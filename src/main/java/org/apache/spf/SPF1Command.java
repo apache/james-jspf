@@ -46,8 +46,12 @@ public class SPF1Command {
 
 	private boolean mechanism = true;
 
+	private String rawCommand;
+
 	protected SPF1Command(String rawCommand, SPF1Data spfData)
-			throws NeutralException {
+			throws NeutralException, WarningException {
+
+		this.rawCommand = rawCommand;
 
 		this.spfData = spfData;
 		if (rawCommand.length() == 0) {
@@ -56,7 +60,7 @@ public class SPF1Command {
 		if (MODIFIERS.indexOf(rawCommand.substring(0, 1)) > -1) {
 			prefix = rawCommand.substring(0, 1);
 			command = rawCommand.substring(1).trim();
-		} else {		
+		} else {
 			command = rawCommand.trim();
 		}
 
@@ -71,20 +75,21 @@ public class SPF1Command {
 			}
 		}
 
-
 		// Check for valid maskLengh. If its invalid throw an exception.
-		if (maskLengthIP4 > 32 || maskLengthIP4 < 0 ) {
-			throw new NeutralException("Invalid CIDR length near \"/" + maskLengthIP4 + "\" in \"" + rawCommand + "\"");
-			//throw new NeutralException("CIDR length out of bounds");
-		} else if ( maskLengthIP6 > 128
-				|| maskLengthIP6 < 0) {
-			throw new NeutralException("Invalid CIDR length near \"/" + maskLengthIP6 + "\" in \"" + rawCommand + "\"");
-			
-		} 
+		if (maskLengthIP4 > 32 || maskLengthIP4 < 0) {
+			throw new NeutralException("Invalid CIDR length near \"/"
+					+ maskLengthIP4 + "\" in \"" + rawCommand + "\"");
+			// throw new NeutralException("CIDR length out of bounds");
+		} else if (maskLengthIP6 > 128 || maskLengthIP6 < 0) {
+			throw new NeutralException("Invalid CIDR length near \"/"
+					+ maskLengthIP6 + "\" in \"" + rawCommand + "\"");
+
+		}
 	}
 
-	/***
+	/***************************************************************************
 	 * Get the command
+	 * 
 	 * @return command
 	 */
 	protected String getCommand() {
@@ -93,6 +98,7 @@ public class SPF1Command {
 
 	/**
 	 * Get the prefix
+	 * 
 	 * @return prefix
 	 */
 	protected String getPrefix() {
@@ -101,6 +107,7 @@ public class SPF1Command {
 
 	/**
 	 * Get the suffix
+	 * 
 	 * @return suffix
 	 */
 	protected String getSuffix() {
@@ -109,6 +116,7 @@ public class SPF1Command {
 
 	/**
 	 * Return true if its a mechanism
+	 * 
 	 * @return true or false
 	 */
 	protected boolean isMechanism() {
@@ -117,7 +125,9 @@ public class SPF1Command {
 
 	/**
 	 * Return true if the given command is the current command.
-	 * @param command The current command 
+	 * 
+	 * @param command
+	 *            The current command
 	 * @return true or false
 	 */
 	protected boolean isCommand(String command) {
@@ -134,78 +144,116 @@ public class SPF1Command {
 
 	/**
 	 * Run the checkcommand for the A prefix
-	 * @param checkAddress The ipAddress
-	 * @param domainName The domain
+	 * 
+	 * @param checkAddress
+	 *            The ipAddress
+	 * @param domainName
+	 *            The domain
 	 * @return true or false
-	 * @throws ErrorException if an error result should returned
-	 * @throws UnknownException if an unknown result should returned
-	 * @throws NoneException if an none result should returned
+	 * @throws ErrorException
+	 *             if an error result should returned
+	 * @throws UnknownException
+	 *             if an unknown result should returned
+	 * @throws NoneException
+	 *             if an none result should returned
+	 * @throws WarningException
 	 */
 	protected boolean runACommand(IPAddr checkAddress, String domainName)
-			throws NeutralException, ErrorException, NoneException {
+			throws NeutralException, ErrorException, NoneException,
+			WarningException {
 
 		ArrayList addressList = new ArrayList();
 		String domainData;
 
-
 		checkAddress = IPAddr.getAddress(checkAddress.getIPAddress(),
 				maskLengthIP4);
+
 		if (suffix1.equals("")) {
 			domainData = domainName;
 		} else {
 			domainData = suffix1;
 		}
-		addressList.addAll(DNSProbe.getARecords(domainData, maskLengthIP4));
-		if (checkAddressList(checkAddress, addressList)) {
-			return true;
+
+		// check if its a FQDN
+		if (SPF1Utils.checkFQDN(domainData)) {
+			addressList.addAll(DNSProbe.getARecords(domainData, maskLengthIP4));
+			if (checkAddressList(checkAddress, addressList)) {
+				return true;
+			}
+		} else {
+
+			throw new WarningException(
+					"Warning: Hostname has a missing or invalid TLD");
 		}
 		return false;
 	}
 
 	/**
 	 * Run the checkcommand for the MX prefix
-	 * @param checkAddress The ipAddress
-	 * @param domainName -The domain
+	 * 
+	 * @param checkAddress
+	 *            The ipAddress
+	 * @param domainName
+	 *            -The domain
 	 * @return true or false
-	 * @throws ErrorException if an error result should returned
-	 * @throws UnknownException if an unknown result should returned
-	 * @throws NoneException if an none result should returned
+	 * @throws ErrorException
+	 *             if an error result should returned
+	 * @throws WarningException
+	 * @throws UnknownException
+	 *             if an unknown result should returned
+	 * @throws NoneException
+	 *             if an none result should returned
 	 */
 	protected boolean runMXCommand(IPAddr checkAddress, String domainName)
-			throws ErrorException, NeutralException {
+			throws ErrorException, NeutralException, WarningException {
 
 		String domainData;
 
 		checkAddress = IPAddr.getAddress(checkAddress.getIPAddress(),
 				maskLengthIP4);
-		System.out.println("CheckAddress: " + checkAddress);
 
 		if (suffix1.equals("")) {
 			domainData = domainName;
 		} else {
+
 			domainData = suffix1;
 		}
 
-		try {
-			if (checkAddressList(checkAddress, DNSProbe.getMXRecords(
-					domainData, maskLengthIP4, spfData.getStripInvalidMX()))) {
-				return true;
-			}
+		// check if its a FQDN
+		if (SPF1Utils.checkFQDN(domainData)) {
+			try {
+				if (checkAddressList(checkAddress, DNSProbe.getMXRecords(
+						domainData, maskLengthIP4, spfData.getStripInvalidMX()))) {
+					return true;
+				}
 
-		} catch (NoneException e) {
+			} catch (NoneException e) {
+			}
+		} else {
+
+			throw new WarningException(
+					"Warning: Hostname has a missing or invalid TLD");
+
 		}
 		return false;
 	}
 
 	/**
 	 * Run the checkcommand for the IP prefix. Should work for both IP4 & IP6
-	 *
-	 * @param ipAddress The ipAddress
+	 * 
+	 * @param ipAddress
+	 *            The ipAddress
 	 * @return true or false
-	 * @throws NeutralException if the result should be neutral
+	 * @throws NeutralException
+	 *             if the result should be neutral
+	 * @throws ErrorException 
 	 */
-	protected boolean runIPCommand(String ipAddress) throws NeutralException {
+	protected boolean runIPCommand(String ipAddress) throws NeutralException,
+			ErrorException {
 
+		if (IPAddr.isValidIP(suffix1) == false) {
+			throw new ErrorException("Not a valid IP address: " + suffix1);
+		}
 		IPAddr testIP;
 		IPAddr originalIP;
 		testIP = IPAddr.getAddress(suffix1, maskLengthIP4);
@@ -221,13 +269,20 @@ public class SPF1Command {
 
 	/**
 	 * Run the checkcommand for the PTR prefix
-	 * @param domainList The domains
-	 * @param checkDomain The domain to check
-	 * @param compareAddress The IP address to compare to
+	 * 
+	 * @param domainList
+	 *            The domains
+	 * @param checkDomain
+	 *            The domain to check
+	 * @param compareAddress
+	 *            The IP address to compare to
 	 * @return true or false
-	 * @throws ErrorException if an error result should returned
-	 * @throws UnknownException if an unknown result should returned
-	 * @throws NoneException if an none result should returned
+	 * @throws ErrorException
+	 *             if an error result should returned
+	 * @throws UnknownException
+	 *             if an unknown result should returned
+	 * @throws NoneException
+	 *             if an none result should returned
 	 */
 	protected boolean runPTRCommand(ArrayList domainList, String checkDomain,
 			String compareAddress) throws ErrorException, NeutralException,
@@ -269,8 +324,10 @@ public class SPF1Command {
 	 * Run the exists Command
 	 * 
 	 * @return true or false
-	 * @throws NeutralException if an neutral result should returned
-	 * @throws NoneException if an none result should returned
+	 * @throws NeutralException
+	 *             if an neutral result should returned
+	 * @throws NoneException
+	 *             if an none result should returned
 	 */
 	protected boolean runExistsCommand() throws NeutralException, NoneException {
 		ArrayList aRecords;
@@ -290,26 +347,41 @@ public class SPF1Command {
 	 * Run the exists Command
 	 * 
 	 * @return true or false
-	 * @throws NeutralException if an neutral result should returned
-	 * @throws NoneException if an none result should returned
-	 * @throws UnknownException if an unknown result should returned
-	 * @throws ErrorException if an error result should returned
+	 * @throws NeutralException
+	 *             if an neutral result should returned
+	 * @throws NoneException
+	 *             if an none result should returned
+	 * @throws UnknownException
+	 *             if an unknown result should returned
+	 * @throws ErrorException
+	 *             if an error result should returned
+	 * @throws IncludeException
 	 */
 
 	protected String runIncludeCommand() throws NeutralException,
-			NoneException, ErrorException, UnknownException {
+			ErrorException, UnknownException, IncludeException {
 
+		SPF1Record spf = null;
 		if (spfData.getDepth() == 20) {
-			throw new NeutralException("Recurse depth exceeded");
+			throw new IncludeException("loop encountered");
 		}
+
 		spfData.setDepth(spfData.getDepth() + 1);
 		String redirectDomain = suffix1;
 
+		if (redirectDomain.equals("")) {
+			throw new IncludeException(
+					"include mechanism not given an argument");
+		}
 		spfData.setCurrentDomain(redirectDomain);
-		SPF1Record spf = new SPF1Record(DNSProbe.getSpfRecord(redirectDomain,
-				spfData.spfVersion), spfData);
+		try {
+			spf = new SPF1Record(DNSProbe.getSpfRecord(redirectDomain,
+					spfData.spfVersion), spfData);
+		} catch (NoneException e) {
+		}
 		if (spf == null) {
-			throw new NeutralException("No spf record");
+			throw new IncludeException("Missing SPF record at: "
+					+ redirectDomain);
 		}
 		return spf.runCheck();
 
@@ -319,10 +391,14 @@ public class SPF1Command {
 	 * Run the redirect command
 	 * 
 	 * @return the result if the redirect command
-	 * @throws NeutralException if an neutral result should returned
-	 * @throws NoneException if an none result should returned
-	 * @throws UnknownException if an unknown result should returned
-	 * @throws ErrorException if an error result should returned
+	 * @throws NeutralException
+	 *             if an neutral result should returned
+	 * @throws NoneException
+	 *             if an none result should returned
+	 * @throws UnknownException
+	 *             if an unknown result should returned
+	 * @throws ErrorException
+	 *             if an error result should returned
 	 */
 
 	protected String runRedirectCommand() throws NeutralException,
@@ -347,9 +423,12 @@ public class SPF1Command {
 	 * Run the exp command
 	 * 
 	 * @return explanation which us contained in the SPF-Record
-	 * @throws NeutralException if an neutral result should returned
-	 * @throws NoneException if an none result should returned
-	 * @throws ErrorException if an error result should returned
+	 * @throws NeutralException
+	 *             if an neutral result should returned
+	 * @throws NoneException
+	 *             if an none result should returned
+	 * @throws ErrorException
+	 *             if an error result should returned
 	 */
 	protected String runExpCommand() throws ErrorException, NoneException,
 			NeutralException {
@@ -361,8 +440,11 @@ public class SPF1Command {
 
 	/**
 	 * Check if the given ipaddress array contains the provided ip.
-	 * @param checkAddress The ip wich should be contained in the given ArrayList
-	 * @param addressList The ip ArrayList.
+	 * 
+	 * @param checkAddress
+	 *            The ip wich should be contained in the given ArrayList
+	 * @param addressList
+	 *            The ip ArrayList.
 	 * @return true or false
 	 */
 	private boolean checkAddressList(IPAddr checkAddress, ArrayList addressList) {
@@ -381,20 +463,22 @@ public class SPF1Command {
 	}
 
 	/**
-	 * Check if its a valid SPF1Command 
+	 * Check if its a valid SPF1Command
 	 * 
 	 * @return true or false
-	 * @throws NeutralException if an neutral result should returned
+	 * @throws NeutralException
+	 *             if an neutral result should returned
 	 */
 
-	//TODO: also make records without checkSuffixCommand to work
-	private boolean isSPF1Command() throws NeutralException {
+	// TODO: also make records without checkSuffixCommand to work
+	private boolean isSPF1Command() throws NeutralException, WarningException {
 
 		boolean result = false;
 		if (checkSuffixCommand("a")) {
 			suffix1 = macroExpandDomain(suffix1);
 			result = true;
 		} else if (checkSuffixCommand("mx")) {
+
 			suffix1 = macroExpandDomain(suffix1);
 			result = true;
 		} else if (checkSuffixCommand("ip4")) {
@@ -416,7 +500,7 @@ public class SPF1Command {
 
 			result = checkUnknownMechanism();
 			if (result) {
-				
+
 				// throw new UnknownException("Unknown mechanism " + command);
 			}
 		}
@@ -459,7 +543,8 @@ public class SPF1Command {
 	/**
 	 * Check if the provided String is a command
 	 * 
-	 * @param compare The string which should checked
+	 * @param compare
+	 *            The string which should checked
 	 * @return true or false
 	 */
 	private boolean checkCommand(String compare) {
@@ -480,24 +565,25 @@ public class SPF1Command {
 	/**
 	 * Check if the provided String is a suffixCommand
 	 * 
-	 * @param compare The String to check
+	 * @param compare
+	 *            The String to check
 	 * @return true or false
-	 * @throws NeutralException 
+	 * @throws NeutralException
 	 */
-	private boolean checkSuffixCommand(String compare) throws NeutralException {
+	private boolean checkSuffixCommand(String compare) throws NeutralException,
+			WarningException {
 
-		
 		if (compare.equals(command.toLowerCase())
 				|| (command.toLowerCase().startsWith(compare + ":"))
 				|| (command.toLowerCase().startsWith(compare + "/"))) {
-			
-			if ((command.toLowerCase().startsWith(compare + ":"))) {				
-				splitMasks(command.substring(compare.length() + 1),true);
+
+			if ((command.toLowerCase().startsWith(compare + ":"))) {
+				splitMasks(command.substring(compare.length() + 1), true);
 				command = command.substring(0, compare.length());
 				return true;
 			}
 			if ((command.toLowerCase().startsWith(compare + "/"))) {
-				splitMasks(command.substring(compare.length()),false);
+				splitMasks(command.substring(compare.length()), false);
 				command = command.substring(0, compare.length());
 				return true;
 			}
@@ -510,14 +596,16 @@ public class SPF1Command {
 	/**
 	 * Split ip and netmask
 	 * 
-	 * @param original 
+	 * @param original
+	 * @throws WarningException
 	 */
 
-	public void splitMasks(String original,boolean domainSpec) throws NeutralException {
+	public void splitMasks(String original, boolean domainSpec)
+			throws NeutralException, WarningException {
 
 		StringBuffer working = new StringBuffer();
 		StringBuffer temp = new StringBuffer();
-		
+
 		working.append(original);
 		String reversed = working.reverse().toString();
 
@@ -540,19 +628,23 @@ public class SPF1Command {
 			temp.append(reversed.substring(0, ip4Position));
 
 			try {
-					maskLengthIP4 = Integer.parseInt(temp.reverse().toString());
-			} catch (NumberFormatException e)  {
+				maskLengthIP4 = Integer.parseInt(temp.reverse().toString());
+			} catch (NumberFormatException e) {
 				if (domainSpec == true) {
 					if (SPF1Utils.checkFQDN(temp.reverse().toString())) {
-					
+
 					} else {
-						throw new NeutralException("Warning: Hostname has a missing or invalid TLD");
+
+						throw new WarningException(
+								"Warning: Hostname has a missing or invalid TLD");
 					}
-					
+
 				} else {
-					//throw new NeutralException("Warning: Hostname has a missing or invalid TLD");
-					throw new NeutralException("Invalid CIDR length near \"" + original + "\" in \"" + command  + "\"");	
-			
+					// throw new NeutralException("Warning: Hostname has a
+					// missing or invalid TLD");
+					throw new NeutralException("Invalid CIDR length near \""
+							+ original + "\" in \"" + command + "\"");
+
 				}
 			}
 			reversed = tempDomain;
@@ -565,7 +657,7 @@ public class SPF1Command {
 
 	}
 
-	//TODO: Write javadoc
+	// TODO: Write javadoc
 	private String macroExpandDomain(String data) throws NeutralException {
 		return new MacroExpand(spfData).expandDomain(data);
 	}

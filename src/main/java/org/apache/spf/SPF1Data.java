@@ -60,6 +60,7 @@ public class SPF1Data {
 	private String unknownCommand = "";
 
 	private boolean stripInvalidMX = false;
+	
 
 	protected SPF1Data(String mailFrom, String heloDomain, String clientIP)
 			throws ErrorException, NoneException {

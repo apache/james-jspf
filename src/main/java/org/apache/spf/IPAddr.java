@@ -489,7 +489,25 @@ public class IPAddr {
 		return inAddress;
 	}
 
+	/**
+	 * Check if the given IP is valid. Only works with ip4
+	 * @param ip The ipaddress to check
+	 * @return true or false
+	 */
 	public static boolean isValidIP(String ip) {
-		return Address.isDottedQuad(ip);
+		try {
+			
+			InetAddress i = InetAddress.getByName(ip);
+			
+			if (i == null) {
+				return false;
+			} else {
+				return true;
+			}
+		} catch (UnknownHostException e) {
+			return false;
+		}
+		
+
 	}
 }

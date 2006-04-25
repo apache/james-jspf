@@ -75,6 +75,7 @@ public class SPF {
 			// init the the spfrecord
 			spfRecord = new SPF1Record(spfDnsEntry, spfData);
 
+			//spfRecord = new SPF1Record("v=spf1 ip4:111.222.133.144/22 ip4:1.2.3/4",spfData);
 			// Run the check and get the result
 			result = spfRecord.runCheck();
 
@@ -92,10 +93,7 @@ public class SPF {
 		} catch (NeutralException e) {
 			e.printStackTrace();
 			result = SPF1Utils.NEUTRAL;
-		} catch (UnknownException e) {
-			e.printStackTrace();
-			result = SPF1Utils.UNKNOWN;
-		}
+		} 
 
 		// convert raw result to name
 		String convertedResult = SPF1Utils.resultToName(result);
@@ -205,9 +203,9 @@ public class SPF {
 			}
 		}
 		// Testing only
-		ipAddress = "192.0.2.1";
-		mailFrom = "20.spf1-test.mailzone.com";
-		host = "20.spf1-test.mailzone.com";
+		ipAddress = "192.0.2.200";
+		mailFrom = "51.spf1-test.mailzone.com";
+		host = "51.spf1-test.mailzone.com";
 
 		// run test !
 		String result = spf.checkSPF(ipAddress, mailFrom, host);

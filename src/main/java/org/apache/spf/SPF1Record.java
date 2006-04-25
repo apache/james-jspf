@@ -34,7 +34,10 @@ public class SPF1Record {
 	private ArrayList spfModifiers = new ArrayList();
 
 	private SPF1Data spfData;
+
 	private String rawRecord = null;
+
+	private String warning = null;
 
 	protected SPF1Record(String record, SPF1Data spfData) throws NoneException,
 			NeutralException {
@@ -45,20 +48,20 @@ public class SPF1Record {
 
 		if (record.startsWith(SPF_VERSION1 + " ")) {
 			String mainSpfRecord = extractMainSpfRecord(record);
-			
+
 			rawRecord = mainSpfRecord;
-			
+
 			parseCommands(mainSpfRecord);
 		} else {
 			String[] recordParts = record.split(" ");
 			String spfRecord = recordParts[0];
 			if (recordParts[0].startsWith(SPF_VERSION1)) {
-				//SPF-Version was given but the space was missed
+				// SPF-Version was given but the space was missed
 				throw new NoneException(
 						"Could not find a valid SPF record near \""
 								+ SPF_VERSION1 + "\" in \"" + spfRecord + "\"");
 			} else if (recordParts[0].startsWith("v=")) {
-				//SPF-Version wrong
+				// SPF-Version wrong
 				throw new NoneException(
 						"Could not find a valid SPF record near \""
 								+ spfRecord.charAt(0) + "\" in \"" + spfRecord
@@ -84,7 +87,6 @@ public class SPF1Record {
 	private String extractMainSpfRecord(String record) {
 		String mainSpfRecord = record;
 
-
 		mainSpfRecord.substring(SPF_VERSION1.length() + 1);
 		return mainSpfRecord;
 
@@ -105,15 +107,19 @@ public class SPF1Record {
 		for (int i = 0; i < temp.length; i++) {
 			currentSplit = temp[i].trim();
 			if (!currentSplit.equals("")) {
-				System.out.println("current: " + currentSplit);
-				
-				processCommand = new SPF1Command(currentSplit, spfData);
-				System.out.println("PRE: " + processCommand.toString());
-				if (processCommand.isMechanism()) {
-					spfMechanisms.add(processCommand);
-				} else {
-					spfModifiers.add(processCommand);
+
+				try {
+					processCommand = new SPF1Command(currentSplit, spfData);
+
+					if (processCommand.isMechanism()) {
+						spfMechanisms.add(processCommand);
+					} else {
+						spfModifiers.add(processCommand);
+					}
+				} catch (WarningException w) {
+					warning = w.getMessage();
 				}
+
 			}
 		}
 	}
@@ -140,100 +146,159 @@ public class SPF1Record {
 	 * @throws ErrorException
 	 *             if an error result should returned
 	 */
-	protected String runCheck() throws NeutralException, NoneException,
-			ErrorException, UnknownException {
+	protected String runCheck() {
 
 		String result = SPF1Utils.NEUTRAL;
 		SPF1Command runCommand;
 
 		for (int i = 0; i < spfMechanisms.size(); i++) {
+			try {
 
-			runCommand = (SPF1Command) spfMechanisms.get(i);
+				runCommand = (SPF1Command) spfMechanisms.get(i);
 
-			IPAddr checkAddress = IPAddr.getAddress(spfData.getIpAddress());
-			if (runCommand.isCommand("a")) {
-				if (runCommand.runACommand(checkAddress, spfData
-						.getCurrentDomain())) {
-					return runCommand.getPrefix();
-				}
-			} else if (runCommand.isCommand("mx")) {
-				if (runCommand.runMXCommand(checkAddress, spfData
-						.getCurrentDomain())) {
-					return runCommand.getPrefix();
-				}
-			} else if (runCommand.isCommand("all")) {
-				// As soon as All is reached, stop processing
-				return runCommand.getPrefix();
-			} else if (runCommand.isCommand("ptr")) {
-				if (runCommand.runPTRCommand(DNSProbe.getPTRRecords(spfData
-						.getIpAddress()), spfData.getCurrentDomain(), spfData
-						.getIpAddress())) {
-					return runCommand.getPrefix();
-				}
-			} else if (runCommand.isCommand("ip4")) {
-				if (runCommand.runIPCommand(spfData.getIpAddress())) {
-					return runCommand.getPrefix();
-				}
-			} else if (runCommand.isCommand("ip6")) {
-				if (runCommand.runIPCommand(spfData.getIpAddress())) {
-					return runCommand.getPrefix();
-				}
-			} else if (runCommand.isCommand("include")) {
-				try {
-					if (runCommand.runIncludeCommand().equals(SPF1Utils.PASS)) {
-						return SPF1Utils.PASS;
+				IPAddr checkAddress = IPAddr.getAddress(spfData.getIpAddress());
+
+				if (runCommand.isCommand("a")) {
+					if (runCommand.runACommand(checkAddress, spfData
+							.getCurrentDomain())) {
+						return runCommand.getPrefix();
 					}
-				} catch (Exception e) {
-					throw new UnknownException("Unknown include "
-							+ e.getMessage());
-				}
-			} else if (runCommand.isCommand("exists")) {
-				if (runCommand.runExistsCommand()) {
+				} else if (runCommand.isCommand("mx")) {
+					if (runCommand.runMXCommand(checkAddress, spfData
+							.getCurrentDomain())) {
+						return runCommand.getPrefix();
+					}
+				} else if (runCommand.isCommand("all")) {
+					// As soon as All is reached, stop processing
 					return runCommand.getPrefix();
+				} else if (runCommand.isCommand("ptr")) {
+					if (runCommand.runPTRCommand(DNSProbe.getPTRRecords(spfData
+							.getIpAddress()), spfData.getCurrentDomain(),
+							spfData.getIpAddress())) {
+						return runCommand.getPrefix();
+					}
+				} else if (runCommand.isCommand("ip4")) {
+					if (runCommand.runIPCommand(spfData.getIpAddress())) {
+						return runCommand.getPrefix();
+					}
+				} else if (runCommand.isCommand("ip6")) {
+
+					// only give result neutral cause we not support ipv6 at the moment!
+
+					return SPF1Utils.NEUTRAL;
+					/*
+					 if (runCommand.runIPCommand(spfData.getIpAddress())) {
+					 return runCommand.getPrefix();
+					 }
+					 */
+				} else if (runCommand.isCommand("include")) {
+
+					try {
+						if (runCommand.runIncludeCommand().equals(
+								SPF1Utils.PASS)) {
+							return SPF1Utils.PASS;
+						} else if (runCommand.runIncludeCommand().equals(
+								SPF1Utils.UNKNOWN)) {
+
+							return SPF1Utils.UNKNOWN;
+						}
+					} catch (NeutralException e) {
+						throw new NeutralException("Unknown include "
+								+ e.getMessage());
+					}
+				} else if (runCommand.isCommand("exists")) {
+					if (runCommand.runExistsCommand()) {
+						return runCommand.getPrefix();
+					}
+				} else if (runCommand.isCommand("redirect")) {
+					return runCommand.runRedirectCommand();
+				} else {
+
+					if (runCommand.isMechanism()) {
+
+						spfData.setUnknownCommand(runCommand.getPrefix()
+								+ runCommand.getCommand());
+
+						result = SPF1Utils.UNKNOWN;
+
+						if (rawRecord.contains(":")) {
+							String[] chars = rawRecord.split(":");
+
+							throw new UnknownMechanismException(
+									"Unknown mechanism found near \""
+											+ runCommand.getCommand()
+											+ "\" in \""
+											+ runCommand.getCommand() + ":"
+											+ chars[1] + "\"");
+
+						} else {
+
+							throw new UnknownMechanismException(
+									"Unknown mechanism found in \""
+											+ runCommand.getCommand() + "\"");
+
+						}
+
+					}
 				}
-			} else if (runCommand.isCommand("redirect")) {
-				return runCommand.runRedirectCommand();
-			} else {
-
-
-				if (runCommand.isMechanism()) {
-					
-					spfData.setUnknownCommand(runCommand.getPrefix()
-							+ runCommand.getCommand());
-
-					if(rawRecord.contains(":")) {
-						String [] chars = rawRecord.split(":");
-						
-						throw new UnknownException("Unknown mechanism found near \""
-								 + runCommand.getCommand() + "\" in \"" + runCommand.getCommand() + ":" + chars[1] + "\"");
-						
-					} else {
-
-						throw new UnknownException("Unknown mechanism found in \""
-							+ runCommand.getCommand() + "\"");
-				
-
-				}
-
-				}
+			} catch (WarningException w) {
+				w.printStackTrace();
+				setWarning(w.getMessage());
+			} catch (NoneException e) {
+				e.printStackTrace();
+				result = SPF1Utils.NONE;
+			} catch (NeutralException e) {
+				e.printStackTrace();
+				setWarning(e.getMessage());
+				result = SPF1Utils.NEUTRAL;
+			} catch (ErrorException e) {
+				e.printStackTrace();
+				setWarning(e.getMessage());
+				result = SPF1Utils.ERROR;
+			} catch (UnknownException e) {
+				e.printStackTrace();
+				result = SPF1Utils.UNKNOWN;
+			} catch (UnknownMechanismException e) {
+				setWarning(e.getMessage());
+				e.printStackTrace();
+				return SPF1Utils.UNKNOWN;
+			} catch (IncludeException e) {
+				e.printStackTrace();
+				return SPF1Utils.UNKNOWN;
 			}
-
 		}
 
 		// check for modifiers
 		for (int i = 0; i < spfModifiers.size(); i++) {
-			System.out.println("mod: " + spfModifiers.get(i));
-			runCommand = (SPF1Command) spfModifiers.get(i);
-			if (runCommand.isCommand("redirect")) {
-				return runCommand.runRedirectCommand();
-			}
-			if (runCommand.isCommand("default")) {
-				if (runCommand.getSuffix().equals("deny") || runCommand.getSuffix().equals("softfail")) {
-				//TODO: check for valid default entry 
-					return SPF1Utils.nameToResult(runCommand.getSuffix());
-				} else {
-					throw new UnknownException("Invalid option found in \"default=" +runCommand.getSuffix() + "\"");
+			try {
+
+				runCommand = (SPF1Command) spfModifiers.get(i);
+				if (runCommand.isCommand("redirect")) {
+					return runCommand.runRedirectCommand();
 				}
+				if (runCommand.isCommand("default")) {
+					if (runCommand.getSuffix().equals("deny")
+							|| runCommand.getSuffix().equals("softfail")
+							|| runCommand.getSuffix().equals("neutral")) {
+						// TODO: check for valid default entry
+						return SPF1Utils.nameToResult(runCommand.getSuffix());
+					} else {
+						throw new UnknownException(
+								"Invalid option found in \"default="
+										+ runCommand.getSuffix() + "\"");
+					}
+				}
+			} catch (NoneException e) {
+				result = SPF1Utils.NONE;
+			} catch (NeutralException e) {
+				result = SPF1Utils.NEUTRAL;
+			} catch (ErrorException e) {
+				e.printStackTrace();
+				result = SPF1Utils.ERROR;
+			} catch (UnknownException e) {
+				e.printStackTrace();
+				setWarning(e.getMessage());
+				result = SPF1Utils.UNKNOWN;
 			}
 		}
 
@@ -270,13 +335,14 @@ public class SPF1Record {
 				}
 			}
 		}
-		
+
 		// if the domain has no explanation , generate one!
-		if (result == null || result.equals("") ) {
+		if (result == null || result.equals("")) {
 			String explanation = "http://www.openspf.org/why.html?sender=%{S}&ip=%{I}";
 			try {
 				return new MacroExpand(spfData).expandExplanation(explanation);
-			} catch (NeutralException e) {}
+			} catch (NeutralException e) {
+			}
 		}
 		return result;
 	}
@@ -291,6 +357,16 @@ public class SPF1Record {
 			toText.append(spfMechanisms.get(i));
 		}
 		return toText.toString();
+	}
+
+	public String getWarning() {
+		return warning;
+	}
+
+	private void setWarning(String warn) {
+		if (warning == null) {
+			warning = warn;
+		}
 	}
 
 }
