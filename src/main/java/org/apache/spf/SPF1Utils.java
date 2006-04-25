@@ -126,31 +126,18 @@ public class SPF1Utils {
 		}
 
 	}
-	
-	protected static ArrayList getNameResults () {
-		ArrayList nameResults = new ArrayList();
-		
-		nameResults.add(PASS_CONV);
-		nameResults.add(ALLOW_CONV);
-		nameResults.add(FAIL_CONV);
-		nameResults.add(DENY_CONV);
-		nameResults.add(NEUTRAL_CONV);
-		nameResults.add(SOFTFAIL_CONV);
-		nameResults.add(ERROR_CONV);
-		nameResults.add(NONE_CONV);
-		nameResults.add(UNKNOWN_CONV);
-		
-		return nameResults;
-		
-	}
-	
+
+	/**
+	 * Check for valid FQDN
+	 * @param host The hostname to check
+	 * @return false or true
+	 */
 	protected static boolean checkFQDN(String host) {
-		String regex = "(([a-zA-Z0-9\\-])+\\.)+([a-zA-Z0-9]{2,4})+$";
+		String regex = "(([a-zA-Z0-9\\-])+\\.)+([a-zA-Z0-9]{1,4})+$";
 		if (host.matches(regex)) {
 			return true;
 		} else {
 			return false;
-
 		}		
 	}
 
