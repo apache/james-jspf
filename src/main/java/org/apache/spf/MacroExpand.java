@@ -1,0 +1,271 @@
+/***********************************************************************
+ * Copyright (c) 1999-2006 The Apache Software Foundation.             *
+ * All rights reserved.                                                *
+ * ------------------------------------------------------------------- *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you *
+ * may not use this file except in compliance with the License. You    *
+ * may obtain a copy of the License at:                                *
+ *                                                                     *
+ *     http://www.apache.org/licenses/LICENSE-2.0                      *
+ *                                                                     *
+ * Unless required by applicable law or agreed to in writing, software *
+ * distributed under the License is distributed on an "AS IS" BASIS,   *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or     *
+ * implied.  See the License for the specific language governing       *
+ * permissions and limitations under the License.                      *
+ ***********************************************************************/
+
+package org.apache.spf;
+
+/**
+ * @author Mimecast Contact : spf@mimecast.net 
+ * @author Norman Maurer <nm@byteaction.de>
+ */
+
+//TODO: Add javadocs
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class MacroExpand {
+
+	public static final String MACRO_REGEX = "\\%\\{[lsoditpvhcrLSODITPVHCR]\\d*r?[\\.\\-\\+,/_\\=]*\\}";
+
+	private SPF1Data spfData;
+
+	private Pattern inputPattern;
+
+	private Matcher inputMatcher;
+
+	private Pattern cellPattern;
+
+	private Matcher cellMatcher;
+
+	private boolean isExplanation = false;
+
+	protected MacroExpand(SPF1Data spfData) {
+		this.spfData = spfData;
+		inputPattern = Pattern.compile(MACRO_REGEX);
+	}
+
+	protected String expandExplanation(String input) throws NeutralException {
+
+		isExplanation = true;
+		return expand(input);
+	}
+
+	protected String expandDomain(String input) throws NeutralException {
+
+		isExplanation = false;
+		String domainName = expand(input);
+		// reduce to less than 255 characters, deleting subdomains from left
+		int split = 0;
+		while (domainName.length() > 255 && split > -1) {
+			split = domainName.indexOf(".");
+			domainName = domainName.substring(split + 1);
+		}
+		return domainName;
+	}
+
+	private String expand(String input) throws NeutralException {
+
+		input = replaceLiterals(input);
+
+		StringBuffer decodedValue = new StringBuffer();
+		inputMatcher = inputPattern.matcher(input);
+		String macroCell;
+
+		while (inputMatcher.find()) {
+			macroCell = input.substring(inputMatcher.start() + 2, inputMatcher
+					.end() - 1);
+			inputMatcher
+					.appendReplacement(decodedValue, replaceCell(macroCell));
+		}
+		inputMatcher.appendTail(decodedValue);
+
+		// SOUT
+		// System.out.println(decodedValue.toString());
+
+		return decodedValue.toString();
+	}
+
+	private String replaceCell(String replaceValue) throws NeutralException {
+
+		String variable = "";
+		String domainNumber = "";
+		boolean isReversed = false;
+		String delimeters = ".";
+
+		if (isExplanation) {
+			// Find command
+			cellPattern = Pattern.compile("[ctCT]");
+			cellMatcher = cellPattern.matcher(replaceValue);
+			while (cellMatcher.find()) {
+				if (cellMatcher.group().toUpperCase().equals(
+						cellMatcher.group())) {
+					variable = encodeURL(matchVariable(cellMatcher.group()));
+				} else {
+					variable = matchVariable(cellMatcher.group());
+				}
+			}
+		}
+		// Get only command character so that 'r' command and 'r' modifier don't clash
+		String commandCharacter = replaceValue.substring(0, 1);
+		// Find command
+		cellPattern = Pattern.compile("[lsodipvhrLSODIPVHR]");
+		cellMatcher = cellPattern.matcher(commandCharacter);
+		while (cellMatcher.find()) {
+			if (cellMatcher.group().toUpperCase().equals(cellMatcher.group())) {
+				variable = encodeURL(matchVariable(cellMatcher.group()));
+			} else {
+				variable = matchVariable(cellMatcher.group());
+			}
+		}
+		// Remove Macro code so that r macro code does not clash with r the reverse modifier
+		replaceValue = replaceValue.substring(1);
+
+		// Find number of domains to use
+		cellPattern = Pattern.compile("\\d+");
+		cellMatcher = cellPattern.matcher(replaceValue);
+		while (cellMatcher.find()) {
+			domainNumber = cellMatcher.group();
+			if (Integer.parseInt(domainNumber) == 0) {
+				throw new NeutralException("Digit transformer must be non-zero");
+			}
+		}
+		// find if reversed
+		cellPattern = Pattern.compile("r");
+		cellMatcher = cellPattern.matcher(replaceValue);
+		while (cellMatcher.find()) {
+			isReversed = true;
+		}
+
+		// find delimeters
+		cellPattern = Pattern.compile("[\\.\\-\\+\\,\\/\\_\\=]+");
+		cellMatcher = cellPattern.matcher(replaceValue);
+		while (cellMatcher.find()) {
+			delimeters = cellMatcher.group();
+		}
+
+		// Reverse domains as necessary
+		ArrayList data = split(variable, delimeters);
+		if (isReversed) {
+			data = reverse(data);
+		}
+
+		// Truncate domain name to number of sub sections
+		String returnData;
+		if (!domainNumber.equals("")) {
+			returnData = subset(data, Integer.parseInt(domainNumber));
+		} else {
+			returnData = subset(data);
+		}
+
+		return returnData;
+
+	}
+
+	private String matchVariable(String variable) throws NeutralException {
+
+		variable = variable.toLowerCase();
+		if (variable.equalsIgnoreCase("i")) {
+			return spfData.getIpAddress();
+		} else if (variable.equalsIgnoreCase("s")) {
+			return spfData.getMailFrom();
+		} else if (variable.equalsIgnoreCase("h")) {
+			return spfData.getHostName();
+		} else if (variable.equalsIgnoreCase("l")) {
+			return spfData.getCurrentSenderPart();
+		} else if (variable.equalsIgnoreCase("d")) {
+			return spfData.getCurrentDomain();
+		} else if (variable.equalsIgnoreCase("v")) {
+			return spfData.getInAddress();
+		} else if (variable.equalsIgnoreCase("t")) {
+			return Long.toString(spfData.getTimeStamp());
+		} else if (variable.equalsIgnoreCase("c")) {
+			return spfData.getReadableIP();
+		} else if (variable.equalsIgnoreCase("p")) {
+			return spfData.getClientDomain();
+		} else if (variable.equalsIgnoreCase("o")) {
+			return spfData.getSenderDomain();
+		} else {
+			throw new NeutralException("Unknown command : " + variable);
+		}
+	}
+
+	private ArrayList split(String data, String delimeters) {
+
+		String currentChar;
+		StringBuffer element = new StringBuffer();
+		ArrayList splitParts = new ArrayList();
+
+		for (int i = 0; i < data.length(); i++) {
+			currentChar = data.substring(i, i + 1);
+			if (delimeters.indexOf(currentChar) > -1) {
+				splitParts.add(element.toString());
+				element.setLength(0);
+			} else {
+				element.append(currentChar);
+			}
+		}
+		splitParts.add(element.toString());
+		return splitParts;
+	}
+
+	private ArrayList reverse(ArrayList data) {
+
+		ArrayList reversed = new ArrayList();
+		for (int i = 0; i < data.size(); i++) {
+			reversed.add(0, data.get(i));
+		}
+		return reversed;
+	}
+
+	private String subset(ArrayList data) {
+		return subset(data, data.size());
+	}
+
+	private String subset(ArrayList data, int length) {
+
+		StringBuffer buildString = new StringBuffer();
+		if (data.size() < length) {
+			length = data.size();
+		}
+		int start = data.size() - length;
+		for (int i = start; i < data.size(); i++) {
+			if (buildString.length() > 0) {
+				buildString.append(".");
+			}
+			buildString.append(data.get(i));
+		}
+		return buildString.toString();
+
+	}
+
+	private String replaceLiterals(String data) {
+
+		data = data.replaceAll("%%", "%");
+		data = data.replaceAll("%_", " ");
+		data = data.replaceAll("%-", "%20");
+		return data;
+	}
+
+	private String encodeURL(String data) {
+
+		try {
+			// TODO URLEncoder method is not RFC2396 compatible, known difference
+			// is Space character gets converted to "+" rather than "%20"
+			// Is there anything else which is not correct with URLEncoder?
+			// Couldn't find a RFC2396 encoder
+			data = URLEncoder.encode(data, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// This shouldn't happen
+		}
+		return data.replaceAll("\\+", "%20");
+
+	}
+
+}
