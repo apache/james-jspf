@@ -49,7 +49,7 @@ public class SPF1Command {
 	private String rawCommand;
 
 	protected SPF1Command(String rawCommand, SPF1Data spfData)
-			throws NeutralException, WarningException {
+			throws NeutralException,UnknownException {
 
 		this.rawCommand = rawCommand;
 
@@ -160,7 +160,7 @@ public class SPF1Command {
 	 */
 	protected boolean runACommand(IPAddr checkAddress, String domainName)
 			throws NeutralException, ErrorException, NoneException,
-			WarningException {
+			UnknownException {
 
 		ArrayList addressList = new ArrayList();
 		String domainData;
@@ -182,7 +182,7 @@ public class SPF1Command {
 			}
 		} else {
 
-			throw new WarningException(
+			throw new UnknownException(
 					"Warning: Hostname has a missing or invalid TLD");
 		}
 		return false;
@@ -198,6 +198,7 @@ public class SPF1Command {
 	 * @return true or false
 	 * @throws ErrorException
 	 *             if an error result should returned
+	 * @throws UnknownException 
 	 * @throws WarningException
 	 * @throws UnknownException
 	 *             if an unknown result should returned
@@ -205,7 +206,7 @@ public class SPF1Command {
 	 *             if an none result should returned
 	 */
 	protected boolean runMXCommand(IPAddr checkAddress, String domainName)
-			throws ErrorException, NeutralException, WarningException {
+			throws ErrorException, NeutralException, UnknownException {
 
 		String domainData;
 
@@ -231,7 +232,7 @@ public class SPF1Command {
 			}
 		} else {
 
-			throw new WarningException(
+			throw new UnknownException(
 					"Warning: Hostname has a missing or invalid TLD");
 
 		}
@@ -471,7 +472,7 @@ public class SPF1Command {
 	 */
 
 	// TODO: also make records without checkSuffixCommand to work
-	private boolean isSPF1Command() throws NeutralException, WarningException {
+	private boolean isSPF1Command() throws UnknownException,NeutralException {
 
 		boolean result = false;
 		if (checkSuffixCommand("a")) {
@@ -570,8 +571,7 @@ public class SPF1Command {
 	 * @return true or false
 	 * @throws NeutralException
 	 */
-	private boolean checkSuffixCommand(String compare) throws NeutralException,
-			WarningException {
+	private boolean checkSuffixCommand(String compare) throws UnknownException,NeutralException {
 
 		if (compare.equals(command.toLowerCase())
 				|| (command.toLowerCase().startsWith(compare + ":"))
@@ -601,7 +601,7 @@ public class SPF1Command {
 	 */
 
 	public void splitMasks(String original, boolean domainSpec)
-			throws NeutralException, WarningException {
+			throws UnknownException,NeutralException {
 
 		StringBuffer working = new StringBuffer();
 		StringBuffer temp = new StringBuffer();
@@ -635,7 +635,7 @@ public class SPF1Command {
 
 					} else {
 
-						throw new WarningException(
+						throw new UnknownException(
 								"Warning: Hostname has a missing or invalid TLD");
 					}
 

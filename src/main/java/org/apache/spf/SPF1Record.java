@@ -116,7 +116,7 @@ public class SPF1Record {
 					} else {
 						spfModifiers.add(processCommand);
 					}
-				} catch (WarningException w) {
+				} catch (UnknownException w) {
 					warning = w.getMessage();
 				}
 
@@ -241,9 +241,6 @@ public class SPF1Record {
 
 					}
 				}
-			} catch (WarningException w) {
-				w.printStackTrace();
-				setWarning(w.getMessage());
 			} catch (NoneException e) {
 				e.printStackTrace();
 				result = SPF1Utils.NONE;
@@ -256,6 +253,7 @@ public class SPF1Record {
 				setWarning(e.getMessage());
 				result = SPF1Utils.ERROR;
 			} catch (UnknownException e) {
+				setWarning(e.getMessage());
 				e.printStackTrace();
 				result = SPF1Utils.UNKNOWN;
 			} catch (UnknownMechanismException e) {
