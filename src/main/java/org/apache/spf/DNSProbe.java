@@ -111,11 +111,11 @@ public class DNSProbe {
 					txtR.add(txt.rdataToString());
 				}
 			} else {
-				throw new NoneException("No TXTRecord found");
+				throw new NoneException("No TXTRecord found for: " + hostname);
 			}
 		} catch (TextParseException e) {
 			//I think thats the best we could do
-			throw new NoneException("No TXTRecord found");
+			throw new NoneException("No TXTRecord found for: " + hostname);
 		}
 		return txtR;
 	}
@@ -192,7 +192,7 @@ public class DNSProbe {
 				}
 
 			} catch (UnknownHostException e1) {
-				throw new NoneException("No A record found");
+				throw new NoneException("No A record found for: " + strServer);
 			}
 		}
 		return listTxtData;
@@ -272,11 +272,11 @@ public class DNSProbe {
 								+ IPAddr.stripDot(ptr.getTarget().toString()));
 					}
 				} else {
-					throw new NoneException("No PTRRecord found");
+					throw new NoneException("No PTRRecord found for: " + ipAddress);
 				}
 			} catch (TextParseException e) {
 				// i think this is the best we could do
-				throw new NoneException("No PTRRecord found");
+				throw new NoneException("No PTRRecord found for: " + ipAddress);
 			}
 		} catch (NeutralException e1) {
 			throw new NeutralException(e1.getMessage());
@@ -353,11 +353,11 @@ public class DNSProbe {
 
 				}
 			} else {
-				throw new NoneException("No MX Record");
+				throw new NoneException("No MX Record found for: " + host);
 			}
 		} catch (TextParseException e) {
 			// i think this is the best we could do
-			throw new NoneException("No MX Record");
+			throw new NoneException("No MX Record found for: " + host);
 		}
 		return mxR;
 	}
@@ -367,9 +367,9 @@ public class DNSProbe {
 		
 		try {
 			rec = Address.getByName(host).getHostAddress();
-			System.err.println("REC: " +rec);
+
 		} catch (UnknownHostException e) {
-			throw new NoneException("No A record found");
+			throw new NoneException("No A record found for: " + host);
 		}
 		return rec;
 	}
