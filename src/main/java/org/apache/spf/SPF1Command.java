@@ -170,10 +170,9 @@ public class SPF1Command {
 			domainData = suffix1;
 		}
         
-        System.out.println("SUF: " + domainData);
-
 		// check if its a FQDN
-		if (SPF1Utils.checkFQDN(domainData)) {
+		
+        if (SPF1Utils.checkFQDN(domainData)) {
 			addressList.addAll(DNSProbe.getARecords(domainData, maskLengthIP4));
 			if (checkAddressList(checkAddress, addressList)) {
 				return true;
