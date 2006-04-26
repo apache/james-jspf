@@ -46,12 +46,8 @@ public class SPF1Command {
 
 	private boolean mechanism = true;
 
-	private String rawCommand;
-
 	protected SPF1Command(String rawCommand, SPF1Data spfData)
 			throws NeutralException,UnknownException {
-
-		this.rawCommand = rawCommand;
 
 		this.spfData = spfData;
 		if (rawCommand.length() == 0) {

@@ -216,9 +216,6 @@ public class SPF1Record {
 
 					if (runCommand.isMechanism()) {
 
-						spfData.setUnknownCommand(runCommand.getPrefix()
-								+ runCommand.getCommand());
-
 						result = SPF1Utils.UNKNOWN;
 
 						if (rawRecord.contains(":")) {

@@ -17,8 +17,6 @@
 
 package org.apache.spf;
 
-import java.util.ArrayList;
-
 /**
  * 
  * Class that offer static methods to convert SPF Results and contains all

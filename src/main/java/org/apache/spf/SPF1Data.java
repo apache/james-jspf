@@ -55,10 +55,6 @@ public class SPF1Data {
 
 	private int depth = 1;
 
-	private String explanation = "";
-
-	private String unknownCommand = "";
-
 	private boolean stripInvalidMX = false;
 	
 
@@ -236,15 +232,6 @@ public class SPF1Data {
 	 */
 	public String getReceivingDomain() {
 		return receivingDomain;
-	}
-
-	/**
-	 * Set the unknownCommand
-	 * 
-	 * @param command
-	 */
-	public void setUnknownCommand(String command) {
-		this.unknownCommand = command;
 	}
 
 	/**
