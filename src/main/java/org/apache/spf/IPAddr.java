@@ -382,7 +382,7 @@ public class IPAddr {
 	/**
 	 * Get reverse ipAddress
 	 * 
-	 * @retrun reverse ipAddress
+	 * @return reverse ipAddress
 	 */
 	public String getReverseIP() {
 		return getIPAddress(reverseIP(address));

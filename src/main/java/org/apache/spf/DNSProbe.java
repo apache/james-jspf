@@ -283,7 +283,7 @@ public class DNSProbe {
 
 	/**
 	 * 
-	 * @see #getMXRecords(String domainName, int mask, boolean stripInvalidMX)
+	 * @see #getMXRecords(String domainName, int mask)
 	 */
 	public static ArrayList getMXRecords(String domainName) throws NoneException, ErrorException {
 		return getMXRecords(domainName, 32);
@@ -294,7 +294,6 @@ public class DNSProbe {
 	 *  
 	 * @param domainName The domainName or ipaddress we want to get the ips for
 	 * @param mask The netmask
-	 * @param stripInvalidMX Strip mxrecords which belongs to reserved nerworks
 	 * @return IPAddresses of the MX-Records
 	 * @throws NoneException if no MX-Record was found
 	 * @throws ErrorException
