@@ -38,6 +38,9 @@ import org.xbill.DNS.Type;
  * @author Norman Maurer <nm@byteaction.de>
  * 
  */
+
+//TODO : Check which Exception should be thrown by which lookup. Not 100 % sure at the moment but it seems to work.
+
 public class DNSProbe {
 
 	/**
