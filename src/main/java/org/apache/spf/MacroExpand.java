@@ -18,11 +18,12 @@
 package org.apache.spf;
 
 /**
+ * This Class is used to convert all macros to the right values!
+ * 
  * @author Mimecast Contact : spf@mimecast.net 
  * @author Norman Maurer <nm@byteaction.de>
  */
 
-//TODO: Add javadocs
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -51,12 +52,24 @@ public class MacroExpand {
 		inputPattern = Pattern.compile(MACRO_REGEX);
 	}
 
+    /**
+     * This method expand the given a explanation 
+     * @param input The explanation which should be expand
+     * @return expanded explanation
+     * @throws NeutralException
+     */
 	protected String expandExplanation(String input) throws NeutralException {
 
 		isExplanation = true;
 		return expand(input);
 	}
 
+    /**
+     * This method expand the given domain
+     * @param input The domain which should be expand
+     * @return expanded domain
+     * @throws NeutralException
+     */
 	protected String expandDomain(String input) throws NeutralException {
 
 		isExplanation = false;
@@ -70,6 +83,7 @@ public class MacroExpand {
 		return domainName;
 	}
 
+    
 	private String expand(String input) throws NeutralException {
 
 		input = replaceLiterals(input);
@@ -92,6 +106,12 @@ public class MacroExpand {
 		return decodedValue.toString();
 	}
 
+    /**
+     * 
+     * @param replaceValue
+     * @return
+     * @throws NeutralException
+     */
 	private String replaceCell(String replaceValue) throws NeutralException {
 
 		String variable = "";
@@ -168,6 +188,12 @@ public class MacroExpand {
 
 	}
 
+    /**
+     * Get the value for the given Variable like descripted in the RFC
+     * @param variable The varibale we want to get the value for
+     * @return value for the given variable
+     * @throws NeutralException if the given variable not exists
+     */
 	private String matchVariable(String variable) throws NeutralException {
 
 		variable = variable.toLowerCase();
@@ -196,6 +222,13 @@ public class MacroExpand {
 		}
 	}
 
+    /**
+     * Create an ArrayList by the given String. The String get splitted by given delimeters and one entry in the Array
+     * will be made for each splited String
+     * @param data The String we want to put in the Array
+     * @param delimeters The delimeter we want to use to split the String
+     * @return ArrayList which contains the String parts
+     */
 	private ArrayList split(String data, String delimeters) {
 
 		String currentChar;
@@ -215,6 +248,11 @@ public class MacroExpand {
 		return splitParts;
 	}
 
+    /**
+     * Reverse an ArrayList
+     * @param data The ArrayList we want to get reversed
+     * @return reversed ArrayList
+     */
 	private ArrayList reverse(ArrayList data) {
 
 		ArrayList reversed = new ArrayList();
@@ -228,6 +266,7 @@ public class MacroExpand {
 		return subset(data, data.size());
 	}
 
+    
 	private String subset(ArrayList data, int length) {
 
 		StringBuffer buildString = new StringBuffer();
@@ -245,6 +284,11 @@ public class MacroExpand {
 
 	}
 
+    /**
+     * Replace al literals
+     * @param data The String we want to replace the literals
+     * @return given String with all literales replaced
+     */
 	private String replaceLiterals(String data) {
 
 		data = data.replaceAll("%%", "%");
@@ -253,6 +297,11 @@ public class MacroExpand {
 		return data;
 	}
 
+    /**
+     * Encode the given URL to UTF-8
+     * @param data url to encode
+     * @return encoded URL 
+     */
 	private String encodeURL(String data) {
 
 		try {
