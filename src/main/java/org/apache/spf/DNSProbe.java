@@ -55,7 +55,7 @@ public class DNSProbe {
 	 * @throws NoneException if no SPF-Record was found.
 	 * @throws NeutralException if an invalid SPF-Version was specified.
 	 */
-	protected static String getSpfRecord(String hostname, String spfVersion)
+	public static String getSpfRecord(String hostname, String spfVersion)
 			throws ErrorException, NeutralException, NoneException {
 
 		String returnValue = null;
@@ -99,7 +99,7 @@ public class DNSProbe {
 	 * @throws NoneException if none TXT-Records were found.
 	 * @throws ErrorException  
 	 */
-	public static ArrayList getTXTRecords(String hostname)
+	private static ArrayList getTXTRecords(String hostname)
 			throws NoneException, ErrorException {
 		ArrayList txtR = new ArrayList();
 		Record[] records;
@@ -125,6 +125,8 @@ public class DNSProbe {
 	 * 
 	 * @param domain The domain which should be resolved
 	 * @return false or true
+     * 
+     * @deprecated not used
 	 */
 	public static boolean isFQDN(String domain) {
 		boolean isResolvable = true;
@@ -140,6 +142,8 @@ public class DNSProbe {
 	/**
 	 * 
 	 * @see #getARecords(String strServer, int mask)
+     * 
+     * @deprecated not used
 	 */
 	public static ArrayList getARecords(String strServer)
 			throws NeutralException, NoneException, ErrorException {
@@ -206,7 +210,7 @@ public class DNSProbe {
 	 * @return ArrayList of the conversion
 	 * @throws ErrorException
 	 */
-	protected static ArrayList getAList(ArrayList addressList, int maskLength)
+	private static ArrayList getAList(ArrayList addressList, int maskLength)
 			throws ErrorException {
 
 		ArrayList listAddresses = new ArrayList();
@@ -285,8 +289,9 @@ public class DNSProbe {
 	}
 
 	/**
-	 * 
 	 * @see #getMXRecords(String domainName, int mask)
+     * 
+     * @deprecated not used
 	 */
 	public static ArrayList getMXRecords(String domainName) throws NoneException, ErrorException {
 		return getMXRecords(domainName, 32);
@@ -341,7 +346,7 @@ public class DNSProbe {
 	 * @return MX-Records for the given hostname
 	 * @throws NoneException if no MX-Records was found
 	 */
-	public static ArrayList getMXNames(String host) throws NoneException {
+	private static ArrayList getMXNames(String host) throws NoneException {
 		ArrayList mxR = new ArrayList();
 		Record[] records;
 		try {
@@ -362,6 +367,10 @@ public class DNSProbe {
 		return mxR;
 	}
 	
+    
+	/**
+	 * @deprecated Not used
+	 */
 	public static String getARecord(String host) throws NoneException {
 		String rec = null;
 		
