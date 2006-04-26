@@ -220,7 +220,7 @@ public class SPF1Command {
 		if (SPF1Utils.checkFQDN(domainData)) {
 			try {
 				if (checkAddressList(checkAddress, DNSProbe.getMXRecords(
-						domainData, maskLengthIP4, spfData.getStripInvalidMX()))) {
+						domainData, maskLengthIP4))) {
 					return true;
 				}
 

@@ -55,9 +55,6 @@ public class SPF1Data {
 
 	private int depth = 1;
 
-	private boolean stripInvalidMX = false;
-	
-
 	protected SPF1Data(String mailFrom, String heloDomain, String clientIP)
 			throws ErrorException, NoneException {
 
@@ -75,22 +72,6 @@ public class SPF1Data {
 
 		// setup the data!
 		setupData(mailFrom, hostName);
-		
-		/*
-		if (SPF1Utils.checkFQDN(currentDomain)) {
-			
-		} else {
-			throw new NoneException("Warning: Hostname has a missing or invalid TLD");
-		}
-		*/
-
-		// TODO: Check if the domain is FQDN. I think try to resolv is the wronk
-		// way. Maybe we should only test the syntax.
-
-		/*
-		 * if (!DNSProbe.isFQDN(currentDomain)) { throw new NoneException("No
-		 * valid domain: " + currentDomain); }
-		 */
 	}
 
 	/**
@@ -261,23 +242,5 @@ public class SPF1Data {
 		this.currentDomain = domain;
 	}
 
-	/**
-	 * Strip invalidMX Records (reserverd IPs)
-	 * 
-	 * @param true
-	 *            or false
-	 */
-	public void setStripInvalidMX(boolean strip) {
-		this.stripInvalidMX = strip;
-	}
-
-	/**
-	 * Get stripInvalidMX value
-	 * 
-	 * @return stripInvalidMX
-	 */
-	public boolean getStripInvalidMX() {
-		return stripInvalidMX;
-	}
 
 }

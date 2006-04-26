@@ -285,15 +285,12 @@ public class DNSProbe {
 	 * 
 	 * @see #getMXRecords(String domainName, int mask, boolean stripInvalidMX)
 	 */
-	public static ArrayList getMXRecords(String domainName,
-			boolean stripInvalidMX) throws NoneException, ErrorException {
-		return getMXRecords(domainName, 32, stripInvalidMX);
+	public static ArrayList getMXRecords(String domainName) throws NoneException, ErrorException {
+		return getMXRecords(domainName, 32);
 	}
 
 	/**
 	 * Get a list of masked IPAddr MX-Records
-	 * 
-	 * TODO: Check if stripInvalidMX should be removed. I see no need for this.
 	 *  
 	 * @param domainName The domainName or ipaddress we want to get the ips for
 	 * @param mask The netmask
@@ -302,47 +299,14 @@ public class DNSProbe {
 	 * @throws NoneException if no MX-Record was found
 	 * @throws ErrorException
 	 */
-	public static ArrayList getMXRecords(String domainName, int mask,
-			boolean stripInvalidMX) throws ErrorException, NoneException {
+	public static ArrayList getMXRecords(String domainName, int mask) throws ErrorException, NoneException {
 
 		ArrayList mxAddresses = DNSProbe.getAList(DNSProbe
 				.getMXNames(domainName), mask);
-
-		if (stripInvalidMX == true) {
-			return stripInvalidMX(mxAddresses);
-		} else {
-			return mxAddresses;
-		}
-	}
-
-	/**
-	 * Strip invalid ips (reserved ips) from MX-Records
-	 * 
-	 * TODO: Do we really need this. I don't think so!
-	 * 
-	 * @param mxAddresses ArrayList which contains the MXrecords
-	 * @return Valid MXRecords
-	 */
-	private static ArrayList stripInvalidMX(ArrayList mxAddresses) {
-
-		String address;
-		IPAddr tempAddress;
-		int size = mxAddresses.size();
-
-		for (int i = 0; i < size; i++) {
-
-			tempAddress = (IPAddr) mxAddresses.get(size - 1 - i);
-			address = tempAddress.getIPAddress();
-
-			if (ReservedMX.isReserved(address)) {
-				mxAddresses.remove(size - 1 - i);
-			}
-
-		}
-
 		return mxAddresses;
-
+		
 	}
+
 
 	/**
 	 * Get an ArrayList of IPAddr's given the DNS type and mask
