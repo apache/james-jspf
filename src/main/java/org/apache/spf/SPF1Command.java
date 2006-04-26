@@ -169,6 +169,8 @@ public class SPF1Command {
 		} else {
 			domainData = suffix1;
 		}
+        
+        System.out.println("SUF: " + domainData);
 
 		// check if its a FQDN
 		if (SPF1Utils.checkFQDN(domainData)) {
