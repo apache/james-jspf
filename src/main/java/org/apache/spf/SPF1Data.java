@@ -17,7 +17,7 @@
 
 package org.apache.spf;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 
@@ -164,7 +164,7 @@ public class SPF1Data {
 	 * @return clientDomain
 	 */
 	public String getClientDomain() {
-		ArrayList domains;
+		List domains;
 		try {
 			domains = dnsProbe.getPTRRecords(ipAddress);
 			if (domains.size() > 0) {

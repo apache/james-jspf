@@ -50,8 +50,7 @@ public class SPF {
      * 
      */
     public SPF() {
-        super();
-        dnsProbe = new DNSServiceXBillImpl();
+        this(new DNSServiceXBillImpl());
     }
 
     /**

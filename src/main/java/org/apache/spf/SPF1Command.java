@@ -25,6 +25,7 @@ package org.apache.spf;
  */
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class SPF1Command {
 
@@ -282,7 +283,7 @@ public class SPF1Command {
 	 * @throws NoneException
 	 *             if an none result should returned
 	 */
-	protected boolean runPTRCommand(ArrayList domainList, String checkDomain,
+	protected boolean runPTRCommand(List domainList, String checkDomain,
 			String compareAddress) throws ErrorException, NeutralException,
 			NoneException {
 
@@ -296,7 +297,7 @@ public class SPF1Command {
 
 		for (int i = 0; i < domainList.size(); i++) {
 
-			ArrayList aList = spfData.getDnsProbe().getARecords((String) domainList.get(i),
+			List aList = spfData.getDnsProbe().getARecords((String) domainList.get(i),
 					maskLengthIP4);
 			for (int j = 0; j < aList.size(); j++) {
 				compareIP = (IPAddr) aList.get(j);
@@ -328,7 +329,7 @@ public class SPF1Command {
 	 *             if an none result should returned
 	 */
 	protected boolean runExistsCommand() throws NeutralException, NoneException {
-		ArrayList aRecords;
+		List aRecords;
 		try {
 			aRecords = spfData.getDnsProbe().getARecords(suffix1, maskLengthIP4);
 		} catch (Exception e) {
@@ -445,7 +446,7 @@ public class SPF1Command {
 	 *            The ip ArrayList.
 	 * @return true or false
 	 */
-	private boolean checkAddressList(IPAddr checkAddress, ArrayList addressList) {
+	private boolean checkAddressList(IPAddr checkAddress, List addressList) {
 
 		IPAddr aValue = null;
 		for (int i = 0; i < addressList.size(); i++) {

@@ -21,6 +21,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.xbill.DNS.Address;
 import org.xbill.DNS.Lookup;
@@ -47,7 +48,7 @@ public class DNSServiceXBillImpl implements DNSService {
      * @see org.apache.spf.DNSService#getSpfRecord(java.lang.String, java.lang.String)
      */
 	public String getSpfRecord(String hostname, String spfVersion)
-			throws ErrorException, NeutralException, NoneException {
+			throws ErrorException, NoneException {
 
 		String returnValue = null;
 		ArrayList txtR = new ArrayList();
@@ -91,7 +92,7 @@ public class DNSServiceXBillImpl implements DNSService {
 	 * @throws ErrorException  
 	 */
 	private static ArrayList getTXTRecords(String hostname)
-			throws NoneException, ErrorException {
+			throws NoneException {
 		ArrayList txtR = new ArrayList();
 		Record[] records;
 		try {
@@ -114,7 +115,7 @@ public class DNSServiceXBillImpl implements DNSService {
 	/**
      * @see org.apache.spf.DNSService#getARecords(java.lang.String, int)
      */
-	public ArrayList getARecords(String strServer, int mask)
+	public List getARecords(String strServer, int mask)
 			throws NeutralException, NoneException, ErrorException {
 
 		String host = null;
@@ -184,8 +185,7 @@ public class DNSServiceXBillImpl implements DNSService {
 	/**
      * @see org.apache.spf.DNSService#getTxtCatType(java.lang.String)
      */
-	public String getTxtCatType(String strServer) throws NoneException,
-			ErrorException {
+	public String getTxtCatType(String strServer) throws NoneException {
 
 		StringBuffer txtData = new StringBuffer();
 		ArrayList records = getTXTRecords(strServer);
@@ -199,8 +199,8 @@ public class DNSServiceXBillImpl implements DNSService {
      * @see org.apache.spf.DNSService#getPTRRecords(java.lang.String)
      */
 
-	public ArrayList getPTRRecords(String ipAddress)
-			throws ErrorException, NoneException, NeutralException {
+	public List getPTRRecords(String ipAddress)
+			throws NoneException, NeutralException {
 
 		ArrayList ptrR = new ArrayList();
 		Record[] records;
@@ -236,7 +236,7 @@ public class DNSServiceXBillImpl implements DNSService {
 	/**
      * @see org.apache.spf.DNSService#getMXRecords(java.lang.String, int)
      */
-	public ArrayList getMXRecords(String domainName, int mask) throws ErrorException, NoneException {
+	public List getMXRecords(String domainName, int mask) throws ErrorException, NoneException {
 
 		ArrayList mxAddresses = getAList(getMXNames(domainName), mask);
 		return mxAddresses;
