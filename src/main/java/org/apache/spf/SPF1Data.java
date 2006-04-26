@@ -28,6 +28,8 @@ import java.util.ArrayList;
  */
 
 public class SPF1Data {
+    
+    private DNSService dnsProbe = null;
 
 	protected String spfVersion = "v=spf1";
 
@@ -55,12 +57,18 @@ public class SPF1Data {
 
 	private int depth = 1;
 
-	protected SPF1Data(String mailFrom, String heloDomain, String clientIP)
+    protected SPF1Data(String mailFrom, String heloDomain, String clientIP)
+            throws ErrorException, NoneException {
+        this(mailFrom, heloDomain, clientIP, new DNSServiceXBillImpl());
+    }
+
+	protected SPF1Data(String mailFrom, String heloDomain, String clientIP, DNSService dnsProbe)
 			throws ErrorException, NoneException {
 
 		this.mailFrom = mailFrom.trim();
 		this.hostName = heloDomain.trim();
 		this.ipAddress = clientIP.trim();
+        this.dnsProbe = dnsProbe;
 
 		try {
 			// get the in Address
@@ -158,7 +166,7 @@ public class SPF1Data {
 	public String getClientDomain() {
 		ArrayList domains;
 		try {
-			domains = DNSProbe.getPTRRecords(ipAddress);
+			domains = dnsProbe.getPTRRecords(ipAddress);
 			if (domains.size() > 0) {
 				clientDomain = (String) domains.get(0);
 			} else {
@@ -241,6 +249,14 @@ public class SPF1Data {
 	public void setCurrentDomain(String domain) {
 		this.currentDomain = domain;
 	}
+
+    public DNSService getDnsProbe() {
+        return dnsProbe;
+    }
+
+    public void setDnsProbe(DNSService dnsProbe) {
+        this.dnsProbe = dnsProbe;
+    }
 
 
 }

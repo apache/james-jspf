@@ -172,7 +172,7 @@ public class SPF1Record {
 					// As soon as All is reached, stop processing
 					return runCommand.getPrefix();
 				} else if (runCommand.isCommand("ptr")) {
-					if (runCommand.runPTRCommand(DNSProbe.getPTRRecords(spfData
+					if (runCommand.runPTRCommand(spfData.getDnsProbe().getPTRRecords(spfData
 							.getIpAddress()), spfData.getCurrentDomain(),
 							spfData.getIpAddress())) {
 						return runCommand.getPrefix();

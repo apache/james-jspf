@@ -25,6 +25,8 @@ package org.apache.spf;
  */
 
 public class SPF {
+    
+    private DNSService dnsProbe = null;
 
     private String result = SPF1Utils.PASS;
 
@@ -41,6 +43,24 @@ public class SPF {
     private String header = "";
 
     private final String SPF_VERSION1 = "v=spf1";
+
+    
+    
+    /**
+     * 
+     */
+    public SPF() {
+        super();
+        dnsProbe = new DNSServiceXBillImpl();
+    }
+
+    /**
+     * @param dnsProbe the dns provider
+     */
+    public SPF(DNSService dnsProbe) {
+        super();
+        this.dnsProbe = dnsProbe;
+    }
 
     /**
      * Run check for SPF with the given values.
@@ -69,10 +89,10 @@ public class SPF {
 
         try {
             // Setup the data
-            spfData = new SPF1Data(mailFrom, hostName, ipAddress);
+            spfData = new SPF1Data(mailFrom, hostName, ipAddress, dnsProbe);
 
             // Get the raw dns txt entry which contains a spf entry
-            String spfDnsEntry = DNSProbe.getSpfRecord(spfData
+            String spfDnsEntry = dnsProbe.getSpfRecord(spfData
                     .getCurrentDomain(), SPF_VERSION1);
 
             // init the the spfrecord

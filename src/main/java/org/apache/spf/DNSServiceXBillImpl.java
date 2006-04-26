@@ -41,21 +41,12 @@ import org.xbill.DNS.Type;
 
 //TODO : Check which Exception should be thrown by which lookup. Not 100 % sure at the moment but it seems to work.
 
-public class DNSProbe {
+public class DNSServiceXBillImpl implements DNSService {
 
 	/**
-	 * Get the SPF-Record for a server given it's version
-	 *  
-	 * TODO: support SPF Records too.
-	 * 
-	 * @param hostname The hostname for which we want to retrieve the SPF-Record
-	 * @param spfVersion The SPF-Version which should used.
-	 * @return The SPF-Record if one is found.
-	 * @throws ErrorException if more then one SPF-Record was found.
-	 * @throws NoneException if no SPF-Record was found.
-	 * @throws NeutralException if an invalid SPF-Version was specified.
-	 */
-	public static String getSpfRecord(String hostname, String spfVersion)
+     * @see org.apache.spf.DNSService#getSpfRecord(java.lang.String, java.lang.String)
+     */
+	public String getSpfRecord(String hostname, String spfVersion)
 			throws ErrorException, NeutralException, NoneException {
 
 		String returnValue = null;
@@ -121,46 +112,9 @@ public class DNSProbe {
 	}
 
 	/**
-	 * Check if a the given domain could be resolved (is FQDN)
-	 * 
-	 * @param domain The domain which should be resolved
-	 * @return false or true
-     * 
-     * @deprecated not used
-	 */
-	public static boolean isFQDN(String domain) {
-		boolean isResolvable = true;
-
-		try {
-			Address.getByName(domain);
-		} catch (UnknownHostException e) {
-			isResolvable = false;
-		}
-		return isResolvable;
-	}
-
-	/**
-	 * 
-	 * @see #getARecords(String strServer, int mask)
-     * 
-     * @deprecated not used
-	 */
-	public static ArrayList getARecords(String strServer)
-			throws NeutralException, NoneException, ErrorException {
-		return getARecords(strServer, 32);
-	}
-
-	/**
-	 * Get a list of IPAddr's for a server using the mask length
-	 * 
-	 * @param strServer The hostname or ipAddress whe should get the A-Records for
-	 * @param mask The netmask to use
-	 * @return The ipAddresses
-	 * @throws NeutralException
-	 * @throws NoneException if no A records was found 
-	 * @throws ErrorException
-	 */
-	public static ArrayList getARecords(String strServer, int mask)
+     * @see org.apache.spf.DNSService#getARecords(java.lang.String, int)
+     */
+	public ArrayList getARecords(String strServer, int mask)
 			throws NeutralException, NoneException, ErrorException {
 
 		String host = null;
@@ -210,7 +164,7 @@ public class DNSProbe {
 	 * @return ArrayList of the conversion
 	 * @throws ErrorException
 	 */
-	private static ArrayList getAList(ArrayList addressList, int maskLength)
+	private ArrayList getAList(ArrayList addressList, int maskLength)
 			throws ErrorException {
 
 		ArrayList listAddresses = new ArrayList();
@@ -219,7 +173,7 @@ public class DNSProbe {
 		for (int i = 0; i < addressList.size(); i++) {
 			aValue = addressList.get(i).toString();
 			try {
-				listAddresses.addAll(DNSProbe.getARecords(aValue, maskLength));
+				listAddresses.addAll(getARecords(aValue, maskLength));
 			} catch (Exception e) {
 				// Carry on regardless?
 			}
@@ -228,13 +182,9 @@ public class DNSProbe {
 	}
 
 	/**
-	 * Get TXT records as a string
-	 * @param strServer The hostname for which we want to retrieve the TXT-Record
-	 * @return String which reflect the TXT-Record
-	 * @throws NoneException if no TXT-Record was found 
-	 * @throws ErrorException if the hostname is not resolvable
-	 */
-	public static String getTxtCatType(String strServer) throws NoneException,
+     * @see org.apache.spf.DNSService#getTxtCatType(java.lang.String)
+     */
+	public String getTxtCatType(String strServer) throws NoneException,
 			ErrorException {
 
 		StringBuffer txtData = new StringBuffer();
@@ -246,15 +196,10 @@ public class DNSProbe {
 	}
 
 	/**
-	 * Get reverse DNS records
-	 * 
-	 * @param ipAddress The ipAddress for which we want to get the PTR-Record
-	 * @return the PTR-Records
-	 * @throws NoneException if no PTR-Record was found
-	 * 
-	 */
+     * @see org.apache.spf.DNSService#getPTRRecords(java.lang.String)
+     */
 
-	public static ArrayList getPTRRecords(String ipAddress)
+	public ArrayList getPTRRecords(String ipAddress)
 			throws ErrorException, NoneException, NeutralException {
 
 		ArrayList ptrR = new ArrayList();
@@ -289,27 +234,11 @@ public class DNSProbe {
 	}
 
 	/**
-	 * @see #getMXRecords(String domainName, int mask)
-     * 
-     * @deprecated not used
-	 */
-	public static ArrayList getMXRecords(String domainName) throws NoneException, ErrorException {
-		return getMXRecords(domainName, 32);
-	}
+     * @see org.apache.spf.DNSService#getMXRecords(java.lang.String, int)
+     */
+	public ArrayList getMXRecords(String domainName, int mask) throws ErrorException, NoneException {
 
-	/**
-	 * Get a list of masked IPAddr MX-Records
-	 *  
-	 * @param domainName The domainName or ipaddress we want to get the ips for
-	 * @param mask The netmask
-	 * @return IPAddresses of the MX-Records
-	 * @throws NoneException if no MX-Record was found
-	 * @throws ErrorException
-	 */
-	public static ArrayList getMXRecords(String domainName, int mask) throws ErrorException, NoneException {
-
-		ArrayList mxAddresses = DNSProbe.getAList(DNSProbe
-				.getMXNames(domainName), mask);
+		ArrayList mxAddresses = getAList(getMXNames(domainName), mask);
 		return mxAddresses;
 		
 	}
@@ -367,19 +296,4 @@ public class DNSProbe {
 		return mxR;
 	}
 	
-    
-	/**
-	 * @deprecated Not used
-	 */
-	public static String getARecord(String host) throws NoneException {
-		String rec = null;
-		
-		try {
-			rec = Address.getByName(host).getHostAddress();
-
-		} catch (UnknownHostException e) {
-			throw new NoneException("No A record found for: " + host);
-		}
-		return rec;
-	}
 }

@@ -173,7 +173,7 @@ public class SPF1Command {
 		// check if its a FQDN
 		
         if (SPF1Utils.checkFQDN(domainData)) {
-			addressList.addAll(DNSProbe.getARecords(domainData, maskLengthIP4));
+			addressList.addAll(spfData.getDnsProbe().getARecords(domainData, maskLengthIP4));
 			if (checkAddressList(checkAddress, addressList)) {
 				return true;
 			}
@@ -220,7 +220,7 @@ public class SPF1Command {
 		// check if its a FQDN
 		if (SPF1Utils.checkFQDN(domainData)) {
 			try {
-				if (checkAddressList(checkAddress, DNSProbe.getMXRecords(
+				if (checkAddressList(checkAddress, spfData.getDnsProbe().getMXRecords(
 						domainData, maskLengthIP4))) {
 					return true;
 				}
@@ -296,7 +296,7 @@ public class SPF1Command {
 
 		for (int i = 0; i < domainList.size(); i++) {
 
-			ArrayList aList = DNSProbe.getARecords((String) domainList.get(i),
+			ArrayList aList = spfData.getDnsProbe().getARecords((String) domainList.get(i),
 					maskLengthIP4);
 			for (int j = 0; j < aList.size(); j++) {
 				compareIP = (IPAddr) aList.get(j);
@@ -330,7 +330,7 @@ public class SPF1Command {
 	protected boolean runExistsCommand() throws NeutralException, NoneException {
 		ArrayList aRecords;
 		try {
-			aRecords = DNSProbe.getARecords(suffix1, maskLengthIP4);
+			aRecords = spfData.getDnsProbe().getARecords(suffix1, maskLengthIP4);
 		} catch (Exception e) {
 			return false;
 		}
@@ -373,7 +373,7 @@ public class SPF1Command {
 		}
 		spfData.setCurrentDomain(redirectDomain);
 		try {
-			spf = new SPF1Record(DNSProbe.getSpfRecord(redirectDomain,
+			spf = new SPF1Record(spfData.getDnsProbe().getSpfRecord(redirectDomain,
 					spfData.spfVersion), spfData);
 		} catch (NoneException e) {
 		}
@@ -408,7 +408,7 @@ public class SPF1Command {
 		spfData.setDepth(spfData.getDepth() + 1);
 		String redirectDomain = macroExpandDomain(suffix1);
 
-		SPF1Record spf = new SPF1Record(DNSProbe.getSpfRecord(redirectDomain,
+		SPF1Record spf = new SPF1Record(spfData.getDnsProbe().getSpfRecord(redirectDomain,
 				spfData.spfVersion), spfData);
 		spfData.setCurrentDomain(redirectDomain);
 		if (spf == null) {
@@ -432,7 +432,7 @@ public class SPF1Command {
 			NeutralException {
 
 		String txtRecord = macroExpandDomain(suffix1);
-		String explanation = DNSProbe.getTxtCatType(txtRecord);
+		String explanation = spfData.getDnsProbe().getTxtCatType(txtRecord);
 		return new MacroExpand(spfData).expandExplanation(explanation);
 	}
 
