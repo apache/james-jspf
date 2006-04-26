@@ -17,13 +17,7 @@
 
 package org.apache.spf;
 
-import java.net.Inet4Address;
-import java.net.Inet6Address;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
-
-import org.xbill.DNS.Address;
 
 /**
  * @author MimeCast
@@ -460,54 +454,23 @@ public class IPAddr {
 	 * @throws ErrorException if the ipAddress is not valid (rfc conform)
 	 */
 	public static String getInAddress(String ipAddress) throws ErrorException {
-
-		String inAddress = null;
-
-		if (Address.isDottedQuad(ipAddress)) {
-
-			try {
-				InetAddress ip = InetAddress.getByName(ipAddress);
-
-				if (ip instanceof Inet4Address) {
-
-					inAddress = "in-addr";
-				} else if (ip instanceof Inet6Address) {
-					inAddress = "ip6";
-				} else {
-					// throw an exception cause the ip is not ipv4 or ipv6.
-					// this should never happen!
-					throw new ErrorException(
-							"IP is not a valid ipv4 or ipv6 address");
-				}
-			} catch (UnknownHostException e) {
-			}
-		} else {
-			// throw an exception cause the ip is not ipv4 or ipv6.
-			// this should never happen!
-			throw new ErrorException("IP is not a valid ipv4 or ipv6 address");
-		}
-		return inAddress;
+        if (ipAddress == null) {
+            throw new ErrorException("IP is not a valid ipv4 or ipv6 address");
+        } else if (Inet6Util.isValidIPV4Address(ipAddress)) {
+            return "in-addr";
+        } else if (Inet6Util.isValidIP6Address(ipAddress)) {
+            return "ipv6";
+        } else {
+            throw new ErrorException("IP is not a valid ipv4 or ipv6 address");
+        }
 	}
 
 	/**
-	 * Check if the given IP is valid. Only works with ip4
+	 * Check if the given IP is valid. Works with ipv4 and ip6
 	 * @param ip The ipaddress to check
 	 * @return true or false
 	 */
 	public static boolean isValidIP(String ip) {
-		try {
-			
-			InetAddress i = InetAddress.getByName(ip);
-			
-			if (i == null) {
-				return false;
-			} else {
-				return true;
-			}
-		} catch (UnknownHostException e) {
-			return false;
-		}
-		
-
+        return ip != null && (Inet6Util.isValidIPV4Address(ip) || Inet6Util.isValidIP6Address(ip));
 	}
 }
