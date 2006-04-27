@@ -77,9 +77,9 @@ public class SPF1Parser {
     private final String TERMS_REGEX = "(?:[ ]+[(?:" + DIRECTIVE_REGEX
             + MODIFIER_REGEX + ")])*";
 
-    private final String IP4_CIDR_LENGTH_REGEX = "/+";
+    private final String IP4_CIDR_LENGTH_REGEX = "/[0-9]+";
 
-    private final String IP6_CIDR_LENGTH_REGEX = "/+";
+    private final String IP6_CIDR_LENGTH_REGEX = "/[0-9]+";
 
     private final String DUAL_CIDR_LENTH_REGEX = IP4_CIDR_LENGTH_REGEX + "*/"
             + IP6_CIDR_LENGTH_REGEX;
