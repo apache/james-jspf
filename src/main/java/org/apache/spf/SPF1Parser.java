@@ -187,7 +187,7 @@ public class SPF1Parser {
     public SPF1Parser(String spfRecord, SPF1Data spfData)
             throws ErrorException, NoneException {
 
-        String[] recordParts = spfRecord.split(" ");
+        //String[] recordParts = spfRecord.split(" ");
 
         // if the record contains no valid spfrecord we will not continue
         // and throw an NoneException
@@ -202,6 +202,8 @@ public class SPF1Parser {
             if (!m.matches()) {
                 throw new ErrorException("Not Parsable");
             }
+            
+            /*
             for (int i = 0; i < recordParts.length; i++) {
 
                 if (isAMechanism(recordParts[i])) {
@@ -211,6 +213,7 @@ public class SPF1Parser {
                     }
                 }
             }
+            */
         }
 
     }

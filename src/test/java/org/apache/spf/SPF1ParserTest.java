@@ -60,12 +60,14 @@ public class SPF1ParserTest extends TestCase {
                     + "no errors" + ">", data.errMsg, "no errors");
         } catch (NoneException e) {
             assertNotNull(data.errMsg);
-            assertTrue(!"no errors".equals(data.errMsg));
+            assertTrue("Expected <" + data.errMsg + "> but was <"
+                    + e.getMessage() + ">",!"no errors".equals(data.errMsg));
 //            assertEquals("Expected <" + data.errMsg + "> but was <"
 //                    + e.getMessage() + ">", data.errMsg, e.getMessage());
         } catch (ErrorException e) {
             assertNotNull(data.errMsg);
-            assertTrue(!"no errors".equals(data.errMsg));
+            assertTrue("Expected <" + data.errMsg + "> but was <"
+                  + e.getMessage() + ">",!"no errors".equals(data.errMsg));
 //            assertEquals("Expected <" + data.errMsg + "> but was <"
 //                    + e.getMessage() + ">", data.errMsg, e.getMessage());
         }
