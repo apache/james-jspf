@@ -228,7 +228,12 @@ public class SPF1Parser {
     private boolean isValidAMechanismn(String recordPart) {
 
         String record = recordPart.trim();
+
         if (record.startsWith("a:") || record.startsWith("A:")) {
+            
+            /**
+             * Its a A Mechanismn wich has a domain-spec. The domain-spec must checked against DOMAIN_SPEC_REGEX 
+             */
 
             String newPart = record.substring(2);
             String[] parts = newPart.split("/");
@@ -241,18 +246,39 @@ public class SPF1Parser {
                     return newPart.matches(DOMAIN_SPEC_REGEX
                             + IP4_CIDR_LENGTH_REGEX);
                 } else if (parts.length == 4) {
+                    System.out.println("HERE: " + newPart);
                     return newPart.matches(DOMAIN_SPEC_REGEX
-                            + IP4_CIDR_LENGTH_REGEX + IP6_CIDR_LENGTH_REGEX);
+                            + DUAL_CIDR_LENGTH_REGEX);
+                } else {
+                    // to many parts this record cannot be valid!!
+                    return false;
+                }
+            }
+        } else {
+            
+            /**
+             * Its an A Mechanismn which has no domain-spec. 
+             */
+            String newPart = record.substring(1);
+            String[] parts = record.split("/");
+
+            if (parts.length < 5) {
+                if (parts.length == 0) {
+                    return true;
+                } else if (parts.length == 2) {
+                    return parts[1].matches(IP4_CIDR_LENGTH_REGEX);
+                } else if (parts.length == 4) {
+                    return newPart.matches(DUAL_CIDR_LENGTH_REGEX);
                 }
             } else {
-                // to many parts this record cannot be valid!!
-                return false;
+                return true;
             }
-        } else if (record.length() == 0) {
-            return true;
+
         }
         return false;
+
     }
+
 
     /**
      * Check if the given part is a A Mechanismn
