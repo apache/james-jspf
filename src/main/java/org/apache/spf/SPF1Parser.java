@@ -22,20 +22,28 @@ public class SPF1Parser {
 
     private String parsedRecord = null;
     
+    
     /**
      * Regex based on http://ftp.rfc-editor.org/in-notes/authors/rfc4408.txt. This will be the next official SPF-Spec
      */
+    // TODO: check all regex!
     private final String ALPHA_DIGIT_REGEX = "[a-zA-Z0-9]";
     private final String MACRO_LETTER_REGEX = "[lsoditpvhcrLSODITPVHCR]";
     private final String TRANSFORMERS_REGEX = "\\d*r?";
     private final String DELEMITER_REGEX = "[\\.\\-\\+,/_\\=]";
-    private final String MACRO_EXPAND_REGEX = "[(\\%\\{" + MACRO_LETTER_REGEX + TRANSFORMERS_REGEX + DELEMITER_REGEX + "*\\})(\\%\\%)(\\%\\_)(\\%\\-)]";
-    private final String MACRO_LITERAL_REGEX = ""; // TODO: Check what that means
-    private final String MACRO_STRING_REGEX = "[(" + MACRO_EXPAND_REGEX +")(" + MACRO_LITERAL_REGEX +")]" ;
-    private final String TOP_LABEL_REGEX = "[(" + ALPHA_DIGIT_REGEX +"*" +"[a-zA-Z]{1}\\.?)(" + ALPHA_DIGIT_REGEX +"+\\-" + "[" + ALPHA_DIGIT_REGEX +"\\-]" + ALPHA_DIGIT_REGEX + ")]";
-    private final String DOMAIN_END_REGEX = "[(\\." + TOP_LABEL_REGEX +"\\.*)(" + MACRO_EXPAND_REGEX + ")]";
+    private final String MACRO_EXPAND_REGEX = "[(?:\\%\\{" + MACRO_LETTER_REGEX + TRANSFORMERS_REGEX + DELEMITER_REGEX + "*\\})(?:\\%\\%)(?:\\%\\_)(?:\\%\\-)]";
+    private final String MACRO_LITERAL_REGEX = "[\\x21-\\x24\\x26-\\x7e]"; // TODO: Check if thats really right!
+    private final String MACRO_STRING_REGEX = "[(?:" + MACRO_EXPAND_REGEX +")(?:" + MACRO_LITERAL_REGEX +")]" ;
+    private final String TOP_LABEL_REGEX = "[(?:" + ALPHA_DIGIT_REGEX +"*" +"[a-zA-Z]{1}\\.?)(?:" + ALPHA_DIGIT_REGEX +"+\\-" + "[" + ALPHA_DIGIT_REGEX +"\\-]" + ALPHA_DIGIT_REGEX + ")]";
+    private final String DOMAIN_END_REGEX = "[(?:\\." + TOP_LABEL_REGEX +"\\.*)(?:" + MACRO_EXPAND_REGEX + ")]";
     private final String DOMAIN_SPEC_REGEX = MACRO_STRING_REGEX + DOMAIN_END_REGEX;
-    
+    private final String QUALIFIER_REGEX = "[\\+\\-\\?\\~]";
+    private final String MECHANISM_REGEX = "[(?:all)(?:include)(?:A)(?:MX)(?:PTR)(?:IP4)(?:IP6)(?:exists)]";
+    private final String NAME_REGEX = "[a-zA-z][(?:a-zA-Z)(?:0-9)\\-\\_\\.]*";
+    private final String UNKNOWN_MODIFIER_REGEX = NAME_REGEX + "\\-" + MACRO_STRING_REGEX;
+    private final String MODIFIER_REGEX = "[(?:redirect)(?:explanation)(?:" + UNKNOWN_MODIFIER_REGEX + "]";
+    private final String DIRECTIVE_REGEX = QUALIFIER_REGEX + "?" + MECHANISM_REGEX;
+    private final String TERMS_REGEX ="(?:[ ]+[(?:" + DIRECTIVE_REGEX +MODIFIER_REGEX +")])*";
     
     
     
