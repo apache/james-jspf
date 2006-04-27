@@ -17,6 +17,9 @@
 
 package org.apache.spf;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class SPF1Parser {
 
     private String parsedRecord = null;
@@ -36,8 +39,8 @@ public class SPF1Parser {
 
     private final String DELEMITER_REGEX = "[\\.\\-\\+,/_\\=]";
 
-    private final String MACRO_EXPAND_REGEX = "\\% (?: \\{" + MACRO_LETTER_PATTERN
-            + TRANSFORMERS_REGEX + DELEMITER_REGEX + "*" + "\\} | \\% | \\_ | \\- )";
+    private final String MACRO_EXPAND_REGEX = "\\% (?:\\{" + MACRO_LETTER_PATTERN
+            + TRANSFORMERS_REGEX + DELEMITER_REGEX + "*" + "\\}|\\%|\\_|\\-)";
 
     private final String MACRO_LITERAL_REGEX = "[\\x21-\\x24\\x26-\\x7e]"; // TODO:
 
@@ -52,7 +55,7 @@ public class SPF1Parser {
      * ABNF: macro-string     = *( macro-expand / macro-literal )
      */
     private final String MACRO_STRING_REGEX = "(?:" + MACRO_EXPAND_REGEX
-            + " | " + MACRO_LITERAL_REGEX + "{1} )*";
+            + "|" + MACRO_LITERAL_REGEX + "{1})*";
 
     /**
      * ABNF: toplabel = ( *alphanum ALPHA *alphanum ) /
@@ -61,14 +64,14 @@ public class SPF1Parser {
      *                ; (see [RFC3696], Section 2)
      */
     private final String TOP_LABEL_REGEX = "(?:" + ALPHA_DIGIT_PATTERN + "*"
-            + ALPHA_PATTERN + "{1}" + ALPHA_DIGIT_PATTERN +"* | (?:"+ ALPHA_DIGIT_PATTERN + "+" +"\\-" + "(?:"
-            + ALPHA_DIGIT_PATTERN + "| \\- )*" + ALPHA_DIGIT_PATTERN + "))";
+            + ALPHA_PATTERN + "{1}" + ALPHA_DIGIT_PATTERN +"*|(?:"+ ALPHA_DIGIT_PATTERN + "+" +"\\-" + "(?:"
+            + ALPHA_DIGIT_PATTERN + "|\\-)*" + ALPHA_DIGIT_PATTERN + "))";
 
     /**
      * ABNF: domain-end       = ( "." toplabel [ "." ] ) / macro-expand
      */
     private final String DOMAIN_END_REGEX = "(?:\\." + TOP_LABEL_REGEX
-            + "\\.?" + " | " + MACRO_EXPAND_REGEX + ")";
+            + "\\.?" + "|" + MACRO_EXPAND_REGEX + ")";
 
     /**
      * ABNF: domain-spec      = macro-string domain-end
@@ -139,7 +142,7 @@ public class SPF1Parser {
     /**
      * ABNF: mechanism        = ( all / include / A / MX / PTR / IP4 / IP6 / exists )
      */
-    private final String MECHANISM_REGEX = "(?: all | " + INCLUDE_REGEX + " | " + A_REGEX + " | " + MX_REGEX + " | " + PTR_REGEX + " | " + IP4_REGEX + " | " + IP6_REGEX + " | " + EXISTS_REGEX + " )";
+    private final String MECHANISM_REGEX = "(?:all|" + INCLUDE_REGEX + "|" + A_REGEX + "|" + MX_REGEX + "|" + PTR_REGEX + "|" + IP4_REGEX + "|" + IP6_REGEX + "|" + EXISTS_REGEX + ")";
 
     /**
      * ABNF: name             = ALPHA *( ALPHA / DIGIT / "-" / "_" / "." )
@@ -191,6 +194,14 @@ public class SPF1Parser {
         if (!isValidSPFVersion(spfRecord)) {
             throw new NoneException("No valid SPF Record: " + spfRecord);
         } else {
+            
+            System.out.println(TERMS_REGEX);
+            
+            Pattern p = Pattern.compile(TERMS_REGEX);
+            Matcher m = p.matcher(spfRecord.replaceFirst(SPF1Utils.SPF_VERSION,""));
+            if (!m.matches()) {
+                throw new ErrorException("Not Parsable");
+            }
             for (int i = 0; i < recordParts.length; i++) {
 
                 if (isAMechanism(recordParts[i])) {
@@ -228,9 +239,8 @@ public class SPF1Parser {
     private boolean isValidAMechanismn(String recordPart) {
 
         String record = recordPart.trim();
-
         if (record.startsWith("a:") || record.startsWith("A:")) {
-            
+
             /**
              * Its a A Mechanismn wich has a domain-spec. The domain-spec must checked against DOMAIN_SPEC_REGEX 
              */
@@ -249,10 +259,10 @@ public class SPF1Parser {
                     System.out.println("HERE: " + newPart);
                     return newPart.matches(DOMAIN_SPEC_REGEX
                             + DUAL_CIDR_LENGTH_REGEX);
-                } else {
-                    // to many parts this record cannot be valid!!
-                    return false;
-                }
+            } else {
+                // to many parts this record cannot be valid!!
+                return false;
+            }
             }
         } else {
             
@@ -264,21 +274,19 @@ public class SPF1Parser {
 
             if (parts.length < 5) {
                 if (parts.length == 0) {
-                    return true;
+            return true;
                 } else if (parts.length == 2) {
                     return parts[1].matches(IP4_CIDR_LENGTH_REGEX);
                 } else if (parts.length == 4) {
                     return newPart.matches(DUAL_CIDR_LENGTH_REGEX);
-                }
+        }
             } else {
                 return true;
             }
 
         }
         return false;
-
     }
-
 
     /**
      * Check if the given part is a A Mechanismn
