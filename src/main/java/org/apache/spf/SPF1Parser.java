@@ -39,11 +39,12 @@ public class SPF1Parser {
             + "*\\})(?:\\%\\%)(?:\\%\\_)(?:\\%\\-)]";
 
     private final String MACRO_LITERAL_REGEX = "[\\x21-\\x24\\x26-\\x7e]"; // TODO:
-                                                                            // Check
-                                                                            // if
-                                                                            // thats
-                                                                            // really
-                                                                            // right!
+
+    // Check
+    // if
+    // thats
+    // really
+    // right!
 
     private final String MACRO_STRING_REGEX = "[(?:" + MACRO_EXPAND_REGEX
             + ")(?:" + MACRO_LITERAL_REGEX + ")]";
@@ -129,9 +130,10 @@ public class SPF1Parser {
      */
     private boolean isValidAMechanismn(String recordPart) {
 
-        if (recordPart.trim().startsWith("a:")) {
+        String record = recordPart.trim();
+        if (record.startsWith("a:") || record.startsWith("A:")) {
 
-            String newPart = recordPart.trim().substring(2);
+            String newPart = record.substring(2);
             String[] parts = newPart.split("/");
 
             // if there are more then 3 parts the record is not valid!
@@ -149,6 +151,8 @@ public class SPF1Parser {
                 // to many parts this record cannot be valid!!
                 return false;
             }
+        } else if (record.length() == 0) {
+            return true;
         }
         return false;
     }
