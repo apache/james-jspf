@@ -62,6 +62,8 @@ public class SPF1Utils {
 	public static final String NONE_CONV = "none";
 	
 	public static final String UNKNOWN_CONV = "unknown";
+
+    public static final String SPF_VERSION = "v=spf1";
 	
 
 
