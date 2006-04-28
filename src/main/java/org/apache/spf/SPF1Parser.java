@@ -215,9 +215,8 @@ public class SPF1Parser {
             if (!m.matches()) {
                 throw new ErrorException("Not Parsable");
             } else {
-                System.out.println("YES");
                 // parse the record
-                result = parseRecord(mainRecord);
+                parseRecord(mainRecord);
             }
         }
     }
@@ -229,7 +228,7 @@ public class SPF1Parser {
      * @return
      * @throws ErrorException
      */
-    public String parseRecord(String record) throws ErrorException {
+    private void parseRecord(String record) throws ErrorException {
 
         String[] part = record.trim().split(" ");
         System.out.println("HERE!");
@@ -320,7 +319,7 @@ public class SPF1Parser {
                     mechanismn.add(p);
 
                     // replace all default values with the right one
-                    replaceHelper(ptrMatcher);
+                    //replaceHelper(ptrMatcher);
                     
                     /*
                     System.out.println("PTR-Mechanismn: " + newPart);
@@ -341,13 +340,11 @@ public class SPF1Parser {
                     System.out.println("Exists:         " + newPart);
                 } else {
                     System.out.println("Unknown:        " + newPart);
-                    return SPF1Utils.UNKNOWN;
+                    //return SPF1Utils.UNKNOWN;
                 }
 
             }
         }
-
-        return SPF1Utils.NONE;
     }
 
     /**
@@ -414,12 +411,12 @@ public class SPF1Parser {
     }
 
     /**
-     * Return the result
+     * Return the mechanismn as Collection
      * 
-     * @return result
+     * @return mechanismn
      */
-    public String getResult() {
-        return result;
+    public Collection getMechanismn() {
+        return mechanismn;
     }
 
 }
