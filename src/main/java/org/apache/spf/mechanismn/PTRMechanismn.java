@@ -72,10 +72,12 @@ public class PTRMechanismn implements GenericMechanismn {
             }
         }
         try {
+            // Get PTR Records for the ipAddress which is provided by SPF1Data
             List domainList = spfData.getDnsProbe().getPTRRecords(
                     spfData.getIpAddress());
             for (int i = 0; i < domainList.size(); i++) {
-
+                
+                // Get a record for this
                 List aList = spfData.getDnsProbe().getARecords(
                         (String) domainList.get(i), maskLength);
                 for (int j = 0; j < aList.size(); j++) {
@@ -86,6 +88,7 @@ public class PTRMechanismn implements GenericMechanismn {
                 }
             }
 
+            // Check if we match one of this ptr!
             for (int j = 0; j < validatedHosts.size(); j++) {
                 compareDomain = (String) validatedHosts.get(j);
                 if (compareDomain.equals(host)

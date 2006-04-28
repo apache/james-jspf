@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 
 import org.apache.spf.mechanismn.AMechanismn;
 import org.apache.spf.mechanismn.MXMechanismn;
+import org.apache.spf.mechanismn.PTRMechanismn;
 
 public class SPF1Parser {
 
@@ -310,12 +311,22 @@ public class SPF1Parser {
                      + checkIP4 + " ip6-mask: " + checkIP6);
                      */
                 } else if (ptrMatcher.matches()) {
+                    
+                    // create a new PTRMechanismn and init it
+                    PTRMechanismn p = new PTRMechanismn();
+                    p.init(getMechanismnPrefix(newPart), checkDomain, checkIP4);
+
+                    // add it to the collection
+                    mechanismn.add(p);
 
                     // replace all default values with the right one
                     replaceHelper(ptrMatcher);
+                    
+                    /*
                     System.out.println("PTR-Mechanismn: " + newPart);
                     System.out.println("target: " + checkDomain + " ip4-mask: "
                             + checkIP4 + " ip6-mask: " + checkIP6);
+                */
                 } else if (redirMatcher.matches()) {
                     // TODO: check what we should replace
                     System.out.println("Redirect:       " + newPart);
