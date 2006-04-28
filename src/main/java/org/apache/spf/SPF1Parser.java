@@ -43,7 +43,7 @@ public class SPF1Parser {
 
     private int checkIP6 = 128;
 
-    private Collection mechanismn = new ArrayList();
+    private Collection mechanism = new ArrayList();
 
     /**
      * Regex based on http://ftp.rfc-editor.org/in-notes/authors/rfc4408.txt.
@@ -286,7 +286,7 @@ public class SPF1Parser {
                     a.init(getQualifier(newPart), checkDomain, checkIP4);
 
                     // add it to the collection
-                    mechanismn.add(a);
+                    mechanism.add(a);
 
                 } else if (ip4Matcher.matches()) {
                     // Replace default mask
@@ -298,7 +298,7 @@ public class SPF1Parser {
                             checkIP4);
 
                     // add it to the collection
-                    mechanismn.add(ip4);
+                    mechanism.add(ip4);
 
                 } else if (ip6Matcher.matches()) {
                     // TODO: Support ip6 Support at all
@@ -314,7 +314,7 @@ public class SPF1Parser {
                     m.init(getQualifier(newPart), checkDomain, checkIP4);
 
                     // add it to the collection
-                    mechanismn.add(m);
+                    mechanism.add(m);
 
                 } else if (ptrMatcher.matches()) {
 
@@ -323,10 +323,9 @@ public class SPF1Parser {
                     p.init(getQualifier(newPart), checkDomain, checkIP4);
 
                     // add it to the collection
-                    mechanismn.add(p);
+                    mechanism.add(p);
 
                 } else if (redirMatcher.matches()) {
-                    // TODO: check what we should replace
                     System.out.println("Redirect:       " + newPart);
                 } else if (expMatcher.matches()) {
                     // TODO: check what we should replace
@@ -341,7 +340,7 @@ public class SPF1Parser {
                     e.init(getQualifier(newPart), checkDomain, checkIP4);
 
                     // add it to the collection
-                    mechanismn.add(e);
+                    mechanism.add(e);
 
                 } else {
                     throw new ErrorException("Unknown mechanismn " + newPart);
@@ -364,7 +363,6 @@ public class SPF1Parser {
         if (match.groupCount() > 0) {
             // replace domain
             if (match.group(1) != null) {
-
                 checkDomain = match.group(1);
 
             }
@@ -441,10 +439,10 @@ public class SPF1Parser {
     /**
      * Return the mechanismn as Collection
      * 
-     * @return mechanismn Collection of all mechanismn which should be used
+     * @return mechanism Collection of all mechanismn which should be used
      */
-    public Collection getMechanismn() {
-        return mechanismn;
+    public Collection getMechanism() {
+        return mechanism;
     }
 
 }
