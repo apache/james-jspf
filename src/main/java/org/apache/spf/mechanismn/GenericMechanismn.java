@@ -18,7 +18,6 @@
 package org.apache.spf.mechanismn;
 
 import org.apache.spf.ErrorException;
-import org.apache.spf.IPAddr;
 import org.apache.spf.SPF1Data;
 
 public interface GenericMechanismn {
@@ -29,13 +28,12 @@ public interface GenericMechanismn {
      * @return result
      * @throws ErrorException
      */
-    public int run(SPF1Data spfData) throws ErrorException;
+    public String run(SPF1Data spfData) throws ErrorException;
     
     /**
      * @param mechanismPrefix The mechanismPrefix
-     * @param checkAddress The ipAddress to check
-     * @param domainName The domainName
+     * @param host The hostname or ip 
      * @param maskLenght The maskLength
      */
-    public void init(String mechanismPrefix,IPAddr checkAddress, String domainName, int maskLenght);
+    public void init(String mechanismPrefix, String host, int maskLenght);
 }

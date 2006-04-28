@@ -22,6 +22,8 @@ import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.spf.mechanismn.AMechanismn;
+
 public class SPF1Parser {
 
     private String checkDomain = null;
@@ -32,7 +34,7 @@ public class SPF1Parser {
 
     private String result = SPF1Utils.PASS;
 
-    private Collection commands = new ArrayList();
+    private Collection mechanismn = new ArrayList();
 
     /**
      * Regex based on http://ftp.rfc-editor.org/in-notes/authors/rfc4408.txt.
@@ -268,6 +270,13 @@ public class SPF1Parser {
 
                     // replace all default values with the right one
                     replaceHelper(aMatcher);
+                    
+                    // create a new AMechanismn and init it
+                    AMechanismn a = new AMechanismn();
+                    a.init(getMechanismnPrefix(newPart), checkDomain, checkIP4);
+                    
+                    // add it to the collection
+                    mechanismn.add(a);
                     System.out.println("A-Mechanismn:   " + newPart);
                     System.out.println("target: " + checkDomain + " ip4-mask: "
                             + checkIP4 + " ip6-mask: " + checkIP6);
@@ -392,10 +401,5 @@ public class SPF1Parser {
         return result;
     }
 
-    // TODO: Write javadoc
-    private String macroExpandDomain(String data, SPF1Data spfData)
-            throws NeutralException {
-        return new MacroExpand(spfData).expandDomain(data);
-    }
 
 }
