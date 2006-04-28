@@ -17,6 +17,7 @@
 
 package org.apache.spf.mechanismn;
 
+import org.apache.spf.ErrorException;
 import org.apache.spf.IPAddr;
 import org.apache.spf.SPF1Data;
 
@@ -26,8 +27,9 @@ public interface GenericMechanismn {
      * Run the mechanismn 
      * @param spfData The SPF1Data
      * @return result
+     * @throws ErrorException
      */
-    public int run(SPF1Data spfData);
+    public int run(SPF1Data spfData) throws ErrorException;
     
     /**
      * @param mechanismPrefix The mechanismPrefix
