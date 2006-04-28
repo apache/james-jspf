@@ -24,17 +24,16 @@ public interface GenericMechanismn {
     
     /**
      * Run the mechanismn 
+     * @param spfData The SPF1Data
      * @return result
      */
-    public int run();
+    public int run(SPF1Data spfData);
     
     /**
-     * 
-     * @param spfData The SPF1Data
      * @param mechanismPrefix The mechanismPrefix
      * @param checkAddress The ipAddress to check
      * @param domainName The domainName
      * @param maskLenght The maskLength
      */
-    public void init(SPF1Data spfData,String mechanismPrefix,IPAddr checkAddress, String domainName, int maskLenght);
+    public void init(String mechanismPrefix,IPAddr checkAddress, String domainName, int maskLenght);
 }
