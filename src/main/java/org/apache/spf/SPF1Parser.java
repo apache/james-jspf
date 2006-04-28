@@ -17,6 +17,8 @@
 
 package org.apache.spf;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,6 +31,8 @@ public class SPF1Parser {
     private int checkIP6 = 128;
 
     private String result = SPF1Utils.PASS;
+
+    private Collection commands = new ArrayList();
 
     /**
      * Regex based on http://ftp.rfc-editor.org/in-notes/authors/rfc4408.txt.
@@ -192,7 +196,7 @@ public class SPF1Parser {
     private final String TERMS_REGEX = "(?:[ ]+(?:" + DIRECTIVE_REGEX + "|"
             + MODIFIER_REGEX + "))*";
 
-    public SPF1Parser(String spfRecord, SPF1Data spfData)
+    public SPF1Parser(String spfRecord)
             throws ErrorException, NoneException {
 
         if (!isValidSPFVersion(spfRecord)) {
@@ -210,7 +214,7 @@ public class SPF1Parser {
             } else {
                 System.out.println("YES");
                 // parse the record
-                result = parseRecord(mainRecord, spfData);
+                result = parseRecord(mainRecord);
             }
         }
     }
@@ -222,7 +226,7 @@ public class SPF1Parser {
      * @return
      * @throws ErrorException
      */
-    public String parseRecord(String record, SPF1Data spfData)
+    public String parseRecord(String record)
             throws ErrorException {
 
         String[] part = record.trim().split(" ");
@@ -241,7 +245,7 @@ public class SPF1Parser {
         for (int i = 0; i < part.length; i++) {
 
             String newPart = part[i].trim();
-            checkDomain = spfData.getCurrentDomain();
+            checkDomain = null;;
             checkIP4 = 32;
             checkIP6 = 128;
 
@@ -263,7 +267,7 @@ public class SPF1Parser {
                 if (aMatcher.matches()) {
 
                     // replace all default values with the right one
-                    replaceHelper(aMatcher, spfData);
+                    replaceHelper(aMatcher);
                     System.out.println("A-Mechanismn:   " + newPart);
                     System.out.println("target: " + checkDomain + " ip4-mask: "
                             + checkIP4 + " ip6-mask: " + checkIP6);
@@ -280,7 +284,7 @@ public class SPF1Parser {
                 } else if (mxMatcher.matches()) {
 
                     // replace all default values with the right one
-                    replaceHelper(mxMatcher, spfData);
+                    replaceHelper(mxMatcher);
                     System.out.println("MX-Mechanismn:  " + newPart);
                     System.out.println("target: " + checkDomain + " ip4-mask: "
                             + checkIP4 + " ip6-mask: " + checkIP6);
@@ -288,7 +292,7 @@ public class SPF1Parser {
                 } else if (ptrMatcher.matches()) {
 
                     // replace all default values with the right one
-                    replaceHelper(ptrMatcher, spfData);
+                    replaceHelper(ptrMatcher);
                     System.out.println("PTR-Mechanismn: " + newPart);
                     System.out.println("target: " + checkDomain + " ip4-mask: "
                             + checkIP4 + " ip6-mask: " + checkIP6);
@@ -323,20 +327,14 @@ public class SPF1Parser {
      *            The matcher for the mechanismn
      * @throws ErrorException
      */
-    private void replaceHelper(Matcher match, SPF1Data spfData)
+    private void replaceHelper(Matcher match)
             throws ErrorException {
         if (match.groupCount() > 0) {
             // replace domain
             if (match.group(1) != null) {
-                try {
-                    checkDomain = macroExpandDomain(match.group(1), spfData);
-                } catch (Exception e) {
-                    // TODO: Change the NeutralException to ErrorException in
-                    // the MacroExpand class.
-                    throw new ErrorException(
-                            "Unable to macro expand the given domain: "
-                                    + match.group(1));
-                }
+
+                checkDomain = match.group(1);
+
             }
 
             // replace ip4 mask
