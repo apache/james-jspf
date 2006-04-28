@@ -39,8 +39,9 @@ public class SPF1Parser {
 
     private final String DELEMITER_REGEX = "[\\.\\-\\+,/_\\=]";
 
-    private final String MACRO_EXPAND_REGEX = "\\% (?:\\{" + MACRO_LETTER_PATTERN
-            + TRANSFORMERS_REGEX + DELEMITER_REGEX + "*" + "\\}|\\%|\\_|\\-)";
+    private final String MACRO_EXPAND_REGEX = "\\% (?:\\{"
+            + MACRO_LETTER_PATTERN + TRANSFORMERS_REGEX + DELEMITER_REGEX + "*"
+            + "\\}|\\%|\\_|\\-)";
 
     private final String MACRO_LITERAL_REGEX = "[\\x21-\\x24\\x26-\\x7e]"; // TODO:
 
@@ -50,104 +51,106 @@ public class SPF1Parser {
     // really
     // right!
 
-    
     /**
-     * ABNF: macro-string     = *( macro-expand / macro-literal )
+     * ABNF: macro-string = *( macro-expand / macro-literal )
      */
-    private final String MACRO_STRING_REGEX = "(?:" + MACRO_EXPAND_REGEX
-            + "|" + MACRO_LITERAL_REGEX + "{1})*";
+    private final String MACRO_STRING_REGEX = "(?:" + MACRO_EXPAND_REGEX + "|"
+            + MACRO_LITERAL_REGEX + "{1})*";
 
     /**
-     * ABNF: toplabel = ( *alphanum ALPHA *alphanum ) /
-     *                ( 1*alphanum "-" *( alphanum / "-" ) alphanum )
-     *                ; LDH rule plus additional TLD restrictions
-     *                ; (see [RFC3696], Section 2)
+     * ABNF: toplabel = ( *alphanum ALPHA *alphanum ) / ( 1*alphanum "-" *(
+     * alphanum / "-" ) alphanum ) ; LDH rule plus additional TLD restrictions ;
+     * (see [RFC3696], Section 2)
      */
     private final String TOP_LABEL_REGEX = "(?:" + ALPHA_DIGIT_PATTERN + "*"
-            + ALPHA_PATTERN + "{1}" + ALPHA_DIGIT_PATTERN +"*|(?:"+ ALPHA_DIGIT_PATTERN + "+" +"\\-" + "(?:"
-            + ALPHA_DIGIT_PATTERN + "|\\-)*" + ALPHA_DIGIT_PATTERN + "))";
+            + ALPHA_PATTERN + "{1}" + ALPHA_DIGIT_PATTERN + "*|(?:"
+            + ALPHA_DIGIT_PATTERN + "+" + "\\-" + "(?:" + ALPHA_DIGIT_PATTERN
+            + "|\\-)*" + ALPHA_DIGIT_PATTERN + "))";
 
     /**
-     * ABNF: domain-end       = ( "." toplabel [ "." ] ) / macro-expand
+     * ABNF: domain-end = ( "." toplabel [ "." ] ) / macro-expand
      */
-    private final String DOMAIN_END_REGEX = "(?:\\." + TOP_LABEL_REGEX
-            + "\\.?" + "|" + MACRO_EXPAND_REGEX + ")";
+    private final String DOMAIN_END_REGEX = "(?:\\." + TOP_LABEL_REGEX + "\\.?"
+            + "|" + MACRO_EXPAND_REGEX + ")";
 
     /**
-     * ABNF: domain-spec      = macro-string domain-end
+     * ABNF: domain-spec = macro-string domain-end
      */
     private final String DOMAIN_SPEC_REGEX = MACRO_STRING_REGEX
             + DOMAIN_END_REGEX;
 
     /**
-     * ABNF: qualifier        = "+" / "-" / "?" / "~"
+     * ABNF: qualifier = "+" / "-" / "?" / "~"
      */
     private final String QUALIFIER_PATTERN = "[\\+\\-\\?\\~]";
 
-    
     /**
-     * ABNF: include          = "include"  ":" domain-spec
+     * ABNF: include = "include" ":" domain-spec
      */
     private final String INCLUDE_REGEX = "include\\:" + DOMAIN_SPEC_REGEX;
 
     /**
-     * ABNF: exists           = "exists"   ":" domain-spec
+     * ABNF: exists = "exists" ":" domain-spec
      */
     private final String EXISTS_REGEX = "exists\\:" + DOMAIN_SPEC_REGEX;
 
     /**
-     * ABNF: ip4-cidr-length  = "/" 1*DIGIT
+     * ABNF: ip4-cidr-length = "/" 1*DIGIT
      */
     private final String IP4_CIDR_LENGTH_REGEX = "/\\d+";
 
     /**
-     * ABNF: ip6-cidr-length  = "/" 1*DIGIT
+     * ABNF: ip6-cidr-length = "/" 1*DIGIT
      */
     private final String IP6_CIDR_LENGTH_REGEX = "/\\d+";
 
     /**
      * ABNF: dual-cidr-length = [ ip4-cidr-length ] [ "/" ip6-cidr-length ]
      */
-    private final String DUAL_CIDR_LENGTH_REGEX = "(?:"+IP4_CIDR_LENGTH_REGEX + ")?"
-            + "(?:/" + IP6_CIDR_LENGTH_REGEX +")?";
-
-
-    /**
-     * TODO
-     * ABNF: IP4              = "ip4"      ":" ip4-network   [ ip4-cidr-length ]
-     */
-    private final String IP4_REGEX = "ip4\\:[0-9.]+" + "(?:" + IP4_CIDR_LENGTH_REGEX +")?";
+    private final String DUAL_CIDR_LENGTH_REGEX = "(?:" + IP4_CIDR_LENGTH_REGEX
+            + ")?" + "(?:/" + IP6_CIDR_LENGTH_REGEX + ")?";
 
     /**
-     * TODO
-     * ABNF: IP6              = "ip6"      ":" ip6-network   [ ip6-cidr-length ]
+     * TODO ABNF: IP4 = "ip4" ":" ip4-network [ ip4-cidr-length ]
      */
-    private final String IP6_REGEX = "ip6\\:[0-9A-Fa-f\\:\\.]+" + "(?:" + IP6_CIDR_LENGTH_REGEX +")?";
+    private final String IP4_REGEX = "ip4\\:[0-9.]+" + "(?:"
+            + IP4_CIDR_LENGTH_REGEX + ")?";
 
     /**
-     * ABNF: A                = "a"      [ ":" domain-spec ] [ dual-cidr-length ]
+     * TODO ABNF: IP6 = "ip6" ":" ip6-network [ ip6-cidr-length ]
      */
-    private final String A_REGEX = "a(?:\\:" + DOMAIN_SPEC_REGEX +")?" + "(?:"+ DUAL_CIDR_LENGTH_REGEX +")?";
+    private final String IP6_REGEX = "ip6\\:[0-9A-Fa-f\\:\\.]+" + "(?:"
+            + IP6_CIDR_LENGTH_REGEX + ")?";
 
     /**
-     * ABNF: MX               = "mx"     [ ":" domain-spec ] [ dual-cidr-length ]
+     * ABNF: A = "a" [ ":" domain-spec ] [ dual-cidr-length ]
      */
-    private final String MX_REGEX = "mx(?:\\:" + DOMAIN_SPEC_REGEX +")?" + "(?:"+ DUAL_CIDR_LENGTH_REGEX +")?";
+    private final String A_REGEX = "a(?:\\:" + DOMAIN_SPEC_REGEX + ")?" + "(?:"
+            + DUAL_CIDR_LENGTH_REGEX + ")?";
 
     /**
-     * ABNF: PTR              = "ptr"    [ ":" domain-spec ]
+     * ABNF: MX = "mx" [ ":" domain-spec ] [ dual-cidr-length ]
      */
-    private final String PTR_REGEX = "ptr(?:\\:" + DOMAIN_SPEC_REGEX +")?";
+    private final String MX_REGEX = "mx(?:\\:" + DOMAIN_SPEC_REGEX + ")?"
+            + "(?:" + DUAL_CIDR_LENGTH_REGEX + ")?";
 
     /**
-     * ABNF: mechanism        = ( all / include / A / MX / PTR / IP4 / IP6 / exists )
+     * ABNF: PTR = "ptr" [ ":" domain-spec ]
      */
-    private final String MECHANISM_REGEX = "(?:all|" + INCLUDE_REGEX + "|" + A_REGEX + "|" + MX_REGEX + "|" + PTR_REGEX + "|" + IP4_REGEX + "|" + IP6_REGEX + "|" + EXISTS_REGEX + ")";
+    private final String PTR_REGEX = "ptr(?:\\:" + DOMAIN_SPEC_REGEX + ")?";
 
     /**
-     * ABNF: name             = ALPHA *( ALPHA / DIGIT / "-" / "_" / "." )
+     * ABNF: mechanism = ( all / include / A / MX / PTR / IP4 / IP6 / exists )
      */
-    private final String NAME_REGEX = ALPHA_PATTERN +"{1}" + "[A-Za-z0-9\\-\\_\\.]*";
+    private final String MECHANISM_REGEX = "(?:all|" + INCLUDE_REGEX + "|"
+            + A_REGEX + "|" + MX_REGEX + "|" + PTR_REGEX + "|" + IP4_REGEX
+            + "|" + IP6_REGEX + "|" + EXISTS_REGEX + ")";
+
+    /**
+     * ABNF: name = ALPHA *( ALPHA / DIGIT / "-" / "_" / "." )
+     */
+    private final String NAME_REGEX = ALPHA_PATTERN + "{1}"
+            + "[A-Za-z0-9\\-\\_\\.]*";
 
     /**
      * ABNF: unknown-modifier = name "=" macro-string
@@ -155,31 +158,30 @@ public class SPF1Parser {
     private final String UNKNOWN_MODIFIER_REGEX = NAME_REGEX + "\\="
             + MACRO_STRING_REGEX;
 
-
     /**
-     * ABNF: redirect         = "redirect" "=" domain-spec
+     * ABNF: redirect = "redirect" "=" domain-spec
      */
-    private final String REDIRECT_REGEX = "redirect\\="+ DOMAIN_SPEC_REGEX;
+    private final String REDIRECT_REGEX = "redirect\\=" + DOMAIN_SPEC_REGEX;
 
     /**
-     * ABNF: explanation      = "exp" "=" domain-spec
+     * ABNF: explanation = "exp" "=" domain-spec
      */
-    private final String EXPLANATION_REGEX = "exp\\="+ DOMAIN_SPEC_REGEX;
+    private final String EXPLANATION_REGEX = "exp\\=" + DOMAIN_SPEC_REGEX;
 
     /**
-     * ABNF: modifier         = redirect / explanation / unknown-modifier
+     * ABNF: modifier = redirect / explanation / unknown-modifier
      */
-    private final String MODIFIER_REGEX = "(?:"+ REDIRECT_REGEX + "|" + EXPLANATION_REGEX + "|"
-            + UNKNOWN_MODIFIER_REGEX + ")";
+    private final String MODIFIER_REGEX = "(?:" + REDIRECT_REGEX + "|"
+            + EXPLANATION_REGEX + "|" + UNKNOWN_MODIFIER_REGEX + ")";
 
     /**
-     * ABNF: directive        = [ qualifier ] mechanism
+     * ABNF: directive = [ qualifier ] mechanism
      */
     private final String DIRECTIVE_REGEX = QUALIFIER_PATTERN + "?"
             + MECHANISM_REGEX;
 
     /**
-     * ABNF: terms            = *( 1*SP ( directive / modifier ) )
+     * ABNF: terms = *( 1*SP ( directive / modifier ) )
      */
     private final String TERMS_REGEX = "(?:[ ]+(?:" + DIRECTIVE_REGEX + "|"
             + MODIFIER_REGEX + "))*";
@@ -187,33 +189,69 @@ public class SPF1Parser {
     public SPF1Parser(String spfRecord, SPF1Data spfData)
             throws ErrorException, NoneException {
 
-        //String[] recordParts = spfRecord.split(" ");
-
-        // if the record contains no valid spfrecord we will not continue
-        // and throw an NoneException
         if (!isValidSPFVersion(spfRecord)) {
             throw new NoneException("No valid SPF Record: " + spfRecord);
         } else {
-            
             System.out.println(TERMS_REGEX);
-            
+
+            String mainRecord = spfRecord.replaceFirst(SPF1Utils.SPF_VERSION,
+                    "");
+
             Pattern p = Pattern.compile(TERMS_REGEX);
-            Matcher m = p.matcher(spfRecord.replaceFirst(SPF1Utils.SPF_VERSION,""));
+            Matcher m = p.matcher(mainRecord);
             if (!m.matches()) {
                 throw new ErrorException("Not Parsable");
-            }
-            
-            /*
-            for (int i = 0; i < recordParts.length; i++) {
+            } else {
 
-                if (isAMechanism(recordParts[i])) {
-                    if (!isValidAMechanismn(recordParts[i])) {
-                        throw new ErrorException("No valid A Mechanism: "
-                                + recordParts[i]);
+                String[] part = mainRecord.trim().split(" ");
+
+                Pattern ip4Pattern = Pattern.compile(IP4_REGEX);
+                Pattern ip6Pattern = Pattern.compile(IP6_REGEX);
+                Pattern aPattern = Pattern.compile(A_REGEX);
+                Pattern mxPattern = Pattern.compile(MX_REGEX);
+                Pattern ptrPattern = Pattern.compile(PTR_REGEX);
+                Pattern redirPattern = Pattern.compile(REDIRECT_REGEX);
+                Pattern expPattern = Pattern.compile(EXPLANATION_REGEX);
+                Pattern inclPattern = Pattern.compile(INCLUDE_REGEX);
+                Pattern existsPattern = Pattern.compile(EXISTS_REGEX);
+
+                for (int i = 0; i < part.length; i++) {
+                    
+                    // TODO: replace the System.out.println() with the correct command calls
+                    
+                    Matcher aMatcher = aPattern.matcher(part[i]);
+                    Matcher ip4Matcher = ip4Pattern.matcher(part[i]);
+                    Matcher ip6Matcher = ip6Pattern.matcher(part[i]);
+                    Matcher mxMatcher = mxPattern.matcher(part[i]);
+                    Matcher ptrMatcher = ptrPattern.matcher(part[i]);
+                    Matcher redirMatcher = redirPattern.matcher(part[i]);
+                    Matcher expMatcher = expPattern.matcher(part[i]);
+                    Matcher inclMatcher = inclPattern.matcher(part[i]);
+                    Matcher existsMatcher = existsPattern.matcher(part[i]);
+
+                    if (aMatcher.matches()) {
+                        System.out.println("A-Mechanismn:   " + part[i]);
+                    } else if (ip4Matcher.matches()) {
+                        System.out.println("IP4-Mechanismn: " + part[i]);
+                    } else if (ip6Matcher.matches()) {
+                        System.out.println("IP6-Mechanismn: " + part[i]);
+                    } else if (mxMatcher.matches()) {
+                        System.out.println("MX-Mechanismn:  " + part[i]);
+                    } else if (ptrMatcher.matches()) {
+                        System.out.println("PTR-Mechanismn: " + part[i]);
+                    } else if (redirMatcher.matches()) {
+                        System.out.println("Redirect:       " + part[i]);
+                    } else if (expMatcher.matches()) {
+                        System.out.println("Exp:            " + part[i]);
+                    } else if (inclMatcher.matches()) {
+                        System.out.println("Include:        " + part[i]);
+                    } else if (existsMatcher.matches()) {
+                        System.out.println("Exists:         " + part[i]);
+                    } else {
+                        System.out.println("Unknown:        " + part[i]);
                     }
                 }
             }
-            */
         }
 
     }
@@ -245,7 +283,8 @@ public class SPF1Parser {
         if (record.startsWith("a:") || record.startsWith("A:")) {
 
             /**
-             * Its a A Mechanismn wich has a domain-spec. The domain-spec must checked against DOMAIN_SPEC_REGEX 
+             * Its a A Mechanismn wich has a domain-spec. The domain-spec must
+             * checked against DOMAIN_SPEC_REGEX
              */
 
             String newPart = record.substring(2);
@@ -262,27 +301,27 @@ public class SPF1Parser {
                     System.out.println("HERE: " + newPart);
                     return newPart.matches(DOMAIN_SPEC_REGEX
                             + DUAL_CIDR_LENGTH_REGEX);
-            } else {
-                // to many parts this record cannot be valid!!
-                return false;
-            }
+                } else {
+                    // to many parts this record cannot be valid!!
+                    return false;
+                }
             }
         } else {
-            
+
             /**
-             * Its an A Mechanismn which has no domain-spec. 
+             * Its an A Mechanismn which has no domain-spec.
              */
             String newPart = record.substring(1);
             String[] parts = record.split("/");
 
             if (parts.length < 5) {
                 if (parts.length == 0) {
-            return true;
+                    return true;
                 } else if (parts.length == 2) {
                     return parts[1].matches(IP4_CIDR_LENGTH_REGEX);
                 } else if (parts.length == 4) {
                     return newPart.matches(DUAL_CIDR_LENGTH_REGEX);
-        }
+                }
             } else {
                 return true;
             }
@@ -308,6 +347,7 @@ public class SPF1Parser {
 
     /**
      * Return the parsed record.
+     * 
      * @return
      */
     public String getParsedRecord() {
