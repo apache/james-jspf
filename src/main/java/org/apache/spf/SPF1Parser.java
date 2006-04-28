@@ -30,6 +30,8 @@ public class SPF1Parser {
 
     private int checkIP6 = 128;
 
+    private String result = SPF1Utils.PASS;
+
     /**
      * Regex based on http://ftp.rfc-editor.org/in-notes/authors/rfc4408.txt.
      * This will be the next official SPF-Spec
@@ -209,88 +211,99 @@ public class SPF1Parser {
                 throw new ErrorException("Not Parsable");
             } else {
 
-                String[] part = mainRecord.trim().split(" ");
+                // parse the record
+                result = parseRecord(mainRecord, spfData);
+            }
+        }
 
-                Pattern ip4Pattern = Pattern.compile(IP4_REGEX);
-                Pattern ip6Pattern = Pattern.compile(IP6_REGEX);
-                Pattern aPattern = Pattern.compile(A_REGEX);
-                Pattern mxPattern = Pattern.compile(MX_REGEX);
-                Pattern ptrPattern = Pattern.compile(PTR_REGEX);
-                Pattern redirPattern = Pattern.compile(REDIRECT_REGEX);
-                Pattern expPattern = Pattern.compile(EXPLANATION_REGEX);
-                Pattern inclPattern = Pattern.compile(INCLUDE_REGEX);
-                Pattern existsPattern = Pattern.compile(EXISTS_REGEX);
+    }
 
-                for (int i = 0; i < part.length; i++) {
+    /**
+     * 
+     * @param record
+     * @param spfData
+     * @return
+     */
+    public String parseRecord(String record, SPF1Data spfData) {
 
-                    String newPart = part[i].trim();
-                    checkDomain = spfData.getCurrentDomain();
-                    checkIP4 = 32;
-                    checkIP6 = 128;
+        String[] part = record.trim().split(" ");
 
-                    if (!newPart.equals("")) {
+        Pattern ip4Pattern = Pattern.compile(IP4_REGEX);
+        Pattern ip6Pattern = Pattern.compile(IP6_REGEX);
+        Pattern aPattern = Pattern.compile(A_REGEX);
+        Pattern mxPattern = Pattern.compile(MX_REGEX);
+        Pattern ptrPattern = Pattern.compile(PTR_REGEX);
+        Pattern redirPattern = Pattern.compile(REDIRECT_REGEX);
+        Pattern expPattern = Pattern.compile(EXPLANATION_REGEX);
+        Pattern inclPattern = Pattern.compile(INCLUDE_REGEX);
+        Pattern existsPattern = Pattern.compile(EXISTS_REGEX);
 
-                        // TODO: replace the System.out.println() with the
-                        // correct command calls
+        for (int i = 0; i < part.length; i++) {
 
-                        Matcher aMatcher = aPattern.matcher(newPart);
-                        Matcher ip4Matcher = ip4Pattern.matcher(newPart);
-                        Matcher ip6Matcher = ip6Pattern.matcher(newPart);
-                        Matcher mxMatcher = mxPattern.matcher(newPart);
-                        Matcher ptrMatcher = ptrPattern.matcher(newPart);
-                        Matcher redirMatcher = redirPattern.matcher(newPart);
-                        Matcher expMatcher = expPattern.matcher(newPart);
-                        Matcher inclMatcher = inclPattern.matcher(newPart);
-                        Matcher existsMatcher = existsPattern.matcher(newPart);
+            String newPart = part[i].trim();
+            checkDomain = spfData.getCurrentDomain();
+            checkIP4 = 32;
+            checkIP6 = 128;
 
-                        if (aMatcher.matches()) {
+            if (!newPart.equals("")) {
 
-                            // replace all default values with the right one
-                            replaceHelper(aMatcher);
-                            System.out.println("A-Mechanismn:   " + newPart);
-                            System.out.println("target: " + checkDomain
-                                    + " ip4-mask: " + checkIP4 + " ip6-mask: "
-                                    + checkIP6);
+                // TODO: replace the System.out.println() with the
+                // correct command calls
 
-                        } else if (ip4Matcher.matches()) {
-                            replaceHelper(ip4Matcher);
-                            System.out.println("IP4-Mechanismn: " + newPart);
-                        } else if (ip6Matcher.matches()) {
-                            replaceHelper(ip4Matcher);
-                            System.out.println("IP6-Mechanismn: " + newPart);
-                        } else if (mxMatcher.matches()) {
+                Matcher aMatcher = aPattern.matcher(newPart);
+                Matcher ip4Matcher = ip4Pattern.matcher(newPart);
+                Matcher ip6Matcher = ip6Pattern.matcher(newPart);
+                Matcher mxMatcher = mxPattern.matcher(newPart);
+                Matcher ptrMatcher = ptrPattern.matcher(newPart);
+                Matcher redirMatcher = redirPattern.matcher(newPart);
+                Matcher expMatcher = expPattern.matcher(newPart);
+                Matcher inclMatcher = inclPattern.matcher(newPart);
+                Matcher existsMatcher = existsPattern.matcher(newPart);
 
-                            // replace all default values with the right one
-                            replaceHelper(mxMatcher);
-                            System.out.println("MX-Mechanismn:  " + newPart);
-                            System.out.println("target: " + checkDomain
-                                    + " ip4-mask: " + checkIP4 + " ip6-mask: "
-                                    + checkIP6);
+                if (aMatcher.matches()) {
 
-                        } else if (ptrMatcher.matches()) {
+                    // replace all default values with the right one
+                    replaceHelper(aMatcher);
+                    System.out.println("A-Mechanismn:   " + newPart);
+                    System.out.println("target: " + checkDomain + " ip4-mask: "
+                            + checkIP4 + " ip6-mask: " + checkIP6);
 
-                            // replace all default values with the right one
-                            replaceHelper(ptrMatcher);
-                            System.out.println("PTR-Mechanismn: " + newPart);
-                            System.out.println("target: " + checkDomain
-                                    + " ip4-mask: " + checkIP4 + " ip6-mask: "
-                                    + checkIP6);
-                        } else if (redirMatcher.matches()) {
-                            System.out.println("Redirect:       " + newPart);
-                        } else if (expMatcher.matches()) {
-                            System.out.println("Exp:            " + newPart);
-                        } else if (inclMatcher.matches()) {
-                            System.out.println("Include:        " + newPart);
-                        } else if (existsMatcher.matches()) {
-                            System.out.println("Exists:         " + newPart);
-                        } else {
-                            System.out.println("Unknown:        " + newPart);
-                        }
-                    }
+                } else if (ip4Matcher.matches()) {
+                    replaceHelper(ip4Matcher);
+                    System.out.println("IP4-Mechanismn: " + newPart);
+                } else if (ip6Matcher.matches()) {
+                    replaceHelper(ip4Matcher);
+                    System.out.println("IP6-Mechanismn: " + newPart);
+                } else if (mxMatcher.matches()) {
+
+                    // replace all default values with the right one
+                    replaceHelper(mxMatcher);
+                    System.out.println("MX-Mechanismn:  " + newPart);
+                    System.out.println("target: " + checkDomain + " ip4-mask: "
+                            + checkIP4 + " ip6-mask: " + checkIP6);
+
+                } else if (ptrMatcher.matches()) {
+
+                    // replace all default values with the right one
+                    replaceHelper(ptrMatcher);
+                    System.out.println("PTR-Mechanismn: " + newPart);
+                    System.out.println("target: " + checkDomain + " ip4-mask: "
+                            + checkIP4 + " ip6-mask: " + checkIP6);
+                } else if (redirMatcher.matches()) {
+                    System.out.println("Redirect:       " + newPart);
+                } else if (expMatcher.matches()) {
+                    System.out.println("Exp:            " + newPart);
+                } else if (inclMatcher.matches()) {
+                    System.out.println("Include:        " + newPart);
+                } else if (existsMatcher.matches()) {
+                    System.out.println("Exists:         " + newPart);
+                } else {
+                    System.out.println("Unknown:        " + newPart);
                 }
             }
         }
 
+        return SPF1Utils.NONE;
     }
 
     /**
@@ -354,11 +367,11 @@ public class SPF1Parser {
     }
 
     /**
-     * Return the parsed record.
-     * 
-     * @return
+     * Return the result
+     * @return result
      */
-    public String getParsedRecord() {
-        return parsedRecord;
+    public String getResult() {
+        return result;
     }
+
 }
