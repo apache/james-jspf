@@ -18,21 +18,38 @@
 package org.apache.spf.mechanismn;
 
 import org.apache.spf.ErrorException;
+import org.apache.spf.MacroExpand;
 import org.apache.spf.SPF1Data;
 
-/**
- * This Interface represent a gerneric mechanismn 
- * @author maurer
- *
- */
-public interface GenericMechanismn {
-    
+import java.util.List;
+
+public class ExistsMechanism extends GenericMechanism {
+
     /**
-     * Run the mechanismn  with the give SPF1Data
-     * @param spfData The SPF1Data
-     * @return result If the not match it return null. Otherwise it returns the modifier
-     * @throws ErrorException if somethink strange happen
+     * 
+     * @see org.apache.spf.mechanismn.GenericMechanism#run(org.apache.spf.SPF1Data)
      */
-    public String run(SPF1Data spfData) throws ErrorException;
-    
+    public String run(SPF1Data spfData) throws ErrorException {
+        List aRecords;
+        
+        String host = this.host;
+        try {
+            host = new MacroExpand(spfData).expandDomain(host);
+        } catch (Exception e) {
+            throw new ErrorException(e.getMessage());
+        }
+
+        try {
+            aRecords = spfData.getDnsProbe().getARecords(host, maskLength);
+        } catch (Exception e) {
+            return null;
+        }
+        if (aRecords.size() > 0) {
+            return qualifier;
+        }
+
+        // No match found
+        return null;
+    }
+
 }

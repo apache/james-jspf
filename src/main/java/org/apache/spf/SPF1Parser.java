@@ -22,10 +22,10 @@ import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.spf.mechanismn.AMechanismn;
-import org.apache.spf.mechanismn.ExistsMechanismn;
-import org.apache.spf.mechanismn.MXMechanismn;
-import org.apache.spf.mechanismn.PTRMechanismn;
+import org.apache.spf.mechanismn.AMechanism;
+import org.apache.spf.mechanismn.ExistsMechanism;
+import org.apache.spf.mechanismn.MXMechanism;
+import org.apache.spf.mechanismn.PTRMechanism;
 
 /**
  * This class can be used ass parses for validate SPF1-Records. It also offer a Collection of SPF1.Mechanism .
@@ -276,7 +276,7 @@ public class SPF1Parser {
                     replaceHelper(aMatcher);
 
                     // create a new AMechanismn and init it
-                    AMechanismn a = new AMechanismn();
+                    AMechanism a = new AMechanism();
                     a.init(getQualifier(newPart), checkDomain, checkIP4);
 
                     // add it to the collection
@@ -297,7 +297,7 @@ public class SPF1Parser {
                     replaceHelper(mxMatcher);
 
                     // create a new MXMechanismn and init it
-                    MXMechanismn m = new MXMechanismn();
+                    MXMechanism m = new MXMechanism();
                     m.init(getQualifier(newPart), checkDomain, checkIP4);
 
                     // add it to the collection
@@ -310,7 +310,7 @@ public class SPF1Parser {
                 } else if (ptrMatcher.matches()) {
 
                     // create a new PTRMechanismn and init it
-                    PTRMechanismn p = new PTRMechanismn();
+                    PTRMechanism p = new PTRMechanism();
                     p.init(getQualifier(newPart), checkDomain, checkIP4);
 
                     // add it to the collection
@@ -328,7 +328,7 @@ public class SPF1Parser {
                 } else if (existsMatcher.matches()) {
 
                     // create a new PTRMechanismn and init it
-                    ExistsMechanismn e = new ExistsMechanismn();
+                    ExistsMechanism e = new ExistsMechanism();
                     e.init(getQualifier(newPart), checkDomain, checkIP4);
 
                     // add it to the collection

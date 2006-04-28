@@ -17,45 +17,38 @@
 
 package org.apache.spf.mechanismn;
 
-import java.util.ArrayList;
-
 import org.apache.spf.ErrorException;
 import org.apache.spf.MacroExpand;
 import org.apache.spf.SPF1Data;
-import org.apache.spf.util.IPAddr;
-import org.apache.spf.util.IPUtil;
 
-public class MXMechanismn implements GenericMechanismn {
+/**
+ * This class represent a gerneric mechanism 
+ * @author maurer
+ *
+ */
+public abstract class GenericMechanism {
 
-    private SPF1Data spfData;
-
-    private String qualifier;
-
-    private String host;
-
-    private int maskLength;
+    protected String qualifier;
+    protected String host;
+    protected int maskLength;
 
     /**
-     * @param qualifier The qualifier
+     * @param qualifier The mechanismPrefix
      * @param host The hostname or ip 
      * @param maskLenght The maskLength
      */
     public void init(String qualifier, String host, int maskLength) {
-
         this.qualifier = qualifier;
         this.host = host;
         this.maskLength = maskLength;
     }
 
     /**
-     * 
-     * @see org.apache.spf.mechanismn.GenericMechanismn#run(org.apache.spf.SPF1Data)
+     * @param spfData
+     * @throws ErrorException
      */
-    public String run(SPF1Data spfData) throws ErrorException {
-        this.spfData = spfData;
-        ArrayList addressList = new ArrayList();
-
-        // Get the right host.
+    protected String expandHost(SPF1Data spfData) throws ErrorException {
+        String host = this.host;
         if (host == null) {
             host = spfData.getCurrentDomain();
         } else {
@@ -66,28 +59,15 @@ public class MXMechanismn implements GenericMechanismn {
                 throw new ErrorException(e.getMessage());
             }
         }
-        // get the ipAddress
-        try {
-            IPAddr checkAddress = IPAddr.getAddress(spfData.getIpAddress(),
-                    maskLength);
-            try {
-                addressList.addAll(spfData.getDnsProbe().getMXRecords(host,
-                        maskLength));
-                if (IPUtil.checkAddressList(checkAddress, addressList)) {
-                    return qualifier;
-                }
-            } catch (Exception e) {
-                // no a records just return null
-                return null;
-            }
-        } catch (Exception e) {
-            throw new ErrorException("No valid ipAddress: "
-                    + spfData.getIpAddress());
-        }
-        // No match found
-        return null;
+        return host;
     }
 
+    /**
+     * Run the mechanismn  with the give SPF1Data
+     * @param spfData The SPF1Data
+     * @return result If the not match it return null. Otherwise it returns the modifier
+     * @throws ErrorException if somethink strange happen
+     */
+    public abstract String run(SPF1Data spfData) throws ErrorException;
+    
 }
-
-

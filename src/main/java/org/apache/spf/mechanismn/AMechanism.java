@@ -17,55 +17,25 @@
 
 package org.apache.spf.mechanismn;
 
-import java.util.ArrayList;
-
 import org.apache.spf.ErrorException;
-import org.apache.spf.MacroExpand;
 import org.apache.spf.SPF1Data;
 import org.apache.spf.util.IPAddr;
 import org.apache.spf.util.IPUtil;
 
-public class AMechanismn implements GenericMechanismn {
+import java.util.ArrayList;
 
-    private SPF1Data spfData;
-
-    private String qualifier;
-
-    private String host;
-
-    private int maskLength;
-
-    /**
-     * @param qualifier The mechanismPrefix
-     * @param host The hostname or ip 
-     * @param maskLenght The maskLength
-     */
-    public void init(String qualifier, String host, int maskLength) {
-
-        this.qualifier = qualifier;
-        this.host = host;
-        this.maskLength = maskLength;
-    }
+public class AMechanism extends GenericMechanism {
 
     /**
      * 
-     * @see org.apache.spf.mechanismn.GenericMechanismn#run(org.apache.spf.SPF1Data)
+     * @see org.apache.spf.mechanismn.GenericMechanism#run(org.apache.spf.SPF1Data)
      */
     public String run(SPF1Data spfData) throws ErrorException {
-        this.spfData = spfData;
         ArrayList addressList = new ArrayList();
 
         // Get the right host.
-        if (host == null) {
-            host = spfData.getCurrentDomain();
-        } else {
-            try {
-                host = new MacroExpand(spfData).expandDomain(host);
-
-            } catch (Exception e) {
-                throw new ErrorException(e.getMessage());
-            }
-        }
+        String host = expandHost(spfData);
+        
         // get the ipAddress
         try {
             IPAddr checkAddress = IPAddr.getAddress(spfData.getIpAddress(),
@@ -87,5 +57,5 @@ public class AMechanismn implements GenericMechanismn {
         // No match found
         return null;
     }
-
+    
 }
