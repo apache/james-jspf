@@ -32,6 +32,8 @@ import java.util.regex.Pattern;
 
 public class MacroExpand {
 
+    //TODO: Change NeutralException to ErrorException!
+
     public static final String MACRO_REGEX = "\\%\\{[lsoditpvhcrLSODITPVHCR]\\d*r?[\\.\\-\\+,/_\\=]*\\}";
 
     private SPF1Data spfData;
@@ -46,7 +48,7 @@ public class MacroExpand {
 
     private boolean isExplanation = false;
 
-    protected MacroExpand(SPF1Data spfData) {
+    public MacroExpand(SPF1Data spfData) {
         this.spfData = spfData;
         inputPattern = Pattern.compile(MACRO_REGEX);
     }
@@ -73,7 +75,7 @@ public class MacroExpand {
      * @return expanded domain
      * @throws NeutralException
      */
-    protected String expandDomain(String input) throws NeutralException {
+    public String expandDomain(String input) throws NeutralException {
 
         isExplanation = false;
         String domainName = expand(input);
