@@ -24,11 +24,13 @@ import java.util.regex.Pattern;
 
 import org.apache.spf.mechanismn.AMechanism;
 import org.apache.spf.mechanismn.ExistsMechanism;
+import org.apache.spf.mechanismn.IP4Mechanism;
 import org.apache.spf.mechanismn.MXMechanism;
 import org.apache.spf.mechanismn.PTRMechanism;
 
 /**
- * This class can be used ass parses for validate SPF1-Records. It also offer a Collection of SPF1.Mechanism .
+ * This class can be used ass parses for validate SPF1-Records. It also offer a
+ * Collection of SPF1.Mechanism .
  * 
  * @author Norman Maurer <nm@byteaction.de>
  * @author Stefano Bagnara <apache@bago.org>
@@ -132,7 +134,7 @@ public class SPF1Parser {
     /**
      * TODO ABNF: IP4 = "ip4" ":" ip4-network [ ip4-cidr-length ]
      */
-    private final String IP4_REGEX = "ip4\\:[0-9.]+" + "(?:"
+    private final String IP4_REGEX = "ip4\\:([0-9.]+)" + "("
             + IP4_CIDR_LENGTH_REGEX + ")?";
 
     /**
@@ -228,9 +230,13 @@ public class SPF1Parser {
 
     /**
      * 
-     * @param record The TXT or SPF Record to parse for mechanismn
-     * @return mechanismn Collection of the mechanismn classes that should be used
-     * @throws ErrorException This Exception will be thrown if an PermError should be returned 
+     * @param record
+     *            The TXT or SPF Record to parse for mechanismn
+     * @return mechanismn Collection of the mechanismn classes that should be
+     *         used
+     * @throws ErrorException
+     *             This Exception will be thrown if an PermError should be
+     *             returned
      */
     private void parseRecord(String record) throws ErrorException {
 
@@ -283,12 +289,19 @@ public class SPF1Parser {
                     mechanismn.add(a);
 
                 } else if (ip4Matcher.matches()) {
-                    // TODO: check what we should replace
-                    // replaceHelper(ip4Matcher,spfData);
-                    System.out.println("IP4-Mechanismn: " + newPart);
+                    // Replace default mask
+                    replaceIP4Helper(ip4Matcher);
+
+                    // create a new IP4Mechanismn and init it
+                    IP4Mechanism ip4 = new IP4Mechanism();
+                    ip4.init(getQualifier(newPart), ip4Matcher.group(1),
+                            checkIP4);
+
+                    // add it to the collection
+                    mechanismn.add(ip4);
 
                 } else if (ip6Matcher.matches()) {
-                    // TODO: check what we should replace
+                    // TODO: Support ip6 Support at all
                     // replaceHelper(ip4Matcher,spfData);
                     System.out.println("IP6-Mechanismn: " + newPart);
                 } else if (mxMatcher.matches()) {
@@ -302,11 +315,7 @@ public class SPF1Parser {
 
                     // add it to the collection
                     mechanismn.add(m);
-                    /*
-                     System.out.println("MX-Mechanismn:  " + newPart);
-                     System.out.println("target: " + checkDomain + " ip4-mask: "
-                     + checkIP4 + " ip6-mask: " + checkIP6);
-                     */
+
                 } else if (ptrMatcher.matches()) {
 
                     // create a new PTRMechanismn and init it
@@ -348,7 +357,8 @@ public class SPF1Parser {
      * 
      * @param match
      *            The matcher for the mechanismn
-     * @throws ErrorException if an PermError should be returned
+     * @throws ErrorException
+     *             if an PermError should be returned
      */
     private void replaceHelper(Matcher match) throws ErrorException {
         if (match.groupCount() > 0) {
@@ -376,6 +386,23 @@ public class SPF1Parser {
     }
 
     /**
+     * Method that helps to replace ip4 mask with the right value
+     * 
+     * @param match
+     *            The matcher for the mechanismn
+     * @throws ErrorException
+     *             if an PermError should be returned
+     */
+    private void replaceIP4Helper(Matcher match) throws ErrorException {
+        if (match.groupCount() > 1) {
+            // replace ip4 mask
+            if (match.group(2) != null) {
+                checkIP4 = Integer.parseInt(match.group(1));
+            }
+        }
+    }
+
+    /**
      * Check if the SPFRecord starts with valid version
      * 
      * @param record
@@ -390,12 +417,13 @@ public class SPF1Parser {
     }
 
     /**
-     * Get the qualifier for the given mechanismn record. if none was specified in
-     * the mechanismn record the qualifier for pass "+" will be used
+     * Get the qualifier for the given mechanismn record. if none was specified
+     * in the mechanismn record the qualifier for pass "+" will be used
      * 
      * @param mechRecord
      *            The mechanismn record
-     * @return qualifier This qualifier will be used by the mechanismn classes for the result the return when match
+     * @return qualifier This qualifier will be used by the mechanismn classes
+     *         for the result the return when match
      */
     private String getQualifier(String mechRecord) {
 
