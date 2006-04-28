@@ -17,7 +17,6 @@
 
 package org.apache.spf;
 
-import java.util.List;
 
 
 /**
@@ -67,18 +66,6 @@ public class SPF1Utils {
 	public static final String UNKNOWN_CONV = "unknown";
 
     public static final String SPF_VERSION = "v=spf1";
-    
-    public static final int PASS_VALUE = 0;
-
-    public static final int NEUTRAL_VALUE = 1;
-    
-    public static final int NONE_VALUE = 2;
-
-    public static final int FAIL_VALUE = 3;
-
-    public static final int SOFTFAIL_VALUE = 4;
-    
-    public static final int ERROR_VALUE = 5;
 	
 
 
@@ -155,29 +142,5 @@ public class SPF1Utils {
 			return false;
 		}		
 	}
-    
-    /**
-     * Check if the given ipaddress array contains the provided ip.
-     * 
-     * @param checkAddress
-     *            The ip wich should be contained in the given ArrayList
-     * @param addressList
-     *            The ip ArrayList.
-     * @return true or false
-     */
-    public static boolean checkAddressList(IPAddr checkAddress, List addressList) {
-
-        IPAddr aValue = null;
-        for (int i = 0; i < addressList.size(); i++) {
-
-            aValue = (IPAddr) addressList.get(i);
-
-            if (checkAddress.getMaskedIPAddress().equals(
-                    aValue.getMaskedIPAddress())) {
-                return true;
-            }
-        }
-        return false;
-    }
 
 }
