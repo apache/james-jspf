@@ -18,22 +18,21 @@
 package org.apache.spf;
 
 /**
-  * This exception get thrown if an invalid include command was supplied
-  * 
-  * @author Norman Maurer <nm@byteaction.de> @since 0.3
-  * 
-  */
+ * This exception get thrown if an invalid include command was supplied
+ * 
+ * @author Norman Maurer <nm@byteaction.de>
+ * 
+ */
 public class IncludeException extends Exception {
 
+    private static final long serialVersionUID = 1L;
 
-	private static final long serialVersionUID = 1L;
+    public IncludeException() {
+        super();
+    }
 
-	public IncludeException() {
-		super();
-	}
-
-	public IncludeException(String strErrorMessage) {
-		super(strErrorMessage);
-	}
+    public IncludeException(String strErrorMessage) {
+        super(strErrorMessage);
+    }
 
 }
