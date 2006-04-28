@@ -253,8 +253,10 @@ public class SPF1Parser {
                                     + checkIP6);
 
                         } else if (ip4Matcher.matches()) {
+                            replaceHelper(ip4Matcher);
                             System.out.println("IP4-Mechanismn: " + newPart);
                         } else if (ip6Matcher.matches()) {
+                            replaceHelper(ip4Matcher);
                             System.out.println("IP6-Mechanismn: " + newPart);
                         } else if (mxMatcher.matches()) {
 
@@ -328,6 +330,27 @@ public class SPF1Parser {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Get the prefix for the given mechanismn record. if none was specified in
+     * the mechanismn record the prefix for pass "+" will be used
+     * 
+     * @param mechRecord
+     *            The mechanismn record
+     * @return prefix
+     */
+    private String getMechanismnPrefix(String mechRecord) {
+
+        if (mechRecord.startsWith(SPF1Utils.FAIL)) {
+            return SPF1Utils.FAIL;
+        } else if (mechRecord.startsWith(SPF1Utils.SOFTFAIL)) {
+            return SPF1Utils.SOFTFAIL;
+        } else if (mechRecord.startsWith(SPF1Utils.NEUTRAL)) {
+            return SPF1Utils.NEUTRAL;
+        } else {
+            return SPF1Utils.PASS;
+        }
     }
 
     /**
