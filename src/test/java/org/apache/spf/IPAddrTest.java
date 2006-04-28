@@ -16,6 +16,8 @@
  ***********************************************************************/
 package org.apache.spf;
 
+import org.apache.spf.util.IPAddr;
+
 import junit.framework.TestCase;
 
 public class IPAddrTest extends TestCase {
