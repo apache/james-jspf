@@ -17,11 +17,20 @@
 
 package org.apache.spf.mechanismn;
 
+import org.apache.spf.IPAddr;
+import org.apache.spf.SPF1Data;
+
 public interface GenericMechanismn {
     
     /**
      * Run the mechanismn 
      * @return result
      */
-    public int checkMechanismn();
+    public int checkMechanismn(IPAddr checkAddress, String domainName, int maskLenght);
+    
+    /**
+     * Init the SPF1Data
+     * @param spfData The current SPF1Data container
+     */
+    public void initSPF1Data(SPF1Data spfData);
 }
