@@ -21,9 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.spf.ErrorException;
-import org.apache.spf.IPAddr;
 import org.apache.spf.MacroExpand;
 import org.apache.spf.SPF1Data;
+import org.apache.spf.util.IPAddr;
 
 public class PTRMechanismn implements GenericMechanismn {
 

@@ -20,10 +20,10 @@ package org.apache.spf.mechanismn;
 import java.util.ArrayList;
 
 import org.apache.spf.ErrorException;
-import org.apache.spf.IPAddr;
-import org.apache.spf.IPUtil;
 import org.apache.spf.MacroExpand;
 import org.apache.spf.SPF1Data;
+import org.apache.spf.util.IPAddr;
+import org.apache.spf.util.IPUtil;
 
 public class MXMechanismn implements GenericMechanismn {
 
