@@ -34,267 +34,276 @@ import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
 
 /**
- * This class contains helper to get all neccassary DNS infos that are needed for SPF
+ * This class contains helper to get all neccassary DNS infos that are needed
+ * for SPF
  * 
  * @author MimeCast
  * @author Norman Maurer <nm@byteaction.de>
+ * @author Stefano Bagnara <apache@bago.org>
  * 
  */
 
-//TODO : Check which Exception should be thrown by which lookup. Not 100 % sure at the moment but it seems to work.
-
+// TODO : Check which Exception should be thrown by which lookup. Not 100 % sure
+// at the moment but it seems to work.
 public class DNSServiceXBillImpl implements DNSService {
 
-	/**
-     * @see org.apache.spf.DNSService#getSpfRecord(java.lang.String, java.lang.String)
+    /**
+     * @see org.apache.spf.DNSService#getSpfRecord(java.lang.String,
+     *      java.lang.String)
      */
-	public String getSpfRecord(String hostname, String spfVersion)
-			throws ErrorException, NoneException {
+    public String getSpfRecord(String hostname, String spfVersion)
+            throws ErrorException, NoneException {
 
-		String returnValue = null;
-		ArrayList txtR = new ArrayList();
+        String returnValue = null;
+        ArrayList txtR = new ArrayList();
 
-		// do DNS lookup for TXT
-		txtR = getTXTRecords(hostname);
+        // do DNS lookup for TXT
+        txtR = getTXTRecords(hostname);
 
-		// process returned records
-		if (!txtR.isEmpty()) {
+        // process returned records
+        if (!txtR.isEmpty()) {
 
-			Iterator all = txtR.iterator();
+            Iterator all = txtR.iterator();
 
-			while (all.hasNext()) {
-				String compare = all.next().toString().trim();
+            while (all.hasNext()) {
+                String compare = all.next().toString().trim();
 
-				// remove '"'
-				compare = compare.toLowerCase().substring(1,
-						compare.length() - 1);
+                // remove '"'
+                compare = compare.toLowerCase().substring(1,
+                        compare.length() - 1);
 
-				if (compare.startsWith(spfVersion + " ")) {
-					if (returnValue == null) {
-						returnValue = compare;
-					} else {
-						throw new ErrorException("More than 1 SPF record found");
-					}
-				}
-			}
-		}
-		if (returnValue == null) {
-			throw new NoneException("No SPF record found");
-		}
-		return returnValue;
-	}
+                if (compare.startsWith(spfVersion + " ")) {
+                    if (returnValue == null) {
+                        returnValue = compare;
+                    } else {
+                        throw new ErrorException("More than 1 SPF record found");
+                    }
+                }
+            }
+        }
+        if (returnValue == null) {
+            throw new NoneException("No SPF record found");
+        }
+        return returnValue;
+    }
 
-	/**
-	 * Get an ArrayList of all TXT Records for a partical domain.
-	 *  
-	 * @param hostname The hostname for which the TXT-Records should be retrieved
-	 * @return TXT Records-which were found. 
-	 * @throws NoneException if none TXT-Records were found.
-	 * @throws ErrorException  
-	 */
-	private static ArrayList getTXTRecords(String hostname)
-			throws NoneException {
-		ArrayList txtR = new ArrayList();
-		Record[] records;
-		try {
-			records = new Lookup(hostname, Type.TXT).run();
-			if (records != null) {
-				for (int i = 0; i < records.length; i++) {
-					TXTRecord txt = (TXTRecord) records[i];
-					txtR.add(txt.rdataToString());
-				}
-			} else {
-				throw new NoneException("No TXTRecord found for: " + hostname);
-			}
-		} catch (TextParseException e) {
-			//I think thats the best we could do
-			throw new NoneException("No TXTRecord found for: " + hostname);
-		}
-		return txtR;
-	}
+    /**
+     * Get an ArrayList of all TXT Records for a partical domain.
+     * 
+     * @param hostname
+     *            The hostname for which the TXT-Records should be retrieved
+     * @return TXT Records-which were found.
+     * @throws NoneException
+     *             if none TXT-Records were found.
+     * @throws ErrorException
+     */
+    private static ArrayList getTXTRecords(String hostname)
+            throws NoneException {
+        ArrayList txtR = new ArrayList();
+        Record[] records;
+        try {
+            records = new Lookup(hostname, Type.TXT).run();
+            if (records != null) {
+                for (int i = 0; i < records.length; i++) {
+                    TXTRecord txt = (TXTRecord) records[i];
+                    txtR.add(txt.rdataToString());
+                }
+            } else {
+                throw new NoneException("No TXTRecord found for: " + hostname);
+            }
+        } catch (TextParseException e) {
+            // I think thats the best we could do
+            throw new NoneException("No TXTRecord found for: " + hostname);
+        }
+        return txtR;
+    }
 
-	/**
+    /**
      * @see org.apache.spf.DNSService#getARecords(java.lang.String, int)
      */
-	public List getARecords(String strServer, int mask)
-			throws NeutralException, NoneException, ErrorException {
+    public List getARecords(String strServer, int mask)
+            throws NeutralException, NoneException, ErrorException {
 
-		String host = null;
-		ArrayList listTxtData = new ArrayList();
+        String host = null;
+        ArrayList listTxtData = new ArrayList();
 
-		if (IPAddr.isIPAddr(strServer)) {
-			try {
-				IPAddr ipTest = IPAddr.getAddress(strServer);
-				// Address is already an IP address, so add it to list
-				listTxtData.add(ipTest);
-			} catch (NeutralException e1) {
-				throw new NeutralException(e1.getMessage());
-			}
-		} else {
-			try {
-				// do DNS A lookup
-				InetAddress[] hosts = Address.getAllByName(strServer);
+        if (IPAddr.isIPAddr(strServer)) {
+            try {
+                IPAddr ipTest = IPAddr.getAddress(strServer);
+                // Address is already an IP address, so add it to list
+                listTxtData.add(ipTest);
+            } catch (NeutralException e1) {
+                throw new NeutralException(e1.getMessage());
+            }
+        } else {
+            try {
+                // do DNS A lookup
+                InetAddress[] hosts = Address.getAllByName(strServer);
 
-				// process returned records
-				for (int i = 0; i < hosts.length; i++) {
+                // process returned records
+                for (int i = 0; i < hosts.length; i++) {
 
-					host = hosts[i].getHostAddress();
+                    host = hosts[i].getHostAddress();
 
-					if (host != null) {
-						ArrayList ipArray = getIPList(host, mask);
-						Iterator ip = ipArray.iterator();
+                    if (host != null) {
+                        ArrayList ipArray = getIPList(host, mask);
+                        Iterator ip = ipArray.iterator();
 
-						while (ip.hasNext()) {
-							listTxtData.add(ip.next());
-						}
-					}
+                        while (ip.hasNext()) {
+                            listTxtData.add(ip.next());
+                        }
+                    }
 
-				}
+                }
 
-			} catch (UnknownHostException e1) {
-				throw new NoneException("No A record found for: " + strServer);
-			}
-		}
-		return listTxtData;
-	}
+            } catch (UnknownHostException e1) {
+                throw new NoneException("No A record found for: " + strServer);
+            }
+        }
+        return listTxtData;
+    }
 
-	/**
-	 * Convert list of DNS names to masked IPAddr
-	 *
-	 * @param addressList ArrayList of DNS names which should be converted to masked IPAddresses
-	 * @param maskLength the networkmask
-	 * @return ArrayList of the conversion
-	 * @throws ErrorException
-	 */
-	private ArrayList getAList(ArrayList addressList, int maskLength)
-			throws ErrorException {
+    /**
+     * Convert list of DNS names to masked IPAddr
+     * 
+     * @param addressList
+     *            ArrayList of DNS names which should be converted to masked
+     *            IPAddresses
+     * @param maskLength
+     *            the networkmask
+     * @return ArrayList of the conversion
+     * @throws ErrorException
+     */
+    private ArrayList getAList(ArrayList addressList, int maskLength)
+            throws ErrorException {
 
-		ArrayList listAddresses = new ArrayList();
-		String aValue;
+        ArrayList listAddresses = new ArrayList();
+        String aValue;
 
-		for (int i = 0; i < addressList.size(); i++) {
-			aValue = addressList.get(i).toString();
-			try {
-				listAddresses.addAll(getARecords(aValue, maskLength));
-			} catch (Exception e) {
-				// Carry on regardless?
-			}
-		}
-		return listAddresses;
-	}
+        for (int i = 0; i < addressList.size(); i++) {
+            aValue = addressList.get(i).toString();
+            try {
+                listAddresses.addAll(getARecords(aValue, maskLength));
+            } catch (Exception e) {
+                // Carry on regardless?
+            }
+        }
+        return listAddresses;
+    }
 
-	/**
+    /**
      * @see org.apache.spf.DNSService#getTxtCatType(java.lang.String)
      */
-	public String getTxtCatType(String strServer) throws NoneException {
+    public String getTxtCatType(String strServer) throws NoneException {
 
-		StringBuffer txtData = new StringBuffer();
-		ArrayList records = getTXTRecords(strServer);
-		for (int i = 0; i < records.size(); i++) {
-			txtData.append(records.get(i));
-		}
-		return txtData.toString();
-	}
+        StringBuffer txtData = new StringBuffer();
+        ArrayList records = getTXTRecords(strServer);
+        for (int i = 0; i < records.size(); i++) {
+            txtData.append(records.get(i));
+        }
+        return txtData.toString();
+    }
 
-	/**
+    /**
      * @see org.apache.spf.DNSService#getPTRRecords(java.lang.String)
      */
 
-	public List getPTRRecords(String ipAddress)
-			throws NoneException, NeutralException {
+    public List getPTRRecords(String ipAddress) throws NoneException,
+            NeutralException {
 
-		ArrayList ptrR = new ArrayList();
-		Record[] records;
+        ArrayList ptrR = new ArrayList();
+        Record[] records;
 
-		// do DNS lookup for TXT
-		IPAddr ip;
-		try {
-			ip = IPAddr.getAddress(ipAddress);
+        // do DNS lookup for TXT
+        IPAddr ip;
+        try {
+            ip = IPAddr.getAddress(ipAddress);
 
-			try {
-				records = new Lookup(ip.getReverseIP() + ".in-addr.arpa",
-						Type.PTR).run();
-				if (records != null) {
-					for (int i = 0; i < records.length; i++) {
-						PTRRecord ptr = (PTRRecord) records[i];
-						ptrR.add(IPAddr.stripDot(ptr.getTarget().toString()));
-						System.out.println("IP = "
-								+ IPAddr.stripDot(ptr.getTarget().toString()));
-					}
-				} else {
-					throw new NoneException("No PTRRecord found for: " + ipAddress);
-				}
-			} catch (TextParseException e) {
-				// i think this is the best we could do
-				throw new NoneException("No PTRRecord found for: " + ipAddress);
-			}
-		} catch (NeutralException e1) {
-			throw new NeutralException(e1.getMessage());
-		}
-		return ptrR;
-	}
+            try {
+                records = new Lookup(ip.getReverseIP() + ".in-addr.arpa",
+                        Type.PTR).run();
+                if (records != null) {
+                    for (int i = 0; i < records.length; i++) {
+                        PTRRecord ptr = (PTRRecord) records[i];
+                        ptrR.add(IPAddr.stripDot(ptr.getTarget().toString()));
+                        System.out.println("IP = "
+                                + IPAddr.stripDot(ptr.getTarget().toString()));
+                    }
+                } else {
+                    throw new NoneException("No PTRRecord found for: "
+                            + ipAddress);
+                }
+            } catch (TextParseException e) {
+                // i think this is the best we could do
+                throw new NoneException("No PTRRecord found for: " + ipAddress);
+            }
+        } catch (NeutralException e1) {
+            throw new NeutralException(e1.getMessage());
+        }
+        return ptrR;
+    }
 
-	/**
+    /**
      * @see org.apache.spf.DNSService#getMXRecords(java.lang.String, int)
      */
-	public List getMXRecords(String domainName, int mask) throws ErrorException, NoneException {
+    public List getMXRecords(String domainName, int mask)
+            throws ErrorException, NoneException {
 
-		ArrayList mxAddresses = getAList(getMXNames(domainName), mask);
-		return mxAddresses;
-		
-	}
+        ArrayList mxAddresses = getAList(getMXNames(domainName), mask);
+        return mxAddresses;
 
+    }
 
-	/**
-	 * Get an ArrayList of IPAddr's given the DNS type and mask
-	 * 
-	 * @param host The hostname or ip of the server for which we want to get the ips
-	 * @param mask The netmask
-	 * @return ipAddresses
-	 */
-	private static ArrayList getIPList(String host, int mask)
-			throws ErrorException {
+    /**
+     * Get an ArrayList of IPAddr's given the DNS type and mask
+     * 
+     * @param host The hostname or ip of the server for which we want to get the ips
+     * @param mask The netmask
+     * @return ipAddresses
+     */
+    private static ArrayList getIPList(String host, int mask)
+            throws ErrorException {
 
-		ArrayList listIP = new ArrayList();
+        ArrayList listIP = new ArrayList();
 
-		try {
-			if (host != null) {
-				listIP.addAll(IPAddr.getAddresses(host, mask));
-			}
-		} catch (Exception e1) {
-			throw new ErrorException(e1.getMessage());
-		}
+        try {
+            if (host != null) {
+                listIP.addAll(IPAddr.getAddresses(host, mask));
+            }
+        } catch (Exception e1) {
+            throw new ErrorException(e1.getMessage());
+        }
 
-		return listIP;
+        return listIP;
 
-	}
+    }
 
-	/**
-	 * Get all MX Records for a domain
-	 * 
-	 * @param host The hostname we want to retrieve the MXRecords for
-	 * @return MX-Records for the given hostname
-	 * @throws NoneException if no MX-Records was found
-	 */
-	private static ArrayList getMXNames(String host) throws NoneException {
-		ArrayList mxR = new ArrayList();
-		Record[] records;
-		try {
-			records = new Lookup(host, Type.MX).run();
-			if (records != null) {
-				for (int i = 0; i < records.length; i++) {
-					MXRecord mx = (MXRecord) records[i];
-					mxR.add(mx.getTarget());
+    /**
+     * Get all MX Records for a domain
+     * 
+     * @param host The hostname we want to retrieve the MXRecords for
+     * @return MX-Records for the given hostname
+     * @throws NoneException if no MX-Records was found
+     */
+    private static ArrayList getMXNames(String host) throws NoneException {
+        ArrayList mxR = new ArrayList();
+        Record[] records;
+        try {
+            records = new Lookup(host, Type.MX).run();
+            if (records != null) {
+                for (int i = 0; i < records.length; i++) {
+                    MXRecord mx = (MXRecord) records[i];
+                    mxR.add(mx.getTarget());
 
-				}
-			} else {
-				throw new NoneException("No MX Record found for: " + host);
-			}
-		} catch (TextParseException e) {
-			// i think this is the best we could do
-			throw new NoneException("No MX Record found for: " + host);
-		}
-		return mxR;
-	}
-	
+                }
+            } else {
+                throw new NoneException("No MX Record found for: " + host);
+            }
+        } catch (TextParseException e) {
+            // i think this is the best we could do
+            throw new NoneException("No MX Record found for: " + host);
+        }
+        return mxR;
+    }
+
 }

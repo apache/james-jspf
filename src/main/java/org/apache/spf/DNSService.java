@@ -19,6 +19,12 @@ package org.apache.spf;
 
 import java.util.List;
 
+/**
+ * Interface which should be used to access all necassary DNS-Records 
+ * @author Norman Maurer <nm@byteaction.de>
+ * @author Stefano Bagnara <apache@bago.org>
+ *
+ */
 public interface DNSService {
 
     /**
