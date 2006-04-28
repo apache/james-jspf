@@ -37,10 +37,9 @@ public interface DNSService {
      * @return The SPF-Record if one is found.
      * @throws ErrorException if more then one SPF-Record was found.
      * @throws NoneException if no SPF-Record was found.
-     * @throws NeutralException if an invalid SPF-Version was specified.
      */
     public String getSpfRecord(String hostname, String spfVersion)
-            throws ErrorException, NeutralException, NoneException;
+            throws ErrorException, NoneException;
 
     /**
      * Get a list of IPAddr's for a server using the mask length
@@ -53,7 +52,7 @@ public interface DNSService {
      * @throws ErrorException
      */
     public List getARecords(String strServer, int mask)
-            throws NeutralException, NoneException, ErrorException;
+            throws NoneException, ErrorException;
 
     /**
      * Get TXT records as a string
@@ -71,11 +70,12 @@ public interface DNSService {
      * @param ipAddress The ipAddress for which we want to get the PTR-Record
      * @return the PTR-Records
      * @throws NoneException if no PTR-Record was found
+     * @throws ErrorException if an PermError should be returned
      * 
      */
 
     public List getPTRRecords(String ipAddress) throws ErrorException,
-            NoneException, NeutralException;
+            NoneException;
 
     /**
      * Get a list of masked IPAddr MX-Records

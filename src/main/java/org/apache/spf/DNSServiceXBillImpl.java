@@ -121,20 +121,16 @@ public class DNSServiceXBillImpl implements DNSService {
     /**
      * @see org.apache.spf.DNSService#getARecords(java.lang.String, int)
      */
-    public List getARecords(String strServer, int mask)
-            throws NeutralException, NoneException, ErrorException {
+    public List getARecords(String strServer, int mask) throws NoneException,
+            ErrorException {
 
         String host = null;
         ArrayList listTxtData = new ArrayList();
 
         if (IPAddr.isIPAddr(strServer)) {
-            try {
-                IPAddr ipTest = IPAddr.getAddress(strServer);
-                // Address is already an IP address, so add it to list
-                listTxtData.add(ipTest);
-            } catch (NeutralException e1) {
-                throw new NeutralException(e1.getMessage());
-            }
+            IPAddr ipTest = IPAddr.getAddress(strServer);
+            // Address is already an IP address, so add it to list
+            listTxtData.add(ipTest);
         } else {
             try {
                 // do DNS A lookup
@@ -209,37 +205,34 @@ public class DNSServiceXBillImpl implements DNSService {
      */
 
     public List getPTRRecords(String ipAddress) throws NoneException,
-            NeutralException {
+            ErrorException {
 
         ArrayList ptrR = new ArrayList();
         Record[] records;
 
         // do DNS lookup for TXT
         IPAddr ip;
-        try {
-            ip = IPAddr.getAddress(ipAddress);
 
-            try {
-                records = new Lookup(ip.getReverseIP() + ".in-addr.arpa",
-                        Type.PTR).run();
-                if (records != null) {
-                    for (int i = 0; i < records.length; i++) {
-                        PTRRecord ptr = (PTRRecord) records[i];
-                        ptrR.add(IPAddr.stripDot(ptr.getTarget().toString()));
-                        System.out.println("IP = "
-                                + IPAddr.stripDot(ptr.getTarget().toString()));
-                    }
-                } else {
-                    throw new NoneException("No PTRRecord found for: "
-                            + ipAddress);
+        ip = IPAddr.getAddress(ipAddress);
+
+        try {
+            records = new Lookup(ip.getReverseIP() + ".in-addr.arpa", Type.PTR)
+                    .run();
+            if (records != null) {
+                for (int i = 0; i < records.length; i++) {
+                    PTRRecord ptr = (PTRRecord) records[i];
+                    ptrR.add(IPAddr.stripDot(ptr.getTarget().toString()));
+                    System.out.println("IP = "
+                            + IPAddr.stripDot(ptr.getTarget().toString()));
                 }
-            } catch (TextParseException e) {
-                // i think this is the best we could do
+            } else {
                 throw new NoneException("No PTRRecord found for: " + ipAddress);
             }
-        } catch (NeutralException e1) {
-            throw new NeutralException(e1.getMessage());
+        } catch (TextParseException e) {
+            // i think this is the best we could do
+            throw new NoneException("No PTRRecord found for: " + ipAddress);
         }
+
         return ptrR;
     }
 

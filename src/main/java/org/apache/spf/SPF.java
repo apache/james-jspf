@@ -25,7 +25,7 @@ package org.apache.spf;
  */
 
 public class SPF {
-    
+
     private DNSService dnsProbe = null;
 
     private String result = SPF1Utils.PASS;
@@ -44,8 +44,6 @@ public class SPF {
 
     private final String SPF_VERSION1 = "v=spf1";
 
-    
-    
     /**
      * 
      */
@@ -111,9 +109,6 @@ public class SPF {
         } catch (NoneException e) {
             e.printStackTrace();
             result = SPF1Utils.NONE;
-        } catch (NeutralException e) {
-            e.printStackTrace();
-            result = SPF1Utils.NEUTRAL;
         }
 
         // convert raw result to name

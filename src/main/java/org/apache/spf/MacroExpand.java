@@ -61,7 +61,7 @@ public class MacroExpand {
      * @return expanded explanation
      * @throws NeutralException
      */
-    protected String expandExplanation(String input) throws NeutralException {
+    protected String expandExplanation(String input) throws Exception {
 
         isExplanation = true;
         return expand(input);
@@ -75,7 +75,7 @@ public class MacroExpand {
      * @return expanded domain
      * @throws NeutralException
      */
-    public String expandDomain(String input) throws NeutralException {
+    public String expandDomain(String input) throws Exception {
 
         isExplanation = false;
         String domainName = expand(input);
@@ -88,7 +88,7 @@ public class MacroExpand {
         return domainName;
     }
 
-    private String expand(String input) throws NeutralException {
+    private String expand(String input) throws Exception {
 
         input = replaceLiterals(input);
 
@@ -116,7 +116,7 @@ public class MacroExpand {
      * @return
      * @throws NeutralException
      */
-    private String replaceCell(String replaceValue) throws NeutralException {
+    private String replaceCell(String replaceValue) throws Exception {
 
         String variable = "";
         String domainNumber = "";
@@ -159,7 +159,7 @@ public class MacroExpand {
         while (cellMatcher.find()) {
             domainNumber = cellMatcher.group();
             if (Integer.parseInt(domainNumber) == 0) {
-                throw new NeutralException("Digit transformer must be non-zero");
+                throw new ErrorException("Digit transformer must be non-zero");
             }
         }
         // find if reversed
@@ -200,10 +200,10 @@ public class MacroExpand {
      * @param variable
      *            The varibale we want to get the value for
      * @return value for the given variable
-     * @throws NeutralException
+     * @throws ErrorException
      *             if the given variable not exists
      */
-    private String matchVariable(String variable) throws NeutralException {
+    private String matchVariable(String variable) throws ErrorException {
 
         variable = variable.toLowerCase();
         if (variable.equalsIgnoreCase("i")) {
@@ -227,7 +227,7 @@ public class MacroExpand {
         } else if (variable.equalsIgnoreCase("o")) {
             return spfData.getSenderDomain();
         } else {
-            throw new NeutralException("Unknown command : " + variable);
+            throw new ErrorException("Unknown command : " + variable);
         }
     }
 
