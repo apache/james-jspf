@@ -20,13 +20,18 @@ package org.apache.spf.mechanismn;
 import org.apache.spf.ErrorException;
 import org.apache.spf.SPF1Data;
 
+/**
+ * This Interface represent a gerneric mechanismn 
+ * @author maurer
+ *
+ */
 public interface GenericMechanismn {
     
     /**
-     * Run the mechanismn 
+     * Run the mechanismn  with the give SPF1Data
      * @param spfData The SPF1Data
-     * @return result
-     * @throws ErrorException
+     * @return result If the not match it return null. Otherwise it returns the modifier
+     * @throws ErrorException if somethink strange happen
      */
     public String run(SPF1Data spfData) throws ErrorException;
     
