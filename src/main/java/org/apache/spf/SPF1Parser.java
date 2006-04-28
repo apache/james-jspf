@@ -23,6 +23,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.spf.mechanismn.AMechanismn;
+import org.apache.spf.mechanismn.ExistsMechanismn;
 import org.apache.spf.mechanismn.MXMechanismn;
 import org.apache.spf.mechanismn.PTRMechanismn;
 
@@ -320,10 +321,10 @@ public class SPF1Parser {
                     //replaceHelper(ptrMatcher);
 
                     /*
-                    System.out.println("PTR-Mechanismn: " + newPart);
-                    System.out.println("target: " + checkDomain + " ip4-mask: "
-                            + checkIP4 + " ip6-mask: " + checkIP6);
-                            */
+                     System.out.println("PTR-Mechanismn: " + newPart);
+                     System.out.println("target: " + checkDomain + " ip4-mask: "
+                     + checkIP4 + " ip6-mask: " + checkIP6);
+                     */
 
                 } else if (redirMatcher.matches()) {
                     // TODO: check what we should replace
@@ -335,11 +336,19 @@ public class SPF1Parser {
                     System.out.println("Include:        " + newPart);
                     // TODO: check what we should replace
                 } else if (existsMatcher.matches()) {
-                    // TODO: check what we should replace
-                    System.out.println("Exists:         " + newPart);
+
+                    // create a new PTRMechanismn and init it
+                    ExistsMechanismn e = new ExistsMechanismn();
+                    e.init(getQualifier(newPart), checkDomain, checkIP4);
+
+                    // add it to the collection
+                    mechanismn.add(e);
+
+                    /*
+                     System.out.println("Exists:         " + newPart);
+                     */
                 } else {
-                    System.out.println("Unknown:        " + newPart);
-                    //return SPF1Utils.UNKNOWN;
+                    throw new ErrorException("Unknown mechanismn " + newPart);
                 }
 
             }
