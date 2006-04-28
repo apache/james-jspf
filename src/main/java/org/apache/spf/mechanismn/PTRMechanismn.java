@@ -29,23 +29,23 @@ public class PTRMechanismn implements GenericMechanismn {
 
     private SPF1Data spfData;
 
-    private String mechanismnPrefix;
+    private String qualifier;
 
     private String host;
 
     private int maskLength;
 
     /**
-     * @param mechanismPrefix
-     *            The mechanismPrefix
+     * @param qualifier
+     *            The qualifier
      * @param host
      *            The hostname or ip
      * @param maskLenght
      *            The maskLength
      */
-    public void init(String mechanismnPrefix, String host, int maskLength) {
+    public void init(String qualifier, String host, int maskLength) {
 
-        this.mechanismnPrefix = mechanismnPrefix;
+        this.qualifier = qualifier;
         this.host = host;
         this.maskLength = maskLength;
     }
@@ -93,7 +93,7 @@ public class PTRMechanismn implements GenericMechanismn {
                 compareDomain = (String) validatedHosts.get(j);
                 if (compareDomain.equals(host)
                         || compareDomain.endsWith("." + host)) {
-                    return mechanismnPrefix;
+                    return qualifier;
                 }
             }
         } catch (Exception e) {

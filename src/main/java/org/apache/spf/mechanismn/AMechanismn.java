@@ -29,20 +29,20 @@ public class AMechanismn implements GenericMechanismn {
 
     private SPF1Data spfData;
 
-    private String mechanismnPrefix;
+    private String qualifier;
 
     private String host;
 
     private int maskLength;
 
     /**
-     * @param mechanismPrefix The mechanismPrefix
+     * @param qualifier The mechanismPrefix
      * @param host The hostname or ip 
      * @param maskLenght The maskLength
      */
-    public void init(String mechanismnPrefix, String host, int maskLength) {
+    public void init(String qualifier, String host, int maskLength) {
 
-        this.mechanismnPrefix = mechanismnPrefix;
+        this.qualifier = qualifier;
         this.host = host;
         this.maskLength = maskLength;
     }
@@ -74,7 +74,7 @@ public class AMechanismn implements GenericMechanismn {
                 addressList.addAll(spfData.getDnsProbe().getARecords(host,
                         maskLength));
                 if (IPUtil.checkAddressList(checkAddress, addressList)) {
-                    return mechanismnPrefix;
+                    return qualifier;
                 }
             } catch (Exception e) {
                 // no a records just return null

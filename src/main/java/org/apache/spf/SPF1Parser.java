@@ -34,8 +34,6 @@ public class SPF1Parser {
 
     private int checkIP6 = 128;
 
-    private String result = SPF1Utils.PASS;
-
     private Collection mechanismn = new ArrayList();
 
     /**
@@ -273,7 +271,7 @@ public class SPF1Parser {
 
                     // create a new AMechanismn and init it
                     AMechanismn a = new AMechanismn();
-                    a.init(getMechanismnPrefix(newPart), checkDomain, checkIP4);
+                    a.init(getQualifier(newPart), checkDomain, checkIP4);
 
                     // add it to the collection
                     mechanismn.add(a);
@@ -300,7 +298,7 @@ public class SPF1Parser {
 
                     // create a new MXMechanismn and init it
                     MXMechanismn m = new MXMechanismn();
-                    m.init(getMechanismnPrefix(newPart), checkDomain, checkIP4);
+                    m.init(getQualifier(newPart), checkDomain, checkIP4);
 
                     // add it to the collection
                     mechanismn.add(m);
@@ -310,22 +308,23 @@ public class SPF1Parser {
                      + checkIP4 + " ip6-mask: " + checkIP6);
                      */
                 } else if (ptrMatcher.matches()) {
-                    
+
                     // create a new PTRMechanismn and init it
                     PTRMechanismn p = new PTRMechanismn();
-                    p.init(getMechanismnPrefix(newPart), checkDomain, checkIP4);
+                    p.init(getQualifier(newPart), checkDomain, checkIP4);
 
                     // add it to the collection
                     mechanismn.add(p);
 
                     // replace all default values with the right one
                     //replaceHelper(ptrMatcher);
-                    
+
                     /*
                     System.out.println("PTR-Mechanismn: " + newPart);
                     System.out.println("target: " + checkDomain + " ip4-mask: "
                             + checkIP4 + " ip6-mask: " + checkIP6);
-                */
+                            */
+
                 } else if (redirMatcher.matches()) {
                     // TODO: check what we should replace
                     System.out.println("Redirect:       " + newPart);
@@ -364,13 +363,18 @@ public class SPF1Parser {
 
             }
 
-            // replace ip4 mask
-            if (match.group(2) != null) {
-                checkIP4 = Integer.parseInt(match.group(2));
-            }
-            // replace ip6 mask
-            if (match.group(3) != null) {
-                checkIP6 = Integer.parseInt(match.group(3));
+            if (match.groupCount() > 1) {
+                // replace ip4 mask
+                if (match.group(2) != null) {
+                    checkIP4 = Integer.parseInt(match.group(2));
+                }
+
+                if (match.groupCount() > 2) {
+                    // replace ip6 mask
+                    if (match.group(3) != null) {
+                        checkIP6 = Integer.parseInt(match.group(3));
+                    }
+                }
             }
         }
     }
@@ -390,14 +394,14 @@ public class SPF1Parser {
     }
 
     /**
-     * Get the prefix for the given mechanismn record. if none was specified in
-     * the mechanismn record the prefix for pass "+" will be used
+     * Get the qualifier for the given mechanismn record. if none was specified in
+     * the mechanismn record the qualifier for pass "+" will be used
      * 
      * @param mechRecord
      *            The mechanismn record
-     * @return prefix
+     * @return qualifier
      */
-    private String getMechanismnPrefix(String mechRecord) {
+    private String getQualifier(String mechRecord) {
 
         if (mechRecord.startsWith(SPF1Utils.FAIL)) {
             return SPF1Utils.FAIL;
