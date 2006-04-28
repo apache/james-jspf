@@ -23,6 +23,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.spf.mechanismn.AMechanismn;
+import org.apache.spf.mechanismn.MXMechanismn;
 
 public class SPF1Parser {
 
@@ -198,8 +199,7 @@ public class SPF1Parser {
     private final String TERMS_REGEX = "(?:[ ]+(?:" + DIRECTIVE_REGEX + "|"
             + MODIFIER_REGEX + "))*";
 
-    public SPF1Parser(String spfRecord)
-            throws ErrorException, NoneException {
+    public SPF1Parser(String spfRecord) throws ErrorException, NoneException {
 
         if (!isValidSPFVersion(spfRecord)) {
             throw new NoneException("No valid SPF Record: " + spfRecord);
@@ -228,8 +228,7 @@ public class SPF1Parser {
      * @return
      * @throws ErrorException
      */
-    public String parseRecord(String record)
-            throws ErrorException {
+    public String parseRecord(String record) throws ErrorException {
 
         String[] part = record.trim().split(" ");
         System.out.println("HERE!");
@@ -247,7 +246,8 @@ public class SPF1Parser {
         for (int i = 0; i < part.length; i++) {
 
             String newPart = part[i].trim();
-            checkDomain = null;;
+            checkDomain = null;
+            ;
             checkIP4 = 32;
             checkIP6 = 128;
 
@@ -270,16 +270,19 @@ public class SPF1Parser {
 
                     // replace all default values with the right one
                     replaceHelper(aMatcher);
-                    
+
                     // create a new AMechanismn and init it
                     AMechanismn a = new AMechanismn();
                     a.init(getMechanismnPrefix(newPart), checkDomain, checkIP4);
-                    
+
                     // add it to the collection
                     mechanismn.add(a);
-                    System.out.println("A-Mechanismn:   " + newPart);
-                    System.out.println("target: " + checkDomain + " ip4-mask: "
-                            + checkIP4 + " ip6-mask: " + checkIP6);
+
+                    /*
+                     System.out.println("A-Mechanismn:   " + newPart);
+                     System.out.println("target: " + checkDomain + " ip4-mask: "
+                     + checkIP4 + " ip6-mask: " + checkIP6);
+                     */
 
                 } else if (ip4Matcher.matches()) {
                     // TODO: check what we should replace
@@ -294,10 +297,18 @@ public class SPF1Parser {
 
                     // replace all default values with the right one
                     replaceHelper(mxMatcher);
-                    System.out.println("MX-Mechanismn:  " + newPart);
-                    System.out.println("target: " + checkDomain + " ip4-mask: "
-                            + checkIP4 + " ip6-mask: " + checkIP6);
 
+                    // create a new MXMechanismn and init it
+                    MXMechanismn m = new MXMechanismn();
+                    m.init(getMechanismnPrefix(newPart), checkDomain, checkIP4);
+
+                    // add it to the collection
+                    mechanismn.add(m);
+                    /*
+                     System.out.println("MX-Mechanismn:  " + newPart);
+                     System.out.println("target: " + checkDomain + " ip4-mask: "
+                     + checkIP4 + " ip6-mask: " + checkIP6);
+                     */
                 } else if (ptrMatcher.matches()) {
 
                     // replace all default values with the right one
@@ -336,8 +347,7 @@ public class SPF1Parser {
      *            The matcher for the mechanismn
      * @throws ErrorException
      */
-    private void replaceHelper(Matcher match)
-            throws ErrorException {
+    private void replaceHelper(Matcher match) throws ErrorException {
         if (match.groupCount() > 0) {
             // replace domain
             if (match.group(1) != null) {
@@ -400,6 +410,5 @@ public class SPF1Parser {
     public String getResult() {
         return result;
     }
-
 
 }
