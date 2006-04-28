@@ -20,7 +20,6 @@ package org.apache.spf.util;
 import java.util.ArrayList;
 
 import org.apache.spf.ErrorException;
-import org.apache.spf.Inet6Util;
 import org.apache.spf.NeutralException;
 import org.apache.spf.UnknownException;
 
