@@ -24,6 +24,12 @@ public class SPF1Parser {
 
     private String parsedRecord = null;
 
+    private String checkDomain = null;
+
+    private int checkIP4 = 32;
+
+    private int checkIP6 = 128;
+
     /**
      * Regex based on http://ftp.rfc-editor.org/in-notes/authors/rfc4408.txt.
      * This will be the next official SPF-Spec
@@ -76,8 +82,8 @@ public class SPF1Parser {
     /**
      * ABNF: domain-spec = macro-string domain-end
      */
-    private final String DOMAIN_SPEC_REGEX = MACRO_STRING_REGEX
-            + DOMAIN_END_REGEX;
+    private final String DOMAIN_SPEC_REGEX = "(" + MACRO_STRING_REGEX
+            + DOMAIN_END_REGEX + ")";
 
     /**
      * ABNF: qualifier = "+" / "-" / "?" / "~"
@@ -97,12 +103,12 @@ public class SPF1Parser {
     /**
      * ABNF: ip4-cidr-length = "/" 1*DIGIT
      */
-    private final String IP4_CIDR_LENGTH_REGEX = "/\\d+";
+    private final String IP4_CIDR_LENGTH_REGEX = "/(\\d+)";
 
     /**
      * ABNF: ip6-cidr-length = "/" 1*DIGIT
      */
-    private final String IP6_CIDR_LENGTH_REGEX = "/\\d+";
+    private final String IP6_CIDR_LENGTH_REGEX = "/(\\d+)";
 
     /**
      * ABNF: dual-cidr-length = [ ip4-cidr-length ] [ "/" ip6-cidr-length ]
@@ -216,44 +222,98 @@ public class SPF1Parser {
                 Pattern existsPattern = Pattern.compile(EXISTS_REGEX);
 
                 for (int i = 0; i < part.length; i++) {
-                    
-                    // TODO: replace the System.out.println() with the correct command calls
-                    
-                    Matcher aMatcher = aPattern.matcher(part[i]);
-                    Matcher ip4Matcher = ip4Pattern.matcher(part[i]);
-                    Matcher ip6Matcher = ip6Pattern.matcher(part[i]);
-                    Matcher mxMatcher = mxPattern.matcher(part[i]);
-                    Matcher ptrMatcher = ptrPattern.matcher(part[i]);
-                    Matcher redirMatcher = redirPattern.matcher(part[i]);
-                    Matcher expMatcher = expPattern.matcher(part[i]);
-                    Matcher inclMatcher = inclPattern.matcher(part[i]);
-                    Matcher existsMatcher = existsPattern.matcher(part[i]);
 
-                    if (aMatcher.matches()) {
-                        System.out.println("A-Mechanismn:   " + part[i]);
-                    } else if (ip4Matcher.matches()) {
-                        System.out.println("IP4-Mechanismn: " + part[i]);
-                    } else if (ip6Matcher.matches()) {
-                        System.out.println("IP6-Mechanismn: " + part[i]);
-                    } else if (mxMatcher.matches()) {
-                        System.out.println("MX-Mechanismn:  " + part[i]);
-                    } else if (ptrMatcher.matches()) {
-                        System.out.println("PTR-Mechanismn: " + part[i]);
-                    } else if (redirMatcher.matches()) {
-                        System.out.println("Redirect:       " + part[i]);
-                    } else if (expMatcher.matches()) {
-                        System.out.println("Exp:            " + part[i]);
-                    } else if (inclMatcher.matches()) {
-                        System.out.println("Include:        " + part[i]);
-                    } else if (existsMatcher.matches()) {
-                        System.out.println("Exists:         " + part[i]);
-                    } else {
-                        System.out.println("Unknown:        " + part[i]);
+                    String newPart = part[i].trim();
+                    checkDomain = spfData.getCurrentDomain();
+                    checkIP4 = 32;
+                    checkIP6 = 128;
+
+                    if (!newPart.equals("")) {
+
+                        // TODO: replace the System.out.println() with the
+                        // correct command calls
+
+                        Matcher aMatcher = aPattern.matcher(newPart);
+                        Matcher ip4Matcher = ip4Pattern.matcher(newPart);
+                        Matcher ip6Matcher = ip6Pattern.matcher(newPart);
+                        Matcher mxMatcher = mxPattern.matcher(newPart);
+                        Matcher ptrMatcher = ptrPattern.matcher(newPart);
+                        Matcher redirMatcher = redirPattern.matcher(newPart);
+                        Matcher expMatcher = expPattern.matcher(newPart);
+                        Matcher inclMatcher = inclPattern.matcher(newPart);
+                        Matcher existsMatcher = existsPattern.matcher(newPart);
+
+                        if (aMatcher.matches()) {
+
+                            // replace all default values with the right one
+                            replaceHelper(aMatcher);
+                            System.out.println("A-Mechanismn:   " + newPart);
+                            System.out.println("target: " + checkDomain
+                                    + " ip4-mask: " + checkIP4 + " ip6-mask: "
+                                    + checkIP6);
+
+                        } else if (ip4Matcher.matches()) {
+                            System.out.println("IP4-Mechanismn: " + newPart);
+                        } else if (ip6Matcher.matches()) {
+                            System.out.println("IP6-Mechanismn: " + newPart);
+                        } else if (mxMatcher.matches()) {
+
+                            // replace all default values with the right one
+                            replaceHelper(mxMatcher);
+                            System.out.println("MX-Mechanismn:  " + newPart);
+                            System.out.println("target: " + checkDomain
+                                    + " ip4-mask: " + checkIP4 + " ip6-mask: "
+                                    + checkIP6);
+
+                        } else if (ptrMatcher.matches()) {
+
+                            // replace all default values with the right one
+                            replaceHelper(ptrMatcher);
+                            System.out.println("PTR-Mechanismn: " + newPart);
+                            System.out.println("target: " + checkDomain
+                                    + " ip4-mask: " + checkIP4 + " ip6-mask: "
+                                    + checkIP6);
+                        } else if (redirMatcher.matches()) {
+                            System.out.println("Redirect:       " + newPart);
+                        } else if (expMatcher.matches()) {
+                            System.out.println("Exp:            " + newPart);
+                        } else if (inclMatcher.matches()) {
+                            System.out.println("Include:        " + newPart);
+                        } else if (existsMatcher.matches()) {
+                            System.out.println("Exists:         " + newPart);
+                        } else {
+                            System.out.println("Unknown:        " + newPart);
+                        }
                     }
                 }
             }
         }
 
+    }
+
+    /**
+     * Method that helps to replace domain,ip4 mask, ip6 mask with the right
+     * values
+     * 
+     * @param match
+     *            The matcher for the mechanismn
+     */
+    private void replaceHelper(Matcher match) {
+        if (match.groupCount() > 0) {
+            // replace domain
+            if (match.group(1) != null) {
+                checkDomain = match.group(1);
+            }
+
+            // replace ip4 mask
+            if (match.group(2) != null) {
+                checkIP4 = Integer.parseInt(match.group(2));
+            }
+            // replace ip6 mask
+            if (match.group(3) != null) {
+                checkIP6 = Integer.parseInt(match.group(3));
+            }
+        }
     }
 
     /**
@@ -268,81 +328,6 @@ public class SPF1Parser {
             return true;
         }
         return false;
-    }
-
-    /**
-     * Method that will check if the submitted A-Mechanismn is valid
-     * 
-     * @param recordPart
-     *            The A-Mechanismn
-     * @return true or false;
-     */
-    private boolean isValidAMechanismn(String recordPart) {
-
-        String record = recordPart.trim();
-        if (record.startsWith("a:") || record.startsWith("A:")) {
-
-            /**
-             * Its a A Mechanismn wich has a domain-spec. The domain-spec must
-             * checked against DOMAIN_SPEC_REGEX
-             */
-
-            String newPart = record.substring(2);
-            String[] parts = newPart.split("/");
-
-            // if there are more then 3 parts the record is not valid!
-            if (parts.length < 5) {
-                if (parts.length == 0) {
-                    return newPart.matches(DOMAIN_SPEC_REGEX);
-                } else if (parts.length == 2) {
-                    return newPart.matches(DOMAIN_SPEC_REGEX
-                            + IP4_CIDR_LENGTH_REGEX);
-                } else if (parts.length == 4) {
-                    System.out.println("HERE: " + newPart);
-                    return newPart.matches(DOMAIN_SPEC_REGEX
-                            + DUAL_CIDR_LENGTH_REGEX);
-                } else {
-                    // to many parts this record cannot be valid!!
-                    return false;
-                }
-            }
-        } else {
-
-            /**
-             * Its an A Mechanismn which has no domain-spec.
-             */
-            String newPart = record.substring(1);
-            String[] parts = record.split("/");
-
-            if (parts.length < 5) {
-                if (parts.length == 0) {
-                    return true;
-                } else if (parts.length == 2) {
-                    return parts[1].matches(IP4_CIDR_LENGTH_REGEX);
-                } else if (parts.length == 4) {
-                    return newPart.matches(DUAL_CIDR_LENGTH_REGEX);
-                }
-            } else {
-                return true;
-            }
-
-        }
-        return false;
-    }
-
-    /**
-     * Check if the given part is a A Mechanismn
-     * 
-     * @param part
-     *            The record part to check
-     * @return true or false
-     */
-    public boolean isAMechanism(String part) {
-        if ((part.startsWith("a")) || (part.startsWith("A"))) {
-            return true;
-        } else {
-            return false;
-        }
     }
 
     /**
