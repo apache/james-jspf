@@ -55,7 +55,7 @@ public class PTRMechanismn implements GenericMechanismn {
      * @see org.apache.spf.mechanismn.GenericMechanismn#run(org.apache.spf.SPF1Data)
      */
     public String run(SPF1Data spfData) throws ErrorException {
-        spfData = this.spfData;
+        this.spfData = spfData;
 
         String compareDomain;
         IPAddr compareIP;

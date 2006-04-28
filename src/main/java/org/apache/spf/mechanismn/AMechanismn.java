@@ -52,7 +52,7 @@ public class AMechanismn implements GenericMechanismn {
      * @see org.apache.spf.mechanismn.GenericMechanismn#run(org.apache.spf.SPF1Data)
      */
     public String run(SPF1Data spfData) throws ErrorException {
-        spfData = this.spfData;
+        this.spfData = spfData;
         ArrayList addressList = new ArrayList();
 
         // Get the right host.
