@@ -19,6 +19,8 @@ package org.apache.spf;
 
 import java.util.List;
 
+import org.apache.spf.util.IPAddr;
+
 public class IPUtil {
     
     /**

@@ -27,6 +27,8 @@ package org.apache.spf;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.spf.util.IPAddr;
+
 public class SPF1Command {
 
 	protected static final String MODIFIERS = "+-?~";

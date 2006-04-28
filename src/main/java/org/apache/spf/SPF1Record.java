@@ -18,6 +18,8 @@ package org.apache.spf;
 
 import java.util.ArrayList;
 
+import org.apache.spf.util.IPAddr;
+
 /**
  * This class represent the SPF-Record
  * 

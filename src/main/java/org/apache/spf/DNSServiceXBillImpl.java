@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.spf.util.IPAddr;
 import org.xbill.DNS.Address;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.MXRecord;
