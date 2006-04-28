@@ -27,6 +27,12 @@ import org.apache.spf.mechanismn.ExistsMechanismn;
 import org.apache.spf.mechanismn.MXMechanismn;
 import org.apache.spf.mechanismn.PTRMechanismn;
 
+/**
+ * This class can be used ass parses for validate SPF1-Records. It also offer a Collection of SPF1.Mechanism .
+ * 
+ * @author Norman Maurer <nm@byteaction.de>
+ * @author Stefano Bagnara <apache@bago.org>
+ */
 public class SPF1Parser {
 
     private String checkDomain = null;
@@ -222,10 +228,9 @@ public class SPF1Parser {
 
     /**
      * 
-     * @param record
-     * @param spfData
-     * @return
-     * @throws ErrorException
+     * @param record The TXT or SPF Record to parse for mechanismn
+     * @return mechanismn Collection of the mechanismn classes that should be used
+     * @throws ErrorException This Exception will be thrown if an PermError should be returned 
      */
     private void parseRecord(String record) throws ErrorException {
 
@@ -277,12 +282,6 @@ public class SPF1Parser {
                     // add it to the collection
                     mechanismn.add(a);
 
-                    /*
-                     System.out.println("A-Mechanismn:   " + newPart);
-                     System.out.println("target: " + checkDomain + " ip4-mask: "
-                     + checkIP4 + " ip6-mask: " + checkIP6);
-                     */
-
                 } else if (ip4Matcher.matches()) {
                     // TODO: check what we should replace
                     // replaceHelper(ip4Matcher,spfData);
@@ -317,15 +316,6 @@ public class SPF1Parser {
                     // add it to the collection
                     mechanismn.add(p);
 
-                    // replace all default values with the right one
-                    //replaceHelper(ptrMatcher);
-
-                    /*
-                     System.out.println("PTR-Mechanismn: " + newPart);
-                     System.out.println("target: " + checkDomain + " ip4-mask: "
-                     + checkIP4 + " ip6-mask: " + checkIP6);
-                     */
-
                 } else if (redirMatcher.matches()) {
                     // TODO: check what we should replace
                     System.out.println("Redirect:       " + newPart);
@@ -344,9 +334,6 @@ public class SPF1Parser {
                     // add it to the collection
                     mechanismn.add(e);
 
-                    /*
-                     System.out.println("Exists:         " + newPart);
-                     */
                 } else {
                     throw new ErrorException("Unknown mechanismn " + newPart);
                 }
@@ -361,7 +348,7 @@ public class SPF1Parser {
      * 
      * @param match
      *            The matcher for the mechanismn
-     * @throws ErrorException
+     * @throws ErrorException if an PermError should be returned
      */
     private void replaceHelper(Matcher match) throws ErrorException {
         if (match.groupCount() > 0) {
@@ -408,7 +395,7 @@ public class SPF1Parser {
      * 
      * @param mechRecord
      *            The mechanismn record
-     * @return qualifier
+     * @return qualifier This qualifier will be used by the mechanismn classes for the result the return when match
      */
     private String getQualifier(String mechRecord) {
 
@@ -426,7 +413,7 @@ public class SPF1Parser {
     /**
      * Return the mechanismn as Collection
      * 
-     * @return mechanismn
+     * @return mechanismn Collection of all mechanismn which should be used
      */
     public Collection getMechanismn() {
         return mechanismn;
