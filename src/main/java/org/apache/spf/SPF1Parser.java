@@ -22,8 +22,6 @@ import java.util.regex.Pattern;
 
 public class SPF1Parser {
 
-    private String parsedRecord = null;
-
     private String checkDomain = null;
 
     private int checkIP4 = 32;
@@ -210,12 +208,11 @@ public class SPF1Parser {
             if (!m.matches()) {
                 throw new ErrorException("Not Parsable");
             } else {
-
+                System.out.println("YES");
                 // parse the record
                 result = parseRecord(mainRecord, spfData);
             }
         }
-
     }
 
     /**
@@ -223,10 +220,13 @@ public class SPF1Parser {
      * @param record
      * @param spfData
      * @return
+     * @throws ErrorException
      */
-    public String parseRecord(String record, SPF1Data spfData) {
+    public String parseRecord(String record, SPF1Data spfData)
+            throws ErrorException {
 
         String[] part = record.trim().split(" ");
+        System.out.println("HERE!");
 
         Pattern ip4Pattern = Pattern.compile(IP4_REGEX);
         Pattern ip6Pattern = Pattern.compile(IP6_REGEX);
@@ -263,21 +263,24 @@ public class SPF1Parser {
                 if (aMatcher.matches()) {
 
                     // replace all default values with the right one
-                    replaceHelper(aMatcher);
+                    replaceHelper(aMatcher, spfData);
                     System.out.println("A-Mechanismn:   " + newPart);
                     System.out.println("target: " + checkDomain + " ip4-mask: "
                             + checkIP4 + " ip6-mask: " + checkIP6);
 
                 } else if (ip4Matcher.matches()) {
-                    replaceHelper(ip4Matcher);
+                    // TODO: check what we should replace
+                    // replaceHelper(ip4Matcher,spfData);
                     System.out.println("IP4-Mechanismn: " + newPart);
+
                 } else if (ip6Matcher.matches()) {
-                    replaceHelper(ip4Matcher);
+                    // TODO: check what we should replace
+                    // replaceHelper(ip4Matcher,spfData);
                     System.out.println("IP6-Mechanismn: " + newPart);
                 } else if (mxMatcher.matches()) {
 
                     // replace all default values with the right one
-                    replaceHelper(mxMatcher);
+                    replaceHelper(mxMatcher, spfData);
                     System.out.println("MX-Mechanismn:  " + newPart);
                     System.out.println("target: " + checkDomain + " ip4-mask: "
                             + checkIP4 + " ip6-mask: " + checkIP6);
@@ -285,21 +288,27 @@ public class SPF1Parser {
                 } else if (ptrMatcher.matches()) {
 
                     // replace all default values with the right one
-                    replaceHelper(ptrMatcher);
+                    replaceHelper(ptrMatcher, spfData);
                     System.out.println("PTR-Mechanismn: " + newPart);
                     System.out.println("target: " + checkDomain + " ip4-mask: "
                             + checkIP4 + " ip6-mask: " + checkIP6);
                 } else if (redirMatcher.matches()) {
+                    // TODO: check what we should replace
                     System.out.println("Redirect:       " + newPart);
                 } else if (expMatcher.matches()) {
+                    // TODO: check what we should replace
                     System.out.println("Exp:            " + newPart);
                 } else if (inclMatcher.matches()) {
                     System.out.println("Include:        " + newPart);
+                    // TODO: check what we should replace
                 } else if (existsMatcher.matches()) {
+                    // TODO: check what we should replace
                     System.out.println("Exists:         " + newPart);
                 } else {
                     System.out.println("Unknown:        " + newPart);
+                    return SPF1Utils.UNKNOWN;
                 }
+
             }
         }
 
@@ -312,12 +321,22 @@ public class SPF1Parser {
      * 
      * @param match
      *            The matcher for the mechanismn
+     * @throws ErrorException
      */
-    private void replaceHelper(Matcher match) {
+    private void replaceHelper(Matcher match, SPF1Data spfData)
+            throws ErrorException {
         if (match.groupCount() > 0) {
             // replace domain
             if (match.group(1) != null) {
-                checkDomain = match.group(1);
+                try {
+                    checkDomain = macroExpandDomain(match.group(1), spfData);
+                } catch (Exception e) {
+                    // TODO: Change the NeutralException to ErrorException in
+                    // the MacroExpand class.
+                    throw new ErrorException(
+                            "Unable to macro expand the given domain: "
+                                    + match.group(1));
+                }
             }
 
             // replace ip4 mask
@@ -368,10 +387,17 @@ public class SPF1Parser {
 
     /**
      * Return the result
+     * 
      * @return result
      */
     public String getResult() {
         return result;
+    }
+
+    // TODO: Write javadoc
+    private String macroExpandDomain(String data, SPF1Data spfData)
+            throws NeutralException {
+        return new MacroExpand(spfData).expandDomain(data);
     }
 
 }
