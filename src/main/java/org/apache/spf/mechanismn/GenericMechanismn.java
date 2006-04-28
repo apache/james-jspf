@@ -30,10 +30,4 @@ public interface GenericMechanismn {
      */
     public String run(SPF1Data spfData) throws ErrorException;
     
-    /**
-     * @param mechanismPrefix The mechanismPrefix
-     * @param host The hostname or ip 
-     * @param maskLenght The maskLength
-     */
-    public void init(String mechanismPrefix, String host, int maskLenght);
 }

@@ -25,7 +25,7 @@ import org.apache.spf.IPUtil;
 import org.apache.spf.MacroExpand;
 import org.apache.spf.SPF1Data;
 
-public class AMechanismn implements GenericMechanismn {
+public class MXMechanismn implements GenericMechanismn {
 
     private SPF1Data spfData;
 
@@ -71,7 +71,7 @@ public class AMechanismn implements GenericMechanismn {
             IPAddr checkAddress = IPAddr.getAddress(spfData.getIpAddress(),
                     maskLength);
             try {
-                addressList.addAll(spfData.getDnsProbe().getARecords(host,
+                addressList.addAll(spfData.getDnsProbe().getMXRecords(host,
                         maskLength));
                 if (IPUtil.checkAddressList(checkAddress, addressList)) {
                     return mechanismnPrefix;
@@ -89,3 +89,5 @@ public class AMechanismn implements GenericMechanismn {
     }
 
 }
+
+
