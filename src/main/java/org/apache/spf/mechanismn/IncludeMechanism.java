@@ -15,27 +15,28 @@
  * permissions and limitations under the License.                      *
  ***********************************************************************/
 
-package org.apache.spf.modifier;
+package org.apache.spf.mechanismn;
 
 import org.apache.spf.MacroExpand;
 import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
 
 /**
- * This class represent the incude modifier
+ * This class represent the incude mechanism
  * 
  * @author Norman Maurer <nm@byteaction.de>
- *
+ * 
  */
-public class IncludeModifier extends GenericModifier {
+public class IncludeMechanism extends GenericMechanism {
 
     /**
-     * Set the host which should be used for include and set it in SPF1Data so it can be accessed
-     * easy later if needed
+     * Set the host which should be used for include
      * 
      * @param spfData
      *            The SPF1Data which should used
-     * @throws PermErrorException if an error is in the redirect modifier
+     * @return The host which should be included
+     * @throws PermErrorException
+     *             if an error is in the redirect modifier
      */
     public String run(SPF1Data spfData) throws PermErrorException {
         String host = this.host;
