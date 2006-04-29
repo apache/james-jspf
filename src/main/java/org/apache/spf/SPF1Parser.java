@@ -30,6 +30,7 @@ import org.apache.spf.mechanismn.IP4Mechanism;
 import org.apache.spf.mechanismn.MXMechanism;
 import org.apache.spf.mechanismn.PTRMechanism;
 import org.apache.spf.modifier.ExpModifier;
+import org.apache.spf.modifier.IncludeModifier;
 import org.apache.spf.modifier.RedirectModifier;
 
 /**
@@ -53,7 +54,11 @@ public class SPF1Parser {
      * Regex based on http://ftp.rfc-editor.org/in-notes/authors/rfc4408.txt.
      * This will be the next official SPF-Spec
      */
+
+    // Stefano go ahead ;-)
     // TODO: check all regex!
+    // TODO: fix the Quantifier problem
+    // TODO: ignore case 
     private final String ALPHA_DIGIT_PATTERN = "[a-zA-Z0-9]";
 
     private final String ALPHA_PATTERN = "[a-zA-Z]";
@@ -112,7 +117,8 @@ public class SPF1Parser {
     /**
      * ABNF: include = "include" ":" domain-spec
      */
-    private final String INCLUDE_REGEX = "include\\:" + DOMAIN_SPEC_REGEX;
+    private final String INCLUDE_REGEX = "include\\:(" + DOMAIN_SPEC_REGEX
+            + ")";
 
     /**
      * ABNF: exists = "exists" ":" domain-spec
@@ -228,7 +234,7 @@ public class SPF1Parser {
             Pattern p = Pattern.compile(TERMS_REGEX);
             Matcher m = p.matcher(mainRecord);
             if (!m.matches()) {
-                throw new PermErrorException("Not Parsable");
+                throw new PermErrorException("Not Parsable: " + mainRecord);
             } else {
                 // parse the record
                 parseRecord(mainRecord);
@@ -249,7 +255,6 @@ public class SPF1Parser {
     private void parseRecord(String record) throws PermErrorException {
 
         String[] part = record.trim().split(" ");
-        System.out.println("HERE!");
 
         Pattern ip4Pattern = Pattern.compile(IP4_REGEX);
         Pattern ip6Pattern = Pattern.compile(IP6_REGEX);
@@ -265,7 +270,7 @@ public class SPF1Parser {
 
             String newPart = part[i].trim();
             checkDomain = null;
-            ;
+
             checkIP4 = 32;
             checkIP6 = 128;
 
@@ -310,8 +315,8 @@ public class SPF1Parser {
                     commands.add(ip4);
 
                 } else if (ip6Matcher.matches()) {
+
                     // TODO: Support ip6 Support at all
-                    // replaceHelper(ip4Matcher,spfData);
                     System.out.println("IP6-Mechanismn: " + newPart);
                 } else if (mxMatcher.matches()) {
 
@@ -368,11 +373,17 @@ public class SPF1Parser {
                     commands.add(e);
 
                 } else if (inclMatcher.matches()) {
-                    System.out.println("Include:        " + newPart);
-                    // TODO: check what we should replace
+
+                    // create a new IncludeModifier and init it
+                    IncludeModifier incl = new IncludeModifier();
+                    incl.init(getQualifier(inclMatcher.group(1)));
+
+                    // add it to the collection
+                    commands.add(incl);
+
                 } else if (existsMatcher.matches()) {
 
-                    // create a new PTRMechanismn and init it
+                    // create a new ExistsMechanismn and init it
                     ExistsMechanism e = new ExistsMechanism();
                     e.init(getQualifier(newPart), checkDomain, checkIP4);
 
@@ -380,7 +391,7 @@ public class SPF1Parser {
                     commands.add(e);
                 } else if (allMatcher.matches()) {
 
-                    // create a new PTRMechanismn and init it
+                    // create a new AllMechanismn and init it
                     AllMechanism a = new AllMechanism();
                     a.init(getQualifier(newPart));
 

@@ -26,11 +26,14 @@ import org.apache.spf.SPF1Data;
  *
  */
 public interface Modifier {
-    
+
     /**
      * Run the mechanismn  with the give SPF1Data
-     * @throws PermErrorException if somethink strange happen
+     * 
+     * @param spfData The SPF1Data we should use
+     * @return host The host we should redirect / include
+     * @throws PermErrorException if there are any syntax problems etc
      */
-    public void run(SPF1Data spfData) throws PermErrorException;
-    
+    public String run(SPF1Data spfData) throws PermErrorException;
+
 }

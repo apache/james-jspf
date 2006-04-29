@@ -62,8 +62,6 @@ public class SPF1Data {
     private String explanation = "";
 
     private String defaultExplanation = "http://www.openspf.org/why.html?sender=%{S}&ip=%{I}";
-    
-    private String redirectDomain = null;
 
     protected SPF1Data(String mailFrom, String heloDomain, String clientIP)
             throws PermErrorException, NoneException {
@@ -297,19 +295,5 @@ public class SPF1Data {
             return explanation;
         }
     }
-   
-    /**
-     * Set the domain which is used for redirect 
-     * 
-     * @param redirectDomain The domain which should used for redirection
-     */
-    public void setRedirectDomain(String redirectDomain) {
-        this.redirectDomain = redirectDomain;
-    }
-    /**
-     * 
-     */
-    public String getRedirectDomain() {
-        return redirectDomain;
-    }
+
 }

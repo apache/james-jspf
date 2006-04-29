@@ -18,49 +18,28 @@
 package org.apache.spf.modifier;
 
 import org.apache.spf.MacroExpand;
+import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
 
-public class ExpModifier {
-
-    private String host;
+public class IncludeModifier extends GenericModifier {
 
     /**
-     * @param host
-     *            The hostname or ip
-     */
-    public void init(String host) {
-        this.host = host;
-    }
-
-    /**
-     * Generate the explanation and set it in SPF1Data so it can be accessed
+     * Set the host which should be used for include and set it in SPF1Data so it can be accessed
      * easy later if needed
      * 
      * @param spfData
      *            The SPF1Data which should used
-     *            
+     * @throws PermErrorException if an error is in the redirect modifier
      */
-    public void run(SPF1Data spfData) {
-        String exp = null;
+    public String run(SPF1Data spfData) throws PermErrorException {
         String host = this.host;
+
         try {
             host = new MacroExpand(spfData).expandDomain(host);
-            exp = spfData.getDnsProbe().getTxtCatType(host);
-
+            return host;
         } catch (Exception e) {
+            throw new PermErrorException("Error in include modifier: " + host);
         }
-
-        if ((exp == null) || (exp.equals(""))) {
-            spfData.setExplanation(spfData.getDefaultExplanation());
-        } else {
-            try {
-                spfData.setExplanation(new MacroExpand(spfData)
-                        .expandExplanation(exp));
-            } catch (Exception e) {
-                spfData.setExplanation("");
-            }
-        }
-
     }
 
 }

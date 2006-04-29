@@ -21,23 +21,24 @@ import org.apache.spf.MacroExpand;
 import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
 
-public class RedirectModifier extends GenericModifier{
+public class RedirectModifier extends GenericModifier {
 
     /**
-     * Set the host which should be used for redirection and set it in SPF1Data so it can be accessed
-     * easy later if needed
+     * Set the host which should be used for redirection and set it in SPF1Data
+     * so it can be accessed easy later if needed
      * 
      * @param spfData
      *            The SPF1Data which should used
-     * @throws PermErrorException if an error is in the redirect modifier
+     * @return host The host to which we shuld redirect
+     * @throws PermErrorException
+     *             if an error is in the redirect modifier
      */
-    public void run(SPF1Data spfData) throws PermErrorException {
+    public String run(SPF1Data spfData) throws PermErrorException {
         String host = this.host;
         try {
             host = new MacroExpand(spfData).expandDomain(host);
-            spfData.setRedirectDomain(host);
+            return host;
         } catch (Exception e) {
-            spfData.setRedirectDomain(null);
             throw new PermErrorException("Error in redirect modifier: " + host);
         }
     }

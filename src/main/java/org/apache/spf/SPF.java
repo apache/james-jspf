@@ -22,6 +22,8 @@ import java.util.Iterator;
 import org.apache.spf.mechanismn.AllMechanism;
 import org.apache.spf.mechanismn.Mechanism;
 import org.apache.spf.modifier.ExpModifier;
+import org.apache.spf.modifier.GenericModifier;
+import org.apache.spf.modifier.Modifier;
 import org.apache.spf.modifier.RedirectModifier;
 
 /**
@@ -119,14 +121,9 @@ public class SPF {
                 } else if (c instanceof ExpModifier) {
                     ExpModifier mo = (ExpModifier) c;
                     mo.run(spfData);
-                } else if (c instanceof RedirectModifier) {
-                    RedirectModifier mo = (RedirectModifier) c;
-                    mo.run(spfData);
-
-                    if (spfData.getRedirectDomain() != null) {
-                        result = checkSPF(spfData.getMailFrom(), spfData
-                                .getHostName(), spfData.getIpAddress());
-                    }
+                } else if (c instanceof Modifier) {
+                    Modifier mo = (Modifier) c;
+                    result = mo.run(spfData);
                 }
 
                 if (qualifier.equals(SPF1Utils.FAIL)) {

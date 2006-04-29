@@ -68,6 +68,6 @@ public abstract class GenericModifier {
      * @throws PermErrorException
      *             if somethink strange happen
      */
-    public abstract void run(SPF1Data spfData) throws PermErrorException;
+    public abstract String run(SPF1Data spfData) throws PermErrorException;
 
 }
