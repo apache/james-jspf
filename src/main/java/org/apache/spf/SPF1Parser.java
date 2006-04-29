@@ -23,6 +23,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.spf.mechanismn.AMechanism;
+import org.apache.spf.mechanismn.AllMechanism;
 import org.apache.spf.mechanismn.ExistsMechanism;
 import org.apache.spf.mechanismn.ExpMechanism;
 import org.apache.spf.mechanismn.IP4Mechanism;
@@ -208,6 +209,8 @@ public class SPF1Parser {
     private final String TERMS_REGEX = "(?:[ ]+(?:" + DIRECTIVE_REGEX + "|"
             + MODIFIER_REGEX + "))*";
 
+    private final String ALL_REGEX = "all";
+
     public SPF1Parser(String spfRecord) throws PermErrorException,
             NoneException {
 
@@ -254,7 +257,7 @@ public class SPF1Parser {
         Pattern expPattern = Pattern.compile(EXPLANATION_REGEX);
         Pattern inclPattern = Pattern.compile(INCLUDE_REGEX);
         Pattern existsPattern = Pattern.compile(EXISTS_REGEX);
-
+        Pattern allPattern = Pattern.compile(ALL_REGEX);
         for (int i = 0; i < part.length; i++) {
 
             String newPart = part[i].trim();
@@ -277,6 +280,7 @@ public class SPF1Parser {
                 Matcher expMatcher = expPattern.matcher(newPart);
                 Matcher inclMatcher = inclPattern.matcher(newPart);
                 Matcher existsMatcher = existsPattern.matcher(newPart);
+                Matcher allMatcher = allPattern.matcher(newPart);
 
                 if (aMatcher.matches()) {
 
@@ -359,6 +363,14 @@ public class SPF1Parser {
 
                     // add it to the collection
                     mechanism.add(e);
+                } else if (allMatcher.matches()) {
+
+                    // create a new PTRMechanismn and init it
+                    AllMechanism a = new AllMechanism();
+                    a.init(getQualifier(newPart));
+
+                    // add it to the collection
+                    mechanism.add(a);
 
                 } else {
                     throw new PermErrorException("Unknown mechanismn "
