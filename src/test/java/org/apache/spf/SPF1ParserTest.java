@@ -48,12 +48,9 @@ public class SPF1ParserTest extends TestCase {
     }
 
     protected void runTest() throws Throwable {
-        String mailFrom = "byteaction.de";
-        String ipAddress = "192.168.0.100";
-        String helo = "byteaction.de";
 
         try {
-            SPF1Data d = new SPF1Data(mailFrom, helo, ipAddress);
+            
             SPF1Parser r = new SPF1Parser(data.recIn);
             
             assertEquals("Expected <" + data.errMsg + "> but was <"

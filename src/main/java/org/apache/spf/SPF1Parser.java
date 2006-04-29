@@ -209,8 +209,8 @@ public class SPF1Parser {
     /**
      * ABNF: directive = [ qualifier ] mechanism
      */
-    private final String DIRECTIVE_REGEX = QUALIFIER_PATTERN + "?"
-            + MECHANISM_REGEX;
+    private final String DIRECTIVE_REGEX = QUALIFIER_PATTERN + "?("
+            + MECHANISM_REGEX + ")";
 
     /**
      * ABNF: terms = *( 1*SP ( directive / modifier ) )
@@ -255,17 +255,16 @@ public class SPF1Parser {
     private void parseRecord(String record) throws PermErrorException {
 
         String[] part = record.trim().split(" ");
-
-        Pattern ip4Pattern = Pattern.compile(IP4_REGEX);
-        Pattern ip6Pattern = Pattern.compile(IP6_REGEX);
-        Pattern aPattern = Pattern.compile(A_REGEX);
-        Pattern mxPattern = Pattern.compile(MX_REGEX);
-        Pattern ptrPattern = Pattern.compile(PTR_REGEX);
-        Pattern redirPattern = Pattern.compile(REDIRECT_REGEX);
+        Pattern ip4Pattern = Pattern.compile(QUALIFIER_PATTERN + "?" + IP4_REGEX);
+        Pattern ip6Pattern = Pattern.compile(QUALIFIER_PATTERN + "?" + IP6_REGEX);
+        Pattern aPattern = Pattern.compile(QUALIFIER_PATTERN + "?" + A_REGEX);
+        Pattern mxPattern = Pattern.compile(QUALIFIER_PATTERN + "?" + MX_REGEX);
+        Pattern ptrPattern = Pattern.compile(QUALIFIER_PATTERN + "?" + PTR_REGEX);
+        Pattern redirPattern = Pattern.compile(QUALIFIER_PATTERN + "?" + REDIRECT_REGEX);
         Pattern expPattern = Pattern.compile(EXPLANATION_REGEX);
-        Pattern inclPattern = Pattern.compile(INCLUDE_REGEX);
-        Pattern existsPattern = Pattern.compile(EXISTS_REGEX);
-        Pattern allPattern = Pattern.compile(ALL_REGEX);
+        Pattern inclPattern = Pattern.compile(QUALIFIER_PATTERN + "?" + INCLUDE_REGEX);
+        Pattern existsPattern = Pattern.compile(QUALIFIER_PATTERN + "?" + EXISTS_REGEX);
+        Pattern allPattern = Pattern.compile(QUALIFIER_PATTERN + "?" + ALL_REGEX);
         for (int i = 0; i < part.length; i++) {
 
             String newPart = part[i].trim();

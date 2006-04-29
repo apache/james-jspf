@@ -51,7 +51,7 @@ public class SPF {
 
     private boolean hasCommand = false;
 
-    private String qualifier = null;
+    private String qualifier = "";
 
     private final String SPF_VERSION1 = "v=spf1";
 
@@ -139,7 +139,7 @@ public class SPF {
             }
 
             // If no match was found set the result to neutral 
-            if ((qualifier == null) && (hasCommand == true)) {
+            if ((qualifier.equals("")) && (hasCommand == true)) {
                 result = SPF1Utils.NEUTRAL;
             }
             // Catch the exceptions and set the result
