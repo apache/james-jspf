@@ -17,7 +17,7 @@
 
 package org.apache.spf.mechanismn;
 
-import org.apache.spf.ErrorException;
+import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
 import org.apache.spf.util.IPAddr;
 import org.apache.spf.util.IPUtil;
@@ -30,7 +30,7 @@ public class AMechanism extends GenericMechanism {
      * 
      * @see org.apache.spf.mechanismn.GenericMechanism#run(org.apache.spf.SPF1Data)
      */
-    public String run(SPF1Data spfData) throws ErrorException {
+    public String run(SPF1Data spfData) throws PermErrorException {
         ArrayList addressList = new ArrayList();
 
         // Get the right host.
@@ -51,7 +51,7 @@ public class AMechanism extends GenericMechanism {
                 return null;
             }
         } catch (Exception e) {
-            throw new ErrorException("No valid ipAddress: "
+            throw new PermErrorException("No valid ipAddress: "
                     + spfData.getIpAddress());
         }
         // No match found

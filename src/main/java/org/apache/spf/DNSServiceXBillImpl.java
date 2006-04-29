@@ -52,7 +52,7 @@ public class DNSServiceXBillImpl implements DNSService {
      *      java.lang.String)
      */
     public String getSpfRecord(String hostname, String spfVersion)
-            throws ErrorException, NoneException {
+            throws PermErrorException, NoneException {
 
         String returnValue = null;
         ArrayList txtR = new ArrayList();
@@ -76,7 +76,7 @@ public class DNSServiceXBillImpl implements DNSService {
                     if (returnValue == null) {
                         returnValue = compare;
                     } else {
-                        throw new ErrorException("More than 1 SPF record found");
+                        throw new PermErrorException("More than 1 SPF record found");
                     }
                 }
             }
@@ -95,7 +95,7 @@ public class DNSServiceXBillImpl implements DNSService {
      * @return TXT Records-which were found.
      * @throws NoneException
      *             if none TXT-Records were found.
-     * @throws ErrorException
+     * @throws PermErrorException
      */
     private static ArrayList getTXTRecords(String hostname)
             throws NoneException {
@@ -122,7 +122,7 @@ public class DNSServiceXBillImpl implements DNSService {
      * @see org.apache.spf.DNSService#getARecords(java.lang.String, int)
      */
     public List getARecords(String strServer, int mask) throws NoneException,
-            ErrorException {
+            PermErrorException {
 
         String host = null;
         ArrayList listTxtData = new ArrayList();
@@ -168,10 +168,10 @@ public class DNSServiceXBillImpl implements DNSService {
      * @param maskLength
      *            the networkmask
      * @return ArrayList of the conversion
-     * @throws ErrorException
+     * @throws PermErrorException
      */
     private ArrayList getAList(ArrayList addressList, int maskLength)
-            throws ErrorException {
+            throws PermErrorException {
 
         ArrayList listAddresses = new ArrayList();
         String aValue;
@@ -205,7 +205,7 @@ public class DNSServiceXBillImpl implements DNSService {
      */
 
     public List getPTRRecords(String ipAddress) throws NoneException,
-            ErrorException {
+            PermErrorException {
 
         ArrayList ptrR = new ArrayList();
         Record[] records;
@@ -240,7 +240,7 @@ public class DNSServiceXBillImpl implements DNSService {
      * @see org.apache.spf.DNSService#getMXRecords(java.lang.String, int)
      */
     public List getMXRecords(String domainName, int mask)
-            throws ErrorException, NoneException {
+            throws PermErrorException, NoneException {
 
         ArrayList mxAddresses = getAList(getMXNames(domainName), mask);
         return mxAddresses;
@@ -255,7 +255,7 @@ public class DNSServiceXBillImpl implements DNSService {
      * @return ipAddresses
      */
     private static ArrayList getIPList(String host, int mask)
-            throws ErrorException {
+            throws PermErrorException {
 
         ArrayList listIP = new ArrayList();
 
@@ -264,7 +264,7 @@ public class DNSServiceXBillImpl implements DNSService {
                 listIP.addAll(IPAddr.getAddresses(host, mask));
             }
         } catch (Exception e1) {
-            throw new ErrorException(e1.getMessage());
+            throw new PermErrorException(e1.getMessage());
         }
 
         return listIP;

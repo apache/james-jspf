@@ -15,24 +15,26 @@
  * permissions and limitations under the License.                      *
  ***********************************************************************/
 
-package org.apache.spf.mechanismn;
 
-import org.apache.spf.PermErrorException;
-import org.apache.spf.SPF1Data;
+package org.apache.spf;
 
 /**
- * This Interface represent a gerneric mechanismn 
- * @author maurer
- *
+ * This exception get thrown if the result should be PermError
+ * 
+ * @author MimeCast
+ * @author Norman Maurer <nm@byteaction.de>
+ * 
  */
-public interface Mechanism {
-    
-    /**
-     * Run the mechanismn  with the give SPF1Data
-     * @param spfData The SPF1Data
-     * @return result If the not match it return null. Otherwise it returns the modifier
-     * @throws PermErrorException if somethink strange happen
-     */
-    public String run(SPF1Data spfData) throws PermErrorException;
-    
+public class PermErrorException extends Exception {
+
+	private static final long serialVersionUID = 1L;
+
+	public PermErrorException() {
+		super();
+	}
+
+	public PermErrorException(String strErrorMessage) {
+		super(strErrorMessage);
+	}
+
 }

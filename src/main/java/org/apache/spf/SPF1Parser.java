@@ -207,7 +207,7 @@ public class SPF1Parser {
     private final String TERMS_REGEX = "(?:[ ]+(?:" + DIRECTIVE_REGEX + "|"
             + MODIFIER_REGEX + "))*";
 
-    public SPF1Parser(String spfRecord) throws ErrorException, NoneException {
+    public SPF1Parser(String spfRecord) throws PermErrorException, NoneException {
 
         if (!isValidSPFVersion(spfRecord)) {
             throw new NoneException("No valid SPF Record: " + spfRecord);
@@ -220,7 +220,7 @@ public class SPF1Parser {
             Pattern p = Pattern.compile(TERMS_REGEX);
             Matcher m = p.matcher(mainRecord);
             if (!m.matches()) {
-                throw new ErrorException("Not Parsable");
+                throw new PermErrorException("Not Parsable");
             } else {
                 // parse the record
                 parseRecord(mainRecord);
@@ -234,11 +234,11 @@ public class SPF1Parser {
      *            The TXT or SPF Record to parse for mechanismn
      * @return mechanismn Collection of the mechanismn classes that should be
      *         used
-     * @throws ErrorException
+     * @throws PermErrorException
      *             This Exception will be thrown if an PermError should be
      *             returned
      */
-    private void parseRecord(String record) throws ErrorException {
+    private void parseRecord(String record) throws PermErrorException {
 
         String[] part = record.trim().split(" ");
         System.out.println("HERE!");
@@ -343,7 +343,7 @@ public class SPF1Parser {
                     mechanism.add(e);
 
                 } else {
-                    throw new ErrorException("Unknown mechanismn " + newPart);
+                    throw new PermErrorException("Unknown mechanismn " + newPart);
                 }
 
             }
@@ -356,10 +356,10 @@ public class SPF1Parser {
      * 
      * @param match
      *            The matcher for the mechanismn
-     * @throws ErrorException
+     * @throws PermErrorException
      *             if an PermError should be returned
      */
-    private void replaceHelper(Matcher match) throws ErrorException {
+    private void replaceHelper(Matcher match) throws PermErrorException {
         if (match.groupCount() > 0) {
             // replace domain
             if (match.group(1) != null) {
@@ -388,10 +388,10 @@ public class SPF1Parser {
      * 
      * @param match
      *            The matcher for the mechanismn
-     * @throws ErrorException
+     * @throws PermErrorException
      *             if an PermError should be returned
      */
-    private void replaceIP4Helper(Matcher match) throws ErrorException {
+    private void replaceIP4Helper(Matcher match) throws PermErrorException {
         if (match.groupCount() > 1) {
             // replace ip4 mask
             if (match.group(2) != null) {

@@ -17,7 +17,7 @@
 
 package org.apache.spf.mechanismn;
 
-import org.apache.spf.ErrorException;
+import org.apache.spf.PermErrorException;
 import org.apache.spf.MacroExpand;
 import org.apache.spf.SPF1Data;
 
@@ -45,9 +45,9 @@ public abstract class GenericMechanism {
 
     /**
      * @param spfData
-     * @throws ErrorException
+     * @throws PermErrorException
      */
-    protected String expandHost(SPF1Data spfData) throws ErrorException {
+    protected String expandHost(SPF1Data spfData) throws PermErrorException {
         String host = this.host;
         if (host == null) {
             host = spfData.getCurrentDomain();
@@ -56,7 +56,7 @@ public abstract class GenericMechanism {
                 host = new MacroExpand(spfData).expandDomain(host);
 
             } catch (Exception e) {
-                throw new ErrorException(e.getMessage());
+                throw new PermErrorException(e.getMessage());
             }
         }
         return host;
@@ -66,8 +66,8 @@ public abstract class GenericMechanism {
      * Run the mechanismn  with the give SPF1Data
      * @param spfData The SPF1Data
      * @return result If the not match it return null. Otherwise it returns the modifier
-     * @throws ErrorException if somethink strange happen
+     * @throws PermErrorException if somethink strange happen
      */
-    public abstract String run(SPF1Data spfData) throws ErrorException;
+    public abstract String run(SPF1Data spfData) throws PermErrorException;
     
 }

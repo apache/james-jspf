@@ -159,7 +159,7 @@ public class MacroExpand {
         while (cellMatcher.find()) {
             domainNumber = cellMatcher.group();
             if (Integer.parseInt(domainNumber) == 0) {
-                throw new ErrorException("Digit transformer must be non-zero");
+                throw new PermErrorException("Digit transformer must be non-zero");
             }
         }
         // find if reversed
@@ -200,10 +200,10 @@ public class MacroExpand {
      * @param variable
      *            The varibale we want to get the value for
      * @return value for the given variable
-     * @throws ErrorException
+     * @throws PermErrorException
      *             if the given variable not exists
      */
-    private String matchVariable(String variable) throws ErrorException {
+    private String matchVariable(String variable) throws PermErrorException {
 
         variable = variable.toLowerCase();
         if (variable.equalsIgnoreCase("i")) {
@@ -227,7 +227,7 @@ public class MacroExpand {
         } else if (variable.equalsIgnoreCase("o")) {
             return spfData.getSenderDomain();
         } else {
-            throw new ErrorException("Unknown command : " + variable);
+            throw new PermErrorException("Unknown command : " + variable);
         }
     }
 

@@ -103,7 +103,7 @@ public class SPF {
             // Catch the exceptions and set the result
             // TODO: remove printStackTrace() if all was checked and works!
 
-        } catch (ErrorException e) {
+        } catch (PermErrorException e) {
             e.printStackTrace();
             result = SPF1Utils.ERROR;
         } catch (NoneException e) {

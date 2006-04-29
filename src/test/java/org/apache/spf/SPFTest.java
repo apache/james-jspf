@@ -215,7 +215,7 @@ public class SPFTest extends TestCase {
         private DNSService dnsService = new DNSServiceXBillImpl();
 
         public String getSpfRecord(String hostname, String spfVersion)
-                throws ErrorException, NoneException {
+                throws PermErrorException, NoneException {
             if ("v=spf1".equals(spfVersion)) {
                 if ("01.spf1-test.mailzone.com".equals(hostname))
                     return "v=spf1                                                             ";
@@ -349,7 +349,7 @@ public class SPFTest extends TestCase {
                 System.out.println("getSpfRecord(" + hostname + ","
                         + spfVersion + ") = " + res);
                 return res;
-            } catch (ErrorException e) {
+            } catch (PermErrorException e) {
                 System.out.println("getSpfRecord(" + hostname + ","
                         + spfVersion + ") = ErrorException[" + e.getMessage()
                         + "]");
@@ -363,7 +363,7 @@ public class SPFTest extends TestCase {
         }
 
         public List getARecords(String strServer, int mask)
-                throws NoneException, ErrorException {
+                throws NoneException, PermErrorException {
             if (mask == 32
                     && "1.bob.lp._spf.spf1-test.mailzone.com".equals(strServer))
                 return getAddressList("127.0.0.2", mask);
@@ -588,7 +588,7 @@ public class SPFTest extends TestCase {
                 }
                 return res;
 
-            } catch (ErrorException e) {
+            } catch (PermErrorException e) {
                 System.out.println("getARecords(" + strServer + "," + mask
                         + ") = ErrorException[" + e.getMessage() + "]");
                 throw e;
@@ -601,14 +601,14 @@ public class SPFTest extends TestCase {
         }
 
         public String getTxtCatType(String strServer) throws NoneException,
-                ErrorException {
+                PermErrorException {
             if ("".equals(strServer))
                 throw new NoneException("No TXTRecord found for: ");
             try {
                 String res = dnsService.getTxtCatType(strServer);
                 System.out.println("getTxtCatType(" + strServer + ") = " + res);
                 return res;
-            } catch (ErrorException e) {
+            } catch (PermErrorException e) {
                 System.out.println("getTxtCatType(" + strServer
                         + ") = ErrorException[" + e.getMessage() + "]");
                 throw e;
@@ -620,7 +620,7 @@ public class SPFTest extends TestCase {
 
         }
 
-        public List getPTRRecords(String ipAddress) throws ErrorException,
+        public List getPTRRecords(String ipAddress) throws PermErrorException,
                 NoneException {
             if ("208.210.124.1".equals(ipAddress))
                 return Arrays.asList(new String[] { "pobox-gw.icgroup.com" });
@@ -653,7 +653,7 @@ public class SPFTest extends TestCase {
                     System.out.println("null");
                 }
                 return res;
-            } catch (ErrorException e) {
+            } catch (PermErrorException e) {
                 System.out.println("getPTRRecords(" + ipAddress
                         + ") = ErrorException[" + e.getMessage() + "]");
                 throw e;
@@ -665,7 +665,7 @@ public class SPFTest extends TestCase {
 
         }
 
-        public List getAddressList(String list, int mask) throws ErrorException {
+        public List getAddressList(String list, int mask) throws PermErrorException {
             if (list == null || "".equals(list)) {
                 return new ArrayList();
             }
@@ -678,7 +678,7 @@ public class SPFTest extends TestCase {
         }
 
         public List getMXRecords(String domainName, int mask)
-                throws ErrorException, NoneException {
+                throws PermErrorException, NoneException {
             if (mask == 32 && "10.spf1-test.mailzone.com".equals(domainName))
                 return getAddressList(
                         "192.0.2.23,192.0.2.20,192.0.2.21,192.0.2.22,192.0.2.30,192.0.2.31,192.0.2.32,192.0.2.33,192.0.2.12,192.0.2.13,192.0.2.10,192.0.2.11",
@@ -728,7 +728,7 @@ public class SPFTest extends TestCase {
                     System.out.println("null");
                 }
                 return res;
-            } catch (ErrorException e) {
+            } catch (PermErrorException e) {
                 System.out.println("getMXRecords(" + domainName + "," + mask
                         + ") = ErrorException[" + e.getMessage() + "]");
                 throw e;

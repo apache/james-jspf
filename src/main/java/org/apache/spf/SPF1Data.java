@@ -60,12 +60,12 @@ public class SPF1Data {
 	private int depth = 1;
 
     protected SPF1Data(String mailFrom, String heloDomain, String clientIP)
-            throws ErrorException, NoneException {
+            throws PermErrorException, NoneException {
         this(mailFrom, heloDomain, clientIP, new DNSServiceXBillImpl());
     }
 
 	protected SPF1Data(String mailFrom, String heloDomain, String clientIP, DNSService dnsProbe)
-			throws ErrorException, NoneException {
+			throws PermErrorException, NoneException {
 
 		this.mailFrom = mailFrom.trim();
 		this.hostName = heloDomain.trim();
@@ -75,9 +75,9 @@ public class SPF1Data {
 		try {
 			// get the in Address
 			inAddress = IPAddr.getInAddress(clientIP);
-		} catch (ErrorException e) {
+		} catch (PermErrorException e) {
 			// throw an exception cause the ip was not rfc conform
-			throw new ErrorException(e.getMessage());
+			throw new PermErrorException(e.getMessage());
 		}
 
 		// setup the data!

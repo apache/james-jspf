@@ -65,7 +65,7 @@ public class SPF1ParserTest extends TestCase {
                     + e.getMessage() + ">",!"no errors".equals(data.errMsg));
 //            assertEquals("Expected <" + data.errMsg + "> but was <"
 //                    + e.getMessage() + ">", data.errMsg, e.getMessage());
-        } catch (ErrorException e) {
+        } catch (PermErrorException e) {
             e.printStackTrace();
             assertNotNull(data.errMsg);
             assertTrue("Expected <" + data.errMsg + "> but was <"

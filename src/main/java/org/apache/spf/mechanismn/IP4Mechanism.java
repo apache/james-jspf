@@ -17,7 +17,7 @@
 
 package org.apache.spf.mechanismn;
 
-import org.apache.spf.ErrorException;
+import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
 import org.apache.spf.util.IPAddr;
 import org.apache.spf.util.Inet6Util;
@@ -28,12 +28,12 @@ public class IP4Mechanism extends GenericMechanism {
      * 
      * @see org.apache.spf.mechanismn.GenericMechanism#run(org.apache.spf.SPF1Data)
      */
-    public String run(SPF1Data spfData) throws ErrorException {
+    public String run(SPF1Data spfData) throws PermErrorException {
         IPAddr testIP;
         IPAddr originalIP;
 
         if (Inet6Util.isValidIPV4Address(host) == false) {
-            throw new ErrorException("Not a valid IP address: " + host);
+            throw new PermErrorException("Not a valid IP address: " + host);
         }
 
         testIP = IPAddr.getAddress(host, maskLength);

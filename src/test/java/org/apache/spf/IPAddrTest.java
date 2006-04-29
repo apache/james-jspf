@@ -22,20 +22,20 @@ import junit.framework.TestCase;
 
 public class IPAddrTest extends TestCase {
     
-    public void testValidIp4Address() throws ErrorException {
+    public void testValidIp4Address() throws PermErrorException {
         assertEquals("in-addr",IPAddr.getInAddress("123.212.255.213"));
         assertEquals("in-addr",IPAddr.getInAddress("0.0.0.0"));
         assertEquals("in-addr",IPAddr.getInAddress("255.255.255.255"));
     }
 
-    public void testValidIp4OverIpv6Address() throws ErrorException {
+    public void testValidIp4OverIpv6Address() throws PermErrorException {
         assertEquals("ipv6",IPAddr.getInAddress("0:0:0:0:0:0:13.1.68.3"));
         assertEquals("ipv6",IPAddr.getInAddress("0:0:0:0:0:FFFF:129.144.52.38"));
         assertEquals("ipv6",IPAddr.getInAddress("::13.1.68.3"));
         assertEquals("ipv6",IPAddr.getInAddress("::FFFF:129.144.52.38"));
     }
 
-    public void testValidIp6Address() throws ErrorException {
+    public void testValidIp6Address() throws PermErrorException {
         assertEquals("ipv6",IPAddr.getInAddress("FEDC:BA98:7654:3210:FEDC:BA98:7654:3210"));
         assertEquals("ipv6",IPAddr.getInAddress("1080:0:0:0:8:800:200C:417A"));
         assertEquals("ipv6",IPAddr.getInAddress("FF01:0:0:0:0:0:0:101"));
@@ -47,65 +47,65 @@ public class IPAddrTest extends TestCase {
         assertEquals("ipv6",IPAddr.getInAddress("::"));
     }
 
-    public void testInvalidIp6Address() throws ErrorException {
+    public void testInvalidIp6Address() throws PermErrorException {
         try {
             assertEquals("ipv6",IPAddr.getInAddress("12AB:0:0:CD3"));
             fail();
-        } catch (ErrorException e) {}
+        } catch (PermErrorException e) {}
         try {
             assertEquals("ipv6",IPAddr.getInAddress("1080:0:0:0:8::800:200C:417A"));
             fail();
-        } catch (ErrorException e) {}
+        } catch (PermErrorException e) {}
         try {
             assertEquals("ipv6",IPAddr.getInAddress("FF01:0:0:0:0:0:0:00000"));
             fail();
-        } catch (ErrorException e) {}
+        } catch (PermErrorException e) {}
         try {
             assertEquals("ipv6",IPAddr.getInAddress("0:0:0:0:0:0:0:0:1"));
             fail();
-        } catch (ErrorException e) {}
+        } catch (PermErrorException e) {}
         try {
             assertEquals("ipv6",IPAddr.getInAddress("0:0:0:0:0:0:0:O"));
             fail();
-        } catch (ErrorException e) {}
+        } catch (PermErrorException e) {}
         try {
             assertEquals("ipv6",IPAddr.getInAddress("1080::8:800::200C:417A"));
             fail();
-        } catch (ErrorException e) {}
+        } catch (PermErrorException e) {}
         try {
             assertEquals("ipv6",IPAddr.getInAddress("FF01:::101"));
             fail();
-        } catch (ErrorException e) {}
+        } catch (PermErrorException e) {}
         try {
             assertEquals("ipv6",IPAddr.getInAddress(":1:"));
             fail();
-        } catch (ErrorException e) {}
+        } catch (PermErrorException e) {}
         try {
             assertEquals("ipv6",IPAddr.getInAddress(":"));
             fail();
-        } catch (ErrorException e) {}
+        } catch (PermErrorException e) {}
     }
 
     public void testInvalidIp4AddressGreatThan255() {
         try {
             assertEquals("in-addr",IPAddr.getInAddress("333.212.255.213"));
             fail();
-        } catch (ErrorException e) {
+        } catch (PermErrorException e) {
         }
         try {
             assertEquals("in-addr",IPAddr.getInAddress("1.2.3."));
             fail();
-        } catch (ErrorException e) {
+        } catch (PermErrorException e) {
         }
         try {
             assertEquals("in-addr",IPAddr.getInAddress("1.2.3.a"));
             fail();
-        } catch (ErrorException e) {
+        } catch (PermErrorException e) {
         }
         try {
             assertEquals("in-addr",IPAddr.getInAddress("1.1.1.1111"));
             fail();
-        } catch (ErrorException e) {
+        } catch (PermErrorException e) {
         }
     }
 

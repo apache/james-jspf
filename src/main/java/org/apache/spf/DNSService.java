@@ -35,11 +35,11 @@ public interface DNSService {
      * @param hostname The hostname for which we want to retrieve the SPF-Record
      * @param spfVersion The SPF-Version which should used.
      * @return The SPF-Record if one is found.
-     * @throws ErrorException if more then one SPF-Record was found.
+     * @throws PermErrorException if more then one SPF-Record was found.
      * @throws NoneException if no SPF-Record was found.
      */
     public String getSpfRecord(String hostname, String spfVersion)
-            throws ErrorException, NoneException;
+            throws PermErrorException, NoneException;
 
     /**
      * Get a list of IPAddr's for a server using the mask length
@@ -49,20 +49,20 @@ public interface DNSService {
      * @return The ipAddresses
      * @throws NeutralException
      * @throws NoneException if no A records was found 
-     * @throws ErrorException
+     * @throws PermErrorException
      */
     public List getARecords(String strServer, int mask)
-            throws NoneException, ErrorException;
+            throws NoneException, PermErrorException;
 
     /**
      * Get TXT records as a string
      * @param strServer The hostname for which we want to retrieve the TXT-Record
      * @return String which reflect the TXT-Record
      * @throws NoneException if no TXT-Record was found 
-     * @throws ErrorException if the hostname is not resolvable
+     * @throws PermErrorException if the hostname is not resolvable
      */
     public String getTxtCatType(String strServer) throws NoneException,
-            ErrorException;
+            PermErrorException;
 
     /**
      * Get reverse DNS records
@@ -70,11 +70,11 @@ public interface DNSService {
      * @param ipAddress The ipAddress for which we want to get the PTR-Record
      * @return the PTR-Records
      * @throws NoneException if no PTR-Record was found
-     * @throws ErrorException if an PermError should be returned
+     * @throws PermErrorException if an PermError should be returned
      * 
      */
 
-    public List getPTRRecords(String ipAddress) throws ErrorException,
+    public List getPTRRecords(String ipAddress) throws PermErrorException,
             NoneException;
 
     /**
@@ -84,9 +84,9 @@ public interface DNSService {
      * @param mask The netmask
      * @return IPAddresses of the MX-Records
      * @throws NoneException if no MX-Record was found
-     * @throws ErrorException
+     * @throws PermErrorException
      */
     public List getMXRecords(String domainName, int mask)
-            throws ErrorException, NoneException;
+            throws PermErrorException, NoneException;
 
 }

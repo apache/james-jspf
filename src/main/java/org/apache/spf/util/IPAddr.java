@@ -19,7 +19,7 @@ package org.apache.spf.util;
 
 import java.util.ArrayList;
 
-import org.apache.spf.ErrorException;
+import org.apache.spf.PermErrorException;
 
 /**
  * @author MimeCast
@@ -59,11 +59,11 @@ public class IPAddr {
      * @param mask
      *            The netmask
      * @return ipAddresses
-     * @throws ErrorException
+     * @throws PermErrorException
      *             on error
      */
     public static ArrayList getAddresses(String host, int mask)
-            throws ErrorException {
+            throws PermErrorException {
 
         ArrayList addressList = new ArrayList();
 
@@ -82,11 +82,11 @@ public class IPAddr {
      * @param maskLength
      *            The netmask
      * @return IpAddress
-     * @throws ErrorException
+     * @throws PermErrorException
      *             on error
      */
     public static IPAddr getAddress(byte[] netAddress, int maskLength)
-            throws ErrorException {
+            throws PermErrorException {
         IPAddr returnAddress = new IPAddr();
         returnAddress.byteToInternal(netAddress);
         returnAddress.setMask(maskLength);
@@ -97,7 +97,7 @@ public class IPAddr {
      * 
      * @see #getAddress(byte[], int)
      */
-    public static IPAddr getAddress(byte[] netAddress) throws ErrorException {
+    public static IPAddr getAddress(byte[] netAddress) throws PermErrorException {
         IPAddr returnAddress = new IPAddr();
         returnAddress.byteToInternal(netAddress);
         returnAddress.setMask(returnAddress.maskLength);
@@ -112,11 +112,11 @@ public class IPAddr {
      * @param maskLength
      *            The netmask
      * @return IpAddress
-     * @throws ErrorException
+     * @throws PermErrorException
      *             on error
      */
     public static IPAddr getAddress(String netAddress, int maskLength)
-            throws ErrorException {
+            throws PermErrorException {
         IPAddr returnAddress = new IPAddr();
         returnAddress.stringToInternal(netAddress);
         returnAddress.setMask(maskLength);
@@ -127,7 +127,7 @@ public class IPAddr {
      * 
      * @see #getAddress(String, int)
      */
-    public static IPAddr getAddress(String netAddress) throws ErrorException {
+    public static IPAddr getAddress(String netAddress) throws PermErrorException {
         IPAddr returnAddress = new IPAddr();
         returnAddress.stringToInternal(netAddress);
         returnAddress.setMask(returnAddress.maskLength);
@@ -235,10 +235,10 @@ public class IPAddr {
      * @param netAddress
      *            The ipAddress given as byte Array
      * 
-     * @throws ErrorException
+     * @throws PermErrorException
      *             on error
      */
-    private void byteToInternal(byte[] netAddress) throws ErrorException {
+    private void byteToInternal(byte[] netAddress) throws PermErrorException {
         if (netAddress.length == 16) {
             // IP6 defaults
             setIP6Defaults();
@@ -254,7 +254,7 @@ public class IPAddr {
                 address[i] = unsigned(netAddress[i]);
             }
         } else {
-            throw new ErrorException("Not a valid IP byte address");
+            throw new PermErrorException("Not a valid IP byte address");
         }
     }
 
@@ -282,10 +282,10 @@ public class IPAddr {
      * 
      * @param netAddress
      *            The ipAddress we should convert
-     * @throws ErrorException
+     * @throws PermErrorException
      *             on error
      */
-    private void stringToInternal(String netAddress) throws ErrorException {
+    private void stringToInternal(String netAddress) throws PermErrorException {
         netAddress = stripDot(netAddress);
 
         String[] tokens = netAddress.toUpperCase().split("\\.");
@@ -316,7 +316,7 @@ public class IPAddr {
             // }else{
             // Reject all IP6 and non IP4 dotted quad currently
 
-            throw new ErrorException("Not a valid IP address: " + netAddress);
+            throw new PermErrorException("Not a valid IP address: " + netAddress);
             // }
         }
     }
@@ -473,17 +473,17 @@ public class IPAddr {
      * 
      * @param ipAddress - ipAddress that should be processed
      * @return the inAddress (in-addr or ip6)
-     * @throws ErrorException if the ipAddress is not valid (rfc conform)
+     * @throws PermErrorException if the ipAddress is not valid (rfc conform)
      */
-    public static String getInAddress(String ipAddress) throws ErrorException {
+    public static String getInAddress(String ipAddress) throws PermErrorException {
         if (ipAddress == null) {
-            throw new ErrorException("IP is not a valid ipv4 or ipv6 address");
+            throw new PermErrorException("IP is not a valid ipv4 or ipv6 address");
         } else if (Inet6Util.isValidIPV4Address(ipAddress)) {
             return "in-addr";
         } else if (Inet6Util.isValidIP6Address(ipAddress)) {
             return "ipv6";
         } else {
-            throw new ErrorException("IP is not a valid ipv4 or ipv6 address");
+            throw new PermErrorException("IP is not a valid ipv4 or ipv6 address");
         }
     }
 

@@ -17,7 +17,7 @@
 
 package org.apache.spf.mechanismn;
 
-import org.apache.spf.ErrorException;
+import org.apache.spf.PermErrorException;
 import org.apache.spf.MacroExpand;
 import org.apache.spf.SPF1Data;
 
@@ -29,14 +29,14 @@ public class ExistsMechanism extends GenericMechanism {
      * 
      * @see org.apache.spf.mechanismn.GenericMechanism#run(org.apache.spf.SPF1Data)
      */
-    public String run(SPF1Data spfData) throws ErrorException {
+    public String run(SPF1Data spfData) throws PermErrorException {
         List aRecords;
         
         String host = this.host;
         try {
             host = new MacroExpand(spfData).expandDomain(host);
         } catch (Exception e) {
-            throw new ErrorException(e.getMessage());
+            throw new PermErrorException(e.getMessage());
         }
 
         try {
