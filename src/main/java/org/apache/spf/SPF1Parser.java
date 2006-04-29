@@ -19,6 +19,7 @@ package org.apache.spf;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,6 +30,7 @@ import org.apache.spf.mechanismn.IP4Mechanism;
 import org.apache.spf.mechanismn.MXMechanism;
 import org.apache.spf.mechanismn.PTRMechanism;
 import org.apache.spf.modifier.ExpModifier;
+import org.apache.spf.modifier.RedirectModifier;
 
 /**
  * This class can be used ass parses for validate SPF1-Records. It also offer a
@@ -45,7 +47,7 @@ public class SPF1Parser {
 
     private int checkIP6 = 128;
 
-    private Collection mechanism = new ArrayList();
+    private Collection commands = new ArrayList();
 
     /**
      * Regex based on http://ftp.rfc-editor.org/in-notes/authors/rfc4408.txt.
@@ -184,7 +186,8 @@ public class SPF1Parser {
     /**
      * ABNF: redirect = "redirect" "=" domain-spec
      */
-    private final String REDIRECT_REGEX = "redirect\\=" + DOMAIN_SPEC_REGEX;
+    private final String REDIRECT_REGEX = "redirect\\=(" + DOMAIN_SPEC_REGEX
+            + ")";
 
     /**
      * ABNF: explanation = "exp" "=" domain-spec
@@ -292,7 +295,7 @@ public class SPF1Parser {
                     a.init(getQualifier(newPart), checkDomain, checkIP4);
 
                     // add it to the collection
-                    mechanism.add(a);
+                    commands.add(a);
 
                 } else if (ip4Matcher.matches()) {
                     // Replace default mask
@@ -304,7 +307,7 @@ public class SPF1Parser {
                             checkIP4);
 
                     // add it to the collection
-                    mechanism.add(ip4);
+                    commands.add(ip4);
 
                 } else if (ip6Matcher.matches()) {
                     // TODO: Support ip6 Support at all
@@ -320,7 +323,7 @@ public class SPF1Parser {
                     m.init(getQualifier(newPart), checkDomain, checkIP4);
 
                     // add it to the collection
-                    mechanism.add(m);
+                    commands.add(m);
 
                 } else if (ptrMatcher.matches()) {
 
@@ -329,28 +332,40 @@ public class SPF1Parser {
                     p.init(getQualifier(newPart), checkDomain, checkIP4);
 
                     // add it to the collection
-                    mechanism.add(p);
+                    commands.add(p);
 
                 } else if (redirMatcher.matches()) {
-                    System.out.println("Redirect:       " + newPart);
+
+                    //create a new RedirectModifier and init it
+                    RedirectModifier r = new RedirectModifier();
+
+                    if (commands.contains(r)) {
+                        throw new PermErrorException(
+                                "More then one redirect modifier found in SPF-Record");
+                    }
+
+                    r.init(redirMatcher.group(1));
+
+                    // add to collection
+                    commands.add(r);
                 } else if (expMatcher.matches()) {
                     // replace all default values with the right one
                     replaceHelper(expMatcher);
 
-                    // create a new ExpMechanismn and init it
+                    // create a new ExpModifier and init it
                     ExpModifier e = new ExpModifier();
 
                     // SPF spec says that a PermError should be thrown if more
                     // the one exp was found
-                    if (mechanism.contains(e)) {
+                    if (commands.contains(e)) {
                         throw new PermErrorException(
-                                "More then one exp found in SPF-Record");
+                                "More then one exp modifier found in SPF-Record");
                     }
 
                     e.init(checkDomain);
 
                     // add it to the collection
-                    mechanism.add(e);
+                    commands.add(e);
 
                 } else if (inclMatcher.matches()) {
                     System.out.println("Include:        " + newPart);
@@ -362,7 +377,7 @@ public class SPF1Parser {
                     e.init(getQualifier(newPart), checkDomain, checkIP4);
 
                     // add it to the collection
-                    mechanism.add(e);
+                    commands.add(e);
                 } else if (allMatcher.matches()) {
 
                     // create a new PTRMechanismn and init it
@@ -370,7 +385,7 @@ public class SPF1Parser {
                     a.init(getQualifier(newPart));
 
                     // add it to the collection
-                    mechanism.add(a);
+                    commands.add(a);
 
                 } else {
                     throw new PermErrorException("Unknown mechanismn "
@@ -468,12 +483,38 @@ public class SPF1Parser {
     }
 
     /**
-     * Return the mechanismn as Collection
+     * Return the commands as Collection
      * 
-     * @return mechanism Collection of all mechanismn which should be used
+     * @return commands Collection of all mechanism which should be used
      */
-    public Collection getMechanism() {
-        return mechanism;
+    public Collection getCommands() {
+        return sortCommands(commands);
     }
 
+    /**
+     * Sort the commands. The redirect modifier must be the last!
+     * @param commands A Collection of all commands
+     * @return sortedCommands Sorted collection of the commands
+     */
+    private Collection sortCommands(Collection commands) {
+        Collection sortedCommands = new ArrayList();
+        Object redirect = null;
+
+        Iterator c = commands.iterator();
+        while (c.hasNext()) {
+            Object com = c.next();
+
+            if (com instanceof RedirectModifier) {
+                redirect = com;
+            } else {
+                sortedCommands.add(com);
+            }
+        }
+
+        if (redirect != null) {
+            sortedCommands.add(redirect);
+        }
+
+        return sortedCommands;
+    }
 }

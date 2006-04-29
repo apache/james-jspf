@@ -22,6 +22,7 @@ import java.util.Iterator;
 import org.apache.spf.mechanismn.AllMechanism;
 import org.apache.spf.mechanismn.Mechanism;
 import org.apache.spf.modifier.ExpModifier;
+import org.apache.spf.modifier.RedirectModifier;
 
 /**
  * This class is used to generate a SPF-Test and provided all intressting data.
@@ -58,7 +59,8 @@ public class SPF {
     }
 
     /**
-     * @param dnsProbe the dns provider
+     * @param dnsProbe
+     *            the dns provider
      */
     public SPF(DNSService dnsProbe) {
         super();
@@ -101,20 +103,31 @@ public class SPF {
             // Parse the record
             spfParser = new SPF1Parser(spfDnsEntry);
 
-            // get all mechanism
-            Iterator mech = spfParser.getMechanism().iterator();
+            // get all commands
+            Iterator com = spfParser.getCommands().iterator();
 
-            while (mech.hasNext()) {
+            while (com.hasNext()) {
                 String qualifier = "";
-                Object m = mech.next();
+                Object c = com.next();
 
-                if (m instanceof Mechanism) {
-                    Mechanism me = (Mechanism) m;
+                if (c instanceof Mechanism) {
+                    Mechanism me = (Mechanism) c;
                     result = qualifier = me.run(spfData);
-                } else if (m instanceof AllMechanism) {
-                    AllMechanism me = (AllMechanism) m;
+                } else if (c instanceof AllMechanism) {
+                    AllMechanism me = (AllMechanism) c;
                     result = qualifier = me.run();
-                } 
+                } else if (c instanceof ExpModifier) {
+                    ExpModifier mo = (ExpModifier) c;
+                    mo.run(spfData);
+                } else if (c instanceof RedirectModifier) {
+                    RedirectModifier mo = (RedirectModifier) c;
+                    mo.run(spfData);
+
+                    if (spfData.getRedirectDomain() != null) {
+                        result = checkSPF(spfData.getMailFrom(), spfData
+                                .getHostName(), spfData.getIpAddress());
+                    }
+                }
 
                 if (qualifier.equals(SPF1Utils.FAIL)) {
                     if (spfData.getExplanation().equals("")) {
@@ -147,8 +160,9 @@ public class SPF {
     }
 
     /**
-     * Get the explanation. The explanation is only set if the result is "-" = fail
-     *
+     * Get the explanation. The explanation is only set if the result is "-" =
+     * fail
+     * 
      * @return explanation
      */
     public String getExplanation() {

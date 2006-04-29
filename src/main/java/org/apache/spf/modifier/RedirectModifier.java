@@ -17,57 +17,29 @@
 
 package org.apache.spf.modifier;
 
-import org.apache.spf.PermErrorException;
 import org.apache.spf.MacroExpand;
+import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
 
-/**
- * This class represent a gerneric modifier
- * 
- * @author maurer
- * 
- */
-public abstract class GenericModifier {
-
-    protected String host;
+public class RedirectModifier extends GenericModifier{
 
     /**
-     * @param host
-     *            The hostname or ip
-     */
-    public void init(String host) {
-        this.host = host;
-    }
-
-    /**
-     * @param spfData
-     * @throws PermErrorException
-     */
-    protected String expandHost(SPF1Data spfData) throws PermErrorException {
-        String host = this.host;
-        if (host == null) {
-            host = spfData.getCurrentDomain();
-        } else {
-            try {
-                host = new MacroExpand(spfData).expandDomain(host);
-
-            } catch (Exception e) {
-                throw new PermErrorException(e.getMessage());
-            }
-        }
-        return host;
-    }
-
-    /**
-     * Run the mechanismn with the give SPF1Data
+     * Set the host which should be used for redirection and set it in SPF1Data so it can be accessed
+     * easy later if needed
      * 
      * @param spfData
-     *            The SPF1Data
-     * @return result If the not match it return null. Otherwise it returns the
-     *         modifier
-     * @throws PermErrorException
-     *             if somethink strange happen
+     *            The SPF1Data which should used
+     * @throws PermErrorException if an error is in the redirect modifier
      */
-    public abstract void run(SPF1Data spfData) throws PermErrorException;
+    public void run(SPF1Data spfData) throws PermErrorException {
+        String host = this.host;
+        try {
+            host = new MacroExpand(spfData).expandDomain(host);
+            spfData.setRedirectDomain(host);
+        } catch (Exception e) {
+            spfData.setRedirectDomain(null);
+            throw new PermErrorException("Error in redirect modifier: " + host);
+        }
+    }
 
 }
