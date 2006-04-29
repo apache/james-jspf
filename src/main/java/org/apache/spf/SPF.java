@@ -51,9 +51,9 @@ public class SPF {
 
     private boolean hasCommand = false;
 
-    private String qualifier = "";
+    private String qualifier = null;
 
-    private final String SPF_VERSION1 = "v=spf1";
+    private boolean match = false;
 
     /**
      * 
@@ -102,7 +102,7 @@ public class SPF {
 
             // Get the raw dns txt entry which contains a spf entry
             String spfDnsEntry = dnsProbe.getSpfRecord(spfData
-                    .getCurrentDomain(), SPF_VERSION1);
+                    .getCurrentDomain(), SPF1Utils.SPF_VERSION);
 
             // Parse the record
             spfParser = new SPF1Parser(spfDnsEntry);
@@ -118,6 +118,7 @@ public class SPF {
                 if (c instanceof Mechanism) {
                     Mechanism me = (Mechanism) c;
                     qualifier = me.run(spfData);
+
                 } else if (c instanceof AllMechanism) {
                     AllMechanism me = (AllMechanism) c;
                     qualifier = me.run();
@@ -129,17 +130,22 @@ public class SPF {
                     qualifier = mo.run(spfData);
                 }
 
-                if (qualifier.equals(SPF1Utils.FAIL)) {
-                    if (spfData.getExplanation().equals("")) {
-                        explanation = spfData.getDefaultExplanation();
-                    } else {
-                        explanation = spfData.getExplanation();
+                if (qualifier != null) {
+                    match = true;
+
+                    if (qualifier.equals(SPF1Utils.FAIL)) {
+                        if (spfData.getExplanation().equals("")) {
+                            explanation = spfData.getDefaultExplanation();
+                        } else {
+                            explanation = spfData.getExplanation();
+                        }
                     }
                 }
+
             }
 
             // If no match was found set the result to neutral 
-            if ((qualifier.equals("")) && (hasCommand == true)) {
+            if ((match == false) && (hasCommand == true)) {
                 result = SPF1Utils.NEUTRAL;
             }
             // Catch the exceptions and set the result
