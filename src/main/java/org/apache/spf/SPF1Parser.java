@@ -401,13 +401,13 @@ public class SPF1Parser {
             if (match.groupCount() > 1) {
                 // replace ip4 mask
                 if (match.group(2) != null) {
-                    checkIP4 = Integer.parseInt(match.group(2));
+                    checkIP4 = Integer.parseInt(match.group(2).toString());
                 }
 
                 if (match.groupCount() > 2) {
                     // replace ip6 mask
                     if (match.group(3) != null) {
-                        checkIP6 = Integer.parseInt(match.group(3));
+                        checkIP6 = Integer.parseInt(match.group(3).toString());
                     }
                 }
             }
@@ -423,10 +423,10 @@ public class SPF1Parser {
      *             if an PermError should be returned
      */
     private void replaceIP4Helper(Matcher match) throws PermErrorException {
-        if (match.groupCount() > 1) {
+        if (match.groupCount() > 2) {
             // replace ip4 mask
-            if (match.group(2) != null) {
-                checkIP4 = Integer.parseInt(match.group(1));
+            if (match.group(3) != null) {
+                checkIP4 = Integer.parseInt(match.group(3).toString());
             }
         }
     }

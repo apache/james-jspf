@@ -17,6 +17,11 @@
 
 package org.apache.spf;
 
+import java.util.Iterator;
+
+import org.apache.spf.mechanismn.AllMechanism;
+import org.apache.spf.mechanismn.Mechanism;
+
 /**
  * This class is used to generate a SPF-Test and provided all intressting data.
  * 
@@ -30,7 +35,7 @@ public class SPF {
 
     private String result = SPF1Utils.PASS;
 
-    private SPF1Record spfRecord;
+    private SPF1Parser spfParser;
 
     private SPF1Data spfData;
 
@@ -92,13 +97,28 @@ public class SPF {
             String spfDnsEntry = dnsProbe.getSpfRecord(spfData
                     .getCurrentDomain(), SPF_VERSION1);
 
-            // init the the spfrecord
-            spfRecord = new SPF1Record(spfDnsEntry, spfData);
+            // Parse the record
+            spfParser = new SPF1Parser(spfDnsEntry);
 
-            // Run the check and get the result
-            result = spfRecord.runCheck();
+            // get all mechanism
+            Iterator mech = spfParser.getMechanism().iterator();
 
-            explanation = spfRecord.getExplanation();
+            while (mech.hasNext()) {
+                String qualifier = "";
+                Object m = mech.next();
+
+                if (m instanceof Mechanism) {
+                    Mechanism me = (Mechanism) m;
+                    result = qualifier = me.run(spfData);
+                } else if (m instanceof AllMechanism) {
+                    AllMechanism me = (AllMechanism) m;
+                    result = qualifier = me.run();
+                }
+
+                if (qualifier.equals(SPF1Utils.FAIL)) {
+                    explanation = spfData.getExplanation();
+                }
+            }
 
             // Catch the exceptions and set the result
             // TODO: remove printStackTrace() if all was checked and works!
@@ -121,12 +141,13 @@ public class SPF {
 
     }
 
+    /**
+     * Get the explanation. The explanation is only set if the result is "-" = fail
+     *
+     * @return explanation
+     */
     public String getExplanation() {
         return explanation;
-    }
-
-    public SPF1Record getSpfDetails() throws Exception {
-        return spfRecord;
     }
 
     /**
@@ -203,35 +224,16 @@ public class SPF {
     public static void main(String[] args) {
         SPF spf = new SPF();
 
-        String ipAddress = null;
-        String mailFrom = null;
-        String host = null;
+        String ipAddress = "192.168.200.1";
+        String mailFrom = "nm@aol.com";
+        String host = "aol.com";
 
-        // parse cmdline arguments
-        if (args.length == 3) {
-            for (int i = 0; i < args.length; i++) {
-                if (args[0] != null) {
-                    ipAddress = args[0];
-                }
-                if (args[1] != null) {
-                    mailFrom = args[1];
-                }
-                if (args[2] != null) {
-                    host = args[2];
-                }
-            }
+        // run test !
+        String result = spf.checkSPF(ipAddress, mailFrom, host);
 
-            // run test !
-            String result = spf.checkSPF(ipAddress, mailFrom, host);
-
-            System.out.println("result:     " + result);
-            System.out.println("header:     " + spf.getHeader());
-            System.out.println("exp:        " + spf.getExplanation());
-
-        } else {
-            System.out
-                    .println("Usage: SPFJava.jar \"ipAddress\" \"mailFrom\" \"helo\"");
-        }
+        System.out.println("result:     " + result);
+        System.out.println("header:     " + spf.getHeader());
+        System.out.println("exp:        " + spf.getExplanation());
 
     }
 
