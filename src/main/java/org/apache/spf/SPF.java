@@ -22,9 +22,7 @@ import java.util.Iterator;
 import org.apache.spf.mechanismn.AllMechanism;
 import org.apache.spf.mechanismn.Mechanism;
 import org.apache.spf.modifier.ExpModifier;
-import org.apache.spf.modifier.GenericModifier;
 import org.apache.spf.modifier.Modifier;
-import org.apache.spf.modifier.RedirectModifier;
 
 /**
  * This class is used to generate a SPF-Test and provided all intressting data.
@@ -50,6 +48,10 @@ public class SPF {
     private String headerName = "Received-SPF";
 
     private String header = "";
+
+    private boolean hasCommand = false;
+
+    private String qualifier = null;
 
     private final String SPF_VERSION1 = "v=spf1";
 
@@ -109,21 +111,22 @@ public class SPF {
             Iterator com = spfParser.getCommands().iterator();
 
             while (com.hasNext()) {
-                String qualifier = "";
+
+                hasCommand = true;
                 Object c = com.next();
 
                 if (c instanceof Mechanism) {
                     Mechanism me = (Mechanism) c;
-                    result = qualifier = me.run(spfData);
+                    qualifier = me.run(spfData);
                 } else if (c instanceof AllMechanism) {
                     AllMechanism me = (AllMechanism) c;
-                    result = qualifier = me.run();
+                    qualifier = me.run();
                 } else if (c instanceof ExpModifier) {
                     ExpModifier mo = (ExpModifier) c;
                     mo.run(spfData);
                 } else if (c instanceof Modifier) {
                     Modifier mo = (Modifier) c;
-                    result = mo.run(spfData);
+                    qualifier = mo.run(spfData);
                 }
 
                 if (qualifier.equals(SPF1Utils.FAIL)) {
@@ -135,6 +138,10 @@ public class SPF {
                 }
             }
 
+            // If no match was found set the result to neutral 
+            if ((qualifier == null) && (hasCommand == true)) {
+                result = SPF1Utils.NEUTRAL;
+            }
             // Catch the exceptions and set the result
             // TODO: remove printStackTrace() if all was checked and works!
 
