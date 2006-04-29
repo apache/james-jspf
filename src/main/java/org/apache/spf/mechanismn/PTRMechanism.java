@@ -19,10 +19,12 @@ package org.apache.spf.mechanismn;
 
 import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
+import org.apache.spf.SPF1Parser;
 import org.apache.spf.util.IPAddr;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.MatchResult;
 
 /**
  * This class represent the ptr mechanism
@@ -33,10 +35,29 @@ import java.util.List;
 public class PTRMechanism extends GenericMechanism {
 
     /**
+     * ABNF: "ptr"
+     */
+    public static final String PTR_NAME_REGEX = "[pP][tT][rR]";
+
+    /**
+     * ABNF: "ptr" [ ":" domain-spec ]
+     */
+    public static final String PTR_VALUE_REGEX = "(?:\\:" + SPF1Parser.DOMAIN_SPEC_REGEX + ")?";
+
+    /**
+     * ABNF: PTR = "ptr" [ ":" domain-spec ]
+     */
+    public static final String PTR_REGEX = PTR_NAME_REGEX + PTR_VALUE_REGEX;
+    
+    public PTRMechanism() {
+        super(PTR_NAME_REGEX,PTR_VALUE_REGEX);
+    }
+
+    /**
      * 
      * @see org.apache.spf.mechanismn.GenericMechanism#run(org.apache.spf.SPF1Data)
      */
-    public String run(SPF1Data spfData) throws PermErrorException {
+    public boolean run(SPF1Data spfData) throws PermErrorException {
         String compareDomain;
         IPAddr compareIP;
         ArrayList validatedHosts = new ArrayList();
@@ -66,15 +87,21 @@ public class PTRMechanism extends GenericMechanism {
                 compareDomain = (String) validatedHosts.get(j);
                 if (compareDomain.equals(host)
                         || compareDomain.endsWith("." + host)) {
-                    return qualifier;
+                    return true;
                 }
             }
         } catch (Exception e) {
-            return null;
+            // TODO what exceptions do we want to catch with this?
+            return false;
         }
 
-        return null;
+        return false;
 
+    }
+
+    public void config(MatchResult params) throws PermErrorException {
+        // TODO Auto-generated method stub
+        
     }
 
 }

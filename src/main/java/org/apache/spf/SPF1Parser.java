@@ -17,21 +17,26 @@
 
 package org.apache.spf;
 
+import org.apache.spf.mechanismn.AMechanism;
+import org.apache.spf.mechanismn.AllMechanism;
+import org.apache.spf.mechanismn.Directive;
+import org.apache.spf.mechanismn.ExistsMechanism;
+import org.apache.spf.mechanismn.IP4Mechanism;
+import org.apache.spf.mechanismn.IP6Mechanism;
+import org.apache.spf.mechanismn.IncludeMechanism;
+import org.apache.spf.mechanismn.MXMechanism;
+import org.apache.spf.mechanismn.Mechanism;
+import org.apache.spf.mechanismn.PTRMechanism;
+import org.apache.spf.modifier.ExpModifier;
+import org.apache.spf.modifier.Modifier;
+import org.apache.spf.modifier.RedirectModifier;
+import org.apache.spf.modifier.UnknownModifier;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.spf.mechanismn.AMechanism;
-import org.apache.spf.mechanismn.AllMechanism;
-import org.apache.spf.mechanismn.ExistsMechanism;
-import org.apache.spf.mechanismn.IP4Mechanism;
-import org.apache.spf.mechanismn.IncludeMechanism;
-import org.apache.spf.mechanismn.MXMechanism;
-import org.apache.spf.mechanismn.PTRMechanism;
-import org.apache.spf.modifier.ExpModifier;
-import org.apache.spf.modifier.RedirectModifier;
 
 /**
  * This class can be used ass parses for validate SPF1-Records. It also offer a
@@ -42,14 +47,10 @@ import org.apache.spf.modifier.RedirectModifier;
  */
 public class SPF1Parser {
 
-    private String checkDomain = null;
-
-    private int checkIP4 = 32;
-
-    private int checkIP6 = 128;
-
-    private Collection commands = new ArrayList();
-
+    private Collection directives = new ArrayList();
+    
+    private Collection modifiers = new ArrayList();
+    
     /**
      * Regex based on http://ftp.rfc-editor.org/in-notes/authors/rfc4408.txt.
      * This will be the next official SPF-Spec
@@ -59,21 +60,21 @@ public class SPF1Parser {
     // TODO: check all regex!
     // TODO: fix the Quantifier problem
     // TODO: ignore case 
-    private final String ALPHA_DIGIT_PATTERN = "[a-zA-Z0-9]";
+    private static final String ALPHA_DIGIT_PATTERN = "[a-zA-Z0-9]";
 
-    private final String ALPHA_PATTERN = "[a-zA-Z]";
+    private static final String ALPHA_PATTERN = "[a-zA-Z]";
 
-    private final String MACRO_LETTER_PATTERN = "[lsoditpvhcrLSODITPVHCR]";
+    private static final String MACRO_LETTER_PATTERN = "[lsoditpvhcrLSODITPVHCR]";
 
-    private final String TRANSFORMERS_REGEX = "\\d*[r]?";
+    private static final String TRANSFORMERS_REGEX = "\\d*[r]?";
 
-    private final String DELEMITER_REGEX = "[\\.\\-\\+,/_\\=]";
+    private static final String DELEMITER_REGEX = "[\\.\\-\\+,/_\\=]";
 
-    private final String MACRO_EXPAND_REGEX = "\\% (?:\\{"
+    private static final String MACRO_EXPAND_REGEX = "\\% (?:\\{"
             + MACRO_LETTER_PATTERN + TRANSFORMERS_REGEX + DELEMITER_REGEX + "*"
             + "\\}|\\%|\\_|\\-)";
 
-    private final String MACRO_LITERAL_REGEX = "[\\x21-\\x24\\x26-\\x7e]"; // TODO:
+    private static final String MACRO_LITERAL_REGEX = "[\\x21-\\x24\\x26-\\x7e]"; // TODO:
 
     // Check
     // if
@@ -84,7 +85,7 @@ public class SPF1Parser {
     /**
      * ABNF: macro-string = *( macro-expand / macro-literal )
      */
-    private final String MACRO_STRING_REGEX = "(?:" + MACRO_EXPAND_REGEX + "|"
+    private static final String MACRO_STRING_REGEX = "(?:" + MACRO_EXPAND_REGEX + "|"
             + MACRO_LITERAL_REGEX + "{1})*";
 
     /**
@@ -92,7 +93,7 @@ public class SPF1Parser {
      * alphanum / "-" ) alphanum ) ; LDH rule plus additional TLD restrictions ;
      * (see [RFC3696], Section 2)
      */
-    private final String TOP_LABEL_REGEX = "(?:" + ALPHA_DIGIT_PATTERN + "*"
+    private static final String TOP_LABEL_REGEX = "(?:" + ALPHA_DIGIT_PATTERN + "*"
             + ALPHA_PATTERN + "{1}" + ALPHA_DIGIT_PATTERN + "*|(?:"
             + ALPHA_DIGIT_PATTERN + "+" + "\\-" + "(?:" + ALPHA_DIGIT_PATTERN
             + "|\\-)*" + ALPHA_DIGIT_PATTERN + "))";
@@ -100,374 +101,253 @@ public class SPF1Parser {
     /**
      * ABNF: domain-end = ( "." toplabel [ "." ] ) / macro-expand
      */
-    private final String DOMAIN_END_REGEX = "(?:\\." + TOP_LABEL_REGEX + "\\.?"
+    private static final String DOMAIN_END_REGEX = "(?:\\." + TOP_LABEL_REGEX + "\\.?"
             + "|" + MACRO_EXPAND_REGEX + ")";
 
     /**
      * ABNF: domain-spec = macro-string domain-end
      */
-    private final String DOMAIN_SPEC_REGEX = "(" + MACRO_STRING_REGEX
+    static public final String DOMAIN_SPEC_REGEX = "(" + MACRO_STRING_REGEX
             + DOMAIN_END_REGEX + ")";
 
     /**
      * ABNF: qualifier = "+" / "-" / "?" / "~"
      */
-    private final String QUALIFIER_PATTERN = "[\\+\\-\\?\\~]";
-
-    /**
-     * ABNF: include = "include" ":" domain-spec
-     */
-    private final String INCLUDE_REGEX = "include\\:(" + DOMAIN_SPEC_REGEX
-            + ")";
-
-    /**
-     * ABNF: exists = "exists" ":" domain-spec
-     */
-    private final String EXISTS_REGEX = "exists\\:" + DOMAIN_SPEC_REGEX;
-
-    /**
-     * ABNF: ip4-cidr-length = "/" 1*DIGIT
-     */
-    private final String IP4_CIDR_LENGTH_REGEX = "/(\\d+)";
-
-    /**
-     * ABNF: ip6-cidr-length = "/" 1*DIGIT
-     */
-    private final String IP6_CIDR_LENGTH_REGEX = "/(\\d+)";
+    private static final String QUALIFIER_PATTERN = "[\\+\\-\\?\\~]";
 
     /**
      * ABNF: dual-cidr-length = [ ip4-cidr-length ] [ "/" ip6-cidr-length ]
      */
-    private final String DUAL_CIDR_LENGTH_REGEX = "(?:" + IP4_CIDR_LENGTH_REGEX
-            + ")?" + "(?:/" + IP6_CIDR_LENGTH_REGEX + ")?";
+    static public final String DUAL_CIDR_LENGTH_REGEX = "(?:" + IP4Mechanism.IP4_CIDR_LENGTH_REGEX
+            + ")?" + "(?:/" + IP6Mechanism.IP6_CIDR_LENGTH_REGEX + ")?";
 
-    /**
-     * TODO ABNF: IP4 = "ip4" ":" ip4-network [ ip4-cidr-length ]
-     */
-    private final String IP4_REGEX = "ip4\\:([0-9.]+)" + "("
-            + IP4_CIDR_LENGTH_REGEX + ")?";
-
-    /**
-     * TODO ABNF: IP6 = "ip6" ":" ip6-network [ ip6-cidr-length ]
-     */
-    private final String IP6_REGEX = "ip6\\:[0-9A-Fa-f\\:\\.]+" + "(?:"
-            + IP6_CIDR_LENGTH_REGEX + ")?";
-
-    /**
-     * ABNF: A = "a" [ ":" domain-spec ] [ dual-cidr-length ]
-     */
-    private final String A_REGEX = "a(?:\\:" + DOMAIN_SPEC_REGEX + ")?" + "(?:"
-            + DUAL_CIDR_LENGTH_REGEX + ")?";
-
-    /**
-     * ABNF: MX = "mx" [ ":" domain-spec ] [ dual-cidr-length ]
-     */
-    private final String MX_REGEX = "mx(?:\\:" + DOMAIN_SPEC_REGEX + ")?"
-            + "(?:" + DUAL_CIDR_LENGTH_REGEX + ")?";
-
-    /**
-     * ABNF: PTR = "ptr" [ ":" domain-spec ]
-     */
-    private final String PTR_REGEX = "ptr(?:\\:" + DOMAIN_SPEC_REGEX + ")?";
 
     /**
      * ABNF: mechanism = ( all / include / A / MX / PTR / IP4 / IP6 / exists )
      */
-    private final String MECHANISM_REGEX = "(?:all|" + INCLUDE_REGEX + "|"
-            + A_REGEX + "|" + MX_REGEX + "|" + PTR_REGEX + "|" + IP4_REGEX
-            + "|" + IP6_REGEX + "|" + EXISTS_REGEX + ")";
+    private static final String MECHANISM_REGEX = "(?:" + AllMechanism.ALL_REGEX  + "|" + IncludeMechanism.INCLUDE_REGEX + "|"
+            + AMechanism.A_REGEX + "|" + MXMechanism.MX_REGEX + "|" + PTRMechanism.PTR_REGEX + "|" + IP4Mechanism.IP4_REGEX
+            + "|" + IP6Mechanism.IP6_REGEX + "|" + ExistsMechanism.EXISTS_REGEX + ")";
 
+    /**
+     * ABNF: mechanism = ( all / include / A / MX / PTR / IP4 / IP6 / exists )
+     * define mechanisms names but "all": all is different from other mechanisms because it does not
+     * take parameters.
+     */
+    private static final String MECHANISM_NAME_STEP_REGEX = "(?:"+ AllMechanism.ALL_NAME_REGEX + "|" + IncludeMechanism.INCLUDE_NAME_REGEX +"|"+ AMechanism.A_NAME_REGEX +"|"+ MXMechanism.MX_NAME_REGEX +"|" + PTRMechanism.PTR_NAME_REGEX + "|" + IP4Mechanism.IP4_NAME_REGEX + "|" + IP6Mechanism.IP6_NAME_REGEX + "|" + ExistsMechanism.EXISTS_NAME_REGEX +")";
+    
+    /**
+     * TODO check that MACRO_STRING_REGEX already include all the available chars in mechanism parameters
+     */
+    private static final String MECHANISM_VALUE_STEP_REGEX = MACRO_STRING_REGEX;
+    
     /**
      * ABNF: name = ALPHA *( ALPHA / DIGIT / "-" / "_" / "." )
      */
-    private final String NAME_REGEX = ALPHA_PATTERN + "{1}"
+    private static final String NAME_REGEX = ALPHA_PATTERN + "{1}"
             + "[A-Za-z0-9\\-\\_\\.]*";
 
     /**
      * ABNF: unknown-modifier = name "=" macro-string
      */
-    private final String UNKNOWN_MODIFIER_REGEX = NAME_REGEX + "\\="
-            + MACRO_STRING_REGEX;
+    private static final String UNKNOWN_MODIFIER_REGEX = "("+ NAME_REGEX + ")\\=("
+            + MACRO_STRING_REGEX +")";
+
+    /**
+     * ABNF: "redirect"
+     */
+    private static final String REDIRECT_NAME_REGEX = "[rR][eE][dD][iI][rR][eE][cC][tT]";
+
+    /**
+     * ABNF: domain-spec
+     */
+    private static final String REDIRECT_VALUE_REGEX = DOMAIN_SPEC_REGEX;
 
     /**
      * ABNF: redirect = "redirect" "=" domain-spec
      */
-    private final String REDIRECT_REGEX = "redirect\\=(" + DOMAIN_SPEC_REGEX
-            + ")";
+    private static final String REDIRECT_REGEX = REDIRECT_NAME_REGEX + "\\=" + REDIRECT_VALUE_REGEX;
+
+    /**
+     * ABNF: "exp"
+     */
+    private static final String EXP_NAME_REGEX = "[eE][xX][pP]";
+
+    /**
+     * ABNF: domain-spec
+     */
+    private static final String EXPLANATION_VALUE_REGEX = DOMAIN_SPEC_REGEX;
 
     /**
      * ABNF: explanation = "exp" "=" domain-spec
      */
-    private final String EXPLANATION_REGEX = "exp\\=" + DOMAIN_SPEC_REGEX;
+    private static final String EXPLANATION_REGEX = EXP_NAME_REGEX + "\\=" + EXPLANATION_VALUE_REGEX;
 
     /**
      * ABNF: modifier = redirect / explanation / unknown-modifier
      */
-    private final String MODIFIER_REGEX = "(?:" + REDIRECT_REGEX + "|"
+    private static final String MODIFIER_REGEX = "(?:" + REDIRECT_REGEX + "|"
             + EXPLANATION_REGEX + "|" + UNKNOWN_MODIFIER_REGEX + ")";
 
     /**
      * ABNF: directive = [ qualifier ] mechanism
      */
-    private final String DIRECTIVE_REGEX = QUALIFIER_PATTERN + "?("
+    private static final String DIRECTIVE_REGEX = QUALIFIER_PATTERN + "?("
             + MECHANISM_REGEX + ")";
+
+    /**
+     * ABNF: 1*SP
+     */
+    private static final String TERMS_SEPARATOR_REGEX = "[ ]+";
+
+    /**
+     * ABNF: ( directive / modifier )
+     */
+    private static final String TERM_REGEX = "(?:" + DIRECTIVE_REGEX + "|" + MODIFIER_REGEX + ")";
+
+    /**
+     * ABNF: directive = [ qualifier ] mechanism
+     * 
+     * This is used for the step-by-step parser, don't change the groups!
+     * 
+     * 1) QUALIFIER
+     * 2) ALL
+     * 3) MECHANISM NAME
+     * 4) MECHANISM VALUE
+     * 5) MODIFIER NAME
+     * 6) MODIFIER VALUE
+     */
+    private static final String TERM_STEP_REGEX = "(?:(" + QUALIFIER_PATTERN + "{1})?(?:("+ MECHANISM_NAME_STEP_REGEX + ")([\\:/]{1}" + MECHANISM_VALUE_STEP_REGEX + ")?)|(?:"+ UNKNOWN_MODIFIER_REGEX +"))";
+    private static final int TERM_STEP_REGEX_QUALIFIER_POS = 1;
+    private static final int TERM_STEP_REGEX_MECHANISM_NAME_POS = 2;
+    private static final int TERM_STEP_REGEX_MECHANISM_VALUE_POS = 3;
+    private static final int TERM_STEP_REGEX_MODIFIER_NAME_POS = 4;
+    private static final int TERM_STEP_REGEX_MODIFIER_VALUE_POS = 5;
 
     /**
      * ABNF: terms = *( 1*SP ( directive / modifier ) )
      */
-    private final String TERMS_REGEX = "(?:[ ]+(?:" + DIRECTIVE_REGEX + "|"
-            + MODIFIER_REGEX + "))*";
-
-    private final String ALL_REGEX = "all";
+    private static final String TERMS_REGEX = "(?:" + TERMS_SEPARATOR_REGEX + ""+ TERM_REGEX +")*";
+    
+    /**
+     * ABNF: record = "vspf1" terms
+     */
+    private static final String RECORD_REGEX = Pattern.quote(SPF1Utils.SPF_VERSION)+TERMS_REGEX;
+    
 
     public SPF1Parser(String spfRecord) throws PermErrorException,
             NoneException {
-
-        if (!isValidSPFVersion(spfRecord)) {
+        
+        // check the version "header"
+        if (!spfRecord.startsWith(SPF1Utils.SPF_VERSION+" ")) {
             throw new NoneException("No valid SPF Record: " + spfRecord);
-        } else {
-            System.out.println(TERMS_REGEX);
-
-            String mainRecord = spfRecord.replaceFirst(SPF1Utils.SPF_VERSION,
-                    "");
-
-            Pattern p = Pattern.compile(TERMS_REGEX);
-            Matcher m = p.matcher(mainRecord);
-            if (!m.matches()) {
-                throw new PermErrorException("Not Parsable: " + mainRecord);
-            } else {
-                // parse the record
-                parseRecord(mainRecord);
-            }
         }
-    }
 
-    /**
-     * 
-     * @param record
-     *            The TXT or SPF Record to parse for mechanismn
-     * @return mechanismn Collection of the mechanismn classes that should be
-     *         used
-     * @throws PermErrorException
-     *             This Exception will be thrown if an PermError should be
-     *             returned
-     */
-    private void parseRecord(String record) throws PermErrorException {
+        // single step regexp matcher
+        Pattern p = Pattern.compile(RECORD_REGEX);
+        Matcher m = p.matcher(spfRecord);
+        if (!m.matches()) {
+            throw new PermErrorException("Not Parsable: " + spfRecord);
+        }
+        
+        // the previous check could be skipped once we'll finish the step-by-step parsing
+        // we could simply keep it to have an "extra" input check.
+        
+        // extract terms
+        String[] terms = Pattern.compile(TERMS_SEPARATOR_REGEX).split(spfRecord.replaceFirst(SPF1Utils.SPF_VERSION,""));
+        
+        Pattern termPattern = Pattern.compile(TERM_STEP_REGEX);
+        
+        // cycle terms
+        for (int i = 0; i < terms.length; i++) {
+            Matcher termMatcher = termPattern.matcher(terms[i]);
+            if (!termMatcher.matches()) {
+                throw new PermErrorException("Term ["+terms[i]+"] is not syntactically valid: "+termPattern.pattern());
+            }
+            
+            // DEBUG
+            System.out.println("Qualifier : "+termMatcher.group(TERM_STEP_REGEX_QUALIFIER_POS));
+            System.out.println("Mech Name : "+termMatcher.group(TERM_STEP_REGEX_MECHANISM_NAME_POS));
+            System.out.println("Mech Value: "+termMatcher.group(TERM_STEP_REGEX_MECHANISM_VALUE_POS));
+            System.out.println("Mod Name  : "+termMatcher.group(TERM_STEP_REGEX_MODIFIER_NAME_POS));
+            System.out.println("Mod Value : "+termMatcher.group(TERM_STEP_REGEX_MODIFIER_VALUE_POS));
+            
+            // true if we matched a modifier, false if we matched a directive
+            String modifierName = termMatcher.group(TERM_STEP_REGEX_MODIFIER_NAME_POS);
+            if (modifierName != null) {
+                String modifierValue = termMatcher.group(TERM_STEP_REGEX_MODIFIER_VALUE_POS);
+                Pattern redirPattern = Pattern.compile(REDIRECT_VALUE_REGEX);
+                Matcher redirMatcher = redirPattern.matcher(modifierValue);
 
-        String[] part = record.trim().split(" ");
-        Pattern ip4Pattern = Pattern.compile(QUALIFIER_PATTERN + "*" + IP4_REGEX);
-        Pattern ip6Pattern = Pattern.compile(QUALIFIER_PATTERN + "*" + IP6_REGEX);
-        Pattern aPattern = Pattern.compile(QUALIFIER_PATTERN + "*" + A_REGEX);
-        Pattern mxPattern = Pattern.compile(QUALIFIER_PATTERN + "*" + MX_REGEX);
-        Pattern ptrPattern = Pattern.compile(QUALIFIER_PATTERN + "*" + PTR_REGEX);
-        Pattern redirPattern = Pattern.compile(QUALIFIER_PATTERN + "*" + REDIRECT_REGEX);
-        Pattern expPattern = Pattern.compile(EXPLANATION_REGEX);
-        Pattern inclPattern = Pattern.compile(QUALIFIER_PATTERN + "*" + INCLUDE_REGEX);
-        Pattern existsPattern = Pattern.compile(QUALIFIER_PATTERN + "*" + EXISTS_REGEX);
-        Pattern allPattern = Pattern.compile(QUALIFIER_PATTERN + "*" + ALL_REGEX);
-        for (int i = 0; i < part.length; i++) {
+                Pattern expPattern = Pattern.compile(EXPLANATION_VALUE_REGEX);
+                Matcher expMatcher = expPattern.matcher(modifierValue);
 
-            String newPart = part[i].trim();
-            checkDomain = null;
-
-            checkIP4 = 32;
-            checkIP6 = 128;
-
-            if (!newPart.equals("")) {
-
-                // TODO: replace the System.out.println() with the
-                // correct command calls
-
-                Matcher aMatcher = aPattern.matcher(newPart);
-                Matcher ip4Matcher = ip4Pattern.matcher(newPart);
-                Matcher ip6Matcher = ip6Pattern.matcher(newPart);
-                Matcher mxMatcher = mxPattern.matcher(newPart);
-                Matcher ptrMatcher = ptrPattern.matcher(newPart);
-                Matcher redirMatcher = redirPattern.matcher(newPart);
-                Matcher expMatcher = expPattern.matcher(newPart);
-                Matcher inclMatcher = inclPattern.matcher(newPart);
-                Matcher existsMatcher = existsPattern.matcher(newPart);
-                Matcher allMatcher = allPattern.matcher(newPart);
-
-                if (aMatcher.matches()) {
-
-                    // replace all default values with the right one
-                    replaceHelper(aMatcher);
-
-                    // create a new AMechanismn and init it
-                    AMechanism a = new AMechanism();
-                    a.init(getQualifier(newPart), checkDomain, checkIP4);
-
-                    // add it to the collection
-                    commands.add(a);
-
-                } else if (ip4Matcher.matches()) {
-                    // Replace default mask
-                    replaceIP4Helper(ip4Matcher);
-
-                    // create a new IP4Mechanismn and init it
-                    IP4Mechanism ip4 = new IP4Mechanism();
-                    ip4.init(getQualifier(newPart), ip4Matcher.group(1),
-                            checkIP4);
-
-                    // add it to the collection
-                    commands.add(ip4);
-
-                } else if (ip6Matcher.matches()) {
-
-                    // TODO: Support ip6 Support at all
-                    System.out.println("IP6-Mechanismn: " + newPart);
-                } else if (mxMatcher.matches()) {
-
-                    // replace all default values with the right one
-                    replaceHelper(mxMatcher);
-
-                    // create a new MXMechanismn and init it
-                    MXMechanism m = new MXMechanism();
-                    m.init(getQualifier(newPart), checkDomain, checkIP4);
-
-                    // add it to the collection
-                    commands.add(m);
-
-                } else if (ptrMatcher.matches()) {
-
-                    // create a new PTRMechanismn and init it
-                    PTRMechanism p = new PTRMechanism();
-                    p.init(getQualifier(newPart), checkDomain, checkIP4);
-
-                    // add it to the collection
-                    commands.add(p);
-
-                } else if (redirMatcher.matches()) {
-
-                    //create a new RedirectModifier and init it
-                    RedirectModifier r = new RedirectModifier();
-
-                    if (commands.contains(r)) {
-                        throw new PermErrorException(
-                                "More then one redirect modifier found in SPF-Record");
+                Modifier mod = null;
+                // MODIFIER
+                if (Pattern.compile(REDIRECT_NAME_REGEX).matcher(modifierName).matches()) {
+                    // redirect
+                    if (!redirMatcher.matches()) {
+                        throw new PermErrorException("Error parsing redirect value");
                     }
-
-                    r.init(redirMatcher.group(1));
-
-                    // add to collection
-                    commands.add(r);
-                } else if (expMatcher.matches()) {
-                    // replace all default values with the right one
-                    replaceHelper(expMatcher);
-
-                    // create a new ExpModifier and init it
-                    ExpModifier e = new ExpModifier();
-
-                    // SPF spec says that a PermError should be thrown if more
-                    // the one exp was found
-                    if (commands.contains(e)) {
-                        throw new PermErrorException(
-                                "More then one exp modifier found in SPF-Record");
+                    // TODO check error for multiple modifiers 
+//                  if (directives.contains(e)) {
+//                      throw new PermErrorException(
+//                              "More then one exp modifier found in SPF-Record");
+//                  }
+                    mod = new RedirectModifier();
+                    ((RedirectModifier) mod).init(redirMatcher.group(1));
+                } else if (Pattern.compile(EXP_NAME_REGEX).matcher(modifierName).matches()) {
+                    // exp
+                    if (!expMatcher.matches()) {
+                        throw new PermErrorException("Error parsing redirect value");
                     }
-
-                    e.init(checkDomain);
-
-                    // add it to the collection
-                    commands.add(e);
-
-                } else if (inclMatcher.matches()) {
-
-                    // create a new IncludeModifier and init it
-                    IncludeMechanism incl = new IncludeMechanism();
-                    incl.init(getQualifier(inclMatcher.group(1)),null,0);
-
-                    // add it to the collection
-                    commands.add(incl);
-
-                } else if (existsMatcher.matches()) {
-
-                    // create a new ExistsMechanismn and init it
-                    ExistsMechanism e = new ExistsMechanism();
-                    e.init(getQualifier(newPart), checkDomain, checkIP4);
-
-                    // add it to the collection
-                    commands.add(e);
-                } else if (allMatcher.matches()) {
-
-                    // create a new AllMechanismn and init it
-                    AllMechanism a = new AllMechanism();
-                    a.init(getQualifier(newPart));
-
-                    // add it to the collection
-                    commands.add(a);
-
+                    // TODO check error for multiple modifiers 
+//                    if (directives.contains(e)) {
+//                        throw new PermErrorException(
+//                                "More then one exp modifier found in SPF-Record");
+//                    }
+                    mod = new ExpModifier();
+                    ((ExpModifier) mod).init(redirMatcher.group(1));
                 } else {
-                    throw new PermErrorException("Unknown mechanismn "
-                            + newPart);
+                    // unknown
+                    mod = new UnknownModifier();
                 }
-
-            }
-        }
-    }
-
-    /**
-     * Method that helps to replace domain,ip4 mask, ip6 mask with the right
-     * values
-     * 
-     * @param match
-     *            The matcher for the mechanismn
-     * @throws PermErrorException
-     *             if an PermError should be returned
-     */
-    private void replaceHelper(Matcher match) throws PermErrorException {
-        if (match.groupCount() > 0) {
-            // replace domain
-            if (match.group(1) != null) {
-                checkDomain = match.group(1);
-
-            }
-
-            if (match.groupCount() > 1) {
-                // replace ip4 mask
-                if (match.group(2) != null) {
-                    checkIP4 = Integer.parseInt(match.group(2).toString());
+                modifiers.add(mod);
+                
+            } else {
+                // DIRECTIVE
+                String qualifier = termMatcher.group(TERM_STEP_REGEX_QUALIFIER_POS);
+                String mechName = termMatcher.group(TERM_STEP_REGEX_MECHANISM_NAME_POS);
+                String mechValue = termMatcher.group(TERM_STEP_REGEX_MECHANISM_VALUE_POS);
+                
+                Mechanism mech = null;
+                if (Pattern.compile(AllMechanism.ALL_NAME_REGEX).matcher(mechName).matches()) {
+                    mech = new AllMechanism();
+                } else if (Pattern.compile(IncludeMechanism.INCLUDE_NAME_REGEX).matcher(mechName).matches()) {
+                    mech = new IncludeMechanism();
+                } else if (Pattern.compile(AMechanism.A_NAME_REGEX).matcher(mechName).matches()) {
+                    mech = new AMechanism();
+                } else if (Pattern.compile(MXMechanism.MX_NAME_REGEX).matcher(mechName).matches()) {
+                    mech = new MXMechanism();
+                } else if (Pattern.compile(IP4Mechanism.IP4_NAME_REGEX).matcher(mechName).matches()) {
+                    mech = new IP4Mechanism();
+                } else if (Pattern.compile(IP6Mechanism.IP6_NAME_REGEX).matcher(mechName).matches()) {
+                    mech = new IP6Mechanism();
+                } else if (Pattern.compile(PTRMechanism.PTR_NAME_REGEX).matcher(mechName).matches()) {
+                    mech = new PTRMechanism();
+                } else if (Pattern.compile(ExistsMechanism.EXISTS_NAME_REGEX).matcher(mechName).matches()) {
+                    mech = new ExistsMechanism();
                 }
-
-                if (match.groupCount() > 2) {
-                    // replace ip6 mask
-                    if (match.group(3) != null) {
-                        checkIP6 = Integer.parseInt(match.group(3).toString());
-                    }
-                }
+                ((IncludeMechanism) mech).init(mechValue);
+                directives.add(new Directive(getQualifier(qualifier), mech));
             }
+            
         }
-    }
 
-    /**
-     * Method that helps to replace ip4 mask with the right value
-     * 
-     * @param match
-     *            The matcher for the mechanismn
-     * @throws PermErrorException
-     *             if an PermError should be returned
-     */
-    private void replaceIP4Helper(Matcher match) throws PermErrorException {
-        if (match.groupCount() > 2) {
-            // replace ip4 mask
-            if (match.group(3) != null) {
-                checkIP4 = Integer.parseInt(match.group(3).toString());
-            }
-        }
-    }
-
-    /**
-     * Check if the SPFRecord starts with valid version
-     * 
-     * @param record
-     *            The Record to check
-     * @return true or false
-     */
-    private boolean isValidSPFVersion(String record) {
-        if (record.startsWith(SPF1Utils.SPF_VERSION + " ")) {
-            return true;
-        }
-        return false;
+        // parse the record
+        
+        // TEMPorary disabled
+        // parseRecord(mainRecord);
     }
 
     /**
@@ -480,8 +360,9 @@ public class SPF1Parser {
      *         for the result the return when match
      */
     private String getQualifier(String mechRecord) {
-
-        if (mechRecord.startsWith(SPF1Utils.FAIL)) {
+        if (mechRecord == null) {
+            return SPF1Utils.PASS;
+        } else if (mechRecord.startsWith(SPF1Utils.FAIL)) {
             return SPF1Utils.FAIL;
         } else if (mechRecord.startsWith(SPF1Utils.SOFTFAIL)) {
             return SPF1Utils.SOFTFAIL;
@@ -497,8 +378,8 @@ public class SPF1Parser {
      * 
      * @return commands Collection of all mechanism which should be used
      */
-    public Collection getCommands() {
-        return sortCommands(commands);
+    public Collection getDirectives() {
+        return sortCommands(directives);
     }
 
     /**
@@ -526,5 +407,9 @@ public class SPF1Parser {
         }
 
         return sortedCommands;
+    }
+
+    public Collection getModifiers() {
+        return modifiers;
     }
 }

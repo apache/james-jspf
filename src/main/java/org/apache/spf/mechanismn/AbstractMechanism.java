@@ -20,27 +20,42 @@ package org.apache.spf.mechanismn;
 import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
 
-/**
- * This Interface represent a mechanismn 
- * 
- *@author Norman Maurer <nm@byteaction.de>
- *
- */
-public interface Mechanism {
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public abstract class AbstractMechanism implements Mechanism {
     
-    /**
-     * Configuration
-     * @param params
-     * @throws PermErrorException
-     */
-    public void init(String params) throws PermErrorException;
+    protected Pattern namePattern;
+    protected Pattern valuePattern;
+
+    
+    public void init(String value) throws PermErrorException {
+        Matcher m = valuePattern.matcher(value);
+        if (!m.matches()) {
+            throw new PermErrorException("Value does not match");
+        }
+        config(m.toMatchResult());
+    }
+
+    public AbstractMechanism(String name, String value) {
+        namePattern = Pattern.compile(name);
+        valuePattern = Pattern.compile(value);
+    }
+    
 
     /**
-     * Run the mechanismn  with the give SPF1Data
-     * @param spfData The SPF1Data
-     * @return result if it matches
-     * @throws PermErrorException if somethink strange happen
+     * Run the mechanismn with the give SPF1Data
+     * 
+     * @param spfData
+     *            The SPF1Data
+     * @return result If the not match it return null. Otherwise it returns the
+     *         modifier
+     * @throws PermErrorException
+     *             if somethink strange happen
      */
-    public boolean run(SPF1Data spfData) throws PermErrorException;
+    public abstract boolean run(SPF1Data spfData) throws PermErrorException;
+    
+    public abstract void config(MatchResult params) throws PermErrorException;
 
 }

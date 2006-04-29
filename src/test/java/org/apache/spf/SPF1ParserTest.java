@@ -51,6 +51,8 @@ public class SPF1ParserTest extends TestCase {
 
         try {
             
+            System.out.println("testing ["+data.recIn+"]");
+            
             SPF1Parser r = new SPF1Parser(data.recIn);
             
             assertEquals("Expected <" + data.errMsg + "> but was <"

@@ -17,38 +17,40 @@
 
 package org.apache.spf.mechanismn;
 
-import org.apache.spf.MacroExpand;
 import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
-import org.apache.spf.SPF1Parser;
-
-import java.util.List;
 
 /**
- * This class represent the exists mechanism
+ * This class represent the ip4 mechanism
  * 
  * @author Norman Maurer <nm@byteaction.de>
- *
+ * 
  */
-public class ExistsMechanism extends GenericMechanism {
+public class IP6Mechanism extends GenericMechanism {
 
     /**
-     * ABNF: "exists"
+     * ABNF: "ip6"
      */
-    public static final String EXISTS_NAME_REGEX = "[eE][xX][iI][sS][tT][sS]";
-    
+    public static final String IP6_NAME_REGEX = "[iI][pP][6]";
+
     /**
-     * ABNF: "exists" ":" domain-spec
+     * ABNF: ip6-cidr-length = "/" 1*DIGIT
      */
-    public static final String EXISTS_VALUE_REGEX = "\\:" + SPF1Parser.DOMAIN_SPEC_REGEX;
-    
+    static public final String IP6_CIDR_LENGTH_REGEX = "/(\\d+)";
+
     /**
-     * ABNF: exists = "exists" ":" domain-spec
+     * TODO ip6-network [ ip6-cidr-length ]
      */
-    public static final String EXISTS_REGEX = EXISTS_NAME_REGEX + EXISTS_VALUE_REGEX;
+    public static final String IP6_VALUE_REGEX = "\\:[0-9A-Fa-f\\:\\.]+" + "(?:"
+            + IP6_CIDR_LENGTH_REGEX + ")?";
+
+    /**
+     * TODO ABNF: IP6 = "ip6" ":" ip6-network [ ip6-cidr-length ]
+     */
+    public static final String IP6_REGEX = IP6_NAME_REGEX + IP6_VALUE_REGEX;
     
-    public ExistsMechanism() {
-        super(EXISTS_NAME_REGEX,EXISTS_VALUE_REGEX);
+    public IP6Mechanism() {
+        super(IP6_NAME_REGEX,IP6_VALUE_REGEX);
     }
 
     /**
@@ -56,26 +58,8 @@ public class ExistsMechanism extends GenericMechanism {
      * @see org.apache.spf.mechanismn.GenericMechanism#run(org.apache.spf.SPF1Data)
      */
     public boolean run(SPF1Data spfData) throws PermErrorException {
-        List aRecords;
-
-        String host = this.host;
-        try {
-            host = new MacroExpand(spfData).expandDomain(host);
-        } catch (Exception e) {
-            throw new PermErrorException(e.getMessage());
-        }
-
-        try {
-            aRecords = spfData.getDnsProbe().getARecords(host, maskLength);
-        } catch (Exception e) {
-            return false;
-        }
-        if (aRecords.size() > 0) {
-            return true;
-        }
-
-        // No match found
-        return false;
+        // TODO
+        throw new PermErrorException("Unimplemented");
     }
 
 }

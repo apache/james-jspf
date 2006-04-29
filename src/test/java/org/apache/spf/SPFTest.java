@@ -51,7 +51,7 @@ public class SPFTest extends TestCase {
         super(def.name);
         this.data = def;
     }
-
+    
     protected void runTest() throws Throwable {
 
         String[] params = Pattern.compile("[ ]+").split(data.command);
@@ -96,7 +96,8 @@ public class SPFTest extends TestCase {
             // TODO
         } else if (rcptTo == null && local == null) {
 
-            String resultSPF = new SPF(new MockDNSService()).checkSPF(ip,
+            //new MockDNSService()
+            String resultSPF = new SPF().checkSPF(ip,
                     sender, helo);
 
             if (!data.result.startsWith("/")) {
@@ -113,6 +114,9 @@ public class SPFTest extends TestCase {
             System.out
                     .println("INFO: rcptTo and local commands not currently supported");
         }
+//
+//        System.out.println("--------------------------------------------");
+//        System.out.println(Lookup.getDefaultCache(DClass.IN).toString());
 
     }
 
@@ -195,6 +199,7 @@ public class SPFTest extends TestCase {
             }
 
         }
+        
 
         if (def != null && def.command != null) {
             if (def.result != null) {
@@ -751,7 +756,7 @@ public class SPFTest extends TestCase {
                 addTest(new SPFTest((SPFTestDef) tests.get(i.next())));
             }
         }
-
+        
     }
 
     public static class SPFTestDef {

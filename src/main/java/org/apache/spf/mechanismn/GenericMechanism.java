@@ -17,9 +17,11 @@
 
 package org.apache.spf.mechanismn;
 
-import org.apache.spf.PermErrorException;
 import org.apache.spf.MacroExpand;
+import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
+
+import java.util.regex.MatchResult;
 
 /**
  * This class represent a gerneric mechanism
@@ -27,10 +29,8 @@ import org.apache.spf.SPF1Data;
  * @author Norman Maurer <nm@byteaction.de>
  * 
  */
-public abstract class GenericMechanism {
-
-    protected String qualifier = "+";
-
+public abstract class GenericMechanism extends AbstractMechanism {
+    
     protected String host;
 
     protected int maskLength;
@@ -45,12 +45,15 @@ public abstract class GenericMechanism {
      * @param maskLenght
      *            The maskLength
      */
-    public void init(String qualifier, String host, int maskLength) {
-        this.qualifier = qualifier;
+    public void init(String host, int maskLength) {
         this.host = host;
         this.maskLength = maskLength;
     }
 
+    public GenericMechanism(String name, String value) {
+        super(name,value);
+    }
+    
     /**
      * Expand the hostname
      * 
@@ -72,16 +75,26 @@ public abstract class GenericMechanism {
         return host;
     }
 
-    /**
-     * Run the mechanismn with the give SPF1Data
-     * 
-     * @param spfData
-     *            The SPF1Data
-     * @return result If the not match it return null. Otherwise it returns the
-     *         modifier
-     * @throws PermErrorException
-     *             if somethink strange happen
-     */
-    public abstract String run(SPF1Data spfData) throws PermErrorException;
+    public void config(MatchResult params) throws PermErrorException {
+        if (params.groupCount() >= 1 && params.group(1) != null) {
+            host = params.group(1);
+        } else {
+            host = null;
+        }
+        if (params.groupCount() >= 2 && params.group(2) != null) {
+            maskLength = Integer.parseInt(params.group(2).toString());
+        } else {
+            maskLength = 32;
+        }
+        if (params.groupCount() >= 3 && params.group(3) != null) {
+            maskLength = Integer.parseInt(params.group(3).toString());
+        } else {
+            maskLength = getLength();
+        }
+    }
+    
+    protected int getLength() {
+        return 128;
+    }
 
 }

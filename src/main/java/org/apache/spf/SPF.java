@@ -20,6 +20,7 @@ package org.apache.spf;
 import java.util.Iterator;
 
 import org.apache.spf.mechanismn.AllMechanism;
+import org.apache.spf.mechanismn.Directive;
 import org.apache.spf.mechanismn.Mechanism;
 import org.apache.spf.modifier.ExpModifier;
 import org.apache.spf.modifier.Modifier;
@@ -108,31 +109,30 @@ public class SPF {
             spfParser = new SPF1Parser(spfDnsEntry);
 
             // get all commands
-            Iterator com = spfParser.getCommands().iterator();
-
+            Iterator com = spfParser.getDirectives().iterator();
             while (com.hasNext()) {
-
                 hasCommand = true;
-                Object c = com.next();
+                Directive d = (Directive) com.next();
 
-                if (c instanceof Mechanism) {
-                    Mechanism me = (Mechanism) c;
-                    qualifier = me.run(spfData);
-
-                } else if (c instanceof AllMechanism) {
-                    AllMechanism me = (AllMechanism) c;
-                    qualifier = me.run();
-                } else if (c instanceof ExpModifier) {
-                    ExpModifier mo = (ExpModifier) c;
+                qualifier = d.run(spfData);
+ 
+                if (qualifier != null) {
+                    match = true;
+                }
+            }
+            
+            Iterator mod = spfParser.getModifiers().iterator();
+            while (mod.hasNext()) {
+                Modifier m = (Modifier) mod.next();
+                
+                if (m instanceof ExpModifier) {
+                    ExpModifier mo = (ExpModifier) m;
                     mo.run(spfData);
-                } else if (c instanceof Modifier) {
-                    Modifier mo = (Modifier) c;
-                    qualifier = mo.run(spfData);
+                } else {
+                    qualifier = m.run(spfData);
                 }
 
                 if (qualifier != null) {
-                    match = true;
-
                     if (qualifier.equals(SPF1Utils.FAIL)) {
                         if (spfData.getExplanation().equals("")) {
                             explanation = spfData.getDefaultExplanation();

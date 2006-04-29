@@ -19,6 +19,7 @@ package org.apache.spf.mechanismn;
 
 import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
+import org.apache.spf.SPF1Parser;
 import org.apache.spf.util.IPAddr;
 import org.apache.spf.util.IPUtil;
 
@@ -33,10 +34,31 @@ import java.util.ArrayList;
 public class AMechanism extends GenericMechanism {
 
     /**
+     * ABNF: "a"
+     */
+    public static final String A_NAME_REGEX = "[aA]";
+
+    /**
+     * ABNF: A = "a" [ ":" domain-spec ] [ dual-cidr-length ]
+     */
+    public static final String A_VALUE_REGEX = "(?:\\:" + SPF1Parser.DOMAIN_SPEC_REGEX + ")?" + "(?:"
+            + SPF1Parser.DUAL_CIDR_LENGTH_REGEX + ")?";
+
+    /**
+     * ABNF: A = "a" [ ":" domain-spec ] [ dual-cidr-length ]
+     */
+    public static final String A_REGEX = A_NAME_REGEX + A_VALUE_REGEX;
+
+    
+    public AMechanism() {
+        super(A_NAME_REGEX,A_VALUE_REGEX);
+    }
+
+    /**
      * 
      * @see org.apache.spf.mechanismn.GenericMechanism#run(org.apache.spf.SPF1Data)
      */
-    public String run(SPF1Data spfData) throws PermErrorException {
+    public boolean run(SPF1Data spfData) throws PermErrorException {
         ArrayList addressList = new ArrayList();
 
         // Get the right host.
@@ -50,18 +72,18 @@ public class AMechanism extends GenericMechanism {
                 addressList.addAll(spfData.getDnsProbe().getARecords(host,
                         maskLength));
                 if (IPUtil.checkAddressList(checkAddress, addressList)) {
-                    return qualifier;
+                    return true;
                 }
             } catch (Exception e) {
                 // no a records just return null
-                return null;
+                return false;
             }
         } catch (Exception e) {
             throw new PermErrorException("No valid ipAddress: "
                     + spfData.getIpAddress());
         }
         // No match found
-        return null;
+        return false;
     }
 
 }

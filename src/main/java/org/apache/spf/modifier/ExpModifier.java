@@ -26,7 +26,7 @@ import org.apache.spf.SPF1Data;
  * @author Norman Maurer <nm@byteaction.de>
  * 
  */
-public class ExpModifier {
+public class ExpModifier extends GenericModifier {
 
     private String host;
 
@@ -46,7 +46,7 @@ public class ExpModifier {
      *            The SPF1Data which should used
      * 
      */
-    public void run(SPF1Data spfData) {
+    public String run(SPF1Data spfData) {
         String exp = null;
         String host = this.host;
         try {
@@ -66,6 +66,7 @@ public class ExpModifier {
                 spfData.setExplanation("");
             }
         }
+        return null;
 
     }
 

@@ -31,10 +31,35 @@ import org.apache.spf.util.Inet6Util;
 public class IP4Mechanism extends GenericMechanism {
 
     /**
+     * ABNF: "ip4"
+     */
+    public static final String IP4_NAME_REGEX = "[iI][pP][4]";
+
+
+    /**
+     * ABNF: ip4-cidr-length = "/" 1*DIGIT
+     */
+    static public final String IP4_CIDR_LENGTH_REGEX = "/(\\d+)";
+
+    /**
+     * TODO ABNF: ip4-network [ ip4-cidr-length ]
+     */
+    public static final String IP4_VALUE_REGEX = "\\:" + "([0-9.]+)" + "(" + IP4_CIDR_LENGTH_REGEX + ")?";
+
+    /**
+     * TODO ABNF: IP4 = "ip4" ":" ip4-network [ ip4-cidr-length ]
+     */
+    public static final String IP4_REGEX = IP4_NAME_REGEX + IP4_VALUE_REGEX;
+    
+    public IP4Mechanism() {
+        super(IP4_NAME_REGEX,IP4_VALUE_REGEX);
+    }
+
+    /**
      * 
      * @see org.apache.spf.mechanismn.GenericMechanism#run(org.apache.spf.SPF1Data)
      */
-    public String run(SPF1Data spfData) throws PermErrorException {
+    public boolean run(SPF1Data spfData) throws PermErrorException {
         IPAddr testIP;
         IPAddr originalIP;
 
@@ -46,11 +71,15 @@ public class IP4Mechanism extends GenericMechanism {
         originalIP = IPAddr.getAddress(spfData.getIpAddress(), 32);
 
         if (testIP.getMaskedIPAddress().equals(originalIP.getMaskedIPAddress())) {
-            return qualifier;
+            return true;
         } else {
             // No match
-            return null;
+            return false;
         }
+    }
+
+    public int getLength() {
+        return 32;
     }
 
 }

@@ -20,6 +20,9 @@ package org.apache.spf.mechanismn;
 import org.apache.spf.MacroExpand;
 import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
+import org.apache.spf.SPF1Parser;
+
+import java.util.regex.MatchResult;
 
 /**
  * This class represent the incude mechanism
@@ -27,7 +30,32 @@ import org.apache.spf.SPF1Data;
  * @author Norman Maurer <nm@byteaction.de>
  * 
  */
-public class IncludeMechanism extends GenericMechanism {
+public class IncludeMechanism extends AbstractMechanism {
+
+    /**
+     * ABNF: "include"
+     */
+    public static final String INCLUDE_NAME_REGEX = "[iI][nN][cC][lL][uU][dD][eE]";
+
+    /**
+     * ABNF: include = "include" ":" domain-spec
+     */
+    public static final String INCLUDE_VALUE_REGEX = "\\:" + SPF1Parser.DOMAIN_SPEC_REGEX;
+
+    /**
+     * ABNF: include = "include" ":" domain-spec
+     */
+    public static final String INCLUDE_REGEX = INCLUDE_NAME_REGEX + INCLUDE_VALUE_REGEX;
+
+    public IncludeMechanism() {
+        super(INCLUDE_NAME_REGEX, INCLUDE_VALUE_REGEX);
+    }
+
+    private String host;
+
+    public void init(String host) {
+        this.host = host;
+    }
 
     /**
      * Set the host which should be used for include
@@ -38,15 +66,42 @@ public class IncludeMechanism extends GenericMechanism {
      * @throws PermErrorException
      *             if an error is in the redirect modifier
      */
-    public String run(SPF1Data spfData) throws PermErrorException {
+    public boolean run(SPF1Data spfData) throws PermErrorException {
         String host = this.host;
 
+        /* TODO:
+        Whether this mechanism matches, does not match, or throws an error
+        depends on the result of the recursive evaluation of check_host():
+
+        +---------------------------------+---------------------------------+
+        | A recursive check_host() result | Causes the "include" mechanism  |
+        | of:                             | to:                             |
+        +---------------------------------+---------------------------------+
+        | Pass                            | match                           |
+        |                                 |                                 |
+        | Fail                            | not match                       |
+        |                                 |                                 |
+        | SoftFail                        | not match                       |
+        |                                 |                                 |
+        | Neutral                         | not match                       |
+        |                                 |                                 |
+        | TempError                       | throw TempError                 |
+        |                                 |                                 |
+        | PermError                       | throw PermError                 |
+        |                                 |                                 |
+        | None                            | throw PermError                 |
+        +---------------------------------+---------------------------------+
+        */
         try {
             host = new MacroExpand(spfData).expandDomain(host);
-            return host;
+            return false;
         } catch (Exception e) {
             throw new PermErrorException("Error in include modifier: " + host);
         }
+    }
+
+    public void config(MatchResult params) throws PermErrorException {
+        host = params.group(1);
     }
 
 }

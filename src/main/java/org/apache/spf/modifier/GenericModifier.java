@@ -27,7 +27,7 @@ import org.apache.spf.SPF1Data;
  * @author Norman Maurer <nm@byteaction.de>
  * 
  */
-public abstract class GenericModifier {
+public abstract class GenericModifier implements Modifier {
 
     protected String host;
 

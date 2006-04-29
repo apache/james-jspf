@@ -17,32 +17,44 @@
 
 package org.apache.spf.mechanismn;
 
+import org.apache.spf.PermErrorException;
+import org.apache.spf.SPF1Data;
+
+import java.util.regex.MatchResult;
+
 /**
  * This class represent the all mechanism
  * 
  * @author Norman Maurer <nm@byteaction.de>
  * 
  */
-public class AllMechanism {
+public class AllMechanism extends AbstractMechanism {
 
-    private String qualifier = "+";
 
-    /**
-     * Initialize the mechanism
-     * 
-     * @param qualifier
-     *            The qualifier
-     */
-    public void init(String qualifier) {
-        this.qualifier = qualifier;
+    public static final String ALL_NAME_REGEX = "[aA][lL][lL]";
+
+
+    public static final String ALL_VALUE_REGEX = "";
+
+    
+    public static final String ALL_REGEX = "all";
+
+    public AllMechanism() {
+        super(ALL_NAME_REGEX, ALL_VALUE_REGEX);
     }
 
     /**
-     * Get the qualifier which should be used for all mechanism
-     * 
-     * @return qualifier
+     * @param spfData
+     * @return
+     * @throws PermErrorException
      */
-    public String run() {
-        return qualifier;
+    public boolean run(SPF1Data spfData) throws PermErrorException {
+        return true;
     }
+
+
+    public void config(MatchResult params) throws PermErrorException {
+        // no checks needed
+    }
+
 }
