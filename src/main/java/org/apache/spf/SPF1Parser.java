@@ -209,7 +209,7 @@ public class SPF1Parser {
     private final String TERMS_REGEX = "(?:[ ]+(?:" + DIRECTIVE_REGEX + "|"
             + MODIFIER_REGEX + "))*";
 
-    private final String ALL_REGEX = "\\?all";
+    private final String ALL_REGEX = "all";
 
     public SPF1Parser(String spfRecord) throws PermErrorException,
             NoneException {

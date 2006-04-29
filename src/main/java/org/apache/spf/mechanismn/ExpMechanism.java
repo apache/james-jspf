@@ -25,15 +25,19 @@ public class ExpMechanism {
     private String host = null;
 
     /**
-     * @param host The hostname or ip
+     * @param host
+     *            The hostname or ip
      */
     public void init(String host) {
         this.host = host;
     }
 
     /**
-     * Generate the explanation and set it in SPF1Data so it can be accessed easy later if needed
-     * @param spfData The SPF1Data which should used
+     * Generate the explanation and set it in SPF1Data so it can be accessed
+     * easy later if needed
+     * 
+     * @param spfData
+     *            The SPF1Data which should used
      */
     public void run(SPF1Data spfData) {
         String exp = null;
@@ -46,15 +50,16 @@ public class ExpMechanism {
         }
 
         if ((exp == null) || (exp.equals(""))) {
-            exp = "http://www.openspf.org/why.html?sender=%{S}&ip=%{I}";
+            spfData.setExplanation(spfData.getDefaultExplanation());
+        } else {
+            try {
+                spfData.setExplanation(new MacroExpand(spfData)
+                        .expandExplanation(exp));
+            } catch (Exception e) {
+                spfData.setExplanation("");
+            }
         }
 
-        try {
-            spfData.setExplanation(new MacroExpand(spfData)
-                    .expandExplanation(exp));
-        } catch (Exception e) {
-            spfData.setExplanation("");
-        }
     }
 
 }
