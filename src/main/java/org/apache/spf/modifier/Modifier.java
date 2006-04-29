@@ -15,51 +15,22 @@
  * permissions and limitations under the License.                      *
  ***********************************************************************/
 
-package org.apache.spf.mechanismn;
+package org.apache.spf.modifier;
 
-import org.apache.spf.MacroExpand;
+import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
 
-public class ExpMechanism {
-
-    private String host = null;
-
+/**
+ * This Interface represent a gerneric modifier
+ * @author Norman Maurer <nm@byteaction.de>
+ *
+ */
+public interface Modifier {
+    
     /**
-     * @param host
-     *            The hostname or ip
+     * Run the mechanismn  with the give SPF1Data
+     * @throws PermErrorException if somethink strange happen
      */
-    public void init(String host) {
-        this.host = host;
-    }
-
-    /**
-     * Generate the explanation and set it in SPF1Data so it can be accessed
-     * easy later if needed
-     * 
-     * @param spfData
-     *            The SPF1Data which should used
-     */
-    public void run(SPF1Data spfData) {
-        String exp = null;
-        String host = this.host;
-        try {
-            host = new MacroExpand(spfData).expandDomain(host);
-            exp = spfData.getDnsProbe().getTxtCatType(host);
-
-        } catch (Exception e) {
-        }
-
-        if ((exp == null) || (exp.equals(""))) {
-            spfData.setExplanation(spfData.getDefaultExplanation());
-        } else {
-            try {
-                spfData.setExplanation(new MacroExpand(spfData)
-                        .expandExplanation(exp));
-            } catch (Exception e) {
-                spfData.setExplanation("");
-            }
-        }
-
-    }
-
+    public void run(SPF1Data spfData) throws PermErrorException;
+    
 }

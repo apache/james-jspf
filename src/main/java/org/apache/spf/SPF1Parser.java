@@ -25,10 +25,10 @@ import java.util.regex.Pattern;
 import org.apache.spf.mechanismn.AMechanism;
 import org.apache.spf.mechanismn.AllMechanism;
 import org.apache.spf.mechanismn.ExistsMechanism;
-import org.apache.spf.mechanismn.ExpMechanism;
 import org.apache.spf.mechanismn.IP4Mechanism;
 import org.apache.spf.mechanismn.MXMechanism;
 import org.apache.spf.mechanismn.PTRMechanism;
+import org.apache.spf.modifier.ExpModifier;
 
 /**
  * This class can be used ass parses for validate SPF1-Records. It also offer a
@@ -338,7 +338,7 @@ public class SPF1Parser {
                     replaceHelper(expMatcher);
 
                     // create a new ExpMechanismn and init it
-                    ExpMechanism e = new ExpMechanism();
+                    ExpModifier e = new ExpModifier();
 
                     // SPF spec says that a PermError should be thrown if more
                     // the one exp was found

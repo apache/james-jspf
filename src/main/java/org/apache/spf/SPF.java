@@ -20,8 +20,8 @@ package org.apache.spf;
 import java.util.Iterator;
 
 import org.apache.spf.mechanismn.AllMechanism;
-import org.apache.spf.mechanismn.ExpMechanism;
 import org.apache.spf.mechanismn.Mechanism;
+import org.apache.spf.modifier.ExpModifier;
 
 /**
  * This class is used to generate a SPF-Test and provided all intressting data.
