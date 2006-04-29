@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
 
 public class MacroExpand {
 
-    //TODO: Change NeutralException to ErrorException!
+    // TODO: Change NeutralException to ErrorException!
 
     public static final String MACRO_REGEX = "\\%\\{[lsoditpvhcrLSODITPVHCR]\\d*r?[\\.\\-\\+,/_\\=]*\\}";
 
@@ -61,7 +61,7 @@ public class MacroExpand {
      * @return expanded explanation
      * @throws NeutralException
      */
-    protected String expandExplanation(String input) throws Exception {
+    public String expandExplanation(String input) throws Exception {
 
         isExplanation = true;
         return expand(input);
@@ -159,7 +159,8 @@ public class MacroExpand {
         while (cellMatcher.find()) {
             domainNumber = cellMatcher.group();
             if (Integer.parseInt(domainNumber) == 0) {
-                throw new PermErrorException("Digit transformer must be non-zero");
+                throw new PermErrorException(
+                        "Digit transformer must be non-zero");
             }
         }
         // find if reversed
@@ -300,7 +301,9 @@ public class MacroExpand {
 
     /**
      * Replace al literals
-     * @param data The String we want to replace the literals
+     * 
+     * @param data
+     *            The String we want to replace the literals
      * @return given String with all literales replaced
      */
     private String replaceLiterals(String data) {
@@ -313,13 +316,16 @@ public class MacroExpand {
 
     /**
      * Encode the given URL to UTF-8
-     * @param data url to encode
-     * @return encoded URL 
+     * 
+     * @param data
+     *            url to encode
+     * @return encoded URL
      */
     private String encodeURL(String data) {
 
         try {
-            // TODO URLEncoder method is not RFC2396 compatible, known difference
+            // TODO URLEncoder method is not RFC2396 compatible, known
+            // difference
             // is Space character gets converted to "+" rather than "%20"
             // Is there anything else which is not correct with URLEncoder?
             // Couldn't find a RFC2396 encoder
@@ -328,7 +334,7 @@ public class MacroExpand {
             // This shouldn't happen
         }
 
-        //workaround for the above descripted problem
+        // workaround for the above descripted problem
         return data.replaceAll("\\+", "%20");
 
     }

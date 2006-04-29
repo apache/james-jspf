@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 
 import org.apache.spf.mechanismn.AMechanism;
 import org.apache.spf.mechanismn.ExistsMechanism;
+import org.apache.spf.mechanismn.ExpMechanism;
 import org.apache.spf.mechanismn.IP4Mechanism;
 import org.apache.spf.mechanismn.MXMechanism;
 import org.apache.spf.mechanismn.PTRMechanism;
@@ -207,7 +208,8 @@ public class SPF1Parser {
     private final String TERMS_REGEX = "(?:[ ]+(?:" + DIRECTIVE_REGEX + "|"
             + MODIFIER_REGEX + "))*";
 
-    public SPF1Parser(String spfRecord) throws PermErrorException, NoneException {
+    public SPF1Parser(String spfRecord) throws PermErrorException,
+            NoneException {
 
         if (!isValidSPFVersion(spfRecord)) {
             throw new NoneException("No valid SPF Record: " + spfRecord);
@@ -328,8 +330,24 @@ public class SPF1Parser {
                 } else if (redirMatcher.matches()) {
                     System.out.println("Redirect:       " + newPart);
                 } else if (expMatcher.matches()) {
-                    // TODO: check what we should replace
-                    System.out.println("Exp:            " + newPart);
+                    // replace all default values with the right one
+                    replaceHelper(expMatcher);
+
+                    // create a new ExpMechanismn and init it
+                    ExpMechanism e = new ExpMechanism();
+
+                    // SPF spec says that a PermError should be thrown if more
+                    // the one exp was found
+                    if (mechanism.contains(e)) {
+                        throw new PermErrorException(
+                                "More then one exp found in SPF-Record");
+                    }
+
+                    e.init(checkDomain);
+
+                    // add it to the collection
+                    mechanism.add(e);
+
                 } else if (inclMatcher.matches()) {
                     System.out.println("Include:        " + newPart);
                     // TODO: check what we should replace
@@ -343,7 +361,8 @@ public class SPF1Parser {
                     mechanism.add(e);
 
                 } else {
-                    throw new PermErrorException("Unknown mechanismn " + newPart);
+                    throw new PermErrorException("Unknown mechanismn "
+                            + newPart);
                 }
 
             }
