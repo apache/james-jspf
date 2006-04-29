@@ -27,10 +27,10 @@ import org.apache.spf.mechanismn.AMechanism;
 import org.apache.spf.mechanismn.AllMechanism;
 import org.apache.spf.mechanismn.ExistsMechanism;
 import org.apache.spf.mechanismn.IP4Mechanism;
+import org.apache.spf.mechanismn.IncludeMechanism;
 import org.apache.spf.mechanismn.MXMechanism;
 import org.apache.spf.mechanismn.PTRMechanism;
 import org.apache.spf.modifier.ExpModifier;
-import org.apache.spf.modifier.IncludeModifier;
 import org.apache.spf.modifier.RedirectModifier;
 
 /**
@@ -255,16 +255,16 @@ public class SPF1Parser {
     private void parseRecord(String record) throws PermErrorException {
 
         String[] part = record.trim().split(" ");
-        Pattern ip4Pattern = Pattern.compile(QUALIFIER_PATTERN + "?" + IP4_REGEX);
-        Pattern ip6Pattern = Pattern.compile(QUALIFIER_PATTERN + "?" + IP6_REGEX);
-        Pattern aPattern = Pattern.compile(QUALIFIER_PATTERN + "?" + A_REGEX);
-        Pattern mxPattern = Pattern.compile(QUALIFIER_PATTERN + "?" + MX_REGEX);
-        Pattern ptrPattern = Pattern.compile(QUALIFIER_PATTERN + "?" + PTR_REGEX);
-        Pattern redirPattern = Pattern.compile(QUALIFIER_PATTERN + "?" + REDIRECT_REGEX);
+        Pattern ip4Pattern = Pattern.compile(QUALIFIER_PATTERN + "*" + IP4_REGEX);
+        Pattern ip6Pattern = Pattern.compile(QUALIFIER_PATTERN + "*" + IP6_REGEX);
+        Pattern aPattern = Pattern.compile(QUALIFIER_PATTERN + "*" + A_REGEX);
+        Pattern mxPattern = Pattern.compile(QUALIFIER_PATTERN + "*" + MX_REGEX);
+        Pattern ptrPattern = Pattern.compile(QUALIFIER_PATTERN + "*" + PTR_REGEX);
+        Pattern redirPattern = Pattern.compile(QUALIFIER_PATTERN + "*" + REDIRECT_REGEX);
         Pattern expPattern = Pattern.compile(EXPLANATION_REGEX);
-        Pattern inclPattern = Pattern.compile(QUALIFIER_PATTERN + "?" + INCLUDE_REGEX);
-        Pattern existsPattern = Pattern.compile(QUALIFIER_PATTERN + "?" + EXISTS_REGEX);
-        Pattern allPattern = Pattern.compile(QUALIFIER_PATTERN + "?" + ALL_REGEX);
+        Pattern inclPattern = Pattern.compile(QUALIFIER_PATTERN + "*" + INCLUDE_REGEX);
+        Pattern existsPattern = Pattern.compile(QUALIFIER_PATTERN + "*" + EXISTS_REGEX);
+        Pattern allPattern = Pattern.compile(QUALIFIER_PATTERN + "*" + ALL_REGEX);
         for (int i = 0; i < part.length; i++) {
 
             String newPart = part[i].trim();
@@ -374,8 +374,8 @@ public class SPF1Parser {
                 } else if (inclMatcher.matches()) {
 
                     // create a new IncludeModifier and init it
-                    IncludeModifier incl = new IncludeModifier();
-                    incl.init(getQualifier(inclMatcher.group(1)));
+                    IncludeMechanism incl = new IncludeMechanism();
+                    incl.init(getQualifier(inclMatcher.group(1)),null,0);
 
                     // add it to the collection
                     commands.add(incl);
