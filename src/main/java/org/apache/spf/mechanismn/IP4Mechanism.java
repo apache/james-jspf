@@ -44,7 +44,7 @@ public class IP4Mechanism extends GenericMechanism {
     /**
      * TODO ABNF: ip4-network [ ip4-cidr-length ]
      */
-    public static final String IP4_VALUE_REGEX = "\\:" + "([0-9.]+)" + "(" + IP4_CIDR_LENGTH_REGEX + ")?";
+    public static final String IP4_VALUE_REGEX = "\\:" + "([0-9.]+)" + "(?:" + IP4_CIDR_LENGTH_REGEX + ")?";
 
     /**
      * TODO ABNF: IP4 = "ip4" ":" ip4-network [ ip4-cidr-length ]

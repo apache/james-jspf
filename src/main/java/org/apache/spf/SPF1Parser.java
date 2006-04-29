@@ -139,7 +139,7 @@ public class SPF1Parser {
     /**
      * TODO check that MACRO_STRING_REGEX already include all the available chars in mechanism parameters
      */
-    private static final String MECHANISM_VALUE_STEP_REGEX = MACRO_STRING_REGEX;
+    private static final String MECHANISM_VALUE_STEP_REGEX = "[^ ]+";
     
     /**
      * ABNF: name = ALPHA *( ALPHA / DIGIT / "-" / "_" / "." )
@@ -227,7 +227,7 @@ public class SPF1Parser {
     /**
      * ABNF: terms = *( 1*SP ( directive / modifier ) )
      */
-    private static final String TERMS_REGEX = "(?:" + TERMS_SEPARATOR_REGEX + ""+ TERM_REGEX +")*";
+    private static final String TERMS_REGEX = "(?:" + TERMS_SEPARATOR_REGEX + TERM_REGEX +")*";
     
     /**
      * ABNF: record = "vspf1" terms
@@ -246,9 +246,9 @@ public class SPF1Parser {
         // single step regexp matcher
         Pattern p = Pattern.compile(RECORD_REGEX);
         Matcher m = p.matcher(spfRecord);
-        if (!m.matches()) {
-            throw new PermErrorException("Not Parsable: " + spfRecord);
-        }
+//        if (!m.matches()) {
+//            throw new PermErrorException("Not Parsable: " + spfRecord);
+//        }
         
         // the previous check could be skipped once we'll finish the step-by-step parsing
         // we could simply keep it to have an "extra" input check.
@@ -259,7 +259,7 @@ public class SPF1Parser {
         Pattern termPattern = Pattern.compile(TERM_STEP_REGEX);
         
         // cycle terms
-        for (int i = 0; i < terms.length; i++) {
+        for (int i = 0; i < terms.length; i++) if (terms[i].length()>0){
             Matcher termMatcher = termPattern.matcher(terms[i]);
             if (!termMatcher.matches()) {
                 throw new PermErrorException("Term ["+terms[i]+"] is not syntactically valid: "+termPattern.pattern());
@@ -338,16 +338,18 @@ public class SPF1Parser {
                 } else if (Pattern.compile(ExistsMechanism.EXISTS_NAME_REGEX).matcher(mechName).matches()) {
                     mech = new ExistsMechanism();
                 }
-                ((IncludeMechanism) mech).init(mechValue);
+                mech.init(mechValue);
                 directives.add(new Directive(getQualifier(qualifier), mech));
             }
             
         }
 
-        // parse the record
         
-        // TEMPorary disabled
-        // parseRecord(mainRecord);
+        // further check. We should remove this if it never catches more errors
+        // than the default one.
+        if (!m.matches()) {
+            throw new PermErrorException("Not Parsable: " + spfRecord);
+        }
     }
 
     /**
