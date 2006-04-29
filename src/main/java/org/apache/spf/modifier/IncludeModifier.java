@@ -21,6 +21,12 @@ import org.apache.spf.MacroExpand;
 import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
 
+/**
+ * This class represent the incude modifier
+ * 
+ * @author Norman Maurer <nm@byteaction.de>
+ *
+ */
 public class IncludeModifier extends GenericModifier {
 
     /**

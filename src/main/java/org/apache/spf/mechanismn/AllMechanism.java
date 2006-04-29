@@ -17,6 +17,12 @@
 
 package org.apache.spf.mechanismn;
 
+/**
+ * This class represent the all mechanism
+ * 
+ * @author Norman Maurer <nm@byteaction.de>
+ * 
+ */
 public class AllMechanism {
 
     private String qualifier = "+";

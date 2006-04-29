@@ -24,7 +24,7 @@ import org.apache.spf.SPF1Data;
 /**
  * This class represent a gerneric modifier
  * 
- * @author maurer
+ * @author Norman Maurer <nm@byteaction.de>
  * 
  */
 public abstract class GenericModifier {

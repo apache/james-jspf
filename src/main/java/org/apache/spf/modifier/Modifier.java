@@ -21,7 +21,8 @@ import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
 
 /**
- * This Interface represent a gerneric modifier
+ * This Interface represent a modifier
+ * 
  * @author Norman Maurer <nm@byteaction.de>
  *
  */

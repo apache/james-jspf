@@ -20,6 +20,12 @@ package org.apache.spf.modifier;
 import org.apache.spf.MacroExpand;
 import org.apache.spf.SPF1Data;
 
+/**
+ * This class represent the exp modifier
+ * 
+ * @author Norman Maurer <nm@byteaction.de>
+ * 
+ */
 public class ExpModifier {
 
     private String host;
@@ -38,7 +44,7 @@ public class ExpModifier {
      * 
      * @param spfData
      *            The SPF1Data which should used
-     *            
+     * 
      */
     public void run(SPF1Data spfData) {
         String exp = null;

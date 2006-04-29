@@ -23,6 +23,12 @@ import org.apache.spf.SPF1Data;
 
 import java.util.List;
 
+/**
+ * This class represent the exists mechanism
+ * 
+ * @author Norman Maurer <nm@byteaction.de>
+ *
+ */
 public class ExistsMechanism extends GenericMechanism {
 
     /**
@@ -31,7 +37,7 @@ public class ExistsMechanism extends GenericMechanism {
      */
     public String run(SPF1Data spfData) throws PermErrorException {
         List aRecords;
-        
+
         String host = this.host;
         try {
             host = new MacroExpand(spfData).expandDomain(host);

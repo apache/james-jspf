@@ -24,6 +24,12 @@ import org.apache.spf.util.IPUtil;
 
 import java.util.ArrayList;
 
+/**
+ * This class represent the mx mechanism
+ * 
+ * @author Norman Maurer <nm@byteaction.de>
+ *
+ */
 public class MXMechanism extends GenericMechanism {
 
     /**
@@ -35,7 +41,7 @@ public class MXMechanism extends GenericMechanism {
 
         // Get the right host.
         String host = expandHost(spfData);
-        
+
         // get the ipAddress
         try {
             IPAddr checkAddress = IPAddr.getAddress(spfData.getIpAddress(),
@@ -59,5 +65,3 @@ public class MXMechanism extends GenericMechanism {
     }
 
 }
-
-

@@ -23,13 +23,16 @@ import org.apache.spf.SPF1Data;
 
 /**
  * This class represent a gerneric mechanism 
- * @author maurer
+ * 
+ * @author Norman Maurer <nm@byteaction.de>
  *
  */
 public abstract class GenericMechanism {
 
-    protected String qualifier;
+    protected String qualifier = "+";
+
     protected String host;
+
     protected int maskLength;
 
     /**
@@ -69,5 +72,5 @@ public abstract class GenericMechanism {
      * @throws PermErrorException if somethink strange happen
      */
     public abstract String run(SPF1Data spfData) throws PermErrorException;
-    
+
 }

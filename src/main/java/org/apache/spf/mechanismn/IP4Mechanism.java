@@ -22,6 +22,12 @@ import org.apache.spf.SPF1Data;
 import org.apache.spf.util.IPAddr;
 import org.apache.spf.util.Inet6Util;
 
+/**
+ * This class represent the ip4 mechanism
+ * 
+ * @author Norman Maurer <nm@byteaction.de>
+ * 
+ */
 public class IP4Mechanism extends GenericMechanism {
 
     /**

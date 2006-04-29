@@ -24,6 +24,12 @@ import org.apache.spf.util.IPAddr;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class represent the ptr mechanism
+ * 
+ * @author Norman Maurer <nm@byteaction.de>
+ *
+ */
 public class PTRMechanism extends GenericMechanism {
 
     /**
@@ -37,13 +43,13 @@ public class PTRMechanism extends GenericMechanism {
 
         // Get the right host.
         String host = expandHost(spfData);
-        
+
         try {
             // Get PTR Records for the ipAddress which is provided by SPF1Data
             List domainList = spfData.getDnsProbe().getPTRRecords(
                     spfData.getIpAddress());
             for (int i = 0; i < domainList.size(); i++) {
-                
+
                 // Get a record for this
                 List aList = spfData.getDnsProbe().getARecords(
                         (String) domainList.get(i), maskLength);
