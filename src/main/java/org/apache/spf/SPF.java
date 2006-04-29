@@ -20,6 +20,7 @@ package org.apache.spf;
 import java.util.Iterator;
 
 import org.apache.spf.mechanismn.AllMechanism;
+import org.apache.spf.mechanismn.ExpMechanism;
 import org.apache.spf.mechanismn.Mechanism;
 
 /**
@@ -113,10 +114,14 @@ public class SPF {
                 } else if (m instanceof AllMechanism) {
                     AllMechanism me = (AllMechanism) m;
                     result = qualifier = me.run();
-                }
+                } 
 
                 if (qualifier.equals(SPF1Utils.FAIL)) {
-                    explanation = spfData.getExplanation();
+                    if (spfData.getExplanation().equals("")) {
+                        explanation = spfData.getDefaultExplanation();
+                    } else {
+                        explanation = spfData.getExplanation();
+                    }
                 }
             }
 

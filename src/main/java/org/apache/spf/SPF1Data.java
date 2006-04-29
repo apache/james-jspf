@@ -61,6 +61,8 @@ public class SPF1Data {
 
     private String explanation = "";
 
+    private String defaultExplanation = "http://www.openspf.org/why.html?sender=%{S}&ip=%{I}";
+
     protected SPF1Data(String mailFrom, String heloDomain, String clientIP)
             throws PermErrorException, NoneException {
         this(mailFrom, heloDomain, clientIP, new DNSServiceXBillImpl());
@@ -279,6 +281,19 @@ public class SPF1Data {
      */
     public String getExplanation() {
         return explanation;
+    }
+
+    /**
+     * Get the default explanation
+     * 
+     * @return default explanation
+     */
+    public String getDefaultExplanation() {
+        try {
+            return new MacroExpand(this).expandExplanation(defaultExplanation);
+        } catch (Exception e) {
+            return explanation;
+        }
     }
 
 }
