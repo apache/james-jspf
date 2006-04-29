@@ -28,6 +28,8 @@ public class AllMechanism {
     private String qualifier = "+";
 
     /**
+     * Initialize the mechanism
+     * 
      * @param qualifier
      *            The qualifier
      */

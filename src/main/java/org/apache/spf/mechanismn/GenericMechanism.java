@@ -22,10 +22,10 @@ import org.apache.spf.MacroExpand;
 import org.apache.spf.SPF1Data;
 
 /**
- * This class represent a gerneric mechanism 
+ * This class represent a gerneric mechanism
  * 
  * @author Norman Maurer <nm@byteaction.de>
- *
+ * 
  */
 public abstract class GenericMechanism {
 
@@ -36,9 +36,14 @@ public abstract class GenericMechanism {
     protected int maskLength;
 
     /**
-     * @param qualifier The mechanismPrefix
-     * @param host The hostname or ip 
-     * @param maskLenght The maskLength
+     * Initialize the mechanism
+     * 
+     * @param qualifier
+     *            The mechanismPrefix
+     * @param host
+     *            The hostname or ip
+     * @param maskLenght
+     *            The maskLength
      */
     public void init(String qualifier, String host, int maskLength) {
         this.qualifier = qualifier;
@@ -47,6 +52,8 @@ public abstract class GenericMechanism {
     }
 
     /**
+     * Expand the hostname
+     * 
      * @param spfData
      * @throws PermErrorException
      */
@@ -66,10 +73,14 @@ public abstract class GenericMechanism {
     }
 
     /**
-     * Run the mechanismn  with the give SPF1Data
-     * @param spfData The SPF1Data
-     * @return result If the not match it return null. Otherwise it returns the modifier
-     * @throws PermErrorException if somethink strange happen
+     * Run the mechanismn with the give SPF1Data
+     * 
+     * @param spfData
+     *            The SPF1Data
+     * @return result If the not match it return null. Otherwise it returns the
+     *         modifier
+     * @throws PermErrorException
+     *             if somethink strange happen
      */
     public abstract String run(SPF1Data spfData) throws PermErrorException;
 
