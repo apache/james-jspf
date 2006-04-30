@@ -111,6 +111,7 @@ public class SPF {
                 qualifier = d.run(spfData);
  
                 if (qualifier != null) {
+                    result = qualifier;
                     match = true;
                 }
             }
@@ -125,11 +126,12 @@ public class SPF {
                 }
 
                 if (qualifier != null) {
+                    result = qualifier;
+                    
                     if (qualifier.equals(SPF1Utils.FAIL)) {
                         explanation = spfData.getExplanation();
                     }
                 }
-
             }
 
             // If no match was found set the result to neutral 
