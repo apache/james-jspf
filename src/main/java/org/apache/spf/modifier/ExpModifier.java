@@ -19,6 +19,7 @@ package org.apache.spf.modifier;
 
 import org.apache.spf.MacroExpand;
 import org.apache.spf.SPF1Data;
+import org.apache.spf.SPF1Parser;
 
 /**
  * This class represent the exp modifier
@@ -27,6 +28,24 @@ import org.apache.spf.SPF1Data;
  * 
  */
 public class ExpModifier extends GenericModifier {
+
+
+    /**
+     * ABNF: "exp"
+     */
+    public static final String NAME_REGEX = "[eE][xX][pP]";
+
+    /**
+     * ABNF: domain-spec
+     */
+    public static final String VALUE_REGEX = SPF1Parser.DOMAIN_SPEC_REGEX;
+
+    /**
+     * ABNF: explanation = "exp" "=" domain-spec
+     */
+    public static final String REGEX = NAME_REGEX + "\\="
+            + VALUE_REGEX;
+    
 
     private String host;
 

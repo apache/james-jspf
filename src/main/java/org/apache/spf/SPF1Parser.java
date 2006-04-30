@@ -132,12 +132,6 @@ public class SPF1Parser {
     private static final String MECHANISM_VALUE_STEP_REGEX = MACRO_STRING_REGEX;
 
     /**
-     * ABNF: name = ALPHA *( ALPHA / DIGIT / "-" / "_" / "." )
-     */
-    private static final String NAME_REGEX = ALPHA_PATTERN + "{1}"
-            + "[A-Za-z0-9\\-\\_\\.]*";
-
-    /**
      * ABNF: toplabel = ( *alphanum ALPHA *alphanum ) / ( 1*alphanum "-" *(
      * alphanum / "-" ) alphanum ) ; LDH rule plus additional TLD restrictions ;
      * (see [RFC3696], Section 2)
@@ -162,48 +156,10 @@ public class SPF1Parser {
             + SPF1Parser.MACRO_STRING_REGEX + DOMAIN_END_REGEX + ")";
 
     /**
-     * ABNF: unknown-modifier = name "=" macro-string
-     */
-    private static final String UNKNOWN_MODIFIER_REGEX = "(" + NAME_REGEX
-            + ")\\=(" + MACRO_STRING_REGEX + ")";
-
-    /**
-     * ABNF: "redirect"
-     */
-    private static final String REDIRECT_NAME_REGEX = "[rR][eE][dD][iI][rR][eE][cC][tT]";
-
-    /**
-     * ABNF: domain-spec
-     */
-    private static final String REDIRECT_VALUE_REGEX = DOMAIN_SPEC_REGEX;
-
-    /**
-     * ABNF: redirect = "redirect" "=" domain-spec
-     */
-    private static final String REDIRECT_REGEX = REDIRECT_NAME_REGEX + "\\="
-            + REDIRECT_VALUE_REGEX;
-
-    /**
-     * ABNF: "exp"
-     */
-    private static final String EXP_NAME_REGEX = "[eE][xX][pP]";
-
-    /**
-     * ABNF: domain-spec
-     */
-    private static final String EXPLANATION_VALUE_REGEX = DOMAIN_SPEC_REGEX;
-
-    /**
-     * ABNF: explanation = "exp" "=" domain-spec
-     */
-    private static final String EXPLANATION_REGEX = EXP_NAME_REGEX + "\\="
-            + EXPLANATION_VALUE_REGEX;
-
-    /**
      * ABNF: modifier = redirect / explanation / unknown-modifier
      */
-    private static final String MODIFIER_REGEX = "(?:" + REDIRECT_REGEX + "|"
-            + EXPLANATION_REGEX + "|" + UNKNOWN_MODIFIER_REGEX + ")";
+    private static final String MODIFIER_REGEX = "(?:" + RedirectModifier.REGEX + "|"
+            + ExpModifier.REGEX + "|" + UnknownModifier.REGEX + ")";
 
     /**
      * ABNF: directive = [ qualifier ] mechanism
@@ -232,7 +188,7 @@ public class SPF1Parser {
      */
     private static final String TERM_STEP_REGEX = "(?:(" + QUALIFIER_PATTERN
             + "{1})?(?:(" + MECHANISM_NAME_STEP_REGEX + ")([\\:/]{1}"
-            + MECHANISM_VALUE_STEP_REGEX + ")?)|(?:" + UNKNOWN_MODIFIER_REGEX
+            + MECHANISM_VALUE_STEP_REGEX + ")?)|(?:" + UnknownModifier.REGEX
             + "))";
 
     private static final int TERM_STEP_REGEX_QUALIFIER_POS = 1;
@@ -323,16 +279,16 @@ public class SPF1Parser {
                     String modifierValue = termMatcher
                             .group(TERM_STEP_REGEX_MODIFIER_VALUE_POS);
                     Pattern redirPattern = Pattern
-                            .compile(REDIRECT_VALUE_REGEX);
+                            .compile(RedirectModifier.VALUE_REGEX);
                     Matcher redirMatcher = redirPattern.matcher(modifierValue);
 
                     Pattern expPattern = Pattern
-                            .compile(EXPLANATION_VALUE_REGEX);
+                            .compile(ExpModifier.VALUE_REGEX);
                     Matcher expMatcher = expPattern.matcher(modifierValue);
 
                     Modifier mod = null;
                     // MODIFIER
-                    if (Pattern.compile(REDIRECT_NAME_REGEX).matcher(
+                    if (Pattern.compile(RedirectModifier.NAME_REGEX).matcher(
                             modifierName).matches()) {
                         // redirect
                         if (!redirMatcher.matches()) {
@@ -341,7 +297,7 @@ public class SPF1Parser {
                         }
                         mod = new RedirectModifier();
                         ((RedirectModifier) mod).init(redirMatcher.group(1));
-                    } else if (Pattern.compile(EXP_NAME_REGEX).matcher(
+                    } else if (Pattern.compile(ExpModifier.NAME_REGEX).matcher(
                             modifierName).matches()) {
                         // exp
                         if (!expMatcher.matches()) {

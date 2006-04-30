@@ -19,8 +19,26 @@ package org.apache.spf.modifier;
 
 import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
+import org.apache.spf.SPF1Parser;
 
 public class UnknownModifier extends GenericModifier {
+
+    /**
+     * ABNF: name = ALPHA *( ALPHA / DIGIT / "-" / "_" / "." )
+     */
+    public static final String NAME_REGEX = SPF1Parser.ALPHA_PATTERN + "{1}"
+            + "[A-Za-z0-9\\-\\_\\.]*";
+
+    /**
+     * ABNF: unknown-modifier = name "=" macro-string
+     */
+    public static final String VALUE_REGEX = "\\=(" + SPF1Parser.MACRO_STRING_REGEX + ")";
+
+    /**
+     * ABNF: unknown-modifier = name "=" macro-string
+     */
+    public static final String REGEX = "(" + NAME_REGEX + ")" + VALUE_REGEX;
+
 
     /**
      * @see org.apache.spf.modifier.Modifier#run(org.apache.spf.SPF1Data)
