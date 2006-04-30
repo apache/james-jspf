@@ -17,13 +17,11 @@
 
 package org.apache.spf;
 
-import java.util.Iterator;
-
-import org.apache.spf.mechanismn.AllMechanism;
 import org.apache.spf.mechanismn.Directive;
-import org.apache.spf.mechanismn.Mechanism;
 import org.apache.spf.modifier.ExpModifier;
 import org.apache.spf.modifier.Modifier;
+
+import java.util.Iterator;
 
 /**
  * This class is used to generate a SPF-Test and provided all intressting data.
