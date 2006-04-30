@@ -35,7 +35,6 @@ import org.xbill.DNS.Type;
  * This class contains helper to get all neccassary DNS infos that are needed
  * for SPF
  * 
- * @author MimeCast
  * @author Norman Maurer <nm@byteaction.de>
  * @author Stefano Bagnara <apache@bago.org>
  * 
@@ -46,7 +45,6 @@ public class DNSServiceXBillImpl implements DNSService {
     //TODO: do we need AAAARecord lookup for ipv6 ?
     
     /**
-     * @throws TempErrorException 
      * @see org.apache.spf.DNSService#getSpfRecord(java.lang.String,
      *      java.lang.String)
      */
@@ -95,7 +93,7 @@ public class DNSServiceXBillImpl implements DNSService {
      * @throws NoneException
      *             if none TXT-Records were found.
      * @throws TempErrorException if the lookup result was not "HOST NOT FOUND" or "SUCCESSFULLY" 
-     * @throws PermErrorException
+     * @throws PermErrorException if an PermError should be returned
      */
     private static ArrayList getTXTRecords(String hostname)
             throws NoneException, TempErrorException {
@@ -180,7 +178,7 @@ public class DNSServiceXBillImpl implements DNSService {
      * @param maskLength
      *            the networkmask
      * @return ArrayList of the conversion
-     * @throws PermErrorException
+     * @throws PermErrorException if an PermError should be returned
      */
     private ArrayList getAList(ArrayList addressList, int maskLength)
             throws PermErrorException {
@@ -215,7 +213,6 @@ public class DNSServiceXBillImpl implements DNSService {
     /**
      * @see org.apache.spf.DNSService#getPTRRecords(java.lang.String)
      */
-
     public List getPTRRecords(String ipAddress) throws NoneException,
             PermErrorException, TempErrorException {
 

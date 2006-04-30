@@ -30,7 +30,7 @@ public interface DNSService {
     /**
      * Get the SPF-Record for a server given it's version
      *  
-     * TODO: support SPF Records too.
+     * TODO: support SPF Records too. This will be done if dnsjava support it!
      * 
      * @param hostname The hostname for which we want to retrieve the SPF-Record
      * @param spfVersion The SPF-Version which should used.
@@ -49,7 +49,7 @@ public interface DNSService {
      * @param mask The netmask to use
      * @return The ipAddresses
      * @throws NoneException if no A records was found 
-     * @throws PermErrorException
+     * @throws PermErrorException if an PermError should be returned
      * @throws TempErrorException if the lookup result was not "HOST NOT FOUND" or "SUCCESSFULLY"
      */
     public List getARecords(String strServer, int mask)
@@ -86,7 +86,7 @@ public interface DNSService {
      * @param mask The netmask
      * @return IPAddresses of the MX-Records
      * @throws NoneException if no MX-Record was found
-     * @throws PermErrorException
+     * @throws PermErrorException if an PermError should be returned
      * @throws TempErrorException if the lookup result was not "HOST NOT FOUND" or "SUCCESSFULLY"
      */
     public List getMXRecords(String domainName, int mask)
