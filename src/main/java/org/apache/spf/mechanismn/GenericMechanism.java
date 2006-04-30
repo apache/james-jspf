@@ -17,6 +17,7 @@
 
 package org.apache.spf.mechanismn;
 
+import org.apache.spf.Configurable;
 import org.apache.spf.MacroExpand;
 import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
@@ -29,7 +30,7 @@ import java.util.regex.MatchResult;
  * @author Norman Maurer <nm@byteaction.de>
  * 
  */
-public abstract class GenericMechanism implements Mechanism {
+public abstract class GenericMechanism implements Mechanism, Configurable {
 
     /**
      * ABNF: ip4-cidr-length = "/" 1*DIGIT

@@ -17,6 +17,7 @@
 
 package org.apache.spf.mechanismn;
 
+import org.apache.spf.Configurable;
 import org.apache.spf.MacroExpand;
 import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
@@ -30,7 +31,7 @@ import java.util.regex.MatchResult;
  * @author Norman Maurer <nm@byteaction.de>
  * 
  */
-public class IncludeMechanism implements Mechanism {
+public class IncludeMechanism implements Mechanism, Configurable {
 
     /**
      * ABNF: "include"

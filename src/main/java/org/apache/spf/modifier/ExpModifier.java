@@ -46,16 +46,6 @@ public class ExpModifier extends GenericModifier {
     public static final String REGEX = NAME_REGEX + VALUE_REGEX;
     
 
-    private String host;
-
-    /**
-     * @param host
-     *            The hostname or ip
-     */
-    public void init(String host) {
-        this.host = host;
-    }
-
     /**
      * Generate the explanation and set it in SPF1Data so it can be accessed
      * easy later if needed

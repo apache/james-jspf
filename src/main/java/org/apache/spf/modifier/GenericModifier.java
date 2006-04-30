@@ -17,9 +17,12 @@
 
 package org.apache.spf.modifier;
 
+import org.apache.spf.Configurable;
 import org.apache.spf.PermErrorException;
 import org.apache.spf.MacroExpand;
 import org.apache.spf.SPF1Data;
+
+import java.util.regex.MatchResult;
 
 /**
  * This class represent a gerneric modifier
@@ -27,17 +30,9 @@ import org.apache.spf.SPF1Data;
  * @author Norman Maurer <nm@byteaction.de>
  * 
  */
-public abstract class GenericModifier implements Modifier {
+public abstract class GenericModifier implements Modifier, Configurable {
 
     protected String host;
-
-    /**
-     * @param host
-     *            The hostname or ip
-     */
-    public void init(String host) {
-        this.host = host;
-    }
 
     /**
      * @param spfData
@@ -69,5 +64,11 @@ public abstract class GenericModifier implements Modifier {
      *             if somethink strange happen
      */
     public abstract String run(SPF1Data spfData) throws PermErrorException;
+
+    public void config(MatchResult params) throws PermErrorException {
+        if (params.groupCount() > 0) {
+            this.host = params.group(1);
+        }
+    }
 
 }

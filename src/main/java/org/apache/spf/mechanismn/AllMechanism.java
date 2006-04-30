@@ -17,6 +17,7 @@
 
 package org.apache.spf.mechanismn;
 
+import org.apache.spf.Configurable;
 import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
 
@@ -28,7 +29,7 @@ import java.util.regex.MatchResult;
  * @author Norman Maurer <nm@byteaction.de>
  * 
  */
-public class AllMechanism implements Mechanism {
+public class AllMechanism implements Mechanism, Configurable {
 
     public static final String NAME_REGEX = "[aA][lL][lL]";
 

@@ -15,50 +15,19 @@
  * permissions and limitations under the License.                      *
  ***********************************************************************/
 
-package org.apache.spf.modifier;
+package org.apache.spf;
 
-import org.apache.spf.Configurable;
-import org.apache.spf.PermErrorException;
-import org.apache.spf.SPF1Data;
-import org.apache.spf.SPF1Parser;
 
 import java.util.regex.MatchResult;
 
-public class UnknownModifier implements Modifier, Configurable {
+public interface Configurable {
 
     /**
-     * ABNF: name = ALPHA *( ALPHA / DIGIT / "-" / "_" / "." )
+     * Configuration
+     * 
+     * @param params
+     * @throws PermErrorException
      */
-    public static final String NAME_REGEX = SPF1Parser.ALPHA_PATTERN + "{1}"
-            + "[A-Za-z0-9\\-\\_\\.]*";
-
-    /**
-     * ABNF: unknown-modifier = name "=" macro-string
-     */
-    public static final String VALUE_REGEX = "\\=(" + SPF1Parser.MACRO_STRING_REGEX + ")";
-
-    /**
-     * ABNF: unknown-modifier = name "=" macro-string
-     */
-    public static final String REGEX = "(" + NAME_REGEX + ")" + VALUE_REGEX;
-
-
-    /**
-     * @see org.apache.spf.modifier.Modifier#run(org.apache.spf.SPF1Data)
-     */
-    public String run(SPF1Data spfData) throws PermErrorException {
-        return null;
-    }
-
-    /**
-     * @see org.apache.spf.modifier.Modifier#enforceSingleInstance()
-     */
-    public boolean enforceSingleInstance() {
-        return false;
-    }
-
-    public void config(MatchResult params) throws PermErrorException {
-        // Nothing to do
-    }
+    public void config(MatchResult params) throws PermErrorException;
 
 }

@@ -20,7 +20,6 @@ package org.apache.spf.mechanismn;
 import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
 
-import java.util.regex.MatchResult;
 
 /**
  * This Interface represent a mechanismn
@@ -29,14 +28,6 @@ import java.util.regex.MatchResult;
  * 
  */
 public interface Mechanism {
-
-    /**
-     * Configuration
-     * 
-     * @param params
-     * @throws PermErrorException
-     */
-    public void config(MatchResult params) throws PermErrorException;
 
     /**
      * Run the mechanismn with the give SPF1Data
