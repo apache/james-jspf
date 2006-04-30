@@ -24,6 +24,7 @@ import org.apache.spf.util.IPAddr;
 import org.apache.spf.util.IPUtil;
 
 import java.util.ArrayList;
+import java.util.regex.MatchResult;
 
 /**
  * This class represent the a mechanism
@@ -42,16 +43,24 @@ public class AMechanism extends GenericMechanism {
      * ABNF: A = "a" [ ":" domain-spec ] [ dual-cidr-length ]
      */
     public static final String A_VALUE_REGEX = "(?:\\:" + SPF1Parser.DOMAIN_SPEC_REGEX + ")?" + "(?:"
-            + SPF1Parser.DUAL_CIDR_LENGTH_REGEX + ")?";
+            + DUAL_CIDR_LENGTH_REGEX + ")?";
 
     /**
      * ABNF: A = "a" [ ":" domain-spec ] [ dual-cidr-length ]
      */
     public static final String A_REGEX = A_NAME_REGEX + A_VALUE_REGEX;
 
+
+    protected int ip4cidr;
+
+    protected int ip6cidr;
     
     public AMechanism() {
-        super(A_NAME_REGEX,A_VALUE_REGEX);
+        this(A_NAME_REGEX,A_VALUE_REGEX);
+    }
+    
+    protected AMechanism(String patternName, String patternValue) {
+        super(patternName,patternValue);
     }
 
     /**
@@ -67,10 +76,10 @@ public class AMechanism extends GenericMechanism {
         // get the ipAddress
         try {
             IPAddr checkAddress = IPAddr.getAddress(spfData.getIpAddress(),
-                    maskLength);
+                    ip4cidr);
             try {
                 addressList.addAll(spfData.getDnsProbe().getARecords(host,
-                        maskLength));
+                        ip4cidr));
                 if (IPUtil.checkAddressList(checkAddress, addressList)) {
                     return true;
                 }
@@ -84,6 +93,20 @@ public class AMechanism extends GenericMechanism {
         }
         // No match found
         return false;
+    }
+
+    public void config(MatchResult params) throws PermErrorException {
+        super.config(params);
+        if (params.groupCount() >= 2 && params.group(2) != null) {
+            ip4cidr = Integer.parseInt(params.group(2).toString());
+        } else {
+            ip4cidr = 32;
+        }
+        if (params.groupCount() >= 3 && params.group(3) != null) {
+            ip6cidr = Integer.parseInt(params.group(3).toString());
+        } else {
+            ip6cidr = 128;
+        }
     }
 
 }

@@ -19,6 +19,7 @@ package org.apache.spf.mechanismn;
 
 import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
+import org.apache.spf.util.Inet6Util;
 
 /**
  * This class represent the ip4 mechanism
@@ -26,7 +27,7 @@ import org.apache.spf.SPF1Data;
  * @author Norman Maurer <nm@byteaction.de>
  * 
  */
-public class IP6Mechanism extends GenericMechanism {
+public class IP6Mechanism extends IP4Mechanism {
 
     /**
      * ABNF: "ip6"
@@ -34,14 +35,9 @@ public class IP6Mechanism extends GenericMechanism {
     public static final String IP6_NAME_REGEX = "[iI][pP][6]";
 
     /**
-     * ABNF: ip6-cidr-length = "/" 1*DIGIT
-     */
-    static public final String IP6_CIDR_LENGTH_REGEX = "/(\\d+)";
-
-    /**
      * TODO ip6-network [ ip6-cidr-length ]
      */
-    public static final String IP6_VALUE_REGEX = "\\:[0-9A-Fa-f\\:\\.]+" + "(?:"
+    public static final String IP6_VALUE_REGEX = "\\:([0-9A-Fa-f\\:\\.]+)" + "(?:"
             + IP6_CIDR_LENGTH_REGEX + ")?";
 
     /**
@@ -60,6 +56,15 @@ public class IP6Mechanism extends GenericMechanism {
     public boolean run(SPF1Data spfData) throws PermErrorException {
         // TODO
         throw new PermErrorException("Unimplemented");
+    }
+
+    
+    protected boolean isValidAddress(String ipString) {
+        return Inet6Util.isValidIP6Address(ipString);
+    }
+
+    protected int getMaxCidr() {
+        return 128;
     }
 
 }

@@ -22,6 +22,8 @@ import org.apache.spf.SPF1Data;
 import org.apache.spf.util.IPAddr;
 import org.apache.spf.util.Inet6Util;
 
+import java.util.regex.MatchResult;
+
 /**
  * This class represent the ip4 mechanism
  * 
@@ -35,12 +37,6 @@ public class IP4Mechanism extends GenericMechanism {
      */
     public static final String IP4_NAME_REGEX = "[iI][pP][4]";
 
-
-    /**
-     * ABNF: ip4-cidr-length = "/" 1*DIGIT
-     */
-    static public final String IP4_CIDR_LENGTH_REGEX = "/(\\d+)";
-
     /**
      * TODO ABNF: ip4-network [ ip4-cidr-length ]
      */
@@ -52,25 +48,28 @@ public class IP4Mechanism extends GenericMechanism {
     public static final String IP4_REGEX = IP4_NAME_REGEX + IP4_VALUE_REGEX;
     
     public IP4Mechanism() {
-        super(IP4_NAME_REGEX,IP4_VALUE_REGEX);
+        this(IP4_NAME_REGEX,IP4_VALUE_REGEX);
     }
+    
+    public IP4Mechanism(String namePattern,String valuePattern) {
+        super(namePattern,valuePattern);
+    }
+    
+    
+    private IPAddr ip = null;
+    
+    private int maskLength = 0;
 
     /**
      * 
      * @see org.apache.spf.mechanismn.GenericMechanism#run(org.apache.spf.SPF1Data)
      */
     public boolean run(SPF1Data spfData) throws PermErrorException {
-        IPAddr testIP;
         IPAddr originalIP;
 
-        if (Inet6Util.isValidIPV4Address(host) == false) {
-            throw new PermErrorException("Not a valid IP address: " + host);
-        }
-
-        testIP = IPAddr.getAddress(host, maskLength);
         originalIP = IPAddr.getAddress(spfData.getIpAddress(), 32);
 
-        if (testIP.getMaskedIPAddress().equals(originalIP.getMaskedIPAddress())) {
+        if (ip.getMaskedIPAddress().equals(originalIP.getMaskedIPAddress())) {
             return true;
         } else {
             // No match
@@ -78,7 +77,29 @@ public class IP4Mechanism extends GenericMechanism {
         }
     }
 
-    public int getLength() {
+    public void config(MatchResult params) throws PermErrorException {
+        if (params.groupCount() == 0) {
+            throw new PermErrorException("Missing ip");
+        }
+        String ipString = params.group(1);
+        if (!isValidAddress(ipString)) {
+            throw new PermErrorException("Invalid Address");
+        }
+        maskLength = getMaxCidr();
+        if (params.groupCount() >= 2 && params.group(2) != null) {
+            maskLength = Integer.parseInt(params.group(2).toString());
+            if (maskLength > getMaxCidr()) {
+                throw new PermErrorException("Invalid CIDR");
+            }
+        }
+        ip = IPAddr.getAddress(ipString, maskLength);
+    }
+    
+    protected boolean isValidAddress(String ipString) {
+        return Inet6Util.isValidIPV4Address(ipString);
+    }
+
+    protected int getMaxCidr() {
         return 32;
     }
 

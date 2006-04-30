@@ -20,9 +20,7 @@ package org.apache.spf.mechanismn;
 import org.apache.spf.MacroExpand;
 import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
-import org.apache.spf.util.IPAddr;
 
-import java.net.InetAddress;
 import java.util.regex.MatchResult;
 
 /**
@@ -32,26 +30,28 @@ import java.util.regex.MatchResult;
  * 
  */
 public abstract class GenericMechanism extends AbstractMechanism {
-    
-    protected String host;
 
-    protected int maskLength;
 
     /**
-     * Initialize the mechanism
-     * 
-     * @param qualifier
-     *            The mechanismPrefix
-     * @param host
-     *            The hostname or ip
-     * @param maskLenght
-     *            The maskLength
+     * ABNF: ip4-cidr-length = "/" 1*DIGIT
      */
-    public void init(String host, int maskLength) {
-        this.host = host;
-        this.maskLength = maskLength;
-    }
+    protected static final String IP4_CIDR_LENGTH_REGEX = "/(\\d+)";
 
+
+    /**
+     * ABNF: ip6-cidr-length = "/" 1*DIGIT
+     */
+    protected static final String IP6_CIDR_LENGTH_REGEX = "/(\\d+)";
+
+    /**
+     * ABNF: dual-cidr-length = [ ip4-cidr-length ] [ "/" ip6-cidr-length ]
+     */
+    protected static final String DUAL_CIDR_LENGTH_REGEX = "(?:" + IP4_CIDR_LENGTH_REGEX
+            + ")?" + "(?:/" + IP6_CIDR_LENGTH_REGEX + ")?";
+
+
+    protected String domain;
+    
     public GenericMechanism(String name, String value) {
         super(name,value);
     }
@@ -63,7 +63,7 @@ public abstract class GenericMechanism extends AbstractMechanism {
      * @throws PermErrorException
      */
     protected String expandHost(SPF1Data spfData) throws PermErrorException {
-        String host = this.host;
+        String host = this.domain;
         if (host == null) {
             host = spfData.getCurrentDomain();
         } else {
@@ -79,25 +79,10 @@ public abstract class GenericMechanism extends AbstractMechanism {
 
     public void config(MatchResult params) throws PermErrorException {
         if (params.groupCount() >= 1 && params.group(1) != null) {
-            host = params.group(1);
-            IPAddr.getInAddress(host);
+            domain = params.group(1);
         } else {
-            host = null;
+            domain = null;
         }
-        if (params.groupCount() >= 2 && params.group(2) != null) {
-            maskLength = Integer.parseInt(params.group(2).toString());
-        } else {
-            maskLength = 32;
-        }
-        if (params.groupCount() >= 3 && params.group(3) != null) {
-            maskLength = Integer.parseInt(params.group(3).toString());
-        } else {
-            maskLength = getLength();
-        }
-    }
-    
-    protected int getLength() {
-        return 128;
     }
 
 }

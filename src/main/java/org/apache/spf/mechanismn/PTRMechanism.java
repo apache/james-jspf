@@ -24,7 +24,6 @@ import org.apache.spf.util.IPAddr;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.MatchResult;
 
 /**
  * This class represent the ptr mechanism
@@ -72,8 +71,9 @@ public class PTRMechanism extends GenericMechanism {
             for (int i = 0; i < domainList.size(); i++) {
 
                 // Get a record for this
+                // TODO with no maskLength what should we get?
                 List aList = spfData.getDnsProbe().getARecords(
-                        (String) domainList.get(i), maskLength);
+                        (String) domainList.get(i), 32);
                 for (int j = 0; j < aList.size(); j++) {
                     compareIP = (IPAddr) aList.get(j);
                     if (compareIP.toString().equals(spfData.getIpAddress())) {
@@ -97,11 +97,6 @@ public class PTRMechanism extends GenericMechanism {
 
         return false;
 
-    }
-
-    public void config(MatchResult params) throws PermErrorException {
-        // TODO Auto-generated method stub
-        
     }
 
 }

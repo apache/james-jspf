@@ -60,9 +60,9 @@ public class SPF1Parser {
     // TODO: check all regex!
     // TODO: fix the Quantifier problem
     // TODO: ignore case 
-    private static final String ALPHA_DIGIT_PATTERN = "[a-zA-Z0-9]";
+    static public final String ALPHA_DIGIT_PATTERN = "[a-zA-Z0-9]";
 
-    private static final String ALPHA_PATTERN = "[a-zA-Z]";
+    static public final String ALPHA_PATTERN = "[a-zA-Z]";
 
     private static final String MACRO_LETTER_PATTERN = "[lsoditpvhcrLSODITPVHCR]";
 
@@ -70,7 +70,7 @@ public class SPF1Parser {
 
     private static final String DELEMITER_REGEX = "[\\.\\-\\+,/_\\=]";
 
-    private static final String MACRO_EXPAND_REGEX = "\\% (?:\\{"
+    static public final String MACRO_EXPAND_REGEX = "\\% (?:\\{"
             + MACRO_LETTER_PATTERN + TRANSFORMERS_REGEX + DELEMITER_REGEX + "*"
             + "\\}|\\%|\\_|\\-)";
 
@@ -85,41 +85,12 @@ public class SPF1Parser {
     /**
      * ABNF: macro-string = *( macro-expand / macro-literal )
      */
-    private static final String MACRO_STRING_REGEX = "(?:" + MACRO_EXPAND_REGEX + "|"
+    static public final String MACRO_STRING_REGEX = "(?:" + MACRO_EXPAND_REGEX + "|"
             + MACRO_LITERAL_REGEX + "{1})*";
-
-    /**
-     * ABNF: toplabel = ( *alphanum ALPHA *alphanum ) / ( 1*alphanum "-" *(
-     * alphanum / "-" ) alphanum ) ; LDH rule plus additional TLD restrictions ;
-     * (see [RFC3696], Section 2)
-     */
-    private static final String TOP_LABEL_REGEX = "(?:" + ALPHA_DIGIT_PATTERN + "*"
-            + ALPHA_PATTERN + "{1}" + ALPHA_DIGIT_PATTERN + "*|(?:"
-            + ALPHA_DIGIT_PATTERN + "+" + "\\-" + "(?:" + ALPHA_DIGIT_PATTERN
-            + "|\\-)*" + ALPHA_DIGIT_PATTERN + "))";
-
-    /**
-     * ABNF: domain-end = ( "." toplabel [ "." ] ) / macro-expand
-     */
-    private static final String DOMAIN_END_REGEX = "(?:\\." + TOP_LABEL_REGEX + "\\.?"
-            + "|" + MACRO_EXPAND_REGEX + ")";
-
-    /**
-     * ABNF: domain-spec = macro-string domain-end
-     */
-    static public final String DOMAIN_SPEC_REGEX = "(" + MACRO_STRING_REGEX
-            + DOMAIN_END_REGEX + ")";
-
     /**
      * ABNF: qualifier = "+" / "-" / "?" / "~"
      */
     private static final String QUALIFIER_PATTERN = "[\\+\\-\\?\\~]";
-
-    /**
-     * ABNF: dual-cidr-length = [ ip4-cidr-length ] [ "/" ip6-cidr-length ]
-     */
-    static public final String DUAL_CIDR_LENGTH_REGEX = "(?:" + IP4Mechanism.IP4_CIDR_LENGTH_REGEX
-            + ")?" + "(?:/" + IP6Mechanism.IP6_CIDR_LENGTH_REGEX + ")?";
 
 
     /**
@@ -147,6 +118,30 @@ public class SPF1Parser {
     private static final String NAME_REGEX = ALPHA_PATTERN + "{1}"
             + "[A-Za-z0-9\\-\\_\\.]*";
 
+
+    /**
+     * ABNF: toplabel = ( *alphanum ALPHA *alphanum ) / ( 1*alphanum "-" *(
+     * alphanum / "-" ) alphanum ) ; LDH rule plus additional TLD restrictions ;
+     * (see [RFC3696], Section 2)
+     */
+    private static final String TOP_LABEL_REGEX = "(?:" + SPF1Parser.ALPHA_DIGIT_PATTERN + "*"
+            + SPF1Parser.ALPHA_PATTERN + "{1}" + SPF1Parser.ALPHA_DIGIT_PATTERN + "*|(?:"
+            + SPF1Parser.ALPHA_DIGIT_PATTERN + "+" + "\\-" + "(?:" + SPF1Parser.ALPHA_DIGIT_PATTERN
+            + "|\\-)*" + SPF1Parser.ALPHA_DIGIT_PATTERN + "))";
+
+    /**
+     * ABNF: domain-end = ( "." toplabel [ "." ] ) / macro-expand
+     */
+    private static final String DOMAIN_END_REGEX = "(?:\\." + TOP_LABEL_REGEX + "\\.?"
+            + "|" + SPF1Parser.MACRO_EXPAND_REGEX + ")";
+
+    /**
+     * ABNF: domain-spec = macro-string domain-end
+     */
+    public static final String DOMAIN_SPEC_REGEX = "(" + SPF1Parser.MACRO_STRING_REGEX
+            + DOMAIN_END_REGEX + ")";
+
+    
     /**
      * ABNF: unknown-modifier = name "=" macro-string
      */

@@ -37,7 +37,7 @@ public class AllMechanism extends AbstractMechanism {
     public static final String ALL_VALUE_REGEX = "";
 
     
-    public static final String ALL_REGEX = "all";
+    public static final String ALL_REGEX = ALL_NAME_REGEX;
 
     public AllMechanism() {
         super(ALL_NAME_REGEX, ALL_VALUE_REGEX);

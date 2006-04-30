@@ -58,7 +58,7 @@ public class ExistsMechanism extends GenericMechanism {
     public boolean run(SPF1Data spfData) throws PermErrorException {
         List aRecords;
 
-        String host = this.host;
+        String host = expandHost(spfData);
         try {
             host = new MacroExpand(spfData).expandDomain(host);
         } catch (Exception e) {
@@ -66,7 +66,8 @@ public class ExistsMechanism extends GenericMechanism {
         }
 
         try {
-            aRecords = spfData.getDnsProbe().getARecords(host, maskLength);
+            // TODO: is 32 the correct default?
+            aRecords = spfData.getDnsProbe().getARecords(host, 32);
         } catch (Exception e) {
             return false;
         }

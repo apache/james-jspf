@@ -24,7 +24,6 @@ import org.apache.spf.util.IPAddr;
 import org.apache.spf.util.IPUtil;
 
 import java.util.ArrayList;
-import java.util.regex.MatchResult;
 
 /**
  * This class represent the mx mechanism
@@ -32,7 +31,7 @@ import java.util.regex.MatchResult;
  * @author Norman Maurer <nm@byteaction.de>
  *
  */
-public class MXMechanism extends GenericMechanism {
+public class MXMechanism extends AMechanism {
 
     /**
      * ABNF: "mx"
@@ -43,7 +42,7 @@ public class MXMechanism extends GenericMechanism {
      * ABNF: [ ":" domain-spec ] [ dual-cidr-length ]
      */
     public static final String MX_VALUE_REGEX = "(?:\\:" + SPF1Parser.DOMAIN_SPEC_REGEX + ")?"
-            + "(?:" + SPF1Parser.DUAL_CIDR_LENGTH_REGEX + ")?";
+            + "(?:" + DUAL_CIDR_LENGTH_REGEX + ")?";
 
     /**
      * ABNF: MX = "mx" [ ":" domain-spec ] [ dual-cidr-length ]
@@ -67,10 +66,10 @@ public class MXMechanism extends GenericMechanism {
         // get the ipAddress
         try {
             IPAddr checkAddress = IPAddr.getAddress(spfData.getIpAddress(),
-                    maskLength);
+                    ip4cidr);
             try {
                 addressList.addAll(spfData.getDnsProbe().getMXRecords(host,
-                        maskLength));
+                        ip4cidr));
                 if (IPUtil.checkAddressList(checkAddress, addressList)) {
                     return true;
                 }
@@ -84,11 +83,6 @@ public class MXMechanism extends GenericMechanism {
         }
         // No match found
         return false;
-    }
-
-    public void config(MatchResult params) throws PermErrorException {
-        // TODO Auto-generated method stub
-        
     }
 
 }
