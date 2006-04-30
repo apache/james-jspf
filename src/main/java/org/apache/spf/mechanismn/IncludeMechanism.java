@@ -101,6 +101,9 @@ public class IncludeMechanism extends AbstractMechanism {
     }
 
     public void config(MatchResult params) throws PermErrorException {
+        if (params.groupCount() == 0) {
+            throw new PermErrorException("Include mechanism without an host");
+        }
         host = params.group(1);
     }
 

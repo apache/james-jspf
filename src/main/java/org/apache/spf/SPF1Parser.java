@@ -70,7 +70,7 @@ public class SPF1Parser {
 
     private static final String DELEMITER_REGEX = "[\\.\\-\\+,/_\\=]";
 
-    static public final String MACRO_EXPAND_REGEX = "\\% (?:\\{"
+    static public final String MACRO_EXPAND_REGEX = "\\%(?:\\{"
             + MACRO_LETTER_PATTERN + TRANSFORMERS_REGEX + DELEMITER_REGEX + "*"
             + "\\}|\\%|\\_|\\-)";
 

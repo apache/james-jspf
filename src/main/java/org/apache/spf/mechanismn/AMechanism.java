@@ -99,11 +99,17 @@ public class AMechanism extends GenericMechanism {
         super.config(params);
         if (params.groupCount() >= 2 && params.group(2) != null) {
             ip4cidr = Integer.parseInt(params.group(2).toString());
+            if (ip4cidr > 32) {
+                throw new PermErrorException("Ivalid IP4 CIDR length");
+            }
         } else {
             ip4cidr = 32;
         }
         if (params.groupCount() >= 3 && params.group(3) != null) {
             ip6cidr = Integer.parseInt(params.group(3).toString());
+            if (ip6cidr > 128) {
+                throw new PermErrorException("Ivalid IP6 CIDR length");
+            }
         } else {
             ip6cidr = 128;
         }
