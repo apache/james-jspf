@@ -36,7 +36,7 @@ public class MacroExpand {
 
     public static final String MACRO_REGEX = "\\%\\{[lsoditpvhcrLSODITPVHCR]\\d*r?[\\.\\-\\+,/_\\=]*\\}";
 
-    private SPF1Data spfData;
+    private MacroData spfData;
 
     private Pattern inputPattern;
 

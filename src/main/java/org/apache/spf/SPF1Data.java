@@ -29,7 +29,7 @@ import org.apache.spf.util.IPAddr;
  * @author Norman Maurer <nm@byteaction.de>
  */
 
-public class SPF1Data {
+public class SPF1Data implements MacroData {
 
     private DNSService dnsProbe = null;
 
@@ -120,54 +120,42 @@ public class SPF1Data {
     }
 
     /**
-     * Get current-senderpart (l)
-     * 
-     * @return current-senderpart
+     * @see org.apache.spf.MacroData#getCurrentSenderPart()
      */
     public String getCurrentSenderPart() {
         return currentSenderPart;
     }
 
     /**
-     * Get responsible-sender (s)
-     * 
-     * @return responsible-sender
+     * @see org.apache.spf.MacroData#getMailFrom()
      */
     public String getMailFrom() {
         return mailFrom;
     }
 
     /**
-     * Get sender-domain (h)
-     * 
-     * @return sender-domain
+     * @see org.apache.spf.MacroData#getHostName()
      */
     public String getHostName() {
         return hostName;
     }
 
     /**
-     * Get current-domain (d)
-     * 
-     * @return current-domain
+     * @see org.apache.spf.MacroData#getCurrentDomain()
      */
     public String getCurrentDomain() {
         return currentDomain;
     }
 
     /**
-     * Get inAddress (v)
-     * 
-     * @return inAddress
+     * @see org.apache.spf.MacroData#getInAddress()
      */
     public String getInAddress() {
         return inAddress;
     }
 
     /**
-     * Get clientDomain (p)
-     * 
-     * @return clientDomain
+     * @see org.apache.spf.MacroData#getClientDomain()
      */
     public String getClientDomain() {
         List domains;
@@ -185,36 +173,28 @@ public class SPF1Data {
     }
 
     /**
-     * Get senderDomain (o)
-     * 
-     * @return senderDomain
+     * @see org.apache.spf.MacroData#getSenderDomain()
      */
     public String getSenderDomain() {
         return senderDomain;
     }
 
     /**
-     * Get sending-host (i)
-     * 
-     * @return sending-host
+     * @see org.apache.spf.MacroData#getIpAddress()
      */
     public String getIpAddress() {
         return ipAddress;
     }
 
     /**
-     * Get timeStamp (t)
-     * 
-     * @return timeStamp
+     * @see org.apache.spf.MacroData#getTimeStamp()
      */
     public long getTimeStamp() {
         return timeStamp;
     }
 
     /**
-     * Get readableIP (c)
-     * 
-     * @return readableIP
+     * @see org.apache.spf.MacroData#getReadableIP()
      */
     public String getReadableIP() {
         return readableIP;
