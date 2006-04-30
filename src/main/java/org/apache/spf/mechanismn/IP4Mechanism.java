@@ -33,20 +33,10 @@ import java.util.regex.MatchResult;
 public class IP4Mechanism extends GenericMechanism {
 
     /**
-     * ABNF: "ip4"
+     * ABNF: IP4 = "ip4" ":" ip4-network [ ip4-cidr-length ]
      */
-    public static final String NAME_REGEX = "[iI][pP][4]";
-
-    /**
-     * TODO ABNF: ip4-network [ ip4-cidr-length ]
-     */
-    public static final String VALUE_REGEX = "\\:" + "([0-9.]+)" + "(?:"
-            + IP4_CIDR_LENGTH_REGEX + ")?";
-
-    /**
-     * TODO ABNF: IP4 = "ip4" ":" ip4-network [ ip4-cidr-length ]
-     */
-    public static final String REGEX = NAME_REGEX + VALUE_REGEX;
+    public static final String REGEX = "[iI][pP][4]" + "\\:" + "([0-9.]+)"
+            + "(?:" + IP4_CIDR_LENGTH_REGEX + ")?";
 
     private IPAddr ip = null;
 

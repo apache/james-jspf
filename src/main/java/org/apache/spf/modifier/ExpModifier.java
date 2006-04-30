@@ -32,20 +32,10 @@ import org.apache.spf.SPF1Parser;
 public class ExpModifier extends GenericModifier {
 
     /**
-     * ABNF: "exp"
-     */
-    public static final String NAME_REGEX = "[eE][xX][pP]";
-
-    /**
-     * ABNF: domain-spec
-     */
-    public static final String VALUE_REGEX = "\\="
-            + SPF1Parser.DOMAIN_SPEC_REGEX;
-
-    /**
      * ABNF: explanation = "exp" "=" domain-spec
      */
-    public static final String REGEX = NAME_REGEX + VALUE_REGEX;
+    public static final String REGEX = "[eE][xX][pP]" + "\\="
+        + SPF1Parser.DOMAIN_SPEC_REGEX;
 
     private String defaultExplanation = "http://www.openspf.org/why.html?sender=%{S}&ip=%{I}";
 

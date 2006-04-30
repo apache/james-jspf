@@ -34,21 +34,10 @@ import java.util.regex.MatchResult;
 public class IncludeMechanism implements Mechanism, Configurable {
 
     /**
-     * ABNF: "include"
-     */
-    public static final String NAME_REGEX = "[iI][nN][cC][lL][uU][dD][eE]";
-
-    /**
      * ABNF: include = "include" ":" domain-spec
      */
-    public static final String VALUE_REGEX = "\\:"
+    public static final String REGEX = "[iI][nN][cC][lL][uU][dD][eE]" + "\\:"
             + SPF1Parser.DOMAIN_SPEC_REGEX;
-
-    /**
-     * ABNF: include = "include" ":" domain-spec
-     */
-    public static final String REGEX = NAME_REGEX
-            + VALUE_REGEX;
 
     private String host;
 
@@ -68,23 +57,14 @@ public class IncludeMechanism implements Mechanism, Configurable {
          * TODO: Whether this mechanism matches, does not match, or throws an
          * error depends on the result of the recursive evaluation of
          * check_host():
-         * +---------------------------------+---------------------------------+
-         * | A recursive check_host() result | Causes the "include" mechanism  |
-         * | of:                             | to:                             |
-         * +---------------------------------+---------------------------------+
-         * | Pass                            | match                           |
-         * |                                 |                                 |
-         * | Fail                            | not match                       |
-         * |                                 |                                 |
-         * | SoftFail                        | not match                       |
-         * |                                 |                                 |
-         * | Neutral                         | not match                       |
-         * |                                 |                                 |
-         * | TempError                       | throw TempError                 |
-         * |                                 |                                 |
-         * | PermError                       | throw PermError                 |
-         * |                                 |                                 |
-         * | None                            | throw PermError                 |
+         * +---------------------------------+---------------------------------+ |
+         * A recursive check_host() result | Causes the "include" mechanism | |
+         * of: | to: |
+         * +---------------------------------+---------------------------------+ |
+         * Pass | match | | | | | Fail | not match | | | | | SoftFail | not
+         * match | | | | | Neutral | not match | | | | | TempError | throw
+         * TempError | | | | | PermError | throw PermError | | | | | None |
+         * throw PermError |
          * +---------------------------------+---------------------------------+
          */
         try {

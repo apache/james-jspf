@@ -35,21 +35,11 @@ import java.util.regex.MatchResult;
 public class AMechanism extends GenericMechanism {
 
     /**
-     * ABNF: "a"
-     */
-    public static final String NAME_REGEX = "[aA]";
-
-    /**
      * ABNF: A = "a" [ ":" domain-spec ] [ dual-cidr-length ]
      */
-    public static final String VALUE_REGEX = "(?:\\:"
+    public static final String REGEX = "[aA]" + "(?:\\:"
             + SPF1Parser.DOMAIN_SPEC_REGEX + ")?" + "(?:"
             + DUAL_CIDR_LENGTH_REGEX + ")?";
-
-    /**
-     * ABNF: A = "a" [ ":" domain-spec ] [ dual-cidr-length ]
-     */
-    public static final String REGEX = NAME_REGEX + VALUE_REGEX;
 
     protected int ip4cidr;
 

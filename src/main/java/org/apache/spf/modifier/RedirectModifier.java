@@ -31,19 +31,9 @@ import org.apache.spf.SPF1Parser;
 public class RedirectModifier extends GenericModifier {
 
     /**
-     * ABNF: "redirect"
-     */
-    public static final String NAME_REGEX = "[rR][eE][dD][iI][rR][eE][cC][tT]";
-
-    /**
-     * ABNF: domain-spec
-     */
-    public static final String VALUE_REGEX = "\\=" + SPF1Parser.DOMAIN_SPEC_REGEX;
-
-    /**
      * ABNF: redirect = "redirect" "=" domain-spec
      */
-    public static final String REGEX = NAME_REGEX + VALUE_REGEX;
+    public static final String REGEX = "[rR][eE][dD][iI][rR][eE][cC][tT]" + "\\=" + SPF1Parser.DOMAIN_SPEC_REGEX;
 
     /**
      * Set the host which should be used for redirection and set it in SPF1Data

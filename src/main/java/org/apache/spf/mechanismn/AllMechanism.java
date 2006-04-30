@@ -31,11 +31,7 @@ import java.util.regex.MatchResult;
  */
 public class AllMechanism implements Mechanism, Configurable {
 
-    public static final String NAME_REGEX = "[aA][lL][lL]";
-
-    public static final String VALUE_REGEX = "";
-
-    public static final String REGEX = NAME_REGEX;
+    public static final String REGEX = "[aA][lL][lL]";
 
     /**
      * @param spfData

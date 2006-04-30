@@ -28,19 +28,10 @@ public class UnknownModifier implements Modifier, Configurable {
 
     /**
      * ABNF: name = ALPHA *( ALPHA / DIGIT / "-" / "_" / "." )
-     */
-    public static final String NAME_REGEX = SPF1Parser.ALPHA_PATTERN + "{1}"
-            + "[A-Za-z0-9\\-\\_\\.]*";
-
-    /**
      * ABNF: unknown-modifier = name "=" macro-string
      */
-    public static final String VALUE_REGEX = "\\=(" + SPF1Parser.MACRO_STRING_REGEX + ")";
-
-    /**
-     * ABNF: unknown-modifier = name "=" macro-string
-     */
-    public static final String REGEX = "(" + NAME_REGEX + ")" + VALUE_REGEX;
+    public static final String REGEX = "(" + SPF1Parser.ALPHA_PATTERN + "{1}"
+        + "[A-Za-z0-9\\-\\_\\.]*" + ")" + "\\=(" + SPF1Parser.MACRO_STRING_REGEX + ")";
 
 
     /**

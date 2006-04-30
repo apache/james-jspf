@@ -33,21 +33,10 @@ import java.util.List;
 public class ExistsMechanism extends GenericMechanism {
 
     /**
-     * ABNF: "exists"
-     */
-    public static final String NAME_REGEX = "[eE][xX][iI][sS][tT][sS]";
-
-    /**
-     * ABNF: "exists" ":" domain-spec
-     */
-    public static final String VALUE_REGEX = "\\:"
-            + SPF1Parser.DOMAIN_SPEC_REGEX;
-
-    /**
      * ABNF: exists = "exists" ":" domain-spec
      */
-    public static final String REGEX = NAME_REGEX
-            + VALUE_REGEX;
+    public static final String REGEX = "[eE][xX][iI][sS][tT][sS]" + "\\:"
+            + SPF1Parser.DOMAIN_SPEC_REGEX;
 
     /**
      * 

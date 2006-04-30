@@ -30,20 +30,10 @@ import org.apache.spf.util.Inet6Util;
 public class IP6Mechanism extends IP4Mechanism {
 
     /**
-     * ABNF: "ip6"
+     * ABNF: IP6 = "ip6" ":" ip6-network [ ip6-cidr-length ]
      */
-    public static final String NAME_REGEX = "[iI][pP][6]";
-
-    /**
-     * TODO ip6-network [ ip6-cidr-length ]
-     */
-    public static final String VALUE_REGEX = "\\:([0-9A-Fa-f\\:\\.]+)"
-            + "(?:" + IP6_CIDR_LENGTH_REGEX + ")?";
-
-    /**
-     * TODO ABNF: IP6 = "ip6" ":" ip6-network [ ip6-cidr-length ]
-     */
-    public static final String REGEX = NAME_REGEX + VALUE_REGEX;
+    public static final String REGEX = "[iI][pP][6]"
+            + "\\:([0-9A-Fa-f\\:\\.]+)" + "(?:" + IP6_CIDR_LENGTH_REGEX + ")?";
 
     /**
      * 
