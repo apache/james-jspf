@@ -35,22 +35,22 @@ public class IncludeMechanism extends AbstractMechanism {
     /**
      * ABNF: "include"
      */
-    public static final String INCLUDE_NAME_REGEX = "[iI][nN][cC][lL][uU][dD][eE]";
+    public static final String NAME_REGEX = "[iI][nN][cC][lL][uU][dD][eE]";
 
     /**
      * ABNF: include = "include" ":" domain-spec
      */
-    public static final String INCLUDE_VALUE_REGEX = "\\:"
+    public static final String VALUE_REGEX = "\\:"
             + SPF1Parser.DOMAIN_SPEC_REGEX;
 
     /**
      * ABNF: include = "include" ":" domain-spec
      */
-    public static final String INCLUDE_REGEX = INCLUDE_NAME_REGEX
-            + INCLUDE_VALUE_REGEX;
+    public static final String REGEX = NAME_REGEX
+            + VALUE_REGEX;
 
     public IncludeMechanism() {
-        super(INCLUDE_NAME_REGEX, INCLUDE_VALUE_REGEX);
+        super(NAME_REGEX, VALUE_REGEX);
     }
 
     private String host;

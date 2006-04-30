@@ -49,4 +49,11 @@ public class RedirectModifier extends GenericModifier {
         }
     }
 
+    /**
+     * @see org.apache.spf.modifier.Modifier#enforceSingleInstance()
+     */
+    public boolean enforceSingleInstance() {
+        return true;
+    }
+
 }

@@ -32,8 +32,7 @@ import org.apache.spf.modifier.Modifier;
 import org.apache.spf.modifier.RedirectModifier;
 import org.apache.spf.modifier.UnknownModifier;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.lang.reflect.Field;
 import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -46,10 +45,23 @@ import java.util.regex.Pattern;
  * @author Stefano Bagnara <apache@bago.org>
  */
 public class SPF1Parser {
+    
+    private static final Class[] knownMechanisms = new Class[] {
+        AllMechanism.class,
+        AMechanism.class,
+        ExistsMechanism.class,
+        IncludeMechanism.class,
+        IP4Mechanism.class,
+        IP6Mechanism.class,
+        MXMechanism.class,
+        PTRMechanism.class
+    };
 
-    private Collection directives = new ArrayList();
-
-    private Collection modifiers = new ArrayList();
+    private static final Class[] knownModifiers = new Class[] {
+        ExpModifier.class,
+        RedirectModifier.class,
+        UnknownModifier.class
+    };
 
     /**
      * Regex based on http://ftp.rfc-editor.org/in-notes/authors/rfc4408.txt.
@@ -89,10 +101,14 @@ public class SPF1Parser {
      * ABNF: mechanism = ( all / include / A / MX / PTR / IP4 / IP6 / exists )
      */
     private static final String MECHANISM_REGEX = "(?:"
-            + AllMechanism.ALL_REGEX + "|" + IncludeMechanism.INCLUDE_REGEX
-            + "|" + AMechanism.A_REGEX + "|" + MXMechanism.MX_REGEX + "|"
-            + PTRMechanism.PTR_REGEX + "|" + IP4Mechanism.IP4_REGEX + "|"
-            + IP6Mechanism.IP6_REGEX + "|" + ExistsMechanism.EXISTS_REGEX + ")";
+            + AllMechanism.REGEX + "|" 
+            + IncludeMechanism.REGEX + "|" 
+            + AMechanism.REGEX + "|" 
+            + MXMechanism.REGEX + "|"
+            + PTRMechanism.REGEX + "|" 
+            + IP4Mechanism.REGEX + "|"
+            + IP6Mechanism.REGEX + "|" 
+            + ExistsMechanism.REGEX + ")";
 
     /**
      * ABNF: mechanism = ( all / include / A / MX / PTR / IP4 / IP6 / exists )
@@ -100,12 +116,14 @@ public class SPF1Parser {
      * because it does not take parameters.
      */
     private static final String MECHANISM_NAME_STEP_REGEX = "(?:"
-            + AllMechanism.ALL_NAME_REGEX + "|"
-            + IncludeMechanism.INCLUDE_NAME_REGEX + "|"
-            + AMechanism.A_NAME_REGEX + "|" + MXMechanism.MX_NAME_REGEX + "|"
-            + PTRMechanism.PTR_NAME_REGEX + "|" + IP4Mechanism.IP4_NAME_REGEX
-            + "|" + IP6Mechanism.IP6_NAME_REGEX + "|"
-            + ExistsMechanism.EXISTS_NAME_REGEX + ")";
+            + AllMechanism.NAME_REGEX + "|"
+            + IncludeMechanism.NAME_REGEX + "|"
+            + AMechanism.NAME_REGEX + "|" 
+            + MXMechanism.NAME_REGEX + "|"
+            + PTRMechanism.NAME_REGEX + "|" 
+            + IP4Mechanism.NAME_REGEX + "|" 
+            + IP6Mechanism.NAME_REGEX + "|"
+            + ExistsMechanism.NAME_REGEX + ")";
 
     /**
      * TODO check that MACRO_STRING_REGEX already include all the available
@@ -240,8 +258,13 @@ public class SPF1Parser {
             .quote(SPF1Utils.SPF_VERSION)
             + TERMS_REGEX;
 
-    public SPF1Parser(String spfRecord) throws PermErrorException,
-            NoneException {
+    public SPF1Parser() {
+    }
+    
+    
+    public SPF1Record parse(String spfRecord) throws PermErrorException, NoneException {
+        
+        SPF1Record result = new SPF1Record();
 
         // check the version "header"
         if (!spfRecord.startsWith(SPF1Utils.SPF_VERSION + " ")) {
@@ -316,11 +339,6 @@ public class SPF1Parser {
                             throw new PermErrorException(
                                     "Error parsing redirect value");
                         }
-                        // TODO check error for multiple modifiers
-                        // if (directives.contains(e)) {
-                        // throw new PermErrorException(
-                        // "More then one exp modifier found in SPF-Record");
-                        // }
                         mod = new RedirectModifier();
                         ((RedirectModifier) mod).init(redirMatcher.group(1));
                     } else if (Pattern.compile(EXP_NAME_REGEX).matcher(
@@ -330,18 +348,23 @@ public class SPF1Parser {
                             throw new PermErrorException(
                                     "Error parsing redirect value");
                         }
-                        // TODO check error for multiple modifiers
-                        // if (directives.contains(e)) {
-                        // throw new PermErrorException(
-                        // "More then one exp modifier found in SPF-Record");
-                        // }
                         mod = new ExpModifier();
                         ((ExpModifier) mod).init(redirMatcher.group(1));
                     } else {
                         // unknown
                         mod = new UnknownModifier();
                     }
-                    modifiers.add(mod);
+                    
+                    if (mod.enforceSingleInstance()) {
+                        Iterator it = result.getModifiers().iterator();
+                        while (it.hasNext()) {
+                            if (it.next().getClass().equals(mod.getClass())) {
+                                throw new PermErrorException("More than one "+modifierName+" found in SPF-Record");
+                            }
+                        }
+                    }
+                    
+                    result.getModifiers().add(mod);
 
                 } else {
                     // DIRECTIVE
@@ -353,36 +376,37 @@ public class SPF1Parser {
                             .group(TERM_STEP_REGEX_MECHANISM_VALUE_POS);
 
                     Mechanism mech = null;
-                    if (Pattern.compile(AllMechanism.ALL_NAME_REGEX).matcher(
-                            mechName).matches()) {
-                        mech = new AllMechanism();
-                    } else if (Pattern.compile(
-                            IncludeMechanism.INCLUDE_NAME_REGEX).matcher(
-                            mechName).matches()) {
-                        mech = new IncludeMechanism();
-                    } else if (Pattern.compile(AMechanism.A_NAME_REGEX)
-                            .matcher(mechName).matches()) {
-                        mech = new AMechanism();
-                    } else if (Pattern.compile(MXMechanism.MX_NAME_REGEX)
-                            .matcher(mechName).matches()) {
-                        mech = new MXMechanism();
-                    } else if (Pattern.compile(IP4Mechanism.IP4_NAME_REGEX)
-                            .matcher(mechName).matches()) {
-                        mech = new IP4Mechanism();
-                    } else if (Pattern.compile(IP6Mechanism.IP6_NAME_REGEX)
-                            .matcher(mechName).matches()) {
-                        mech = new IP6Mechanism();
-                    } else if (Pattern.compile(PTRMechanism.PTR_NAME_REGEX)
-                            .matcher(mechName).matches()) {
-                        mech = new PTRMechanism();
-                    } else if (Pattern.compile(
-                            ExistsMechanism.EXISTS_NAME_REGEX)
-                            .matcher(mechName).matches()) {
-                        mech = new ExistsMechanism();
+                    for (int j = 0; j < knownMechanisms.length; j++) {
+                        Class mechClass = knownMechanisms[j];
+                        try {
+                            Field f = mechClass.getField("NAME_REGEX");
+                            String nameReg = (String) f.get(null);
+
+                            if (Pattern.compile(nameReg).matcher(mechName).matches()) {
+                                mech = (Mechanism) mechClass.newInstance();
+                            }
+
+                            
+                        } catch (SecurityException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        } catch (NoSuchFieldException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        } catch (IllegalArgumentException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        } catch (IllegalAccessException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        } catch (InstantiationException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
                     }
+
                     mech.init(mechValue);
-                    directives
-                            .add(new Directive(getQualifier(qualifier), mech));
+                    result.getDirectives().add(new Directive(getQualifier(qualifier), mech));
                 }
 
             }
@@ -392,6 +416,8 @@ public class SPF1Parser {
         if (!m.matches()) {
             throw new PermErrorException("Not Parsable: " + spfRecord);
         }
+        
+        return result;
     }
 
     /**
@@ -416,46 +442,5 @@ public class SPF1Parser {
             return SPF1Utils.PASS;
         }
     }
-
-    /**
-     * Return the commands as Collection
-     * 
-     * @return commands Collection of all mechanism which should be used
-     */
-    public Collection getDirectives() {
-        return sortCommands(directives);
-    }
-
-    /**
-     * Sort the commands. The redirect modifier must be the last!
-     * 
-     * @param commands
-     *            A Collection of all commands
-     * @return sortedCommands Sorted collection of the commands
-     */
-    private Collection sortCommands(Collection commands) {
-        Collection sortedCommands = new ArrayList();
-        Object redirect = null;
-
-        Iterator c = commands.iterator();
-        while (c.hasNext()) {
-            Object com = c.next();
-
-            if (com instanceof RedirectModifier) {
-                redirect = com;
-            } else {
-                sortedCommands.add(com);
-            }
-        }
-
-        if (redirect != null) {
-            sortedCommands.add(redirect);
-        }
-
-        return sortedCommands;
-    }
-
-    public Collection getModifiers() {
-        return modifiers;
-    }
+    
 }

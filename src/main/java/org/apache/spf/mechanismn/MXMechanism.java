@@ -36,22 +36,22 @@ public class MXMechanism extends AMechanism {
     /**
      * ABNF: "mx"
      */
-    public static final String MX_NAME_REGEX = "[mM][xX]";
+    public static final String NAME_REGEX = "[mM][xX]";
 
     /**
      * ABNF: [ ":" domain-spec ] [ dual-cidr-length ]
      */
-    public static final String MX_VALUE_REGEX = "(?:\\:"
+    public static final String VALUE_REGEX = "(?:\\:"
             + SPF1Parser.DOMAIN_SPEC_REGEX + ")?" + "(?:"
             + DUAL_CIDR_LENGTH_REGEX + ")?";
 
     /**
      * ABNF: MX = "mx" [ ":" domain-spec ] [ dual-cidr-length ]
      */
-    public static final String MX_REGEX = MX_NAME_REGEX + MX_VALUE_REGEX;
+    public static final String REGEX = NAME_REGEX + VALUE_REGEX;
 
     public MXMechanism() {
-        super(MX_NAME_REGEX, MX_VALUE_REGEX);
+        super(NAME_REGEX, VALUE_REGEX);
     }
 
     /**

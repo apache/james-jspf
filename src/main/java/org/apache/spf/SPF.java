@@ -36,7 +36,7 @@ public class SPF {
 
     private String result = SPF1Utils.PASS;
 
-    private SPF1Parser spfParser;
+    private SPF1Record spfRecord;
 
     private SPF1Data spfData;
 
@@ -104,10 +104,10 @@ public class SPF {
                     .getCurrentDomain(), SPF1Utils.SPF_VERSION);
 
             // Parse the record
-            spfParser = new SPF1Parser(spfDnsEntry);
+            spfRecord = new SPF1Parser().parse(spfDnsEntry);
 
             // get all commands
-            Iterator com = spfParser.getDirectives().iterator();
+            Iterator com = spfRecord.getDirectives().iterator();
             while (com.hasNext()) {
                 hasCommand = true;
                 Directive d = (Directive) com.next();
@@ -119,7 +119,7 @@ public class SPF {
                 }
             }
             
-            Iterator mod = spfParser.getModifiers().iterator();
+            Iterator mod = spfRecord.getModifiers().iterator();
             while (mod.hasNext()) {
                 Modifier m = (Modifier) mod.next();
                 

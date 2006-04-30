@@ -35,21 +35,21 @@ public class IP4Mechanism extends GenericMechanism {
     /**
      * ABNF: "ip4"
      */
-    public static final String IP4_NAME_REGEX = "[iI][pP][4]";
+    public static final String NAME_REGEX = "[iI][pP][4]";
 
     /**
      * TODO ABNF: ip4-network [ ip4-cidr-length ]
      */
-    public static final String IP4_VALUE_REGEX = "\\:" + "([0-9.]+)" + "(?:"
+    public static final String VALUE_REGEX = "\\:" + "([0-9.]+)" + "(?:"
             + IP4_CIDR_LENGTH_REGEX + ")?";
 
     /**
      * TODO ABNF: IP4 = "ip4" ":" ip4-network [ ip4-cidr-length ]
      */
-    public static final String IP4_REGEX = IP4_NAME_REGEX + IP4_VALUE_REGEX;
+    public static final String REGEX = NAME_REGEX + VALUE_REGEX;
 
     public IP4Mechanism() {
-        this(IP4_NAME_REGEX, IP4_VALUE_REGEX);
+        this(NAME_REGEX, VALUE_REGEX);
     }
 
     public IP4Mechanism(String namePattern, String valuePattern) {

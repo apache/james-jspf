@@ -15,32 +15,29 @@
  * permissions and limitations under the License.                      *
  ***********************************************************************/
 
-package org.apache.spf.modifier;
+package org.apache.spf;
 
-import org.apache.spf.PermErrorException;
-import org.apache.spf.SPF1Data;
+import java.util.ArrayList;
+import java.util.Collection;
 
-/**
- * This Interface represent a modifier
- * 
- * @author Norman Maurer <nm@byteaction.de>
- * 
- */
-public interface Modifier {
+public class SPF1Record {
 
+    private Collection directives = new ArrayList();
+
+    private Collection modifiers = new ArrayList();
+    
     /**
-     * Run the mechanismn with the give SPF1Data
+     * Return the commands as Collection
      * 
-     * @param spfData
-     *            The SPF1Data we should use
-     * @return host The host we should redirect / include
-     * @throws PermErrorException
-     *             if there are any syntax problems etc
+     * @return commands Collection of all mechanism which should be used
      */
-    public String run(SPF1Data spfData) throws PermErrorException;
+    public Collection getDirectives() {
+        return directives;
+    }
 
-    /**
-     * @return true if only one instance of this modifier is allowed
-     */
-    public boolean enforceSingleInstance();
+
+    public Collection getModifiers() {
+        return modifiers;
+    }
+
 }

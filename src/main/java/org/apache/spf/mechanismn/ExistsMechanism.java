@@ -35,22 +35,22 @@ public class ExistsMechanism extends GenericMechanism {
     /**
      * ABNF: "exists"
      */
-    public static final String EXISTS_NAME_REGEX = "[eE][xX][iI][sS][tT][sS]";
+    public static final String NAME_REGEX = "[eE][xX][iI][sS][tT][sS]";
 
     /**
      * ABNF: "exists" ":" domain-spec
      */
-    public static final String EXISTS_VALUE_REGEX = "\\:"
+    public static final String VALUE_REGEX = "\\:"
             + SPF1Parser.DOMAIN_SPEC_REGEX;
 
     /**
      * ABNF: exists = "exists" ":" domain-spec
      */
-    public static final String EXISTS_REGEX = EXISTS_NAME_REGEX
-            + EXISTS_VALUE_REGEX;
+    public static final String REGEX = NAME_REGEX
+            + VALUE_REGEX;
 
     public ExistsMechanism() {
-        super(EXISTS_NAME_REGEX, EXISTS_VALUE_REGEX);
+        super(NAME_REGEX, VALUE_REGEX);
     }
 
     /**

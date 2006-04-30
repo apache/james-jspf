@@ -70,4 +70,11 @@ public class ExpModifier extends GenericModifier {
 
     }
 
+    /**
+     * @see org.apache.spf.modifier.Modifier#enforceSingleInstance()
+     */
+    public boolean enforceSingleInstance() {
+        return true;
+    }
+
 }

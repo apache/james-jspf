@@ -36,21 +36,21 @@ public class PTRMechanism extends GenericMechanism {
     /**
      * ABNF: "ptr"
      */
-    public static final String PTR_NAME_REGEX = "[pP][tT][rR]";
+    public static final String NAME_REGEX = "[pP][tT][rR]";
 
     /**
      * ABNF: "ptr" [ ":" domain-spec ]
      */
-    public static final String PTR_VALUE_REGEX = "(?:\\:"
+    public static final String VALUE_REGEX = "(?:\\:"
             + SPF1Parser.DOMAIN_SPEC_REGEX + ")?";
 
     /**
      * ABNF: PTR = "ptr" [ ":" domain-spec ]
      */
-    public static final String PTR_REGEX = PTR_NAME_REGEX + PTR_VALUE_REGEX;
+    public static final String REGEX = NAME_REGEX + VALUE_REGEX;
 
     public PTRMechanism() {
-        super(PTR_NAME_REGEX, PTR_VALUE_REGEX);
+        super(NAME_REGEX, VALUE_REGEX);
     }
 
     /**

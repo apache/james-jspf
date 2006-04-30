@@ -37,26 +37,26 @@ public class AMechanism extends GenericMechanism {
     /**
      * ABNF: "a"
      */
-    public static final String A_NAME_REGEX = "[aA]";
+    public static final String NAME_REGEX = "[aA]";
 
     /**
      * ABNF: A = "a" [ ":" domain-spec ] [ dual-cidr-length ]
      */
-    public static final String A_VALUE_REGEX = "(?:\\:"
+    public static final String VALUE_REGEX = "(?:\\:"
             + SPF1Parser.DOMAIN_SPEC_REGEX + ")?" + "(?:"
             + DUAL_CIDR_LENGTH_REGEX + ")?";
 
     /**
      * ABNF: A = "a" [ ":" domain-spec ] [ dual-cidr-length ]
      */
-    public static final String A_REGEX = A_NAME_REGEX + A_VALUE_REGEX;
+    public static final String REGEX = NAME_REGEX + VALUE_REGEX;
 
     protected int ip4cidr;
 
     protected int ip6cidr;
 
     public AMechanism() {
-        this(A_NAME_REGEX, A_VALUE_REGEX);
+        this(NAME_REGEX, VALUE_REGEX);
     }
 
     protected AMechanism(String patternName, String patternValue) {

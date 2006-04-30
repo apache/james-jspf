@@ -22,8 +22,18 @@ import org.apache.spf.SPF1Data;
 
 public class UnknownModifier extends GenericModifier {
 
+    /**
+     * @see org.apache.spf.modifier.Modifier#run(org.apache.spf.SPF1Data)
+     */
     public String run(SPF1Data spfData) throws PermErrorException {
         return null;
+    }
+
+    /**
+     * @see org.apache.spf.modifier.Modifier#enforceSingleInstance()
+     */
+    public boolean enforceSingleInstance() {
+        return false;
     }
 
 }

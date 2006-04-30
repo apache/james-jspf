@@ -53,7 +53,7 @@ public class SPF1ParserTest extends TestCase {
 
             System.out.println("testing [" + data.recIn + "]");
 
-            new SPF1Parser(data.recIn);
+            new SPF1Parser().parse(data.recIn);
 
             assertEquals("Expected <" + data.errMsg + "> but was <"
                     + "no errors" + ">", data.errMsg, "no errors");

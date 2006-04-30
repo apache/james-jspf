@@ -30,14 +30,14 @@ import java.util.regex.MatchResult;
  */
 public class AllMechanism extends AbstractMechanism {
 
-    public static final String ALL_NAME_REGEX = "[aA][lL][lL]";
+    public static final String NAME_REGEX = "[aA][lL][lL]";
 
-    public static final String ALL_VALUE_REGEX = "";
+    public static final String VALUE_REGEX = "";
 
-    public static final String ALL_REGEX = ALL_NAME_REGEX;
+    public static final String REGEX = NAME_REGEX;
 
     public AllMechanism() {
-        super(ALL_NAME_REGEX, ALL_VALUE_REGEX);
+        super(NAME_REGEX, VALUE_REGEX);
     }
 
     /**
@@ -51,6 +51,7 @@ public class AllMechanism extends AbstractMechanism {
 
     public void config(MatchResult params) throws PermErrorException {
         // no checks needed
+        // the regex only passes with no parameters
     }
 
 }
