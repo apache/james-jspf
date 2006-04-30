@@ -35,6 +35,7 @@ public class SPF1Data implements MacroData {
 
     protected String spfVersion = "v=spf1";
 
+    
     private String ipAddress = ""; // (i)<sending-host>
 
     private String mailFrom = ""; // (s)<responsible-sender>
@@ -56,12 +57,11 @@ public class SPF1Data implements MacroData {
     private String readableIP = ""; // (c)
 
     private String receivingDomain = "unknown"; // (r)
+    
 
     private int depth = 1;
 
     private String explanation = "";
-
-    private String defaultExplanation = "http://www.openspf.org/why.html?sender=%{S}&ip=%{I}";
 
     protected SPF1Data(String mailFrom, String heloDomain, String clientIP)
             throws PermErrorException, NoneException {
@@ -259,19 +259,6 @@ public class SPF1Data implements MacroData {
      */
     public String getExplanation() {
         return explanation;
-    }
-
-    /**
-     * Get the default explanation
-     * 
-     * @return default explanation
-     */
-    public String getDefaultExplanation() {
-        try {
-            return new MacroExpand(this).expandExplanation(defaultExplanation);
-        } catch (Exception e) {
-            return explanation;
-        }
     }
 
 }

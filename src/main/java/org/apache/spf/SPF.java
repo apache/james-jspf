@@ -18,7 +18,6 @@
 package org.apache.spf;
 
 import org.apache.spf.mechanismn.Directive;
-import org.apache.spf.modifier.ExpModifier;
 import org.apache.spf.modifier.Modifier;
 
 import java.util.Iterator;
@@ -34,10 +33,6 @@ public class SPF {
 
     private DNSService dnsProbe = null;
 
-    private String result = SPF1Utils.PASS;
-
-    private SPF1Record spfRecord;
-
     private SPF1Data spfData;
 
     private String explanation = "";
@@ -47,12 +42,6 @@ public class SPF {
     private String headerName = "Received-SPF";
 
     private String header = "";
-
-    private boolean hasCommand = false;
-
-    private String qualifier = null;
-
-    private boolean match = false;
 
     /**
      * 
@@ -84,6 +73,9 @@ public class SPF {
      */
     public String checkSPF(String ipAddress, String mailFrom, String hostName) {
 
+        // TODO is the default PASS ?
+        String result = SPF1Utils.PASS;
+        
         /**
          * Check if the connection was made from localhost. Set the result to
          * PASS if its from localhost.
@@ -104,7 +96,11 @@ public class SPF {
                     .getCurrentDomain(), SPF1Utils.SPF_VERSION);
 
             // Parse the record
-            spfRecord = new SPF1Parser().parse(spfDnsEntry);
+            SPF1Record spfRecord = new SPF1Parser().parse(spfDnsEntry);
+
+            boolean match = false;
+            String qualifier = null;
+            boolean hasCommand = false;
 
             // get all commands
             Iterator com = spfRecord.getDirectives().iterator();
@@ -123,20 +119,14 @@ public class SPF {
             while (mod.hasNext()) {
                 Modifier m = (Modifier) mod.next();
                 
-                if (m instanceof ExpModifier) {
-                    ExpModifier mo = (ExpModifier) m;
-                    mo.run(spfData);
-                } else {
-                    qualifier = m.run(spfData);
+                String q = m.run(spfData);
+                if (q != null) {
+                    qualifier = q;
                 }
 
                 if (qualifier != null) {
                     if (qualifier.equals(SPF1Utils.FAIL)) {
-                        if (spfData.getExplanation().equals("")) {
-                            explanation = spfData.getDefaultExplanation();
-                        } else {
-                            explanation = spfData.getExplanation();
-                        }
+                        explanation = spfData.getExplanation();
                     }
                 }
 

@@ -164,21 +164,6 @@ public class IPAddr {
     }
 
     /**
-     * Check if and ip is IP4
-     * 
-     * TODO: I think we can remove this and use my new method.
-     * 
-     * @return true or false
-     */
-    public boolean isIP4() {
-        if (ipLength == 4) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /**
      * Set default values for ipv6
      * 
      */

@@ -59,9 +59,10 @@ public class MacroExpand {
      * @param input
      *            The explanation which should be expand
      * @return expanded explanation
+     * @throws PermErrorException 
      * @throws NeutralException
      */
-    public String expandExplanation(String input) throws Exception {
+    public String expandExplanation(String input) throws PermErrorException {
 
         isExplanation = true;
         return expand(input);
@@ -73,9 +74,10 @@ public class MacroExpand {
      * @param input
      *            The domain which should be expand
      * @return expanded domain
+     * @throws PermErrorException 
      * @throws NeutralException
      */
-    public String expandDomain(String input) throws Exception {
+    public String expandDomain(String input) throws PermErrorException {
 
         isExplanation = false;
         String domainName = expand(input);
@@ -88,7 +90,7 @@ public class MacroExpand {
         return domainName;
     }
 
-    private String expand(String input) throws Exception {
+    private String expand(String input) throws PermErrorException {
 
         input = replaceLiterals(input);
 
@@ -114,9 +116,10 @@ public class MacroExpand {
      * 
      * @param replaceValue
      * @return
+     * @throws PermErrorException 
      * @throws NeutralException
      */
-    private String replaceCell(String replaceValue) throws Exception {
+    private String replaceCell(String replaceValue) throws PermErrorException {
 
         String variable = "";
         String domainNumber = "";

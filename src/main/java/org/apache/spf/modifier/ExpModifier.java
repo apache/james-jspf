@@ -18,6 +18,8 @@
 package org.apache.spf.modifier;
 
 import org.apache.spf.MacroExpand;
+import org.apache.spf.NoneException;
+import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
 import org.apache.spf.SPF1Parser;
 
@@ -29,7 +31,6 @@ import org.apache.spf.SPF1Parser;
  */
 public class ExpModifier extends GenericModifier {
 
-
     /**
      * ABNF: "exp"
      */
@@ -38,13 +39,16 @@ public class ExpModifier extends GenericModifier {
     /**
      * ABNF: domain-spec
      */
-    public static final String VALUE_REGEX = "\\=" + SPF1Parser.DOMAIN_SPEC_REGEX;
+    public static final String VALUE_REGEX = "\\="
+            + SPF1Parser.DOMAIN_SPEC_REGEX;
 
     /**
      * ABNF: explanation = "exp" "=" domain-spec
      */
     public static final String REGEX = NAME_REGEX + VALUE_REGEX;
-    
+
+    private String defaultExplanation = "http://www.openspf.org/why.html?sender=%{S}&ip=%{I}";
+
 
     /**
      * Generate the explanation and set it in SPF1Data so it can be accessed
@@ -52,27 +56,31 @@ public class ExpModifier extends GenericModifier {
      * 
      * @param spfData
      *            The SPF1Data which should used
+     * @throws PermErrorException 
      * 
      */
-    public String run(SPF1Data spfData) {
+    public String run(SPF1Data spfData) throws PermErrorException {
         String exp = null;
         String host = this.host;
+
         try {
             host = new MacroExpand(spfData).expandDomain(host);
-            exp = spfData.getDnsProbe().getTxtCatType(host);
-
-        } catch (Exception e) {
-        }
-
-        if ((exp == null) || (exp.equals(""))) {
-            spfData.setExplanation(spfData.getDefaultExplanation());
-        } else {
             try {
+                exp = spfData.getDnsProbe().getTxtCatType(host);
+            } catch (NoneException e) {
+                // TODO what should we do here?
+            }
+            
+            if ((exp == null) || (exp.equals(""))) {
+                spfData.setExplanation(new MacroExpand(spfData)
+                        .expandExplanation(defaultExplanation));
+            } else {
                 spfData.setExplanation(new MacroExpand(spfData)
                         .expandExplanation(exp));
-            } catch (Exception e) {
-                spfData.setExplanation("");
             }
+        } catch (PermErrorException e) {
+            spfData.setExplanation("");
+            throw e;
         }
         return null;
 

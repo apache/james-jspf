@@ -32,7 +32,10 @@ import org.apache.spf.modifier.Modifier;
 import org.apache.spf.modifier.RedirectModifier;
 import org.apache.spf.modifier.UnknownModifier;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -46,12 +49,21 @@ import java.util.regex.Pattern;
 public class SPF1Parser {
 
     private static final Class[] knownMechanisms = new Class[] {
-            AllMechanism.class, AMechanism.class, ExistsMechanism.class,
-            IncludeMechanism.class, IP4Mechanism.class, IP6Mechanism.class,
-            MXMechanism.class, PTRMechanism.class };
+            AllMechanism.class, 
+            AMechanism.class, 
+            ExistsMechanism.class,
+            IncludeMechanism.class, 
+            IP4Mechanism.class, 
+            IP6Mechanism.class,
+            MXMechanism.class, 
+            PTRMechanism.class 
+    };
 
     private static final Class[] knownModifiers = new Class[] {
-            ExpModifier.class, RedirectModifier.class, UnknownModifier.class };
+            ExpModifier.class, 
+            RedirectModifier.class, 
+            UnknownModifier.class 
+    };
 
     /**
      * Regex based on http://ftp.rfc-editor.org/in-notes/authors/rfc4408.txt.
@@ -123,96 +135,52 @@ public class SPF1Parser {
     public static final String DOMAIN_SPEC_REGEX = "("
             + SPF1Parser.MACRO_STRING_REGEX + DOMAIN_END_REGEX + ")";
 
-    /**
-     * ABNF: 1*SP
-     */
-    private static final String TERMS_SEPARATOR_REGEX = "[ ]+";
+    private Pattern termsSeparatorPattern = null;
 
-    /**
-     * ABNF: directive = [ qualifier ] mechanism
-     * 
-     * This is used for the step-by-step parser, don't change the groups!
-     * 
-     * 1) QUALIFIER 2) ALL 3) MECHANISM NAME 4) MECHANISM VALUE 5) MODIFIER NAME
-     * 6) MODIFIER VALUE
-     */
-    private String TERM_STEP_REGEX = null;
+    
+    private Pattern termPattern = null;
 
+    
+    // TODO: this should be automatically calculated 
     private static final int TERM_STEP_REGEX_QUALIFIER_POS = 1;
 
-    private static final int TERM_STEP_REGEX_MECHANISM_NAME_POS = 2;
+    private static final int TERM_STEP_REGEX_MECHANISM_POS = 2;
 
-    private static final int TERM_STEP_REGEX_MECHANISM_VALUE_POS = 3;
+    private static final int TERM_STEP_REGEX_MECHANISM_COUNT = 13;
 
-    private static final int TERM_STEP_REGEX_MODIFIER_NAME_POS = 4;
+    private static final int TERM_STEP_REGEX_MODIFIER_POS = 16;
 
-    private static final int TERM_STEP_REGEX_MODIFIER_VALUE_POS = 5;
+    private static final int TERM_STEP_REGEX_MODIFIER_COUNT = 2;
+
+    private Pattern recordPattern = null;
+
+    private Map mechanismsMap;
+
+    private Map modifiersMap;
 
     /**
-     * ABNF: record = "vspf1" terms
+     * Constructor.
+     * Creates all the values needed to run the parsing
      */
-    private String RECORD_REGEX = null;
-
     public SPF1Parser() {
-        StringBuffer mechRegex = new StringBuffer();
-        StringBuffer mechNamesRegex = new StringBuffer();
-        mechRegex.append("(?:");
-        mechNamesRegex.append("(?:");
-        for (int j = 0; j < knownMechanisms.length; j++) {
-            Class mechClass = knownMechanisms[j];
-            try {
-                String nameReg = (String) mechClass.getField("NAME_REGEX").get(
-                        null);
-                mechNamesRegex.append(nameReg);
-                String reg = (String) mechClass.getField("REGEX").get(null);
-                mechRegex.append(reg);
-
-                if (j == knownMechanisms.length - 1) {
-                    mechRegex.append(")");
-                    mechNamesRegex.append(")");
-                } else {
-                    mechRegex.append("|");
-                    mechNamesRegex.append("|");
-                }
-
-            } catch (Exception e) {
-
-            }
-        }
-
-        StringBuffer modifierRegex = new StringBuffer();
-        modifierRegex.append("(?:");
-        for (int j = 0; j < knownModifiers.length; j++) {
-            Class mechClass = knownModifiers[j];
-            try {
-                String reg = (String) mechClass.getField("REGEX").get(null);
-                modifierRegex.append(reg);
-                if (j == knownModifiers.length - 1) {
-                    modifierRegex.append(")");
-                } else {
-                    modifierRegex.append("|");
-                }
-
-            } catch (Exception e) {
-
-            }
-        }
-
+        
+        mechanismsMap = createPatternMap(knownMechanisms, "REGEX");
+        modifiersMap = createPatternMap(knownModifiers, "REGEX");
         /**
          * ABNF: mechanism = ( all / include / A / MX / PTR / IP4 / IP6 / exists )
          */
-        String MECHANISM_REGEX = mechRegex.toString();
-        MECHANISM_NAME_STEP_REGEX = mechNamesRegex.toString();
+        String MECHANISM_REGEX = createRegex(mechanismsMap);
+        MECHANISM_NAME_STEP_REGEX = null;
 
         /**
          * ABNF: modifier = redirect / explanation / unknown-modifier
          */
-        String MODIFIER_REGEX = modifierRegex.toString();
+        String MODIFIER_REGEX = "(" + createRegex(modifiersMap) + ")";
 
         /**
          * ABNF: directive = [ qualifier ] mechanism
          */
-        String DIRECTIVE_REGEX = QUALIFIER_PATTERN + "?(" + MECHANISM_REGEX
+        String DIRECTIVE_REGEX = "(" + QUALIFIER_PATTERN + "?)(" + MECHANISM_REGEX
                 + ")";
 
         /**
@@ -222,16 +190,83 @@ public class SPF1Parser {
                 + ")";
 
         /**
+         * ABNF: 1*SP
+         */
+        String TERMS_SEPARATOR_REGEX = "[ ]+";
+
+        /**
          * ABNF: terms = *( 1*SP ( directive / modifier ) )
          */
         String TERMS_REGEX = "(?:" + TERMS_SEPARATOR_REGEX + TERM_REGEX + ")*";
-        RECORD_REGEX = Pattern.quote(SPF1Utils.SPF_VERSION) + TERMS_REGEX;
+        
+        /**
+         * ABNF: record = "vspf1" terms
+         */
+        String RECORD_REGEX = Pattern.quote(SPF1Utils.SPF_VERSION) + TERMS_REGEX;
 
-        TERM_STEP_REGEX = "(?:(" + QUALIFIER_PATTERN + "{1})?(?:("
+        /**
+         * ABNF: directive = [ qualifier ] mechanism
+         * 
+         * This is used for the step-by-step parser, don't change the groups!
+         * 
+         * 1) QUALIFIER 2) ALL 3) MECHANISM NAME 4) MECHANISM VALUE 5) MODIFIER NAME
+         * 6) MODIFIER VALUE
+         */
+        String TERM_STEP_REGEX = TERM_STEP_REGEX = "(?:(" + QUALIFIER_PATTERN + "{1})?(?:("
                 + MECHANISM_NAME_STEP_REGEX + ")([\\:/]{1}"
                 + MECHANISM_VALUE_STEP_REGEX + ")?)|(?:"
                 + UnknownModifier.REGEX + "))";
 
+        recordPattern = Pattern.compile(RECORD_REGEX);
+        termsSeparatorPattern = Pattern.compile(TERMS_SEPARATOR_REGEX);
+        termPattern = Pattern.compile(TERM_REGEX);
+    }
+
+    /**
+     * Loop the classes searching for a String static field named staticFieldName
+     * and create an OR regeex like this:
+     * (?:FIELD1|FIELD2|FIELD3)
+     * 
+     * @param classes classes to analyze
+     * @param staticFieldName static field to concatenate
+     * @return regex
+     */
+    private String createRegex(Map commandMap) {
+        StringBuffer modifierRegex = new StringBuffer();
+        Collection c = commandMap.values();
+        Iterator i = c.iterator();
+        boolean first = true;
+        while (i.hasNext()) {
+            if (first) {
+                modifierRegex.append("(?:");
+                first = false;
+            } else {
+                modifierRegex.append("|");
+            }
+            Pattern pattern = (Pattern) i.next();
+            modifierRegex.append(pattern.pattern());
+        }
+        modifierRegex.append(")");
+        return modifierRegex.toString();
+    }
+
+    /**
+     * @param classes classes to analyze
+     * @param staticFieldName static field to concatenate
+     * @return map <Class,Pattern>
+     */
+    private Map createPatternMap(Class[] classes, String staticFieldName) {
+        Map m = new HashMap();
+        for (int j = 0; j < classes.length; j++) {
+            Class mechClass = classes[j];
+            try {
+                String reg = (String) mechClass.getField(staticFieldName).get(null);
+                m.put(classes[j],Pattern.compile(reg));
+            } catch (Exception e) {
+
+            }
+        }
+        return m;
     }
 
     public SPF1Record parse(String spfRecord) throws PermErrorException,
@@ -244,9 +279,7 @@ public class SPF1Parser {
             throw new NoneException("No valid SPF Record: " + spfRecord);
         }
 
-        // single step regexp matcher
-        Pattern p = Pattern.compile(RECORD_REGEX);
-        Matcher m = p.matcher(spfRecord);
+        Matcher m = recordPattern.matcher(spfRecord);
         // if (!m.matches()) {
         // throw new PermErrorException("Not Parsable: " + spfRecord);
         // }
@@ -256,10 +289,8 @@ public class SPF1Parser {
         // we could simply keep it to have an "extra" input check.
 
         // extract terms
-        String[] terms = Pattern.compile(TERMS_SEPARATOR_REGEX).split(
+        String[] terms = termsSeparatorPattern.split(
                 spfRecord.replaceFirst(SPF1Utils.SPF_VERSION, ""));
-
-        Pattern termPattern = Pattern.compile(TERM_STEP_REGEX);
 
         // cycle terms
         for (int i = 0; i < terms.length; i++)
@@ -270,40 +301,44 @@ public class SPF1Parser {
                             + "] is not syntactically valid: "
                             + termPattern.pattern());
                 }
+                
+                System.out.println("######################"+termMatcher.groupCount());
+                for (int k = 1; k < termMatcher.groupCount(); k++) {
+                    System.out.println("#"+k+"] "+termMatcher.group(k));
+                }
 
                 // DEBUG
                 System.out.println("Qualifier : "
                         + termMatcher.group(TERM_STEP_REGEX_QUALIFIER_POS));
                 System.out
-                        .println("Mech Name : "
-                                + termMatcher
-                                        .group(TERM_STEP_REGEX_MECHANISM_NAME_POS));
-                System.out.println("Mech Value: "
+                .println("Mech Name : "
                         + termMatcher
-                                .group(TERM_STEP_REGEX_MECHANISM_VALUE_POS));
+                                .group(TERM_STEP_REGEX_MECHANISM_POS));
+                System.out
+                .println("Mech Name : "
+                        + termMatcher
+                                .group(TERM_STEP_REGEX_MECHANISM_COUNT));
                 System.out.println("Mod Name  : "
-                        + termMatcher.group(TERM_STEP_REGEX_MODIFIER_NAME_POS));
+                        + termMatcher.group(TERM_STEP_REGEX_MODIFIER_POS));
                 System.out
                         .println("Mod Value : "
                                 + termMatcher
-                                        .group(TERM_STEP_REGEX_MODIFIER_VALUE_POS));
+                                        .group(TERM_STEP_REGEX_MODIFIER_COUNT));
 
                 // true if we matched a modifier, false if we matched a
                 // directive
-                String modifierName = termMatcher
-                        .group(TERM_STEP_REGEX_MODIFIER_NAME_POS);
-                if (modifierName != null) {
-                    String modifierValue = termMatcher
-                            .group(TERM_STEP_REGEX_MODIFIER_VALUE_POS);
+                String modifierString = termMatcher
+                        .group(TERM_STEP_REGEX_MODIFIER_POS);
+                if (modifierString != null) {
 
-                    Modifier mod = (Modifier) lookupAndCreateTerm(modifierName, modifierValue, knownModifiers);;
+                    Modifier mod = (Modifier) lookupAndCreateTerm(modifierString, modifiersMap);
 
                     if (mod.enforceSingleInstance()) {
                         Iterator it = result.getModifiers().iterator();
                         while (it.hasNext()) {
                             if (it.next().getClass().equals(mod.getClass())) {
                                 throw new PermErrorException("More than one "
-                                        + modifierName + " found in SPF-Record");
+                                        + modifierString + " found in SPF-Record");
                             }
                         }
                     }
@@ -314,12 +349,12 @@ public class SPF1Parser {
                     // DIRECTIVE
                     String qualifier = termMatcher
                             .group(TERM_STEP_REGEX_QUALIFIER_POS);
-                    String mechName = termMatcher
-                            .group(TERM_STEP_REGEX_MECHANISM_NAME_POS);
-                    String mechValue = termMatcher
-                            .group(TERM_STEP_REGEX_MECHANISM_VALUE_POS);
+                    String mechString = termMatcher
+                            .group(TERM_STEP_REGEX_MECHANISM_POS);
+//                    String mechValue = termMatcher
+//                            .group(TERM_STEP_REGEX_MECHANISM_VALUE_POS);
 
-                    Object mech = lookupAndCreateTerm(mechName, mechValue, knownMechanisms);
+                    Object mech = lookupAndCreateTerm(mechString, mechanismsMap);
 
                     result.getDirectives().add(
                             new Directive(getQualifier(qualifier),(Mechanism) mech));
@@ -345,34 +380,15 @@ public class SPF1Parser {
      * @return
      * @throws PermErrorException
      */
-    private Object lookupAndCreateTerm(String mechName, String mechValue, Class[] termDefs) throws PermErrorException {
+    private Object lookupAndCreateTerm(String mechString, Map patternMap) throws PermErrorException {
         Object mech = null;
-        for (int j = 0; j < termDefs.length && mech == null; j++) {
-            Class mechClass = termDefs[j];
-            try {
-                String nameReg = (String) mechClass.getField(
-                        "NAME_REGEX").get(null);
-
-                if (Pattern.compile(nameReg).matcher(mechName)
-                        .matches()) {
-                    mech = (Mechanism) createTerm(mechValue, mechClass);
-                }
-
-            } catch (SecurityException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (NoSuchFieldException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IllegalArgumentException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (InstantiationException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+        Iterator i = patternMap.keySet().iterator();
+        while (i.hasNext()) {
+            Class c = (Class) i.next();
+            Pattern p = (Pattern) patternMap.get(c);
+            
+            if (p.matcher(mechString).matches()) {
+                mech = createTerm(mechString, c, (Pattern) patternMap.get(c));
             }
         }
         return mech;
@@ -382,42 +398,39 @@ public class SPF1Parser {
      * @param mechValue
      * @param mechClass
      * @return
-     * @throws InstantiationException
-     * @throws IllegalAccessException
-     * @throws NoSuchFieldException
-     * @throws PermErrorException
+     * @throws PermErrorException 
      */
-    private Object createTerm(String mechValue, Class mechClass) throws InstantiationException, IllegalAccessException, NoSuchFieldException, PermErrorException {
-        Object term = mechClass.newInstance();
-
-        if (term instanceof Configurable) {
-            String valueReg = (String) mechClass.getField(
-                    "VALUE_REGEX").get(null);
-   
-            Pattern valuePattern = Pattern
-                    .compile(valueReg);
-   
-            if (mechValue == null) {
-                mechValue = "";
-            }
-            if ((mechValue == null || mechValue.length() == 0)
-                    && valuePattern.pattern().length() == 0) {
-                ((Configurable) term).config(null);
-            } else {
-   
-                Matcher matcher = valuePattern
-                        .matcher(mechValue);
-                if (!matcher.matches()) {
-                    throw new PermErrorException(
-                            "Value does not match: "
-                                    + valuePattern
-                                            .pattern()
-                                    + " " + mechValue);
+    private Object createTerm(String mechValue, Class mechClass, Pattern pattern) throws PermErrorException  {
+        
+        try {
+            Object term = mechClass.newInstance();
+            if (term instanceof Configurable) {
+                if (mechValue == null) {
+                    mechValue = "";
                 }
-                ((Configurable) term).config(matcher.toMatchResult());
+                if ((mechValue == null || mechValue.length() == 0)
+                        && pattern.pattern().length() == 0) {
+                    ((Configurable) term).config(null);
+                } else {
+       
+                    Matcher matcher = pattern
+                            .matcher(mechValue);
+                    if (!matcher.matches()) {
+                        throw new PermErrorException(
+                                "Value does not match: "
+                                        + pattern
+                                                .pattern()
+                                        + " " + mechValue);
+                    }
+                    ((Configurable) term).config(matcher.toMatchResult());
+                }
             }
+            return term;
+        } catch (IllegalAccessException e) {
+            throw new PermErrorException("Unexpected error creating term: "+e.getMessage());
+        } catch (InstantiationException e) {
+            throw new PermErrorException("Unexpected error creating term: "+e.getMessage());
         }
-        return term;
     }
 
     /**
