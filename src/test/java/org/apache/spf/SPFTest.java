@@ -17,6 +17,8 @@
 
 package org.apache.spf;
 
+import org.apache.spf.util.IPAddr;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -26,8 +28,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
-
-import org.apache.spf.util.IPAddr;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -51,7 +51,7 @@ public class SPFTest extends TestCase {
         super(def.name);
         this.data = def;
     }
-    
+
     protected void runTest() throws Throwable {
 
         String[] params = Pattern.compile("[ ]+").split(data.command);
@@ -96,9 +96,7 @@ public class SPFTest extends TestCase {
             // TODO
         } else if (rcptTo == null && local == null) {
 
-            //new MockDNSService()
-            String resultSPF = new SPF().checkSPF(ip,
-                    sender, helo);
+            String resultSPF = new SPF(new MockDNSService()).checkSPF(ip, sender, helo);
 
             if (!data.result.startsWith("/")) {
                 assertEquals(data.result, resultSPF);
@@ -114,9 +112,9 @@ public class SPFTest extends TestCase {
             System.out
                     .println("INFO: rcptTo and local commands not currently supported");
         }
-//
-//        System.out.println("--------------------------------------------");
-//        System.out.println(Lookup.getDefaultCache(DClass.IN).toString());
+        //
+        // System.out.println("--------------------------------------------");
+        // System.out.println(Lookup.getDefaultCache(DClass.IN).toString());
 
     }
 
@@ -199,7 +197,6 @@ public class SPFTest extends TestCase {
             }
 
         }
-        
 
         if (def != null && def.command != null) {
             if (def.result != null) {
@@ -670,7 +667,8 @@ public class SPFTest extends TestCase {
 
         }
 
-        public List getAddressList(String list, int mask) throws PermErrorException {
+        public List getAddressList(String list, int mask)
+                throws PermErrorException {
             if (list == null || "".equals(list)) {
                 return new ArrayList();
             }
@@ -756,7 +754,7 @@ public class SPFTest extends TestCase {
                 addTest(new SPFTest((SPFTestDef) tests.get(i.next())));
             }
         }
-        
+
     }
 
     public static class SPFTestDef {

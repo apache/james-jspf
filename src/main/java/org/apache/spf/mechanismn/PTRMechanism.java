@@ -29,7 +29,7 @@ import java.util.List;
  * This class represent the ptr mechanism
  * 
  * @author Norman Maurer <nm@byteaction.de>
- *
+ * 
  */
 public class PTRMechanism extends GenericMechanism {
 
@@ -41,15 +41,16 @@ public class PTRMechanism extends GenericMechanism {
     /**
      * ABNF: "ptr" [ ":" domain-spec ]
      */
-    public static final String PTR_VALUE_REGEX = "(?:\\:" + SPF1Parser.DOMAIN_SPEC_REGEX + ")?";
+    public static final String PTR_VALUE_REGEX = "(?:\\:"
+            + SPF1Parser.DOMAIN_SPEC_REGEX + ")?";
 
     /**
      * ABNF: PTR = "ptr" [ ":" domain-spec ]
      */
     public static final String PTR_REGEX = PTR_NAME_REGEX + PTR_VALUE_REGEX;
-    
+
     public PTRMechanism() {
-        super(PTR_NAME_REGEX,PTR_VALUE_REGEX);
+        super(PTR_NAME_REGEX, PTR_VALUE_REGEX);
     }
 
     /**

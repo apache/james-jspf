@@ -31,12 +31,10 @@ import java.util.regex.MatchResult;
  */
 public abstract class GenericMechanism extends AbstractMechanism {
 
-
     /**
      * ABNF: ip4-cidr-length = "/" 1*DIGIT
      */
     protected static final String IP4_CIDR_LENGTH_REGEX = "/(\\d+)";
-
 
     /**
      * ABNF: ip6-cidr-length = "/" 1*DIGIT
@@ -46,16 +44,16 @@ public abstract class GenericMechanism extends AbstractMechanism {
     /**
      * ABNF: dual-cidr-length = [ ip4-cidr-length ] [ "/" ip6-cidr-length ]
      */
-    protected static final String DUAL_CIDR_LENGTH_REGEX = "(?:" + IP4_CIDR_LENGTH_REGEX
-            + ")?" + "(?:/" + IP6_CIDR_LENGTH_REGEX + ")?";
-
+    protected static final String DUAL_CIDR_LENGTH_REGEX = "(?:"
+            + IP4_CIDR_LENGTH_REGEX + ")?" + "(?:/" + IP6_CIDR_LENGTH_REGEX
+            + ")?";
 
     protected String domain;
-    
+
     public GenericMechanism(String name, String value) {
-        super(name,value);
+        super(name, value);
     }
-    
+
     /**
      * Expand the hostname
      * 

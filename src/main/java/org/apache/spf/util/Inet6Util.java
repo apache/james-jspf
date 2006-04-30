@@ -20,6 +20,7 @@ package org.apache.spf.util;
  * Utility functions for IPV6 operations.
  * 
  * see Inet6Util from the Apache Harmony project
+ * 
  * @see org.apache.harmony.util.Inet6Util
  */
 public class Inet6Util {

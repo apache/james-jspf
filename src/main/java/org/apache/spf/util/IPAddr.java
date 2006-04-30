@@ -97,7 +97,8 @@ public class IPAddr {
      * 
      * @see #getAddress(byte[], int)
      */
-    public static IPAddr getAddress(byte[] netAddress) throws PermErrorException {
+    public static IPAddr getAddress(byte[] netAddress)
+            throws PermErrorException {
         IPAddr returnAddress = new IPAddr();
         returnAddress.byteToInternal(netAddress);
         returnAddress.setMask(returnAddress.maskLength);
@@ -127,7 +128,8 @@ public class IPAddr {
      * 
      * @see #getAddress(String, int)
      */
-    public static IPAddr getAddress(String netAddress) throws PermErrorException {
+    public static IPAddr getAddress(String netAddress)
+            throws PermErrorException {
         IPAddr returnAddress = new IPAddr();
         returnAddress.stringToInternal(netAddress);
         returnAddress.setMask(returnAddress.maskLength);
@@ -316,7 +318,8 @@ public class IPAddr {
             // }else{
             // Reject all IP6 and non IP4 dotted quad currently
 
-            throw new PermErrorException("Not a valid IP address: " + netAddress);
+            throw new PermErrorException("Not a valid IP address: "
+                    + netAddress);
             // }
         }
     }
@@ -437,7 +440,8 @@ public class IPAddr {
     /**
      * Reverses internal address
      * 
-     * @param addressData The int array represent the ipAddress
+     * @param addressData
+     *            The int array represent the ipAddress
      * @return reverseIP
      */
     private int[] reverseIP(int[] addressData) {
@@ -471,25 +475,32 @@ public class IPAddr {
     /**
      * This method return the InAddress for the given ip.
      * 
-     * @param ipAddress - ipAddress that should be processed
+     * @param ipAddress -
+     *            ipAddress that should be processed
      * @return the inAddress (in-addr or ip6)
-     * @throws PermErrorException if the ipAddress is not valid (rfc conform)
+     * @throws PermErrorException
+     *             if the ipAddress is not valid (rfc conform)
      */
-    public static String getInAddress(String ipAddress) throws PermErrorException {
+    public static String getInAddress(String ipAddress)
+            throws PermErrorException {
         if (ipAddress == null) {
-            throw new PermErrorException("IP is not a valid ipv4 or ipv6 address");
+            throw new PermErrorException(
+                    "IP is not a valid ipv4 or ipv6 address");
         } else if (Inet6Util.isValidIPV4Address(ipAddress)) {
             return "in-addr";
         } else if (Inet6Util.isValidIP6Address(ipAddress)) {
             return "ipv6";
         } else {
-            throw new PermErrorException("IP is not a valid ipv4 or ipv6 address");
+            throw new PermErrorException(
+                    "IP is not a valid ipv4 or ipv6 address");
         }
     }
 
     /**
      * Check if the given IP is valid. Works with ipv4 and ip6
-     * @param ip The ipaddress to check
+     * 
+     * @param ip
+     *            The ipaddress to check
      * @return true or false
      */
     public static boolean isValidIP(String ip) {

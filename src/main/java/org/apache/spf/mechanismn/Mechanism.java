@@ -21,25 +21,29 @@ import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
 
 /**
- * This Interface represent a mechanismn 
+ * This Interface represent a mechanismn
  * 
- *@author Norman Maurer <nm@byteaction.de>
- *
+ * @author Norman Maurer <nm@byteaction.de>
+ * 
  */
 public interface Mechanism {
-    
+
     /**
      * Configuration
+     * 
      * @param params
      * @throws PermErrorException
      */
     public void init(String params) throws PermErrorException;
 
     /**
-     * Run the mechanismn  with the give SPF1Data
-     * @param spfData The SPF1Data
+     * Run the mechanismn with the give SPF1Data
+     * 
+     * @param spfData
+     *            The SPF1Data
      * @return result if it matches
-     * @throws PermErrorException if somethink strange happen
+     * @throws PermErrorException
+     *             if somethink strange happen
      */
     public boolean run(SPF1Data spfData) throws PermErrorException;
 

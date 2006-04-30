@@ -25,22 +25,24 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public abstract class AbstractMechanism implements Mechanism {
-    
+
     protected Pattern namePattern;
+
     protected Pattern valuePattern;
 
-    
     public void init(String value) throws PermErrorException {
         if (value == null) {
             value = "";
         }
-        if ((value == null || value.length() == 0) && valuePattern.pattern().length()==0) {
+        if ((value == null || value.length() == 0)
+                && valuePattern.pattern().length() == 0) {
             config(null);
-        } else  {
-            
+        } else {
+
             Matcher m = valuePattern.matcher(value);
             if (!m.matches()) {
-                throw new PermErrorException("Value does not match: "+valuePattern.pattern()+" "+value);
+                throw new PermErrorException("Value does not match: "
+                        + valuePattern.pattern() + " " + value);
             }
             config(m.toMatchResult());
         }
@@ -50,7 +52,6 @@ public abstract class AbstractMechanism implements Mechanism {
         namePattern = Pattern.compile(name);
         valuePattern = Pattern.compile(value);
     }
-    
 
     /**
      * Run the mechanismn with the give SPF1Data
@@ -63,7 +64,7 @@ public abstract class AbstractMechanism implements Mechanism {
      *             if somethink strange happen
      */
     public abstract boolean run(SPF1Data spfData) throws PermErrorException;
-    
+
     public abstract void config(MatchResult params) throws PermErrorException;
 
 }

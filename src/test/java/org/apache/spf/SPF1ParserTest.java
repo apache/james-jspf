@@ -50,27 +50,27 @@ public class SPF1ParserTest extends TestCase {
     protected void runTest() throws Throwable {
 
         try {
-            
-            System.out.println("testing ["+data.recIn+"]");
-            
-            SPF1Parser r = new SPF1Parser(data.recIn);
-            
+
+            System.out.println("testing [" + data.recIn + "]");
+
+            new SPF1Parser(data.recIn);
+
             assertEquals("Expected <" + data.errMsg + "> but was <"
                     + "no errors" + ">", data.errMsg, "no errors");
         } catch (NoneException e) {
             e.printStackTrace();
             assertNotNull(data.errMsg);
             assertTrue("Expected <" + data.errMsg + "> but was <"
-                    + e.getMessage() + ">",!"no errors".equals(data.errMsg));
-//            assertEquals("Expected <" + data.errMsg + "> but was <"
-//                    + e.getMessage() + ">", data.errMsg, e.getMessage());
+                    + e.getMessage() + ">", !"no errors".equals(data.errMsg));
+            // assertEquals("Expected <" + data.errMsg + "> but was <"
+            // + e.getMessage() + ">", data.errMsg, e.getMessage());
         } catch (PermErrorException e) {
             e.printStackTrace();
             assertNotNull(data.errMsg);
             assertTrue("Expected <" + data.errMsg + "> but was <"
-                  + e.getMessage() + ">",!"no errors".equals(data.errMsg));
-//            assertEquals("Expected <" + data.errMsg + "> but was <"
-//                    + e.getMessage() + ">", data.errMsg, e.getMessage());
+                    + e.getMessage() + ">", !"no errors".equals(data.errMsg));
+            // assertEquals("Expected <" + data.errMsg + "> but was <"
+            // + e.getMessage() + ">", data.errMsg, e.getMessage());
         }
 
     }

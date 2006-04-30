@@ -24,16 +24,18 @@ import org.apache.spf.SPF1Data;
  * This Interface represent a modifier
  * 
  * @author Norman Maurer <nm@byteaction.de>
- *
+ * 
  */
 public interface Modifier {
 
     /**
-     * Run the mechanismn  with the give SPF1Data
+     * Run the mechanismn with the give SPF1Data
      * 
-     * @param spfData The SPF1Data we should use
+     * @param spfData
+     *            The SPF1Data we should use
      * @return host The host we should redirect / include
-     * @throws PermErrorException if there are any syntax problems etc
+     * @throws PermErrorException
+     *             if there are any syntax problems etc
      */
     public String run(SPF1Data spfData) throws PermErrorException;
 

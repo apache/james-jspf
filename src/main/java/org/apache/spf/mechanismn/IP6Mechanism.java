@@ -37,16 +37,16 @@ public class IP6Mechanism extends IP4Mechanism {
     /**
      * TODO ip6-network [ ip6-cidr-length ]
      */
-    public static final String IP6_VALUE_REGEX = "\\:([0-9A-Fa-f\\:\\.]+)" + "(?:"
-            + IP6_CIDR_LENGTH_REGEX + ")?";
+    public static final String IP6_VALUE_REGEX = "\\:([0-9A-Fa-f\\:\\.]+)"
+            + "(?:" + IP6_CIDR_LENGTH_REGEX + ")?";
 
     /**
      * TODO ABNF: IP6 = "ip6" ":" ip6-network [ ip6-cidr-length ]
      */
     public static final String IP6_REGEX = IP6_NAME_REGEX + IP6_VALUE_REGEX;
-    
+
     public IP6Mechanism() {
-        super(IP6_NAME_REGEX,IP6_VALUE_REGEX);
+        super(IP6_NAME_REGEX, IP6_VALUE_REGEX);
     }
 
     /**
@@ -58,7 +58,6 @@ public class IP6Mechanism extends IP4Mechanism {
         throw new PermErrorException("Unimplemented");
     }
 
-    
     protected boolean isValidAddress(String ipString) {
         return Inet6Util.isValidIP6Address(ipString);
     }

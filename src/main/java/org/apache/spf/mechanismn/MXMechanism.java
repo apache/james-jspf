@@ -29,7 +29,7 @@ import java.util.ArrayList;
  * This class represent the mx mechanism
  * 
  * @author Norman Maurer <nm@byteaction.de>
- *
+ * 
  */
 public class MXMechanism extends AMechanism {
 
@@ -41,8 +41,9 @@ public class MXMechanism extends AMechanism {
     /**
      * ABNF: [ ":" domain-spec ] [ dual-cidr-length ]
      */
-    public static final String MX_VALUE_REGEX = "(?:\\:" + SPF1Parser.DOMAIN_SPEC_REGEX + ")?"
-            + "(?:" + DUAL_CIDR_LENGTH_REGEX + ")?";
+    public static final String MX_VALUE_REGEX = "(?:\\:"
+            + SPF1Parser.DOMAIN_SPEC_REGEX + ")?" + "(?:"
+            + DUAL_CIDR_LENGTH_REGEX + ")?";
 
     /**
      * ABNF: MX = "mx" [ ":" domain-spec ] [ dual-cidr-length ]
@@ -50,7 +51,7 @@ public class MXMechanism extends AMechanism {
     public static final String MX_REGEX = MX_NAME_REGEX + MX_VALUE_REGEX;
 
     public MXMechanism() {
-        super(MX_NAME_REGEX,MX_VALUE_REGEX);
+        super(MX_NAME_REGEX, MX_VALUE_REGEX);
     }
 
     /**

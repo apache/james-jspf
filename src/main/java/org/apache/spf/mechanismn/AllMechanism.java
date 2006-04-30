@@ -30,13 +30,10 @@ import java.util.regex.MatchResult;
  */
 public class AllMechanism extends AbstractMechanism {
 
-
     public static final String ALL_NAME_REGEX = "[aA][lL][lL]";
-
 
     public static final String ALL_VALUE_REGEX = "";
 
-    
     public static final String ALL_REGEX = ALL_NAME_REGEX;
 
     public AllMechanism() {
@@ -51,7 +48,6 @@ public class AllMechanism extends AbstractMechanism {
     public boolean run(SPF1Data spfData) throws PermErrorException {
         return true;
     }
-
 
     public void config(MatchResult params) throws PermErrorException {
         // no checks needed

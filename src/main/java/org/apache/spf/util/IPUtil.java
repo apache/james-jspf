@@ -19,9 +19,8 @@ package org.apache.spf.util;
 
 import java.util.List;
 
-
 public class IPUtil {
-    
+
     /**
      * Check if the given ipaddress array contains the provided ip.
      * 

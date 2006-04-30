@@ -28,7 +28,7 @@ import java.util.List;
  * This class represent the exists mechanism
  * 
  * @author Norman Maurer <nm@byteaction.de>
- *
+ * 
  */
 public class ExistsMechanism extends GenericMechanism {
 
@@ -36,19 +36,21 @@ public class ExistsMechanism extends GenericMechanism {
      * ABNF: "exists"
      */
     public static final String EXISTS_NAME_REGEX = "[eE][xX][iI][sS][tT][sS]";
-    
+
     /**
      * ABNF: "exists" ":" domain-spec
      */
-    public static final String EXISTS_VALUE_REGEX = "\\:" + SPF1Parser.DOMAIN_SPEC_REGEX;
-    
+    public static final String EXISTS_VALUE_REGEX = "\\:"
+            + SPF1Parser.DOMAIN_SPEC_REGEX;
+
     /**
      * ABNF: exists = "exists" ":" domain-spec
      */
-    public static final String EXISTS_REGEX = EXISTS_NAME_REGEX + EXISTS_VALUE_REGEX;
-    
+    public static final String EXISTS_REGEX = EXISTS_NAME_REGEX
+            + EXISTS_VALUE_REGEX;
+
     public ExistsMechanism() {
-        super(EXISTS_NAME_REGEX,EXISTS_VALUE_REGEX);
+        super(EXISTS_NAME_REGEX, EXISTS_VALUE_REGEX);
     }
 
     /**

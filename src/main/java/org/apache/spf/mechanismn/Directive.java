@@ -23,13 +23,14 @@ import org.apache.spf.SPF1Data;
 public class Directive {
 
     protected String qualifier = "+";
+
     private Mechanism mechanism = null;
 
     public Directive(String qualifier, Mechanism mechanism) {
         this.qualifier = qualifier;
-        this.mechanism  = mechanism;
+        this.mechanism = mechanism;
     }
-    
+
     public String run(SPF1Data spfData) throws PermErrorException {
         if (mechanism.run(spfData)) {
             return qualifier;

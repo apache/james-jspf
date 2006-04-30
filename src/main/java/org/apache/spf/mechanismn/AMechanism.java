@@ -30,7 +30,7 @@ import java.util.regex.MatchResult;
  * This class represent the a mechanism
  * 
  * @author Norman Maurer <nm@byteaction.de>
- *
+ * 
  */
 public class AMechanism extends GenericMechanism {
 
@@ -42,7 +42,8 @@ public class AMechanism extends GenericMechanism {
     /**
      * ABNF: A = "a" [ ":" domain-spec ] [ dual-cidr-length ]
      */
-    public static final String A_VALUE_REGEX = "(?:\\:" + SPF1Parser.DOMAIN_SPEC_REGEX + ")?" + "(?:"
+    public static final String A_VALUE_REGEX = "(?:\\:"
+            + SPF1Parser.DOMAIN_SPEC_REGEX + ")?" + "(?:"
             + DUAL_CIDR_LENGTH_REGEX + ")?";
 
     /**
@@ -50,17 +51,16 @@ public class AMechanism extends GenericMechanism {
      */
     public static final String A_REGEX = A_NAME_REGEX + A_VALUE_REGEX;
 
-
     protected int ip4cidr;
 
     protected int ip6cidr;
-    
+
     public AMechanism() {
-        this(A_NAME_REGEX,A_VALUE_REGEX);
+        this(A_NAME_REGEX, A_VALUE_REGEX);
     }
-    
+
     protected AMechanism(String patternName, String patternValue) {
-        super(patternName,patternValue);
+        super(patternName, patternValue);
     }
 
     /**

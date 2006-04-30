@@ -40,24 +40,24 @@ public class IP4Mechanism extends GenericMechanism {
     /**
      * TODO ABNF: ip4-network [ ip4-cidr-length ]
      */
-    public static final String IP4_VALUE_REGEX = "\\:" + "([0-9.]+)" + "(?:" + IP4_CIDR_LENGTH_REGEX + ")?";
+    public static final String IP4_VALUE_REGEX = "\\:" + "([0-9.]+)" + "(?:"
+            + IP4_CIDR_LENGTH_REGEX + ")?";
 
     /**
      * TODO ABNF: IP4 = "ip4" ":" ip4-network [ ip4-cidr-length ]
      */
     public static final String IP4_REGEX = IP4_NAME_REGEX + IP4_VALUE_REGEX;
-    
+
     public IP4Mechanism() {
-        this(IP4_NAME_REGEX,IP4_VALUE_REGEX);
+        this(IP4_NAME_REGEX, IP4_VALUE_REGEX);
     }
-    
-    public IP4Mechanism(String namePattern,String valuePattern) {
-        super(namePattern,valuePattern);
+
+    public IP4Mechanism(String namePattern, String valuePattern) {
+        super(namePattern, valuePattern);
     }
-    
-    
+
     private IPAddr ip = null;
-    
+
     private int maskLength = 0;
 
     /**
@@ -94,7 +94,7 @@ public class IP4Mechanism extends GenericMechanism {
         }
         ip = IPAddr.getAddress(ipString, maskLength);
     }
-    
+
     protected boolean isValidAddress(String ipString) {
         return Inet6Util.isValidIPV4Address(ipString);
     }
