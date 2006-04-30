@@ -20,7 +20,9 @@ package org.apache.spf.mechanismn;
 import org.apache.spf.MacroExpand;
 import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
+import org.apache.spf.util.IPAddr;
 
+import java.net.InetAddress;
 import java.util.regex.MatchResult;
 
 /**
@@ -78,6 +80,7 @@ public abstract class GenericMechanism extends AbstractMechanism {
     public void config(MatchResult params) throws PermErrorException {
         if (params.groupCount() >= 1 && params.group(1) != null) {
             host = params.group(1);
+            IPAddr.getInAddress(host);
         } else {
             host = null;
         }

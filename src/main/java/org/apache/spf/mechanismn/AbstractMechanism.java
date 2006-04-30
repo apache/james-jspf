@@ -31,13 +31,16 @@ public abstract class AbstractMechanism implements Mechanism {
 
     
     public void init(String value) throws PermErrorException {
+        if (value == null) {
+            value = "";
+        }
         if ((value == null || value.length() == 0) && valuePattern.pattern().length()==0) {
             config(null);
         } else  {
             
             Matcher m = valuePattern.matcher(value);
             if (!m.matches()) {
-                throw new PermErrorException("Value does not match");
+                throw new PermErrorException("Value does not match: "+valuePattern.pattern()+" "+value);
             }
             config(m.toMatchResult());
         }
