@@ -20,6 +20,7 @@ package org.apache.spf.mechanismn;
 import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
 import org.apache.spf.SPF1Parser;
+import org.apache.spf.TempErrorException;
 import org.apache.spf.util.IPAddr;
 
 import java.util.ArrayList;
@@ -49,7 +50,7 @@ public class AMechanism extends GenericMechanism {
      * 
      * @see org.apache.spf.mechanismn.GenericMechanism#run(org.apache.spf.SPF1Data)
      */
-    public boolean run(SPF1Data spfData) throws PermErrorException {
+    public boolean run(SPF1Data spfData) throws PermErrorException,TempErrorException {
         ArrayList addressList = new ArrayList();
 
         // Get the right host.
@@ -65,6 +66,8 @@ public class AMechanism extends GenericMechanism {
                 if (checkAddressList(checkAddress, addressList)) {
                     return true;
                 }
+            } catch (TempErrorException e) {
+                    throw new TempErrorException(e.getMessage());
             } catch (Exception e) {
                 // no a records just return null
                 return false;

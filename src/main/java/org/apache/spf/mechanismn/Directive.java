@@ -19,6 +19,7 @@ package org.apache.spf.mechanismn;
 
 import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
+import org.apache.spf.TempErrorException;
 
 public class Directive {
 
@@ -31,7 +32,7 @@ public class Directive {
         this.mechanism = mechanism;
     }
 
-    public String run(SPF1Data spfData) throws PermErrorException {
+    public String run(SPF1Data spfData) throws PermErrorException,TempErrorException {
         if (mechanism.run(spfData)) {
             return qualifier;
         } else {

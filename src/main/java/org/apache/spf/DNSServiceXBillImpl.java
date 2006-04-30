@@ -17,14 +17,12 @@
 
 package org.apache.spf;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.spf.util.IPAddr;
-import org.xbill.DNS.Address;
+import org.xbill.DNS.ARecord;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.MXRecord;
 import org.xbill.DNS.PTRRecord;
@@ -43,16 +41,17 @@ import org.xbill.DNS.Type;
  * 
  */
 
-// TODO : Check which Exception should be thrown by which lookup. Not 100 % sure
-// at the moment but it seems to work.
 public class DNSServiceXBillImpl implements DNSService {
 
+    //TODO: do we need AAAARecord lookup for ipv6 ?
+    
     /**
+     * @throws TempErrorException 
      * @see org.apache.spf.DNSService#getSpfRecord(java.lang.String,
      *      java.lang.String)
      */
     public String getSpfRecord(String hostname, String spfVersion)
-            throws PermErrorException, NoneException {
+            throws PermErrorException, NoneException, TempErrorException {
 
         String returnValue = null;
         ArrayList txtR = new ArrayList();
@@ -95,21 +94,29 @@ public class DNSServiceXBillImpl implements DNSService {
      * @return TXT Records-which were found.
      * @throws NoneException
      *             if none TXT-Records were found.
+     * @throws TempErrorException if the lookup result was not "HOST NOT FOUND" or "SUCCESSFULLY" 
      * @throws PermErrorException
      */
     private static ArrayList getTXTRecords(String hostname)
-            throws NoneException {
+            throws NoneException, TempErrorException {
         ArrayList txtR = new ArrayList();
         Record[] records;
         try {
-            records = new Lookup(hostname, Type.TXT).run();
-            if (records != null) {
-                for (int i = 0; i < records.length; i++) {
-                    TXTRecord txt = (TXTRecord) records[i];
-                    txtR.add(txt.rdataToString());
+            Lookup query = new Lookup(hostname, Type.TXT);
+            records = query.run();
+            int queryResult = query.getResult();
+            
+            if ((queryResult == query.SUCCESSFUL) || (queryResult == query.HOST_NOT_FOUND) ) {
+                if (records != null) {
+                    for (int i = 0; i < records.length; i++) {
+                        TXTRecord txt = (TXTRecord) records[i];
+                        txtR.add(txt.rdataToString());
+                    }
+                } else {
+                    throw new NoneException("No TXTRecord found for: " + hostname);
                 }
             } else {
-                throw new NoneException("No TXTRecord found for: " + hostname);
+                throw new TempErrorException("DNS Server returns RCODE: " + query);
             }
         } catch (TextParseException e) {
             // I think thats the best we could do
@@ -122,9 +129,8 @@ public class DNSServiceXBillImpl implements DNSService {
      * @see org.apache.spf.DNSService#getARecords(java.lang.String, int)
      */
     public List getARecords(String strServer, int mask) throws NoneException,
-            PermErrorException {
+            PermErrorException, TempErrorException {
 
-        String host = null;
         ArrayList listTxtData = new ArrayList();
 
         if (IPAddr.isIPAddr(strServer)) {
@@ -132,28 +138,34 @@ public class DNSServiceXBillImpl implements DNSService {
             // Address is already an IP address, so add it to list
             listTxtData.add(ipTest);
         } else {
+            
+            Record[] records;
             try {
-                // do DNS A lookup
-                InetAddress[] hosts = Address.getAllByName(strServer);
+                Lookup query = new Lookup(strServer, Type.A);
+                records = query.run();
+                int queryResult = query.getResult();
+                
+                if ((queryResult == query.SUCCESSFUL) || (queryResult == query.HOST_NOT_FOUND) ) { 
+                    if (records != null) {
+                        for (int i = 0; i < records.length; i++) {
+                            ARecord a = (ARecord) records[i];
+                                
+                            ArrayList ipArray = getIPList(a.getAddress().getHostAddress(), mask);
+                            Iterator ip = ipArray.iterator();
 
-                // process returned records
-                for (int i = 0; i < hosts.length; i++) {
-
-                    host = hosts[i].getHostAddress();
-
-                    if (host != null) {
-                        ArrayList ipArray = getIPList(host, mask);
-                        Iterator ip = ipArray.iterator();
-
-                        while (ip.hasNext()) {
-                            listTxtData.add(ip.next());
+                            while (ip.hasNext()) {
+                                listTxtData.add(ip.next());
+                            }
                         }
+                    } else {
+                        throw new NoneException("No A record found for: " + strServer);
                     }
-
-                }
-
-            } catch (UnknownHostException e1) {
-                throw new NoneException("No A record found for: " + strServer);
+                } else {
+                    throw new TempErrorException("DNS Server returns RCODE: " + query);
+                }   
+            } catch (TextParseException e) {
+                // i think this is the best we could do
+                throw new NoneException("No A Record found for: " + strServer);
             }
         }
         return listTxtData;
@@ -190,7 +202,7 @@ public class DNSServiceXBillImpl implements DNSService {
     /**
      * @see org.apache.spf.DNSService#getTxtCatType(java.lang.String)
      */
-    public String getTxtCatType(String strServer) throws NoneException {
+    public String getTxtCatType(String strServer) throws NoneException, TempErrorException {
 
         StringBuffer txtData = new StringBuffer();
         ArrayList records = getTXTRecords(strServer);
@@ -205,7 +217,7 @@ public class DNSServiceXBillImpl implements DNSService {
      */
 
     public List getPTRRecords(String ipAddress) throws NoneException,
-            PermErrorException {
+            PermErrorException, TempErrorException {
 
         ArrayList ptrR = new ArrayList();
         Record[] records;
@@ -216,18 +228,25 @@ public class DNSServiceXBillImpl implements DNSService {
         ip = IPAddr.getAddress(ipAddress);
 
         try {
-            records = new Lookup(ip.getReverseIP() + ".in-addr.arpa", Type.PTR)
-                    .run();
-            if (records != null) {
-                for (int i = 0; i < records.length; i++) {
-                    PTRRecord ptr = (PTRRecord) records[i];
-                    ptrR.add(IPAddr.stripDot(ptr.getTarget().toString()));
-                    System.out.println("IP = "
-                            + IPAddr.stripDot(ptr.getTarget().toString()));
+            
+            Lookup query = new Lookup(ip.getReverseIP() + ".in-addr.arpa", Type.PTR);
+            records = query.run();
+            int queryResult = query.getResult();
+            
+            if ((queryResult == query.SUCCESSFUL) || (queryResult == query.HOST_NOT_FOUND) ) {
+                if (records != null) {
+                    for (int i = 0; i < records.length; i++) {
+                        PTRRecord ptr = (PTRRecord) records[i];
+                        ptrR.add(IPAddr.stripDot(ptr.getTarget().toString()));
+                        System.out.println("IP = "
+                                + IPAddr.stripDot(ptr.getTarget().toString()));
+                    }
+                } else {
+                    throw new NoneException("No PTRRecord found for: " + ipAddress);
                 }
             } else {
-                throw new NoneException("No PTRRecord found for: " + ipAddress);
-            }
+                throw new TempErrorException("DNS Server returns RCODE: " + query);
+            }                
         } catch (TextParseException e) {
             // i think this is the best we could do
             throw new NoneException("No PTRRecord found for: " + ipAddress);
@@ -240,7 +259,7 @@ public class DNSServiceXBillImpl implements DNSService {
      * @see org.apache.spf.DNSService#getMXRecords(java.lang.String, int)
      */
     public List getMXRecords(String domainName, int mask)
-            throws PermErrorException, NoneException {
+            throws PermErrorException, NoneException, TempErrorException {
 
         ArrayList mxAddresses = getAList(getMXNames(domainName), mask);
         return mxAddresses;
@@ -277,21 +296,29 @@ public class DNSServiceXBillImpl implements DNSService {
      * @param host The hostname we want to retrieve the MXRecords for
      * @return MX-Records for the given hostname
      * @throws NoneException if no MX-Records was found
+     * @throws TempErrorException if the lookup result was not "HOST NOT FOUND" or "SUCCESSFULLY"  
      */
-    private static ArrayList getMXNames(String host) throws NoneException {
+    private static ArrayList getMXNames(String host) throws NoneException, TempErrorException {
         ArrayList mxR = new ArrayList();
         Record[] records;
         try {
-            records = new Lookup(host, Type.MX).run();
-            if (records != null) {
-                for (int i = 0; i < records.length; i++) {
-                    MXRecord mx = (MXRecord) records[i];
-                    mxR.add(mx.getTarget());
+            Lookup query = new Lookup(host, Type.MX);
+            records = query.run();
+            int queryResult = query.getResult();
+            
+            if ((queryResult == query.SUCCESSFUL) || (queryResult == query.HOST_NOT_FOUND) ) { 
+                if (records != null) {
+                    for (int i = 0; i < records.length; i++) {
+                        MXRecord mx = (MXRecord) records[i];
+                        mxR.add(mx.getTarget());
 
+                    }
+                } else {
+                    throw new NoneException("No MX Record found for: " + host);
                 }
             } else {
-                throw new NoneException("No MX Record found for: " + host);
-            }
+                throw new TempErrorException("DNS Server returns RCODE: " + query);
+            }   
         } catch (TextParseException e) {
             // i think this is the best we could do
             throw new NoneException("No MX Record found for: " + host);

@@ -21,6 +21,7 @@ import org.apache.spf.MacroExpand;
 import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
 import org.apache.spf.SPF1Parser;
+import org.apache.spf.TempErrorException;
 
 import java.util.List;
 
@@ -42,7 +43,7 @@ public class ExistsMechanism extends GenericMechanism {
      * 
      * @see org.apache.spf.mechanismn.GenericMechanism#run(org.apache.spf.SPF1Data)
      */
-    public boolean run(SPF1Data spfData) throws PermErrorException {
+    public boolean run(SPF1Data spfData) throws PermErrorException, TempErrorException {
         List aRecords;
 
         String host = expandHost(spfData);
@@ -55,6 +56,8 @@ public class ExistsMechanism extends GenericMechanism {
         try {
             // TODO: is 32 the correct default?
             aRecords = spfData.getDnsProbe().getARecords(host, 32);
+        } catch (TempErrorException e) {
+            throw new TempErrorException(e.getMessage());
         } catch (Exception e) {
             return false;
         }

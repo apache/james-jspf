@@ -22,6 +22,7 @@ import org.apache.spf.NoneException;
 import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
 import org.apache.spf.SPF1Parser;
+import org.apache.spf.TempErrorException;
 
 /**
  * This class represent the exp modifier
@@ -59,6 +60,9 @@ public class ExpModifier extends GenericModifier {
                 exp = spfData.getDnsProbe().getTxtCatType(host);
             } catch (NoneException e) {
                 // TODO what should we do here?
+            } catch (TempErrorException e) {
+                // TODO what should we do here?
+                e.printStackTrace();
             }
             
             if ((exp == null) || (exp.equals(""))) {

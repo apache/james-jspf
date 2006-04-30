@@ -41,11 +41,13 @@ public class SPF1Utils {
 
 	public static final String SOFTFAIL = "~";
 
-	public static final String ERROR = "error";
+	public static final String PERM_ERROR = "error";
 
 	public static final String NONE = "none";
 	
 	public static final String UNKNOWN = "unknown";
+    
+    public static final String TEMP_ERROR = "temperror";
 
 	public static final String PASS_CONV = "pass";
 
@@ -59,13 +61,17 @@ public class SPF1Utils {
 
 	public static final String SOFTFAIL_CONV = "softfail";
 
-	public static final String ERROR_CONV = "error";
+	public static final String PERM_ERROR_CONV = "error";
 
 	public static final String NONE_CONV = "none";
 	
 	public static final String UNKNOWN_CONV = "unknown";
+    
+    public static final String TEMP_ERROR_CONV = "temperror";
 
     public static final String SPF_VERSION = "v=spf1";
+
+
 	
 
 
@@ -85,8 +91,10 @@ public class SPF1Utils {
 			return NEUTRAL_CONV;
 		} else if (result.equals(SOFTFAIL)) {
 			return SOFTFAIL_CONV;
-		} else if (result.equals(ERROR)) {
-			return ERROR_CONV;
+		} else if (result.equals(PERM_ERROR)) {
+			return PERM_ERROR_CONV;
+        } else if (result.equals(TEMP_ERROR)) {
+            return TEMP_ERROR_CONV;
 		} else if (result.equals(NONE)) {
 			return NONE_CONV;
 		} else if (result.equals(UNKNOWN)) {
@@ -117,8 +125,10 @@ public class SPF1Utils {
 			return NEUTRAL;
 		} else if (result.equals(SOFTFAIL_CONV)) {
 			return SOFTFAIL;
-		} else if (result.equals(ERROR_CONV)) {
-			return ERROR;
+		} else if (result.equals(PERM_ERROR_CONV)) {
+			return PERM_ERROR;
+        } else if (result.equals(TEMP_ERROR_CONV)) {
+            return TEMP_ERROR;
 		} else if (result.equals(NONE_CONV)) {
 			return NONE;
 		} else if (result.equals(UNKNOWN_CONV)) {

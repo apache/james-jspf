@@ -143,10 +143,13 @@ public class SPF {
 
         } catch (PermErrorException e) {
             e.printStackTrace();
-            result = SPF1Utils.ERROR;
+            result = SPF1Utils.PERM_ERROR;
         } catch (NoneException e) {
             e.printStackTrace();
             result = SPF1Utils.NONE;
+        } catch (TempErrorException e) {
+            e.printStackTrace();
+            result = SPF1Utils.TEMP_ERROR;
         }
 
         // convert raw result to name

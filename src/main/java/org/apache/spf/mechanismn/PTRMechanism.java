@@ -20,6 +20,7 @@ package org.apache.spf.mechanismn;
 import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
 import org.apache.spf.SPF1Parser;
+import org.apache.spf.TempErrorException;
 import org.apache.spf.util.IPAddr;
 
 import java.util.ArrayList;
@@ -43,7 +44,7 @@ public class PTRMechanism extends GenericMechanism {
      * 
      * @see org.apache.spf.mechanismn.GenericMechanism#run(org.apache.spf.SPF1Data)
      */
-    public boolean run(SPF1Data spfData) throws PermErrorException {
+    public boolean run(SPF1Data spfData) throws PermErrorException,TempErrorException {
         String compareDomain;
         IPAddr compareIP;
         ArrayList validatedHosts = new ArrayList();
@@ -77,6 +78,8 @@ public class PTRMechanism extends GenericMechanism {
                     return true;
                 }
             }
+        } catch (TempErrorException e) {
+            throw new TempErrorException(e.getMessage());
         } catch (Exception e) {
             // TODO what exceptions do we want to catch with this?
             return false;

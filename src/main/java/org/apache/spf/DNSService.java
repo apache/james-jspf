@@ -37,9 +37,10 @@ public interface DNSService {
      * @return The SPF-Record if one is found.
      * @throws PermErrorException if more then one SPF-Record was found.
      * @throws NoneException if no SPF-Record was found.
+     * @throws TempErrorException if the lookup result was not "HOST NOT FOUND" or "SUCCESSFULLY"
      */
     public String getSpfRecord(String hostname, String spfVersion)
-            throws PermErrorException, NoneException;
+            throws PermErrorException, NoneException,TempErrorException;
 
     /**
      * Get a list of IPAddr's for a server using the mask length
@@ -47,12 +48,12 @@ public interface DNSService {
      * @param strServer The hostname or ipAddress whe should get the A-Records for
      * @param mask The netmask to use
      * @return The ipAddresses
-     * @throws NeutralException
      * @throws NoneException if no A records was found 
      * @throws PermErrorException
+     * @throws TempErrorException if the lookup result was not "HOST NOT FOUND" or "SUCCESSFULLY"
      */
     public List getARecords(String strServer, int mask)
-            throws NoneException, PermErrorException;
+            throws NoneException, PermErrorException,TempErrorException;
 
     /**
      * Get TXT records as a string
@@ -60,9 +61,10 @@ public interface DNSService {
      * @return String which reflect the TXT-Record
      * @throws NoneException if no TXT-Record was found 
      * @throws PermErrorException if the hostname is not resolvable
+     * @throws TempErrorException if the lookup result was not "HOST NOT FOUND" or "SUCCESSFULLY"
      */
     public String getTxtCatType(String strServer) throws NoneException,
-            PermErrorException;
+            PermErrorException,TempErrorException;
 
     /**
      * Get reverse DNS records
@@ -71,11 +73,11 @@ public interface DNSService {
      * @return the PTR-Records
      * @throws NoneException if no PTR-Record was found
      * @throws PermErrorException if an PermError should be returned
-     * 
+     * @throws TempErrorException if the lookup result was not "HOST NOT FOUND" or "SUCCESSFULLY" 
      */
 
     public List getPTRRecords(String ipAddress) throws PermErrorException,
-            NoneException;
+            NoneException,TempErrorException;
 
     /**
      * Get a list of masked IPAddr MX-Records
@@ -85,8 +87,9 @@ public interface DNSService {
      * @return IPAddresses of the MX-Records
      * @throws NoneException if no MX-Record was found
      * @throws PermErrorException
+     * @throws TempErrorException if the lookup result was not "HOST NOT FOUND" or "SUCCESSFULLY"
      */
     public List getMXRecords(String domainName, int mask)
-            throws PermErrorException, NoneException;
+            throws PermErrorException, NoneException,TempErrorException;
 
 }
