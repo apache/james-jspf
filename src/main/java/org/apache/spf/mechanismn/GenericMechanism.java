@@ -29,7 +29,7 @@ import java.util.regex.MatchResult;
  * @author Norman Maurer <nm@byteaction.de>
  * 
  */
-public abstract class GenericMechanism extends AbstractMechanism {
+public abstract class GenericMechanism implements Mechanism {
 
     /**
      * ABNF: ip4-cidr-length = "/" 1*DIGIT
@@ -49,10 +49,6 @@ public abstract class GenericMechanism extends AbstractMechanism {
             + ")?";
 
     protected String domain;
-
-    public GenericMechanism(String name, String value) {
-        super(name, value);
-    }
 
     /**
      * Expand the hostname

@@ -49,10 +49,6 @@ public class PTRMechanism extends GenericMechanism {
      */
     public static final String REGEX = NAME_REGEX + VALUE_REGEX;
 
-    public PTRMechanism() {
-        super(NAME_REGEX, VALUE_REGEX);
-    }
-
     /**
      * 
      * @see org.apache.spf.mechanismn.GenericMechanism#run(org.apache.spf.SPF1Data)

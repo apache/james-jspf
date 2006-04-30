@@ -49,10 +49,6 @@ public class ExistsMechanism extends GenericMechanism {
     public static final String REGEX = NAME_REGEX
             + VALUE_REGEX;
 
-    public ExistsMechanism() {
-        super(NAME_REGEX, VALUE_REGEX);
-    }
-
     /**
      * 
      * @see org.apache.spf.mechanismn.GenericMechanism#run(org.apache.spf.SPF1Data)

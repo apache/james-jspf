@@ -30,7 +30,7 @@ import java.util.regex.MatchResult;
  * @author Norman Maurer <nm@byteaction.de>
  * 
  */
-public class IncludeMechanism extends AbstractMechanism {
+public class IncludeMechanism implements Mechanism {
 
     /**
      * ABNF: "include"
@@ -49,15 +49,7 @@ public class IncludeMechanism extends AbstractMechanism {
     public static final String REGEX = NAME_REGEX
             + VALUE_REGEX;
 
-    public IncludeMechanism() {
-        super(NAME_REGEX, VALUE_REGEX);
-    }
-
     private String host;
-
-    public void init(String host) {
-        this.host = host;
-    }
 
     /**
      * Set the host which should be used for include
@@ -75,15 +67,23 @@ public class IncludeMechanism extends AbstractMechanism {
          * TODO: Whether this mechanism matches, does not match, or throws an
          * error depends on the result of the recursive evaluation of
          * check_host():
-         * 
-         * +---------------------------------+---------------------------------+ |
-         * A recursive check_host() result | Causes the "include" mechanism | |
-         * of: | to: |
-         * +---------------------------------+---------------------------------+ |
-         * Pass | match | | | | | Fail | not match | | | | | SoftFail | not
-         * match | | | | | Neutral | not match | | | | | TempError | throw
-         * TempError | | | | | PermError | throw PermError | | | | | None |
-         * throw PermError |
+         * +---------------------------------+---------------------------------+
+         * | A recursive check_host() result | Causes the "include" mechanism  |
+         * | of:                             | to:                             |
+         * +---------------------------------+---------------------------------+
+         * | Pass                            | match                           |
+         * |                                 |                                 |
+         * | Fail                            | not match                       |
+         * |                                 |                                 |
+         * | SoftFail                        | not match                       |
+         * |                                 |                                 |
+         * | Neutral                         | not match                       |
+         * |                                 |                                 |
+         * | TempError                       | throw TempError                 |
+         * |                                 |                                 |
+         * | PermError                       | throw PermError                 |
+         * |                                 |                                 |
+         * | None                            | throw PermError                 |
          * +---------------------------------+---------------------------------+
          */
         try {

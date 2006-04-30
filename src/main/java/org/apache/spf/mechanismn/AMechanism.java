@@ -55,14 +55,6 @@ public class AMechanism extends GenericMechanism {
 
     protected int ip6cidr;
 
-    public AMechanism() {
-        this(NAME_REGEX, VALUE_REGEX);
-    }
-
-    protected AMechanism(String patternName, String patternValue) {
-        super(patternName, patternValue);
-    }
-
     /**
      * 
      * @see org.apache.spf.mechanismn.GenericMechanism#run(org.apache.spf.SPF1Data)

@@ -28,17 +28,13 @@ import java.util.regex.MatchResult;
  * @author Norman Maurer <nm@byteaction.de>
  * 
  */
-public class AllMechanism extends AbstractMechanism {
+public class AllMechanism implements Mechanism {
 
     public static final String NAME_REGEX = "[aA][lL][lL]";
 
     public static final String VALUE_REGEX = "";
 
     public static final String REGEX = NAME_REGEX;
-
-    public AllMechanism() {
-        super(NAME_REGEX, VALUE_REGEX);
-    }
 
     /**
      * @param spfData

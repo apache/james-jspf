@@ -48,14 +48,6 @@ public class IP4Mechanism extends GenericMechanism {
      */
     public static final String REGEX = NAME_REGEX + VALUE_REGEX;
 
-    public IP4Mechanism() {
-        this(NAME_REGEX, VALUE_REGEX);
-    }
-
-    public IP4Mechanism(String namePattern, String valuePattern) {
-        super(namePattern, valuePattern);
-    }
-
     private IPAddr ip = null;
 
     private int maskLength = 0;

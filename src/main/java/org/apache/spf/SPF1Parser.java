@@ -32,7 +32,6 @@ import org.apache.spf.modifier.Modifier;
 import org.apache.spf.modifier.RedirectModifier;
 import org.apache.spf.modifier.UnknownModifier;
 
-import java.lang.reflect.Field;
 import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -332,17 +331,40 @@ public class SPF1Parser {
                             .group(TERM_STEP_REGEX_MECHANISM_VALUE_POS);
 
                     Mechanism mech = null;
-                    for (int j = 0; j < knownMechanisms.length; j++) {
+                    for (int j = 0; j < knownMechanisms.length && mech == null; j++) {
                         Class mechClass = knownMechanisms[j];
                         try {
-                            Field f = mechClass.getField("NAME_REGEX");
-                            String nameReg = (String) f.get(null);
+                            String nameReg = (String) mechClass.getField("NAME_REGEX").get(null);
 
                             if (Pattern.compile(nameReg).matcher(mechName).matches()) {
                                 mech = (Mechanism) mechClass.newInstance();
-                            }
 
+                                String valueReg = (String) mechClass.getField("VALUE_REGEX").get(null);
+                                
+                                Pattern valuePattern = Pattern.compile(valueReg);
+
+                                
+                                if (mechValue == null) {
+                                    mechValue = "";
+                                }
+                                if ((mechValue == null || mechValue.length() == 0)
+                                        && valuePattern.pattern().length() == 0) {
+                                    mech.config(null);
+                                } else {
+
+                                    Matcher matcher = valuePattern.matcher(mechValue);
+                                    if (!matcher.matches()) {
+                                        throw new PermErrorException("Value does not match: "
+                                                + valuePattern.pattern() + " " + mechValue);
+                                    }
+                                    mech.config(matcher.toMatchResult());
+                                }
+
+                                result.getDirectives().add(new Directive(getQualifier(qualifier), mech));
+
+                            }
                             
+
                         } catch (SecurityException e) {
                             // TODO Auto-generated catch block
                             e.printStackTrace();
@@ -361,8 +383,6 @@ public class SPF1Parser {
                         }
                     }
 
-                    mech.init(mechValue);
-                    result.getDirectives().add(new Directive(getQualifier(qualifier), mech));
                 }
 
             }

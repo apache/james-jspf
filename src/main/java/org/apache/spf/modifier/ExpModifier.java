@@ -38,13 +38,12 @@ public class ExpModifier extends GenericModifier {
     /**
      * ABNF: domain-spec
      */
-    public static final String VALUE_REGEX = SPF1Parser.DOMAIN_SPEC_REGEX;
+    public static final String VALUE_REGEX = "\\=" + SPF1Parser.DOMAIN_SPEC_REGEX;
 
     /**
      * ABNF: explanation = "exp" "=" domain-spec
      */
-    public static final String REGEX = NAME_REGEX + "\\="
-            + VALUE_REGEX;
+    public static final String REGEX = NAME_REGEX + VALUE_REGEX;
     
 
     private String host;
