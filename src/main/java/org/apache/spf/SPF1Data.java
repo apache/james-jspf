@@ -201,9 +201,7 @@ public class SPF1Data implements MacroData {
     }
 
     /**
-     * Get receivingDomain (r)
-     * 
-     * @return receivingDomain
+     * @see org.apache.spf.MacroData#getReceivingDomain()
      */
     public String getReceivingDomain() {
         return receivingDomain;

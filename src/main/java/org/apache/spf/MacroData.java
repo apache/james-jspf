@@ -88,5 +88,12 @@ public interface MacroData {
      * @return readableIP
      */
     public String getReadableIP();
+    
+    /**
+     * Get receivingDomain (r)
+     * 
+     * @return receivingDomain
+     */
+    public String getReceivingDomain();
 
 }

@@ -227,6 +227,8 @@ public class MacroExpand {
             return spfData.getClientDomain();
         } else if (variable.equalsIgnoreCase("o")) {
             return spfData.getSenderDomain();
+        } else if (variable.equalsIgnoreCase("r")) {
+            return spfData.getReceivingDomain();
         } else {
             throw new PermErrorException("Unknown command : " + variable);
         }
