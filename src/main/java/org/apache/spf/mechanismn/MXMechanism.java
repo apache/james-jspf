@@ -21,7 +21,6 @@ import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
 import org.apache.spf.SPF1Parser;
 import org.apache.spf.util.IPAddr;
-import org.apache.spf.util.IPUtil;
 
 import java.util.ArrayList;
 
@@ -67,7 +66,7 @@ public class MXMechanism extends AMechanism {
             try {
                 addressList.addAll(spfData.getDnsProbe().getMXRecords(host,
                         ip4cidr));
-                if (IPUtil.checkAddressList(checkAddress, addressList)) {
+                if (checkAddressList(checkAddress, addressList)) {
                     return true;
                 }
             } catch (Exception e) {

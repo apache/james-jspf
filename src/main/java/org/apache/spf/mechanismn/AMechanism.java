@@ -21,9 +21,9 @@ import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
 import org.apache.spf.SPF1Parser;
 import org.apache.spf.util.IPAddr;
-import org.apache.spf.util.IPUtil;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.MatchResult;
 
 /**
@@ -72,7 +72,7 @@ public class AMechanism extends GenericMechanism {
             try {
                 addressList.addAll(spfData.getDnsProbe().getARecords(host,
                         ip4cidr));
-                if (IPUtil.checkAddressList(checkAddress, addressList)) {
+                if (checkAddressList(checkAddress, addressList)) {
                     return true;
                 }
             } catch (Exception e) {
@@ -105,6 +105,30 @@ public class AMechanism extends GenericMechanism {
         } else {
             ip6cidr = 128;
         }
+    }
+
+    /**
+     * Check if the given ipaddress array contains the provided ip.
+     * 
+     * @param checkAddress
+     *            The ip wich should be contained in the given ArrayList
+     * @param addressList
+     *            The ip ArrayList.
+     * @return true or false
+     */
+    public boolean checkAddressList(IPAddr checkAddress, List addressList) {
+
+        IPAddr aValue = null;
+        for (int i = 0; i < addressList.size(); i++) {
+
+            aValue = (IPAddr) addressList.get(i);
+
+            if (checkAddress.getMaskedIPAddress().equals(
+                    aValue.getMaskedIPAddress())) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
