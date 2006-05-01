@@ -25,8 +25,8 @@ import java.util.Iterator;
 /**
  * This class is used to generate a SPF-Test and provided all intressting data.
  * 
- * @author Mimecast Contact : spf@mimecast.net
  * @author Norman Maurer <nm@byteaction.de>
+ * @author Stefano Bagnara <apache@bago.org>
  */
 
 public class SPF {
@@ -76,8 +76,7 @@ public class SPF {
      */
     public String checkSPF(String ipAddress, String mailFrom, String hostName) {
 
-        // TODO is the default PASS ?
-        String result = SPF1Utils.PASS;
+        String result = SPF1Utils.NEUTRAL;
         
         /**
          * Check if the connection was made from localhost. Set the result to
@@ -113,8 +112,14 @@ public class SPF {
                 qualifier = d.run(spfData);
  
                 if (qualifier != null) {
-                    result = qualifier;
+                    if(qualifier.equals("")) {
+                        result = SPF1Utils.PASS;
+                    } else {
+                        result = qualifier;
+                    }
                     match = true;
+                    // If we have a match we should break the while loop
+                    break;
                 }
             }
             
@@ -248,9 +253,9 @@ public class SPF {
     public static void main(String[] args) {
         SPF spf = new SPF();
 
-        String ipAddress = "192.168.200.1";
-        String mailFrom = "nm@aol.com";
-        String host = "aol.com";
+        String ipAddress = "192.0.2.120";
+        String mailFrom = "20.spf1-test.mailzone.com";
+        String host = "20.spf1-test.mailzone.com";
 
         // run test !
         String result = spf.checkSPF(ipAddress, mailFrom, host);
