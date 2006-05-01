@@ -53,6 +53,9 @@ public class IncludeMechanism implements Mechanism, Configurable {
     public boolean run(SPF1Data spfData) throws PermErrorException {
         String host = this.host;
 
+        // update currentDepth
+        spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);
+
         /*
          * TODO: Whether this mechanism matches, does not match, or throws an
          * error depends on the result of the recursive evaluation of

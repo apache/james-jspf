@@ -47,6 +47,9 @@ public class MXMechanism extends AMechanism {
     public boolean run(SPF1Data spfData) throws PermErrorException,TempErrorException {
         ArrayList addressList = new ArrayList();
 
+        // update currentDepth
+        spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);
+
         // Get the right host.
         String host = expandHost(spfData);
 

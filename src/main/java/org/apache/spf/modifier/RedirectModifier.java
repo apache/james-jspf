@@ -47,6 +47,10 @@ public class RedirectModifier extends GenericModifier {
      */
     public String run(SPF1Data spfData) throws PermErrorException {
         String host = this.host;
+        
+        // update currentDepth
+        spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);
+
         try {
             host = new MacroExpand(spfData).expandDomain(host);
             return host;

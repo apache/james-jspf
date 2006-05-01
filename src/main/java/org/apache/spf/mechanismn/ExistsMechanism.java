@@ -45,6 +45,9 @@ public class ExistsMechanism extends GenericMechanism {
      */
     public boolean run(SPF1Data spfData) throws PermErrorException, TempErrorException {
         List aRecords;
+        
+        // update currentDepth
+        spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);
 
         String host = expandHost(spfData);
         try {

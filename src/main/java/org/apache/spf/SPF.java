@@ -106,7 +106,6 @@ public class SPF {
             // get all commands
             Iterator com = spfRecord.getDirectives().iterator();
             while (com.hasNext()) {
-                spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);
                 
                 // if we reach maximum calls we must throw a PermErrorException. See SPF-RFC Section 10.1.  Processing Limits
                 if (spfData.getCurrentDepth() > spfData.getMaxDepth()) {

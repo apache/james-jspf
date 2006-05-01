@@ -49,6 +49,9 @@ public class PTRMechanism extends GenericMechanism {
         IPAddr compareIP;
         ArrayList validatedHosts = new ArrayList();
 
+        // update currentDepth
+        spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);
+
         // Get the right host.
         String host = expandHost(spfData);
 
