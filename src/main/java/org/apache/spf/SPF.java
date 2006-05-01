@@ -106,6 +106,13 @@ public class SPF {
             // get all commands
             Iterator com = spfRecord.getDirectives().iterator();
             while (com.hasNext()) {
+                spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);
+                
+                // if we reach maximum calls we must throw a PermErrorException. See SPF-RFC Section 10.1.  Processing Limits
+                if (spfData.getCurrentDepth() > spfData.getMaxDepth()) {
+                    throw new PermErrorException("Maximum mechanism/modifier calls done: " + spfData.getCurrentDepth());
+                }
+                
                 hasCommand = true;
                 Directive d = (Directive) com.next();
 
@@ -125,6 +132,13 @@ public class SPF {
             
             Iterator mod = spfRecord.getModifiers().iterator();
             while (mod.hasNext()) {
+                spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);
+                
+                // if we reach maximum calls we must throw a PermErrorException. See SPF-RFC Section 10.1.  Processing Limits
+                if (spfData.getCurrentDepth() > spfData.getMaxDepth()) {
+                    throw new PermErrorException("Maximum mechanism/modifiers calls done: " + spfData.getCurrentDepth());
+                }
+                
                 Modifier m = (Modifier) mod.next();
                 
                 String q = m.run(spfData);

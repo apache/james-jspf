@@ -59,7 +59,9 @@ public class SPF1Data implements MacroData {
     private String receivingDomain = "unknown"; // (r)
     
 
-    private int depth = 1;
+    private int currentDepth = 0;
+    
+    private int maxDepth = 10;
 
     private String explanation = "";
 
@@ -208,21 +210,30 @@ public class SPF1Data implements MacroData {
     }
 
     /**
-     * Get Depth
+     * Get currentDepth
      * 
-     * @return depth
+     * @return currentDepth
      */
-    public int getDepth() {
-        return depth;
+    public int getCurrentDepth() {
+        return currentDepth;
     }
 
     /**
-     * Set Depth
+     * Set currentDepth
      * 
-     * @param depth
+     * @param currentDepth
      */
-    public void setDepth(int depth) {
-        this.depth = depth;
+    public void setCurrentDepth(int currentDepth) {
+        this.currentDepth = currentDepth;
+    }
+    
+    /**
+     * Get the maxDepth
+     * 
+     * @return maxDepth
+     */
+    public int getMaxDepth() {
+        return maxDepth;
     }
 
     /**
