@@ -46,6 +46,13 @@ import java.util.regex.Pattern;
  * TODO this is work in progress and to be documented.
  * The matchResultPositions field should be made simpler and easier to understand.
  * 
+ * TODO doubts about the specification
+ * - redirect or exp with no domain-spec are evaluated as an unknown-modifiers according to the current spec (it does not make too much sense)
+ * - top-label is defined differently in various specs. We'll have to review the code.
+ *   - http://data.iana.org/TLD/tlds-alpha-by-domain.txt (we should probably beeter use and alpha sequence being at least 2 chars
+ *   - Somewhere is defined as "." TLD [ "." ]
+ *   - Otherwise defined as ( *alphanum ALPHA *alphanum ) / ( 1*alphanum "-" *( * alphanum / "-" ) alphanum )
+ * 
  * @see org.apache.spf.SPF1Record
  * 
  * @author Norman Maurer <nm@byteaction.de>

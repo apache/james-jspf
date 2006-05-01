@@ -19,7 +19,8 @@ package org.apache.spf;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Iterator;
 import java.util.regex.Pattern;
 
@@ -31,9 +32,17 @@ public class SPF1ParserTest extends TestCase {
 
     public SPF1ParserTest(String name) throws IOException {
         super(name);
-        HashMap tests = loadTests();
-        data = (SPF1RecordTestDef) tests.get(name);
+        List tests = loadTests();
+        Iterator i = tests.iterator();
+        while (i.hasNext()) {
+            SPF1RecordTestDef def = (SPF1RecordTestDef) i.next();
+            if (name.equals(def.recIn)) {
+                data = def;
+                break;
+            }
+        }
         assertNotNull(data);
+        parser = new SPF1Parser();
     }
 
     public static Test suite() throws IOException {
@@ -77,8 +86,8 @@ public class SPF1ParserTest extends TestCase {
 
     }
 
-    public static HashMap loadTests() throws IOException {
-        HashMap tests = new HashMap();
+    public static List loadTests() throws IOException {
+        List tests = new ArrayList();
 
         BufferedReader br = new BufferedReader(new InputStreamReader(
                 SPF1ParserTest.class.getResourceAsStream("test_parser.txt")));
@@ -98,7 +107,7 @@ public class SPF1ParserTest extends TestCase {
 
                     if ("spftest".equals(tokens[0])) {
                         if (def != null && def.recIn != null) {
-                            tests.put(def.recIn, def);
+                            tests.add(def);
                         }
                         def = new SPF1RecordTestDef();
                         def.name = tokens[2];
@@ -142,7 +151,7 @@ public class SPF1ParserTest extends TestCase {
         }
 
         if (def != null && def.recIn != null) {
-            tests.put(def.recIn, def);
+            tests.add(def);
         }
 
         br.close();
@@ -154,12 +163,11 @@ public class SPF1ParserTest extends TestCase {
 
         public SPF1RecordTestSuite() throws IOException {
             super();
-            HashMap tests = loadTests();
-            Iterator i = tests.keySet().iterator();
+            List tests = loadTests();
+            Iterator i = tests.iterator();
             SPF1Parser parser = new SPF1Parser();
             while (i.hasNext()) {
-                addTest(new SPF1ParserTest((SPF1RecordTestDef) tests.get(i
-                        .next()),parser));
+                addTest(new SPF1ParserTest((SPF1RecordTestDef) i.next(),parser));
             }
         }
 
