@@ -41,10 +41,12 @@ public class SPF1ParserTest extends TestCase {
     }
 
     private SPF1RecordTestDef data;
+    private SPF1Parser parser;
 
-    public SPF1ParserTest(SPF1RecordTestDef def) {
+    public SPF1ParserTest(SPF1RecordTestDef def, SPF1Parser parser) {
         super(def.recIn);
         this.data = def;
+        this.parser = parser;
     }
 
     protected void runTest() throws Throwable {
@@ -53,7 +55,7 @@ public class SPF1ParserTest extends TestCase {
 
             System.out.println("testing [" + data.recIn + "]");
 
-            new SPF1Parser().parse(data.recIn);
+            parser.parse(data.recIn);
 
             assertEquals("Expected <" + data.errMsg + "> but was <"
                     + "no errors" + ">", data.errMsg, "no errors");
@@ -68,7 +70,7 @@ public class SPF1ParserTest extends TestCase {
             e.printStackTrace();
             assertNotNull(data.errMsg);
             assertTrue("Expected <" + data.errMsg + "> but was <"
-                    + e.getMessage() + ">", !"no errors".equals(data.errMsg));
+                    + e.getMessage() + ">\n"+ data.recOut+"\n"+data.recOutAuto, !"no errors".equals(data.errMsg));
             // assertEquals("Expected <" + data.errMsg + "> but was <"
             // + e.getMessage() + ">", data.errMsg, e.getMessage());
         }
@@ -154,9 +156,10 @@ public class SPF1ParserTest extends TestCase {
             super();
             HashMap tests = loadTests();
             Iterator i = tests.keySet().iterator();
+            SPF1Parser parser = new SPF1Parser();
             while (i.hasNext()) {
                 addTest(new SPF1ParserTest((SPF1RecordTestDef) tests.get(i
-                        .next())));
+                        .next()),parser));
             }
         }
 
