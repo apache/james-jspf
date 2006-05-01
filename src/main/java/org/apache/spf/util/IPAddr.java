@@ -274,38 +274,20 @@ public class IPAddr {
      */
     private void stringToInternal(String netAddress) throws PermErrorException {
         netAddress = stripDot(netAddress);
-
-        String[] tokens = netAddress.toUpperCase().split("\\.");
-        // check IP4
-        if (tokens.length == 4) {
-            // Is IP4
-            for (int i = 0; i < tokens.length; i++) {
-                address[i] = Integer.parseInt(tokens[i].trim());
+        
+        byte[] bytes = Inet6Util.createByteArrayFromIPAddressString(netAddress);
+        
+        if (bytes.length == 4) {
+            for (int i = 0; i < bytes.length; i++) {
+                address[i] = bytes[i];
             }
-            // Dotted quad only?
-            // }else if(tokens.length == 3){
-            // address[0] = Integer.parseInt(tokens[0]);
-            // address[1] = Integer.parseInt(tokens[1]);
-            // address[2] = Integer.parseInt(tokens[2])/256;
-            // address[3] = Integer.parseInt(tokens[2])%256;
-            // check IP6
-        } else {
-            // TODO handle IP6 of varying lengths ie : 5fc8:0::0001
-            tokens = netAddress.split("\\:");
-            // IP6 defaults
+        } else if (bytes.length == 16){
             setIP6Defaults();
-            // Convert hex to int
-
-            // address[i] = Integer.parseInt(tokens[i], 16);
-
-            // TODO
-            // if(notIP6){
-            // }else{
-            // Reject all IP6 and non IP4 dotted quad currently
-
-            throw new PermErrorException("Not a valid IP address: "
-                    + netAddress);
-            // }
+            for (int i = 0; i < bytes.length / 2; i++) {
+                address[i] = bytes[i*2]*256+bytes[i*2+1];
+            }
+        } else {
+            throw new PermErrorException("Not a valid address: "+netAddress);
         }
     }
 

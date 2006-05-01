@@ -41,8 +41,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * This class can be used ass parses for validate SPF1-Records. It also offer a
- * Collection of SPF1.Mechanism .
+ * This class can be used to parse SPF1-Records from their textual form to an SPF1Record object that is composed by 2 collections: directives and modifiers.
+ * 
+ * TODO this is work in progress and to be documented.
+ * The matchResultPositions field should be made simpler and easier to understand.
+ * 
+ * @see org.apache.spf.SPF1Record
  * 
  * @author Norman Maurer <nm@byteaction.de>
  * @author Stefano Bagnara <apache@bago.org>
