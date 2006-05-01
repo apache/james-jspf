@@ -54,6 +54,20 @@ public interface DNSService {
      */
     public List getARecords(String strServer, int mask)
             throws NoneException, PermErrorException,TempErrorException;
+    
+    /**
+     * Get a list of IPAddr's for a server using the mask length
+     * 
+     * @param strServer The hostname or ipAddress whe should get the AAAA-Records for
+     * @param mask The netmask to use
+     * @return The ipAddresses
+     * @throws NoneException if no AAAA records was found 
+     * @throws PermErrorException if an PermError should be returned
+     * @throws TempErrorException if the lookup result was not "HOST NOT FOUND" or "SUCCESSFULLY"
+     */
+    public List getAAAARecords(String strServer, int mask)
+            throws NoneException, PermErrorException,TempErrorException;
+
 
     /**
      * Get TXT records as a string

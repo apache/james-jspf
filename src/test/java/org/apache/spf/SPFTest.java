@@ -372,6 +372,42 @@ public class SPFTest extends TestCase {
                     throw e;
                 }
             }
+            
+        public List getAAAARecords(String strServer, int mask)
+            throws NoneException, PermErrorException, TempErrorException {
+                
+        try {
+            List res = dnsService.getAAAARecords(strServer, mask);
+            System.out.print("getAAAARecords(" + strServer + "," + mask
+                    + ") = ");
+            if (res != null) {
+                for (int i = 0; i < res.size(); i++) {
+                    System.out.print(res.get(i));
+                    if (i == res.size() - 1) {
+                        System.out.println("");
+                    } else {
+                        System.out.print(",");
+                    }
+                }
+            } else {
+                System.out.println("getAAAARecords-ret: null");
+            }
+            return res;
+
+        } catch (TempErrorException e) {
+            System.out.println("getAAAARecords(" + strServer + "," + mask
+                    + ") = TermErrorException[" + e.getMessage() + "]");
+            throw e;
+        } catch (PermErrorException e) {
+            System.out.println("getAAAARecords(" + strServer + "," + mask
+                    + ") = PermErrorException[" + e.getMessage() + "]");
+            throw e;
+        } catch (NoneException e) {
+            System.out.println("getAAAARecords(" + strServer + "," + mask
+                    + ") = NoneException[" + e.getMessage() + "]");
+            throw e;
+        }
+    }
 
             public List getARecords(String strServer, int mask)
                     throws NoneException, PermErrorException, TempErrorException {

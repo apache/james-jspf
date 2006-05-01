@@ -22,6 +22,7 @@ import org.apache.spf.SPF1Data;
 import org.apache.spf.SPF1Parser;
 import org.apache.spf.TempErrorException;
 import org.apache.spf.util.IPAddr;
+import org.apache.spf.util.Inet6Util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +32,7 @@ import java.util.regex.MatchResult;
  * This class represent the a mechanism
  * 
  * @author Norman Maurer <nm@byteaction.de>
- * 
+ * @author Stefano Bagnara <apache@bago.org>
  */
 public class AMechanism extends GenericMechanism {
 
@@ -58,19 +59,40 @@ public class AMechanism extends GenericMechanism {
 
         // get the ipAddress
         try {
-            IPAddr checkAddress = IPAddr.getAddress(spfData.getIpAddress(),
+            if(Inet6Util.isValidIPV4Address(spfData.getIpAddress())) {
+            
+                IPAddr checkAddress = IPAddr.getAddress(spfData.getIpAddress(),
                     ip4cidr);
-            try {
-                addressList.addAll(spfData.getDnsProbe().getARecords(host,
+            
+                try {
+                    addressList.addAll(spfData.getDnsProbe().getARecords(host,
                         ip4cidr));
-                if (checkAddressList(checkAddress, addressList)) {
-                    return true;
-                }
-            } catch (TempErrorException e) {
+                    if (checkAddressList(checkAddress, addressList)) {
+                        return true;
+                    }
+                } catch (TempErrorException e) {
                     throw new TempErrorException(e.getMessage());
-            } catch (Exception e) {
-                // no a records just return null
-                return false;
+                } catch (Exception e) {
+                    // no a records just return null
+                    return false;
+                }
+            } else {
+                IPAddr checkAddress = IPAddr.getAddress(spfData.getIpAddress(),
+                        ip6cidr);
+                
+                    try {
+                        addressList.addAll(spfData.getDnsProbe().getAAAARecords(host,
+                            ip6cidr));
+                        if (checkAddressList(checkAddress, addressList)) {
+                            return true;
+                        }
+                    } catch (TempErrorException e) {
+                        throw new TempErrorException(e.getMessage());
+                    } catch (Exception e) {
+                        // no a records just return null
+                        return false;
+                    }
+                
             }
         } catch (Exception e) {
             throw new PermErrorException("No valid ipAddress: "

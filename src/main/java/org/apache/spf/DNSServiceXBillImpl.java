@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.spf.util.IPAddr;
+import org.xbill.DNS.AAAARecord;
 import org.xbill.DNS.ARecord;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.MXRecord;
@@ -41,8 +42,6 @@ import org.xbill.DNS.Type;
  */
 
 public class DNSServiceXBillImpl implements DNSService {
-
-    //TODO: do we need AAAARecord lookup for ipv6 ?
     
     /**
      * @see org.apache.spf.DNSService#getSpfRecord(java.lang.String,
@@ -104,7 +103,7 @@ public class DNSServiceXBillImpl implements DNSService {
             records = query.run();
             int queryResult = query.getResult();
             
-            if ((queryResult == query.SUCCESSFUL) || (queryResult == query.HOST_NOT_FOUND) ) {
+            if ((queryResult == Lookup.SUCCESSFUL) || (queryResult == Lookup.HOST_NOT_FOUND) ) {
                 if (records != null) {
                     for (int i = 0; i < records.length; i++) {
                         TXTRecord txt = (TXTRecord) records[i];
@@ -143,7 +142,7 @@ public class DNSServiceXBillImpl implements DNSService {
                 records = query.run();
                 int queryResult = query.getResult();
                 
-                if ((queryResult == query.SUCCESSFUL) || (queryResult == query.HOST_NOT_FOUND) ) { 
+                if ((queryResult == Lookup.SUCCESSFUL) || (queryResult == Lookup.HOST_NOT_FOUND) ) { 
                     if (records != null) {
                         for (int i = 0; i < records.length; i++) {
                             ARecord a = (ARecord) records[i];
@@ -169,6 +168,53 @@ public class DNSServiceXBillImpl implements DNSService {
         return listTxtData;
     }
 
+    /**
+     * @see org.apache.spf.DNSService#getAAAARecords(java.lang.String, int)
+     */
+    public List getAAAARecords(String strServer, int mask) throws NoneException,
+            PermErrorException, TempErrorException {
+
+        ArrayList listTxtData = new ArrayList();
+
+        if (IPAddr.isIPAddr(strServer)) {
+            IPAddr ipTest = IPAddr.getAddress(strServer);
+            // Address is already an IP address, so add it to list
+            listTxtData.add(ipTest);
+        } else {
+            
+            Record[] records;
+            try {
+                Lookup query = new Lookup(strServer, Type.AAAA);
+                records = query.run();
+                int queryResult = query.getResult();
+                
+                if ((queryResult == Lookup.SUCCESSFUL) || (queryResult == Lookup.HOST_NOT_FOUND) ) { 
+                    if (records != null) {
+                        for (int i = 0; i < records.length; i++) {
+                            AAAARecord a = (AAAARecord) records[i];
+                                
+                            ArrayList ipArray = getIPList(a.getAddress().getHostAddress(), mask);
+                            Iterator ip = ipArray.iterator();
+
+                            while (ip.hasNext()) {
+                                listTxtData.add(ip.next());
+                            }
+                        }
+                    } else {
+                        throw new NoneException("No AAAA record found for: " + strServer);
+                    }
+                } else {
+                    throw new TempErrorException("DNS Server returns RCODE: " + query);
+                }   
+            } catch (TextParseException e) {
+                // i think this is the best we could do
+                throw new NoneException("No AAAA Record found for: " + strServer);
+            }
+        }
+        return listTxtData;
+    }
+
+    
     /**
      * Convert list of DNS names to masked IPAddr
      * 
@@ -230,7 +276,7 @@ public class DNSServiceXBillImpl implements DNSService {
             records = query.run();
             int queryResult = query.getResult();
             
-            if ((queryResult == query.SUCCESSFUL) || (queryResult == query.HOST_NOT_FOUND) ) {
+            if ((queryResult == Lookup.SUCCESSFUL) || (queryResult == Lookup.HOST_NOT_FOUND) ) {
                 if (records != null) {
                     for (int i = 0; i < records.length; i++) {
                         PTRRecord ptr = (PTRRecord) records[i];
@@ -303,7 +349,7 @@ public class DNSServiceXBillImpl implements DNSService {
             records = query.run();
             int queryResult = query.getResult();
             
-            if ((queryResult == query.SUCCESSFUL) || (queryResult == query.HOST_NOT_FOUND) ) { 
+            if ((queryResult == Lookup.SUCCESSFUL) || (queryResult == Lookup.HOST_NOT_FOUND) ) { 
                 if (records != null) {
                     for (int i = 0; i < records.length; i++) {
                         MXRecord mx = (MXRecord) records[i];
