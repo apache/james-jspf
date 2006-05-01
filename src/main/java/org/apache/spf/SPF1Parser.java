@@ -31,6 +31,7 @@ import org.apache.spf.modifier.ExpModifier;
 import org.apache.spf.modifier.Modifier;
 import org.apache.spf.modifier.RedirectModifier;
 import org.apache.spf.modifier.UnknownModifier;
+import org.apache.spf.util.MatchResultSubset;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -152,7 +153,7 @@ public class SPF1Parser {
 
     private Collection modifiersCollection;
 
-    private ArrayList pos;
+    private ArrayList matchResultPositions;
 
     private class TermDef {
         private Pattern pattern;
@@ -218,7 +219,6 @@ public class SPF1Parser {
          * ABNF: mechanism = ( all / include / A / MX / PTR / IP4 / IP6 / exists )
          */
         String MECHANISM_REGEX = createRegex(mechanismsCollection);
-        //MECHANISM_NAME_STEP_REGEX = null;
 
         /**
          * ABNF: modifier = redirect / explanation / unknown-modifier
@@ -242,51 +242,49 @@ public class SPF1Parser {
          */
         String TERMS_SEPARATOR_REGEX = "[ ]+";
 
-        /**
-         * ABNF: terms = *( 1*SP ( directive / modifier ) )
-         */
-        //String TERMS_REGEX = "(?:" + TERMS_SEPARATOR_REGEX + TERM_REGEX + ")*";
-        
-        /**
-         * ABNF: record = "vspf1" terms
-         */
-        //String RECORD_REGEX = Pattern.quote(SPF1Utils.SPF_VERSION) + TERMS_REGEX;
-
         termsSeparatorPattern = Pattern.compile(TERMS_SEPARATOR_REGEX);
         termPattern = Pattern.compile(TERM_REGEX);
         
-        
-        pos = new ArrayList();
+        initializePositions();
+    }
+
+    /**
+     * Fill in the matchResultPositions ArrayList.
+     * This array simply map each regex matchgroup to the Term class that
+     * originated that part of the regex.
+     */
+    private void initializePositions() {
+        matchResultPositions = new ArrayList();
         Iterator i = mechanismsCollection.iterator();
         int posIndex = 0;
-        pos.ensureCapacity(posIndex+1);
-        pos.add(posIndex,null);
+        matchResultPositions.ensureCapacity(posIndex+1);
+        matchResultPositions.add(posIndex,null);
         posIndex++;
-        pos.ensureCapacity(posIndex+1);
-        pos.add(posIndex,null);
+        matchResultPositions.ensureCapacity(posIndex+1);
+        matchResultPositions.add(posIndex,null);
         posIndex++;
-        pos.ensureCapacity(posIndex+1);
-        pos.add(posIndex,null);
+        matchResultPositions.ensureCapacity(posIndex+1);
+        matchResultPositions.add(posIndex,null);
         posIndex++;
         
         while (i.hasNext()) {
             TermDef td = (TermDef) i.next();
             int size = td.getMatchSize()+1;
             for (int k = 0; k < size; k++) {
-                pos.ensureCapacity(posIndex+1);
-                pos.add(posIndex,td);
+                matchResultPositions.ensureCapacity(posIndex+1);
+                matchResultPositions.add(posIndex,td);
                 posIndex++;
             }
         }
         TERM_STEP_REGEX_MODIFIER_POS = posIndex++;
-        pos.add(TERM_STEP_REGEX_MODIFIER_POS,null);
+        matchResultPositions.add(TERM_STEP_REGEX_MODIFIER_POS,null);
         i = modifiersCollection.iterator();
         while (i.hasNext()) {
             TermDef td = (TermDef) i.next();
             int size = td.getMatchSize()+1;
             for (int k = 0; k < size; k++) {
-                pos.ensureCapacity(posIndex+1);
-                pos.add(posIndex,td);
+                matchResultPositions.ensureCapacity(posIndex+1);
+                matchResultPositions.add(posIndex,td);
                 posIndex++;
             }
         }
@@ -366,16 +364,8 @@ public class SPF1Parser {
                 String modifierString = termMatcher
                         .group(TERM_STEP_REGEX_MODIFIER_POS);
                 
-//                System.out.println(termMatcher.groupCount());
-//                String mechanismString = termMatcher
-//                    .group(TERM_STEP_REGEX_MECHANISM_POS);
-//                
-//                System.out.println(spfRecord);
-//                System.out.println("Modifier: "+modifierString);
-//                System.out.println("Mechanism: "+mechanismString);
-
                 if (modifierString != null) {
-
+                    // MODIFIER
                     Modifier mod = (Modifier) lookupAndCreateTerm(termMatcher, TERM_STEP_REGEX_MODIFIER_POS);
 
                     if (mod.enforceSingleInstance()) {
@@ -397,7 +387,7 @@ public class SPF1Parser {
                     Object mech = lookupAndCreateTerm(termMatcher, TERM_STEP_REGEX_MECHANISM_POS);
 
                     result.getDirectives().add(
-                            new Directive(getQualifier(qualifier),(Mechanism) mech));
+                            new Directive(qualifier,(Mechanism) mech));
 
                 }
 
@@ -407,80 +397,6 @@ public class SPF1Parser {
         return result;
     }
     
-    /**
-     * @author Stefano Bagnara
-     * 
-     * Provides a MatchResult view of a subset of another MatchResult
-     */
-    private class MatchResultSubset implements MatchResult {
-        
-        private MatchResult wrapped;
-        private int start;
-        private int count;
-        
-        /**
-         * @param w Original MatchResult
-         * @param zero The original index returned when group(0) is requested
-         * @param start the position where the subresult start
-         * @param count number of groups part of the subresult
-         */
-        public MatchResultSubset(MatchResult w, int start, int count) {
-            this.wrapped = w;
-            this.count = count;
-            this.start = start;
-        }
-        
-        /**
-         * @see java.util.regex.MatchResult#end()
-         */
-        public int end() {
-            throw new UnsupportedOperationException();
-        }
-        
-        /**
-         * @see java.util.regex.MatchResult#end(int)
-         */
-        public int end(int arg0) {
-            throw new UnsupportedOperationException();
-        }
-        
-        /**
-         * @see java.util.regex.MatchResult#group()
-         */
-        public String group() {
-            throw new UnsupportedOperationException();
-        }
-        
-        /**
-         * @see java.util.regex.MatchResult#group(int)
-         */
-        public String group(int arg0) {
-            return wrapped.group(arg0+start);
-        }
-        
-        /**
-         * @see java.util.regex.MatchResult#groupCount()
-         */
-        public int groupCount() {
-            return count;
-        }
-        
-        /**
-         * @see java.util.regex.MatchResult#start()
-         */
-        public int start() {
-            throw new UnsupportedOperationException();
-        }
-        
-        /**
-         * @see java.util.regex.MatchResult#start(int)
-         */
-        public int start(int arg0) {
-            throw new UnsupportedOperationException();
-        }
-
-    }
-
     /**
      * @param mechName
      * @param mechValue
@@ -493,7 +409,7 @@ public class SPF1Parser {
         for (int k = start+1; k < res.groupCount(); k++) {
             //System.out.println(k+"] "+(pos.get(k) != null ? ((TermDef) pos.get(k)).getPattern().pattern()+" => "+res.group(k) : null));
             if (res.group(k) != null) {
-                TermDef c = (TermDef) pos.get(k);
+                TermDef c = (TermDef) matchResultPositions.get(k);
                 MatchResult subres = new MatchResultSubset(res, k, c.getMatchSize());
                 try {
                     Object term = c.getTermDef().newInstance();
@@ -514,29 +430,6 @@ public class SPF1Parser {
             }
         }
         return null;
-    }
-
-    /**
-     * Get the qualifier for the given mechanismn record. if none was specified
-     * in the mechanismn record the qualifier for pass "+" will be used
-     * 
-     * @param mechRecord
-     *            The mechanismn record
-     * @return qualifier This qualifier will be used by the mechanismn classes
-     *         for the result the return when match
-     */
-    private String getQualifier(String mechRecord) {
-        if (mechRecord == null) {
-            return SPF1Utils.PASS;
-        } else if (mechRecord.startsWith(SPF1Utils.FAIL)) {
-            return SPF1Utils.FAIL;
-        } else if (mechRecord.startsWith(SPF1Utils.SOFTFAIL)) {
-            return SPF1Utils.SOFTFAIL;
-        } else if (mechRecord.startsWith(SPF1Utils.NEUTRAL)) {
-            return SPF1Utils.NEUTRAL;
-        } else {
-            return SPF1Utils.PASS;
-        }
     }
 
 }

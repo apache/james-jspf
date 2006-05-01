@@ -27,15 +27,20 @@ public class SPF1Record {
     private Collection modifiers = new ArrayList();
     
     /**
-     * Return the commands as Collection
+     * Return the directives as Collection
      * 
-     * @return commands Collection of all mechanism which should be used
+     * @return directives Collection of all qualifier+mechanism which should be used
      */
     public Collection getDirectives() {
         return directives;
     }
 
 
+    /**
+     * Return the modifiers as Collection
+     * 
+     * @return modifiers Collection of all modifiers which should be used
+     */
     public Collection getModifiers() {
         return modifiers;
     }
