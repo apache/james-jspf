@@ -65,7 +65,7 @@ public class IP4Mechanism extends GenericMechanism {
         }
         String ipString = params.group(1);
         if (!isValidAddress(ipString)) {
-            throw new PermErrorException("Invalid Address");
+            throw new PermErrorException("Invalid Address: "+ipString);
         }
         maskLength = getMaxCidr();
         if (params.groupCount() >= 2 && params.group(2) != null) {

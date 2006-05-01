@@ -43,6 +43,8 @@ public class SPF {
 
     private String header = "";
 
+    private SPF1Parser parser;
+
     /**
      * 
      */
@@ -57,6 +59,7 @@ public class SPF {
     public SPF(DNSService dnsProbe) {
         super();
         this.dnsProbe = dnsProbe;
+        this.parser = new SPF1Parser();
     }
 
     /**
@@ -95,8 +98,7 @@ public class SPF {
             String spfDnsEntry = dnsProbe.getSpfRecord(spfData
                     .getCurrentDomain(), SPF1Utils.SPF_VERSION);
 
-            // Parse the record
-            SPF1Record spfRecord = new SPF1Parser().parse(spfDnsEntry);
+            SPF1Record spfRecord = parser.parse(spfDnsEntry);
 
             boolean match = false;
             String qualifier = null;

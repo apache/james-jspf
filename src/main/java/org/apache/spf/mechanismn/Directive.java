@@ -27,8 +27,13 @@ public class Directive {
 
     private Mechanism mechanism = null;
 
-    public Directive(String qualifier, Mechanism mechanism) {
-        this.qualifier = qualifier;
+    public Directive(String qualifier, Mechanism mechanism) throws PermErrorException {
+        if (qualifier != null) {
+            this.qualifier = qualifier;
+        }
+        if (mechanism == null) {
+            throw new PermErrorException("Mechanism cannot be null");
+        }
         this.mechanism = mechanism;
     }
 
