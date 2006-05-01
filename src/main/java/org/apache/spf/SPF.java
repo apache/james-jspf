@@ -76,91 +76,13 @@ public class SPF {
      */
     public String checkSPF(String ipAddress, String mailFrom, String hostName) {
 
-        String result = SPF1Utils.NEUTRAL;
-        
-        /**
-         * Check if the connection was made from localhost. Set the result to
-         * PASS if its from localhost.
-         */
-        if (ipAddress.trim().startsWith("127.")) {
-            result = SPF1Utils.PASS;
-            return SPF1Utils.resultToName(result);
-        }
+        String result = null;
 
         spfData = null;
-
         try {
             // Setup the data
             spfData = new SPF1Data(mailFrom, hostName, ipAddress, dnsProbe);
-
-            // Get the raw dns txt entry which contains a spf entry
-            String spfDnsEntry = dnsProbe.getSpfRecord(spfData
-                    .getCurrentDomain(), SPF1Utils.SPF_VERSION);
-
-            SPF1Record spfRecord = parser.parse(spfDnsEntry);
-
-            boolean match = false;
-            String qualifier = null;
-            boolean hasCommand = false;
-
-            // get all commands
-            Iterator com = spfRecord.getDirectives().iterator();
-            while (com.hasNext()) {
-                
-                // if we reach maximum calls we must throw a PermErrorException. See SPF-RFC Section 10.1.  Processing Limits
-                if (spfData.getCurrentDepth() > spfData.getMaxDepth()) {
-                    throw new PermErrorException("Maximum mechanism/modifier calls done: " + spfData.getCurrentDepth());
-                }
-                
-                hasCommand = true;
-                Directive d = (Directive) com.next();
-
-                qualifier = d.run(spfData);
- 
-                if (qualifier != null) {
-                    if(qualifier.equals("")) {
-                        result = SPF1Utils.PASS;
-                    } else {
-                        result = qualifier;
-                    }
-                    match = true;
-                    // If we have a match we should break the while loop
-                    break;
-                }
-            }
-            
-            Iterator mod = spfRecord.getModifiers().iterator();
-            while (mod.hasNext()) {
-                spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);
-                
-                // if we reach maximum calls we must throw a PermErrorException. See SPF-RFC Section 10.1.  Processing Limits
-                if (spfData.getCurrentDepth() > spfData.getMaxDepth()) {
-                    throw new PermErrorException("Maximum mechanism/modifiers calls done: " + spfData.getCurrentDepth());
-                }
-                
-                Modifier m = (Modifier) mod.next();
-                
-                String q = m.run(spfData);
-                if (q != null) {
-                    qualifier = q;
-                }
-
-                if (qualifier != null) {
-                    result = qualifier;
-                    
-                    if (qualifier.equals(SPF1Utils.FAIL)) {
-                        explanation = spfData.getExplanation();
-                    }
-                }
-            }
-
-            // If no match was found set the result to neutral 
-            if ((match == false) && (hasCommand == true)) {
-                result = SPF1Utils.NEUTRAL;
-            }
-            // Catch the exceptions and set the result
-            // TODO: remove printStackTrace() if all was checked and works!
-
+            result = checkSPF(spfData);
         } catch (PermErrorException e) {
             e.printStackTrace();
             result = SPF1Utils.PERM_ERROR;
@@ -180,6 +102,99 @@ public class SPF {
 
         return convertedResult;
 
+    }
+
+    /**
+     * @param ipAddress
+     * @throws PermErrorException
+     * @throws NoneException
+     * @throws TempErrorException
+     */
+    public String checkSPF(SPF1Data spfData) throws PermErrorException, NoneException, TempErrorException {
+        String result;
+        result = SPF1Utils.NEUTRAL;
+
+        /**
+         * Check if the connection was made from localhost. Set the result to
+         * PASS if its from localhost.
+         */
+        if (spfData.getIpAddress().trim().startsWith("127.")) {
+            result = SPF1Utils.PASS;
+            return result;
+        }
+
+        // Get the raw dns txt entry which contains a spf entry
+        String spfDnsEntry = dnsProbe.getSpfRecord(spfData
+                .getCurrentDomain(), SPF1Utils.SPF_VERSION);
+
+        System.out.println(spfDnsEntry);
+
+        SPF1Record spfRecord = parser.parse(spfDnsEntry);
+        
+        System.out.println(spfRecord);
+
+        boolean match = false;
+        String qualifier = null;
+        boolean hasCommand = false;
+
+        // get all commands
+        Iterator com = spfRecord.getDirectives().iterator();
+        while (com.hasNext()) {
+            
+            // if we reach maximum calls we must throw a PermErrorException. See SPF-RFC Section 10.1.  Processing Limits
+            if (spfData.getCurrentDepth() > spfData.getMaxDepth()) {
+                throw new PermErrorException("Maximum mechanism/modifier calls done: " + spfData.getCurrentDepth());
+            }
+            
+            hasCommand = true;
+            Directive d = (Directive) com.next();
+
+            qualifier = d.run(spfData);
+ 
+            if (qualifier != null) {
+                if(qualifier.equals("")) {
+                    result = SPF1Utils.PASS;
+                } else {
+                    result = qualifier;
+                }
+                match = true;
+                // If we have a match we should break the while loop
+                break;
+            }
+        }
+        
+        Iterator mod = spfRecord.getModifiers().iterator();
+        while (mod.hasNext()) {
+            spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);
+            
+            // if we reach maximum calls we must throw a PermErrorException. See SPF-RFC Section 10.1.  Processing Limits
+            if (spfData.getCurrentDepth() > spfData.getMaxDepth()) {
+                throw new PermErrorException("Maximum mechanism/modifiers calls done: " + spfData.getCurrentDepth());
+            }
+            
+            Modifier m = (Modifier) mod.next();
+            
+            String q = m.run(spfData);
+            if (q != null) {
+                qualifier = q;
+            }
+
+            if (qualifier != null) {
+                result = qualifier;
+                
+                if (qualifier.equals(SPF1Utils.FAIL)) {
+                    explanation = spfData.getExplanation();
+                }
+            }
+        }
+
+        // If no match was found set the result to neutral 
+        if ((match == false) && (hasCommand == true)) {
+            result = SPF1Utils.NEUTRAL;
+        }
+        // Catch the exceptions and set the result
+        // TODO: remove printStackTrace() if all was checked and works!
+        return result;
     }
 
     /**

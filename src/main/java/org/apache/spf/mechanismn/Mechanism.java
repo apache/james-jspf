@@ -17,6 +17,7 @@
 
 package org.apache.spf.mechanismn;
 
+import org.apache.spf.NoneException;
 import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
 import org.apache.spf.TempErrorException;
@@ -37,7 +38,8 @@ public interface Mechanism {
      * @return result if it matches
      * @throws PermErrorException
      *             if somethink strange happen
+     * @throws NoneException 
      */
-    public boolean run(SPF1Data spfData) throws PermErrorException,TempErrorException;
+    public boolean run(SPF1Data spfData) throws PermErrorException,TempErrorException, NoneException;
 
 }
