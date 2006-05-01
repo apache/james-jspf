@@ -21,6 +21,7 @@ import org.apache.spf.Configurable;
 import org.apache.spf.PermErrorException;
 import org.apache.spf.MacroExpand;
 import org.apache.spf.SPF1Data;
+import org.apache.spf.TempErrorException;
 
 import java.util.regex.MatchResult;
 
@@ -62,8 +63,9 @@ public abstract class GenericModifier implements Modifier, Configurable {
      *         modifier
      * @throws PermErrorException
      *             if somethink strange happen
+     * @throws TempErrorException 
      */
-    public abstract String run(SPF1Data spfData) throws PermErrorException;
+    public abstract String run(SPF1Data spfData) throws PermErrorException, TempErrorException;
 
     public void config(MatchResult params) throws PermErrorException {
         if (params.groupCount() > 0) {

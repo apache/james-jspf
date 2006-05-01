@@ -29,7 +29,7 @@ public class Directive {
     private Mechanism mechanism = null;
 
     public Directive(String qualifier, Mechanism mechanism) throws PermErrorException {
-        if (qualifier != null) {
+        if (qualifier != null && qualifier.length() > 0) {
             this.qualifier = qualifier;
         }
         if (mechanism == null) {
@@ -44,6 +44,14 @@ public class Directive {
         } else {
             return null;
         }
+    }
+
+    public Mechanism getMechanism() {
+        return mechanism;
+    }
+
+    public String getQualifier() {
+        return qualifier;
     }
 
 }

@@ -133,7 +133,6 @@ public class SPF {
         
         System.out.println(spfRecord);
 
-        boolean match = false;
         String qualifier = null;
         boolean hasCommand = false;
 
@@ -148,8 +147,12 @@ public class SPF {
             
             hasCommand = true;
             Directive d = (Directive) com.next();
+            
+            System.out.println("Processing directive: "+d.getQualifier()+d.getMechanism().toString());
 
             qualifier = d.run(spfData);
+            
+            System.out.println("Processed directive: "+d.getQualifier()+d.getMechanism().toString()+" returned "+qualifier);
  
             if (qualifier != null) {
                 if(qualifier.equals("")) {
@@ -157,7 +160,10 @@ public class SPF {
                 } else {
                     result = qualifier;
                 }
-                match = true;
+                
+                spfData.setCurrentResult(result);
+                spfData.setMatch(true);
+                
                 // If we have a match we should break the while loop
                 break;
             }
@@ -173,14 +179,23 @@ public class SPF {
             }
             
             Modifier m = (Modifier) mod.next();
-            
+
+            System.out.println("Processing modifier: "+m.toString());
+
             String q = m.run(spfData);
+            
+            System.out.println("Processed modifier: "+m.toString()+" resulted in "+q);
+
             if (q != null) {
                 qualifier = q;
             }
 
             if (qualifier != null) {
                 result = qualifier;
+                
+                spfData.setCurrentResult(result);
+                spfData.setMatch(true);
+
                 
                 if (qualifier.equals(SPF1Utils.FAIL)) {
                     explanation = spfData.getExplanation();
@@ -189,7 +204,7 @@ public class SPF {
         }
 
         // If no match was found set the result to neutral 
-        if ((match == false) && (hasCommand == true)) {
+        if (!spfData.isMatch() && (hasCommand == true)) {
             result = SPF1Utils.NEUTRAL;
         }
         // Catch the exceptions and set the result

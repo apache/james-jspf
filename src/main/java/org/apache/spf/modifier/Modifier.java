@@ -19,6 +19,7 @@ package org.apache.spf.modifier;
 
 import org.apache.spf.PermErrorException;
 import org.apache.spf.SPF1Data;
+import org.apache.spf.TempErrorException;
 
 /**
  * This Interface represent a modifier
@@ -36,8 +37,9 @@ public interface Modifier {
      * @return host The host we should redirect / include
      * @throws PermErrorException
      *             if there are any syntax problems etc
+     * @throws TempErrorException 
      */
-    public String run(SPF1Data spfData) throws PermErrorException;
+    public String run(SPF1Data spfData) throws PermErrorException, TempErrorException;
 
     /**
      * @return true if only one instance of this modifier is allowed

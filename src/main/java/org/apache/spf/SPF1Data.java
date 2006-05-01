@@ -65,6 +65,10 @@ public class SPF1Data implements MacroData {
 
     private String explanation = "";
 
+    private String currentResult = null;
+
+    private boolean match = false;
+
     protected SPF1Data(String mailFrom, String heloDomain, String clientIP)
             throws PermErrorException, NoneException {
         this(mailFrom, heloDomain, clientIP, new DNSServiceXBillImpl());
@@ -270,6 +274,32 @@ public class SPF1Data implements MacroData {
      */
     public String getExplanation() {
         return explanation;
+    }
+
+    /**
+     * Set the current result
+     * 
+     * @param result result
+     */
+    public void setCurrentResult(String result) {
+        this.currentResult = result;
+    }
+
+    /**
+     * Get the current result
+     * 
+     * @return current result
+     */
+    public String getCurrentResult() {
+        return currentResult;
+    }
+
+    public void setMatch(boolean match) {
+        this.match = match;
+    }
+
+    public boolean isMatch() {
+        return match;
     }
 
 }

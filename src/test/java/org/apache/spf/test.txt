@@ -111,11 +111,15 @@ smtp-comment    /.*/ explanation
 header-comment  /.*/ spfquery: transitioning domain of 03.spf1-test.mailzone.com does not designate 192.0.2.1 as permitted sender
 received-spf    /.*/ Received-SPF: softfail (spfquery: transitioning domain of 03.spf1-test.mailzone.com does not designate 192.0.2.1 as permitted sender) client-ip=192.0.2.1; envelope-from=postmaster@03.spf1-test.mailzone.com; helo=03.spf1-test.mailzone.com;
 
-spfquery -ip=192.0.2.1 -sender=05.spf1-test.mailzone.com -helo=05.spf1-test.mailzone.com
-result          /.*/ fail
-smtp-comment    /.*/ explanation
-header-comment  /.*/ spfquery: domain of 05.spf1-test.mailzone.com does not designate 192.0.2.1 as permitted sender
-received-spf    /.*/ Received-SPF: fail (spfquery: domain of 05.spf1-test.mailzone.com does not designate 192.0.2.1 as permitted sender) client-ip=192.0.2.1; envelope-from=postmaster@05.spf1-test.mailzone.com; helo=05.spf1-test.mailzone.com;
+# This is wrong.
+# The spf record for the host is : "v=spf1                                             default=deny   "
+# default=deny is not part of the specification
+#
+#spfquery -ip=192.0.2.1 -sender=05.spf1-test.mailzone.com -helo=05.spf1-test.mailzone.com
+#result          /.*/ fail
+#smtp-comment    /.*/ explanation
+#header-comment  /.*/ spfquery: domain of 05.spf1-test.mailzone.com does not designate 192.0.2.1 as permitted sender
+#received-spf    /.*/ Received-SPF: fail (spfquery: domain of 05.spf1-test.mailzone.com does not designate 192.0.2.1 as permitted sender) client-ip=192.0.2.1; envelope-from=postmaster@05.spf1-test.mailzone.com; helo=05.spf1-test.mailzone.com;
 
 spfquery -ip=192.0.2.1 -sender=06.spf1-test.mailzone.com -helo=06.spf1-test.mailzone.com
 result          /.*/ neutral
@@ -610,12 +614,16 @@ smtp-comment    /.*/
 header-comment  /.*/ spfquery: domain of 45.spf1-test.mailzone.com designates 192.0.2.200 as permitted sender
 received-spf    /.*/ Received-SPF: pass (spfquery: domain of 45.spf1-test.mailzone.com designates 192.0.2.200 as permitted sender) client-ip=192.0.2.200; envelope-from=postmaster@45.spf1-test.mailzone.com; helo=45.spf1-test.mailzone.com;
 
-spfquery -ip=192.0.2.200 -sender=50.spf1-test.mailzone.com -helo=50.spf1-test.mailzone.com
-result          /.*/ unknown
-smtp-comment    /^(perl|libspf)$/ explanation
-smtp-comment    /.*/ 
-header-comment  /.*/ spfquery: error in processing during lookup of domain of 50.spf1-test.mailzone.com: Required option is missing
-received-spf    /.*/ Received-SPF: unknown (spfquery: error in processing during lookup of domain of 50.spf1-test.mailzone.com: Required option is missing) client-ip=192.0.2.200; envelope-from=postmaster@50.spf1-test.mailzone.com; helo=50.spf1-test.mailzone.com; problem=Required option is missing near "" in "                                    -all";
+# this is wrong
+# the spf record returned is "v=spf1 include                                     -all"
+# include with no ":" is not a valid directive.
+#
+#spfquery -ip=192.0.2.200 -sender=50.spf1-test.mailzone.com -helo=50.spf1-test.mailzone.com
+#result          /.*/ unknown
+#smtp-comment    /^(perl|libspf)$/ explanation
+#smtp-comment    /.*/ 
+#header-comment  /.*/ spfquery: error in processing during lookup of domain of 50.spf1-test.mailzone.com: Required option is missing
+#received-spf    /.*/ Received-SPF: unknown (spfquery: error in processing during lookup of domain of 50.spf1-test.mailzone.com: Required option is missing) client-ip=192.0.2.200; envelope-from=postmaster@50.spf1-test.mailzone.com; helo=50.spf1-test.mailzone.com; problem=Required option is missing near "" in "                                    -all";
 
 spfquery -ip=192.0.2.200 -sender=51.spf1-test.mailzone.com -helo=51.spf1-test.mailzone.com
 result          /.*/ fail
@@ -645,14 +653,26 @@ smtp-comment    /.*/
 header-comment  /.*/ spfquery: domain of 52.spf1-test.mailzone.com designates 192.0.2.130 as permitted sender
 received-spf    /.*/ Received-SPF: pass (spfquery: domain of 52.spf1-test.mailzone.com designates 192.0.2.130 as permitted sender) client-ip=192.0.2.130; envelope-from=postmaster@52.spf1-test.mailzone.com; helo=52.spf1-test.mailzone.com;
 
+# the record is "v=spf1 include:56.spf1-test.mailzone.com                  -all"
+# and 56.spf1-test.mailzone.com return a "NoneExeption".
+# include specify that a NoneException must result in a PermError
+# so error seems to me a better result than unknown for this test.
+#
 spfquery -ip=192.0.2.200 -sender=55.spf1-test.mailzone.com -helo=55.spf1-test.mailzone.com
+result          spfjava error
 result          /.*/ unknown
 smtp-comment    /^(perl|libspf)$/ explanation
 smtp-comment    /.*/ 
 header-comment  /.*/ spfquery: error in processing during lookup of domain of 55.spf1-test.mailzone.com: Could not find a valid SPF record
 received-spf    /.*/ Received-SPF: unknown (spfquery: error in processing during lookup of domain of 55.spf1-test.mailzone.com: Could not find a valid SPF record) client-ip=192.0.2.200; envelope-from=postmaster@55.spf1-test.mailzone.com; helo=55.spf1-test.mailzone.com;
 
+# the record is "v=spf1 include:56.spf1-test.mailzone.com                  -all"
+# and 56.spf1-test.mailzone.com return a "NoneExeption".
+# include specify that a NoneException must result in a PermError
+# so error seems to me a better result than unknown for this test.
+#
 spfquery -ip=192.0.2.130 -sender=55.spf1-test.mailzone.com -helo=55.spf1-test.mailzone.com
+result          spfjava error
 result          /.*/ unknown
 smtp-comment    /^(perl|libspf)$/ explanation
 smtp-comment    /.*/ 
@@ -665,28 +685,46 @@ smtp-comment    /.*/
 header-comment  /.*/ spfquery: 192.0.2.200 is neither permitted nor denied by domain of 56.spf1-test.mailzone.com
 received-spf    /.*/ Received-SPF: none (spfquery: 192.0.2.200 is neither permitted nor denied by domain of 56.spf1-test.mailzone.com) client-ip=192.0.2.200; envelope-from=postmaster@56.spf1-test.mailzone.com; helo=56.spf1-test.mailzone.com;
 
+# the record is "v=spf1 include:spf1-test.mailzone.com                  -all"
+# and spf1-test.mailzone.com return a "NoneExeption".
+# include specify that a NoneException must result in a PermError
+# so error seems to me a better result than unknown for this test.
+#
 spfquery -ip=192.0.2.200 -sender=57.spf1-test.mailzone.com -helo=57.spf1-test.mailzone.com
+result          spfjava error
 result          /.*/ unknown
 smtp-comment    /^(perl|libspf)$/ explanation
 smtp-comment    /.*/ 
 header-comment  /.*/ spfquery: error in processing during lookup of domain of 57.spf1-test.mailzone.com: Could not find a valid SPF record
 received-spf    /.*/ Received-SPF: unknown (spfquery: error in processing during lookup of domain of 57.spf1-test.mailzone.com: Could not find a valid SPF record) client-ip=192.0.2.200; envelope-from=postmaster@57.spf1-test.mailzone.com; helo=57.spf1-test.mailzone.com;
 
+# the record is "v=spf1 include:spf1-test.mailzone.com                  -all"
+# and spf1-test.mailzone.com return a "NoneExeption".
+# include specify that a NoneException must result in a PermError
+# so error seems to me a better result than unknown for this test.
+#
 spfquery -ip=192.0.2.130 -sender=57.spf1-test.mailzone.com -helo=57.spf1-test.mailzone.com
+result          spfjava error
 result          /.*/ unknown
 smtp-comment    /^(perl|libspf)$/ explanation
 smtp-comment    /.*/ 
 header-comment  /.*/ spfquery: error in processing during lookup of domain of 57.spf1-test.mailzone.com: Could not find a valid SPF record
 received-spf    /.*/ Received-SPF: unknown (spfquery: error in processing during lookup of domain of 57.spf1-test.mailzone.com: Could not find a valid SPF record) client-ip=192.0.2.130; envelope-from=postmaster@57.spf1-test.mailzone.com; helo=57.spf1-test.mailzone.com;
 
+# this create a loop between 58 and 59. So we throw a PermError as per RFC
+#
 spfquery -ip=192.0.2.200 -sender=58.spf1-test.mailzone.com -helo=58.spf1-test.mailzone.com
+result          spfjava error
 result          /.*/ unknown
 smtp-comment    /^(perl|libspf)$/ explanation
 smtp-comment    /.*/ 
 header-comment  /.*/ spfquery: error in processing during lookup of domain of 58.spf1-test.mailzone.com: Mechanisms used too many DNS lookups
 received-spf    /.*/ Received-SPF: unknown (spfquery: error in processing during lookup of domain of 58.spf1-test.mailzone.com: Mechanisms used too many DNS lookups) client-ip=192.0.2.200; envelope-from=postmaster@58.spf1-test.mailzone.com; helo=58.spf1-test.mailzone.com;
 
+# this create a loop between 58 and 59. So we throw a PermError as per RFC
+#
 spfquery -ip=192.0.2.130 -sender=59.spf1-test.mailzone.com -helo=59.spf1-test.mailzone.com
+result          spfjava error
 result          /.*/ unknown
 smtp-comment    /^(perl|libspf)$/ explanation
 smtp-comment    /.*/ 
@@ -923,7 +961,10 @@ smtp-comment    /.*/ explanation
 header-comment  /.*/ spfquery: domain of 09.spf1-test.mailzone.com does not designate 192.0.2.1 as permitted sender
 received-spf    /.*/ Received-SPF: fail (spfquery: domain of 09.spf1-test.mailzone.com does not designate 192.0.2.1 as permitted sender) client-ip=192.0.2.1; envelope-from=postmaster@09.spf1-test.mailzone.com; helo=09.spf1-test.mailzone.com;
 
+# this return a "v=spf1 -all exp=99txt.spf1-test.mailzone.com moo" record.
+# moo is not allowed and the parsing fail, so we should return an error.
 spfquery -ip=192.0.2.1 -sender=99.spf1-test.mailzone.com -helo=99.spf1-test.mailzone.com
+result          spfjava error
 result          /.*/ fail
 smtp-comment    /.*/ explanation
 header-comment  /.*/ spfquery: domain of 99.spf1-test.mailzone.com does not designate 192.0.2.1 as permitted sender
@@ -949,6 +990,8 @@ smtp-comment    /.*/ explanation
 header-comment  /.*/ spfquery: domain of 101.spf1-test.mailzone.com does not designate 192.0.2.98 as permitted sender
 received-spf    /.*/ Received-SPF: fail (spfquery: domain of 101.spf1-test.mailzone.com does not designate 192.0.2.98 as permitted sender) client-ip=192.0.2.98; envelope-from=postmaster@101.spf1-test.mailzone.com; helo=101.spf1-test.mailzone.com; problem=Mechanisms found after the "all:" mechanism will be ignored;
 
+# the redirect return this rule "v=spf1 a/26 mx/26 -all"
+# and the rule return +, so it should pass. TODO check this better
 spfquery -ip=192.0.2.98 -sender=102.spf1-test.mailzone.com -helo=102.spf1-test.mailzone.com
 result          /.*/ neutral
 smtp-comment    /^(perl|libspf)$/ explanation

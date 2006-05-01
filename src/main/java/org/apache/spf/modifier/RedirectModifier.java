@@ -18,9 +18,12 @@
 package org.apache.spf.modifier;
 
 import org.apache.spf.MacroExpand;
+import org.apache.spf.NoneException;
 import org.apache.spf.PermErrorException;
+import org.apache.spf.SPF;
 import org.apache.spf.SPF1Data;
 import org.apache.spf.SPF1Parser;
+import org.apache.spf.TempErrorException;
 
 /**
  * This class represent the redirect modifier
@@ -44,18 +47,36 @@ public class RedirectModifier extends GenericModifier {
      * @return host The host to which we shuld redirect
      * @throws PermErrorException
      *             if an error is in the redirect modifier
+     * @throws TempErrorException 
      */
-    public String run(SPF1Data spfData) throws PermErrorException {
-        String host = this.host;
-        
-        // update currentDepth
-        spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);
-
-        try {
-            host = new MacroExpand(spfData).expandDomain(host);
-            return host;
-        } catch (Exception e) {
-            throw new PermErrorException("Error in redirect modifier: " + host);
+    public String run(SPF1Data spfData) throws PermErrorException, TempErrorException {
+        // the redirect modifier is used only when we had no previous matches
+        if (!spfData.isMatch()) {
+            
+            String host = this.host;
+            
+            // update currentDepth
+            spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);
+    
+            try {
+                host = new MacroExpand(spfData).expandDomain(host);
+            } catch (Exception e) {
+                throw new PermErrorException("Error in redirect modifier: " + host);
+            }
+            
+            spfData.setCurrentDomain(host);
+            
+            String res = null;
+            try {
+                res = new SPF(spfData.getDnsProbe()).checkSPF(spfData);
+            } catch (NoneException e) {
+                throw new PermErrorException("included checkSPF returned NoneException");
+            }
+            
+            return res;
+            
+        } else {
+            return null;
         }
     }
 
