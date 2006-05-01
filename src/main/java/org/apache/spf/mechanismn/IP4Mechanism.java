@@ -49,7 +49,7 @@ public class IP4Mechanism extends GenericMechanism {
     public boolean run(SPF1Data spfData) throws PermErrorException {
         IPAddr originalIP;
 
-        originalIP = IPAddr.getAddress(spfData.getIpAddress(), 32);
+        originalIP = IPAddr.getAddress(spfData.getIpAddress(), ip.getMaskLength());
 
         if (ip.getMaskedIPAddress().equals(originalIP.getMaskedIPAddress())) {
             return true;
