@@ -20,6 +20,4 @@ We don't have a JIRA instance for jspf so here is a list of issues
 - add SPFHeaders for all results
   [assigned to Norman Maurer]
   
-- add an ant script or other build mechanism: maven2 is an option
-
 - make a list of code we inherited from spfjava
