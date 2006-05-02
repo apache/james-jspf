@@ -1,9 +1,11 @@
-﻿<?xml version="1.0" encoding="UTF-8"?><project>
+<?xml version="1.0" encoding="UTF-8"?><project>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.james.jspf</groupId>
-  <artifactId>main</artifactId>
-  <version>0.3.2</version>
+  <artifactId>jspf</artifactId>
+  <name>jspf SPF Java Library</name>
+  <version>0.8</version>
   <description></description>
+  <url>http://james.apache.org/jspf</url>
   <dependencies>
     <dependency>
       <groupId>dnsjava</groupId>
@@ -14,28 +16,12 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.13</version>
     </dependency>
   </dependencies>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <configuration>
-          <archive>
-            <manifestFile>src/main/manifest/MANIFEST.MF</manifestFile>
-            <manifest>
-              <mainClass>org.apache.james.jspf.SPF</mainClass>
-            </manifest>
-          </archive>
-        </configuration>
-      </plugin>
-    </plugins>
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-        <filtering>true</filtering>
-      </resource>
-    </resources>
-  </build> 
 </project>
