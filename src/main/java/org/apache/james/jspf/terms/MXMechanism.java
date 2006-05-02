@@ -17,11 +17,11 @@
 
 package org.apache.james.jspf.terms;
 
+import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.parser.SPF1Parser;
-import org.apache.james.jspf.util.IPAddr;
 
 import java.util.ArrayList;
 

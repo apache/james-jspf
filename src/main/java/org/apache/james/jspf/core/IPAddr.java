@@ -15,11 +15,12 @@
  * permissions and limitations under the License.                      *
  ***********************************************************************/
 
-package org.apache.james.jspf.util;
+package org.apache.james.jspf.core;
 
 import java.util.ArrayList;
 
 import org.apache.james.jspf.exceptions.PermErrorException;
+import org.apache.james.jspf.util.Inet6Util;
 
 /**
  * @author MimeCast

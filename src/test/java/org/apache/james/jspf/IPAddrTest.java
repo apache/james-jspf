@@ -16,8 +16,8 @@
  ***********************************************************************/
 package org.apache.james.jspf;
 
+import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.exceptions.PermErrorException;
-import org.apache.james.jspf.util.IPAddr;
 
 import junit.framework.TestCase;
 

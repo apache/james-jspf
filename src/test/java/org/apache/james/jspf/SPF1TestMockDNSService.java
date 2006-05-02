@@ -19,10 +19,10 @@ package org.apache.james.jspf;
 
 import org.apache.james.jspf.DNSServiceXBillImpl;
 import org.apache.james.jspf.core.DNSService;
+import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
-import org.apache.james.jspf.util.IPAddr;
 
 import java.util.ArrayList;
 import java.util.Arrays;

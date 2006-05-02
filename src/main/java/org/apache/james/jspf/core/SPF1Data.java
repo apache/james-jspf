@@ -20,7 +20,6 @@ package org.apache.james.jspf.core;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.macro.MacroData;
-import org.apache.james.jspf.util.IPAddr;
 
 import java.util.List;
 
