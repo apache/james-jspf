@@ -95,7 +95,7 @@ public class SPF1ParserTest extends TestCase {
         List tests = new ArrayList();
 
         BufferedReader br = new BufferedReader(new InputStreamReader(
-                SPF1ParserTest.class.getResourceAsStream("test_parser.txt")));
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("org/apache/james/jspf/test_parser.txt")));
 
         String line;
 
@@ -117,7 +117,7 @@ public class SPF1ParserTest extends TestCase {
                         def = new SPF1RecordTestDef();
                         def.name = tokens[2];
                     } else if ("/.*/".equals(tokens[1])
-                            || "spfjava".equals(tokens[1])) {
+                            || "jspf".equals(tokens[1])) {
 
                         if ("rec-in".equals(tokens[0])) {
                             if (def.recIn == null)

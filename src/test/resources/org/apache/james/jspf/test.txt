@@ -659,7 +659,7 @@ received-spf    /.*/ Received-SPF: pass (spfquery: domain of 52.spf1-test.mailzo
 # so error seems to me a better result than unknown for this test.
 #
 spfquery -ip=192.0.2.200 -sender=55.spf1-test.mailzone.com -helo=55.spf1-test.mailzone.com
-result          spfjava error
+result          jspf error
 result          /.*/ unknown
 smtp-comment    /^(perl|libspf)$/ explanation
 smtp-comment    /.*/ 
@@ -672,7 +672,7 @@ received-spf    /.*/ Received-SPF: unknown (spfquery: error in processing during
 # so error seems to me a better result than unknown for this test.
 #
 spfquery -ip=192.0.2.130 -sender=55.spf1-test.mailzone.com -helo=55.spf1-test.mailzone.com
-result          spfjava error
+result          jspf error
 result          /.*/ unknown
 smtp-comment    /^(perl|libspf)$/ explanation
 smtp-comment    /.*/ 
@@ -691,7 +691,7 @@ received-spf    /.*/ Received-SPF: none (spfquery: 192.0.2.200 is neither permit
 # so error seems to me a better result than unknown for this test.
 #
 spfquery -ip=192.0.2.200 -sender=57.spf1-test.mailzone.com -helo=57.spf1-test.mailzone.com
-result          spfjava error
+result          jspf error
 result          /.*/ unknown
 smtp-comment    /^(perl|libspf)$/ explanation
 smtp-comment    /.*/ 
@@ -704,7 +704,7 @@ received-spf    /.*/ Received-SPF: unknown (spfquery: error in processing during
 # so error seems to me a better result than unknown for this test.
 #
 spfquery -ip=192.0.2.130 -sender=57.spf1-test.mailzone.com -helo=57.spf1-test.mailzone.com
-result          spfjava error
+result          jspf error
 result          /.*/ unknown
 smtp-comment    /^(perl|libspf)$/ explanation
 smtp-comment    /.*/ 
@@ -714,7 +714,7 @@ received-spf    /.*/ Received-SPF: unknown (spfquery: error in processing during
 # this create a loop between 58 and 59. So we throw a PermError as per RFC
 #
 spfquery -ip=192.0.2.200 -sender=58.spf1-test.mailzone.com -helo=58.spf1-test.mailzone.com
-result          spfjava error
+result          jspf error
 result          /.*/ unknown
 smtp-comment    /^(perl|libspf)$/ explanation
 smtp-comment    /.*/ 
@@ -724,7 +724,7 @@ received-spf    /.*/ Received-SPF: unknown (spfquery: error in processing during
 # this create a loop between 58 and 59. So we throw a PermError as per RFC
 #
 spfquery -ip=192.0.2.130 -sender=59.spf1-test.mailzone.com -helo=59.spf1-test.mailzone.com
-result          spfjava error
+result          jspf error
 result          /.*/ unknown
 smtp-comment    /^(perl|libspf)$/ explanation
 smtp-comment    /.*/ 
@@ -964,7 +964,7 @@ received-spf    /.*/ Received-SPF: fail (spfquery: domain of 09.spf1-test.mailzo
 # this return a "v=spf1 -all exp=99txt.spf1-test.mailzone.com moo" record.
 # moo is not allowed and the parsing fail, so we should return an error.
 spfquery -ip=192.0.2.1 -sender=99.spf1-test.mailzone.com -helo=99.spf1-test.mailzone.com
-result          spfjava error
+result          jspf error
 result          /.*/ fail
 smtp-comment    /.*/ explanation
 header-comment  /.*/ spfquery: domain of 99.spf1-test.mailzone.com does not designate 192.0.2.1 as permitted sender
@@ -1018,7 +1018,11 @@ received-spf    /.*/ Received-SPF: pass (spfquery: domain of 103.spf1-test.mailz
 #header-comment  /.*/ spfquery: error in processing during lookup of domain of 104.spf1-test.mailzone.com: Mechanisms used too many DNS lookups
 #received-spf    /.*/ Received-SPF: unknown (spfquery: error in processing during lookup of domain of 104.spf1-test.mailzone.com: Mechanisms used too many DNS lookups) client-ip=192.0.2.98; envelope-from=droid@104.spf1-test.mailzone.com; helo=104.spf1-test.mailzone.com;
 
+# THis is wrong.
+# the spf record is "v=spf1 some:unrecognized=mechanism some=unrecognized:modifier -all"
+# the RFC doesn't support unrecognized mechanisms.
 spfquery -ip=192.0.2.98 -sender=droid@110.spf1-test.mailzone.com -helo=110.spf1-test.mailzone.com
+result          jspf error
 result          /.*/ /^unknown/
 smtp-comment    /^(perl|libspf)$/ explanation
 smtp-comment    /.*/ 
@@ -1299,20 +1303,35 @@ smtp-comment    /.*/ explanation : Reason: local policy
 header-comment  /.*/ spfquery: transitioning local policy does not designate 192.0.2.200 as permitted sender
 received-spf    /.*/ Received-SPF: softfail (spfquery: transitioning local policy does not designate 192.0.2.200 as permitted sender) client-ip=192.0.2.200; envelope-from=postmaster@10.spf1-test.mailzone.com; helo=10.spf1-test.mailzone.com;
 
+# This is wrong
+# the record is "v=spf1 mx -a gpg ~all exp=111txt.spf1-test.mailzone.com"
+# but "gpg" is not a valid term.
+#
 spfquery -ip=192.0.2.10 -sender=111.spf1-test.mailzone.com -helo=111.spf1-test.mailzone.com
+result          jspf error
 result          /.*/ pass
 smtp-comment    perl explanation text: 111.spf1-test.mailzone.com MX mx01.spf1-test.mailzone.com A 192.0.2.10
 smtp-comment    /.*/ 
 header-comment  /.*/ spfquery: domain of 111.spf1-test.mailzone.com designates 192.0.2.10 as permitted sender
 received-spf    /.*/ Received-SPF: pass (spfquery: domain of 111.spf1-test.mailzone.com designates 192.0.2.10 as permitted sender) client-ip=192.0.2.10; envelope-from=postmaster@111.spf1-test.mailzone.com; helo=111.spf1-test.mailzone.com;
 
+# This is wrong
+# the record is "v=spf1 mx -a gpg ~all exp=111txt.spf1-test.mailzone.com"
+# but "gpg" is not a valid term.
+#
 spfquery -ip=192.0.2.200 -sender=111.spf1-test.mailzone.com -helo=111.spf1-test.mailzone.com
+result          jspf error
 result          /.*/ fail
 smtp-comment    /.*/ /^explanation text/
 header-comment  /.*/ spfquery: domain of 111.spf1-test.mailzone.com does not designate 192.0.2.200 as permitted sender
 received-spf    /.*/ Received-SPF: fail (spfquery: domain of 111.spf1-test.mailzone.com does not designate 192.0.2.200 as permitted sender) client-ip=192.0.2.200; envelope-from=postmaster@111.spf1-test.mailzone.com; helo=111.spf1-test.mailzone.com;
 
+# This is wrong
+# the record is "v=spf1 mx -a gpg ~all exp=111txt.spf1-test.mailzone.com"
+# but "gpg" is not a valid term.
+#
 spfquery -ip=1.2.3.4 -sender=111.spf1-test.mailzone.com -helo=111.spf1-test.mailzone.com
+result          jspf error
 result          /.*/ /^unknown/
 smtp-comment    perl explanation text: unrecognized mechanism gpg
 smtp-comment    /.*/ 
@@ -1327,7 +1346,12 @@ smtp-comment    /.*/
 header-comment  /.*/ spfquery: error in processing during lookup of domain of 112.spf1-test.mailzone.com: Invalid character found
 received-spf    /.*/ Received-SPF: unknown (spfquery: error in processing during lookup of domain of 112.spf1-test.mailzone.com: Invalid character found) client-ip=192.0.2.200; envelope-from=postmaster@112.spf1-test.mailzone.com; helo=112.spf1-test.mailzone.com; problem=Invalid character found near "mp" in "mp3";
 
+# This is wrong
+# the record is "v=spf1 a mp3 ~all"
+# but "gpg" is not a valid term.
+#
 spfquery -ip=1.2.3.4 -sender=112.spf1-test.mailzone.com -helo=112.spf1-test.mailzone.com
+result          jspf error
 result          /.*/ unknown
 smtp-comment    /^(perl|libspf)$/ explanation
 smtp-comment    /.*/ 
@@ -1341,7 +1365,12 @@ smtp-comment    /.*/
 header-comment  /.*/ spfquery: error in processing during lookup of domain of 113.spf1-test.mailzone.com: Invalid character found
 received-spf    /.*/ Received-SPF: unknown (spfquery: error in processing during lookup of domain of 113.spf1-test.mailzone.com: Invalid character found) client-ip=192.0.2.200; envelope-from=postmaster@113.spf1-test.mailzone.com; helo=113.spf1-test.mailzone.com; problem=Invalid character found near "mp" in "mp3:";
 
+# This is wrong
+# the record is "v=spf1 a mp3 ~all"
+# but "gpg" is not a valid term.
+#
 spfquery -ip=1.2.3.4 -sender=113.spf1-test.mailzone.com -helo=113.spf1-test.mailzone.com
+result          jspf error
 result          /.*/ unknown
 smtp-comment    /^(perl|libspf)$/ explanation
 smtp-comment    /.*/ 

@@ -176,7 +176,7 @@ public class SPFTest extends TestCase {
                             def.name = tokens[1] + " " + tokens[2];
                             def.command = tokens[1] + " " + tokens[2] + " "
                                     + defaultCommands;
-                        } else if ("/.*/".equals(tokens[1]) || "spfjava".equals(tokens[1])) {
+                        } else if ("/.*/".equals(tokens[1]) || "jspf".equals(tokens[1])) {
 
                             if ("result".equals(tokens[0])) {
                                 if (def.result == null)

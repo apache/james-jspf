@@ -1,4 +1,4 @@
-# CHANGES per RFC / spfjava:
+# CHANGES per RFC / jspf:
 # - mx= is not a valid mechanism, mx: is the right syntax
 # - redirect cannot be used with a prefixing qualifier: +redirect is
 #   invalid
@@ -175,42 +175,42 @@ rec-out         /.*/ Unknown
 
 spftest spf "v=spf1 a:/32//12"
 rec-in          /.*/ SPF record in:  v=spf1 a:/32//12
-err-msg         spfjava ERROR, Read RFC!
+err-msg         jspf ERROR, Read RFC!
 err-msg         /.*/ no errors
-rec-out         spfjava Unknown
+rec-out         jspf Unknown
 rec-out         /.*/ SPF record:  v=spf1 a//12
 
 spftest spf "v=spf1 a:/32//128"
 rec-in          /.*/ SPF record in:  v=spf1 a:/32//128
-err-msg         spfjava ERROR, Read RFC!
+err-msg         jspf ERROR, Read RFC!
 err-msg         /.*/ no errors
-rec-out         spfjava Unknown
+rec-out         jspf Unknown
 rec-out         /.*/ SPF record:  v=spf1 a
 
 spftest spf "v=spf1 a:/x32//12"
 rec-in          /.*/ SPF record in:  v=spf1 a:/x32//12
-err-msg         spfjava ERROR, Read RFC!
+err-msg         jspf ERROR, Read RFC!
 err-msg         /.*/ Warning: Hostname has a missing or invalid TLD
 rec-out         /.*/ SPF record:  v=spf1 a:/x32//12
 
 spftest spf "v=spf1 a:/x32.com//12 +redirect=asdf.net"
 rec-in          /.*/ SPF record in:  v=spf1 a:/x32.com//12 +redirect=asdf.net
-err-msg         spfjava ERROR, Read RFC! + modifiers must not have qualifiers
+err-msg         jspf ERROR, Read RFC! + modifiers must not have qualifiers
 err-msg         /.*/ no errors
-rec-out         spfjava Unknown
+rec-out         jspf Unknown
 rec-out         /.*/ SPF record:  v=spf1 a:/x32.com//12 redirect:asdf.net
 
 spftest spf "v=spf1 a:/x32.com//12 -redirect=asdf.net"
 rec-in          /.*/ SPF record in:  v=spf1 a:/x32.com//12 -redirect=asdf.net
-err-msg         spfjava ERROR, Read RFC! + modifiers must not have qualifiers
+err-msg         jspf ERROR, Read RFC! + modifiers must not have qualifiers
 err-msg         /.*/ no errors
-rec-out         spfjava Unknown
+rec-out         jspf Unknown
 rec-out         /.*/ SPF record:  v=spf1 a:/x32.com//12 -redirect:asdf.net
 
 spftest spf "v=spf1 a:/x32.com//12 redirect=asdf.net"
-rec-in          spfjava SPF record in:  v=spf1 a:/x32.com//12 redirect=asdf.net
-err-msg         spfjava no errors
-rec-out         spfjava SPF record:  v=spf1 a:/x32.com//12 redirect:asdf.net
+rec-in          jspf SPF record in:  v=spf1 a:/x32.com//12 redirect=asdf.net
+err-msg         jspf no errors
+rec-out         jspf SPF record:  v=spf1 a:/x32.com//12 redirect:asdf.net
 
 
 spftest spf "v=spf1 a:/x32.com//12 a"
@@ -220,9 +220,9 @@ rec-out-auto    /.*/
 
 spftest spf "v=spf1 a:/x32.com//12 default=den"
 rec-in          /.*/ SPF record in:  v=spf1 a:/x32.com//12 default=den
-err-msg         spfjava no errors
+err-msg         jspf no errors
 err-msg         /.*/ Invalid option found in "default=den"
-rec-out         spfjava SPF record:  v=spf1 a:/x32.com//12 default=den
+rec-out         jspf SPF record:  v=spf1 a:/x32.com//12 default=den
 rec-out         /.*/ Unknown
 
 spftest spf "v=spf1 a:/x32.com//12 default=deny"
@@ -232,16 +232,16 @@ rec-out         /.*/ SPF record:  v=spf1 a:/x32.com//12 -all
 
 spftest spf "v=spf1 a:/x32.com//12 default=denyy"
 rec-in          /.*/ SPF record in:  v=spf1 a:/x32.com//12 default=denyy
-err-msg         spfjava no errors
+err-msg         jspf no errors
 err-msg         /.*/ Invalid option found in "default=denyy"
-rec-out         spfjava SPF record:  v=spf1 a:/x32.com//12 defailt=denyy
+rec-out         jspf SPF record:  v=spf1 a:/x32.com//12 defailt=denyy
 rec-out         /.*/ Unknown
 
 spftest spf "v=spf1 a:/x32.com//12 default=fail"
 rec-in          /.*/ SPF record in:  v=spf1 a:/x32.com//12 default=fail
-err-msg         spfjava no errors
+err-msg         jspf no errors
 err-msg         /.*/ Invalid option found in "default=fail"
-rec-out         spfjava SPF record:  v=spf1 a:/x32.com//12 defailt=fail
+rec-out         jspf SPF record:  v=spf1 a:/x32.com//12 defailt=fail
 rec-out         /.*/ Unknown
 
 spftest spf "v=spf1 a:/x32.com//12 default=softfail"
@@ -261,7 +261,7 @@ rec-out         /.*/ SPF record:  v=spf1 a:/x32.com//12 redirect:asdf.net
 
 spftest spf "v=spf1 a:/x32.com//12 redirect=softfail"
 rec-in          /.*/ SPF record in:  v=spf1 a:/x32.com//12 redirect=softfail
-err-msg         spfjava no errors
+err-msg         jspf no errors
 err-msg         /.*/ Warning: Hostname has a missing or invalid TLD
 rec-out         /.*/ SPF record:  v=spf1 a:/x32.com//12 redirect:softfail
 
@@ -276,55 +276,55 @@ err-msg         /.*/ no errors
 rec-out         /.*/ SPF record:  v=spf1 a:/x32.com
 
 spftest spf "v=spf1 a:as%%20//24///4 mx:%{i3r}.spf.%{d}/24"
-rec-in          spfjava SPF record in:  v=spf1 a:as%%20/24//4 mx:%{i3r}.spf.%{d}/24
+rec-in          jspf SPF record in:  v=spf1 a:as%%20/24//4 mx:%{i3r}.spf.%{d}/24
 rec-in          /.*/ SPF record in:  v=spf1 a:as%%20//24///4 mx:%{i3r}.spf.%{d}/24
-err-msg         spfjava ERROR as%%20 is not a valid domain-spec
+err-msg         jspf ERROR as%%20 is not a valid domain-spec
 err-msg         /.*/ Warning: Hostname has a missing or invalid TLD
 rec-out         /.*/ SPF record:  v=spf1 a:as%-//24///4 mx=%{i3r}.spf.%{d}/24
 
 spftest spf "v=spf1 a:as%- mx:%{i3r}.spf.%{d}"
 rec-in          /.*/ SPF record in:  v=spf1 a:as%- mx:%{i3r}.spf.%{d}
-err-msg         spfjava no errors
+err-msg         jspf no errors
 err-msg         /.*/ Warning: Hostname has a missing or invalid TLD
 rec-out-auto    /.*/
 
 spftest spf "v=spf1 a:as%-//24///4 mx:%{i3r}.spf.%{d}"
-rec-in          spfjava SPF record in:  v=spf1 a:as%-/24//4 mx:%{i3r}.spf.%{d}
+rec-in          jspf SPF record in:  v=spf1 a:as%-/24//4 mx:%{i3r}.spf.%{d}
 rec-in          /.*/ SPF record in:  v=spf1 a:as%-//24///4 mx:%{i3r}.spf.%{d}
-err-msg         spfjava no errors
+err-msg         jspf no errors
 err-msg         /.*/ Warning: Hostname has a missing or invalid TLD
 rec-out-auto    /.*/
 
 spftest spf "v=spf1 a:as%-//24///4 mx:%{i3r}.spf.%{d}/"
-rec-in          spfjava SPF record in:  v=spf1 a:as%-/24//4 mx:%{i3r}.spf.%{d}/
+rec-in          jspf SPF record in:  v=spf1 a:as%-/24//4 mx:%{i3r}.spf.%{d}/
 rec-in          /.*/ SPF record in:  v=spf1 a:as%-//24///4 mx:%{i3r}.spf.%{d}/
-err-msg         spfjava ERROR - / with no CIDR
+err-msg         jspf ERROR - / with no CIDR
 err-msg         /.*/ Warning: Hostname has a missing or invalid TLD
 rec-out-auto    /.*/
 
 spftest spf "v=spf1 a:as%-//24///4 mx:%{i3r}.spf.%{d}/24"
-rec-in          spfjava SPF record in:  v=spf1 a:as%-/24//4 mx:%{i3r}.spf.%{d}/24
+rec-in          jspf SPF record in:  v=spf1 a:as%-/24//4 mx:%{i3r}.spf.%{d}/24
 rec-in          /.*/ SPF record in:  v=spf1 a:as%-//24///4 mx:%{i3r}.spf.%{d}/24
-err-msg         spfjava no errors
+err-msg         jspf no errors
 err-msg         /.*/ Warning: Hostname has a missing or invalid TLD
 rec-out-auto    /.*/
 
 spftest spf "v=spf1 a:as%-//24//4 mx:%{i3r}.spf.%{d}"
-rec-in          spfjava SPF record in:  v=spf1 a:as%-/24//4 mx:%{i3r}.spf.%{d}
+rec-in          jspf SPF record in:  v=spf1 a:as%-/24//4 mx:%{i3r}.spf.%{d}
 rec-in          /.*/ SPF record in:  v=spf1 a:as%-//24//4 mx:%{i3r}.spf.%{d}
-err-msg         spfjava no errors
+err-msg         jspf no errors
 err-msg         /.*/ Warning: Hostname has a missing or invalid TLD
 rec-out-auto    /.*/
 
 spftest spf "v=spf1 a:as%-/24 mx:%{i3r}.spf.%{d}"
 rec-in          /.*/ SPF record in:  v=spf1 a:as%-/24 mx:%{i3r}.spf.%{d}
-err-msg         spfjava no errors
+err-msg         jspf no errors
 err-msg         /.*/ Warning: Hostname has a missing or invalid TLD
 rec-out-auto    /.*/
 
 spftest spf "v=spf1 a:as%-/24//4 mx:%{i3r}.spf.%{d}"
 rec-in          /.*/ SPF record in:  v=spf1 a:as%-/24//4 mx:%{i3r}.spf.%{d}
-err-msg         spfjava no errors
+err-msg         jspf no errors
 err-msg         /.*/ Warning: Hostname has a missing or invalid TLD
 rec-out-auto    /.*/
 
@@ -335,7 +335,7 @@ rec-out         /.*/ Unknown
 
 spftest spf "v=spf1 a:b/234//2"
 rec-in          /.*/ SPF record in:  v=spf1 a:b/234//2
-err-msg         spfjava Invalid CIDR length near "/234" in "a:b/234//2"
+err-msg         jspf Invalid CIDR length near "/234" in "a:b/234//2"
 err-msg         /.*/ Invalid CIDR length near "/234//2" in "a:b/234//2"
 rec-out         /.*/ Unknown
 
@@ -366,7 +366,7 @@ rec-out         /.*/ Unknown
 
 spftest spf "v=spf1 a:b.c/33//129"
 rec-in          /.*/ SPF record in:  v=spf1 a:b.c/33//129
-err-msg         spfjava Invalid CIDR length near "/33" in "a:b.c/33//129"
+err-msg         jspf Invalid CIDR length near "/33" in "a:b.c/33//129"
 err-msg         /.*/ Invalid CIDR length near "/129" in "a:b.c/33//129"
 rec-out         /.*/ Unknown
 
@@ -402,7 +402,7 @@ rec-out-auto    /.*/
 
 spftest spf "v=spf1 ip4:111.222.133.144/22 ip4:1.2.3/4"
 rec-in          /.*/ SPF record in:  v=spf1 ip4:111.222.133.144/22 ip4:1.2.3/4
-err-msg         spfjava Not a valid IP address: 1.2.3
+err-msg         jspf Not a valid IP address: 1.2.3
 err-msg         /.*/ Invalid IPv4 address literal near ":1.2.3/4" in "ip4:1.2.3/4"
 rec-out         /.*/ Unknown
 
@@ -423,25 +423,25 @@ rec-out-auto    /.*/
 
 spftest spf "v=spf1 ip4:111.222.33.444"
 rec-in          /.*/ SPF record in:  v=spf1 ip4:111.222.33.444
-err-msg         spfjava Not a valid IP address: 111.222.33.444
+err-msg         jspf Not a valid IP address: 111.222.33.444
 err-msg         /.*/ Invalid IPv4 address literal near ":111.222.33.444" in "ip4:111.222.33.444"
 rec-out         /.*/ Unknown
 
 spftest spf "v=spf1 ip4:111.222.333.4"
 rec-in          /.*/ SPF record in:  v=spf1 ip4:111.222.333.4
-err-msg         spfjava Not a valid IP address: 111.222.333.4
+err-msg         jspf Not a valid IP address: 111.222.333.4
 err-msg         /.*/ Invalid IPv4 address literal near ":111.222.333.4" in "ip4:111.222.333.4"
 rec-out         /.*/ Unknown
 
 spftest spf "v=spf1 ip4:111.222.333.44"
 rec-in          /.*/ SPF record in:  v=spf1 ip4:111.222.333.44
-err-msg         spfjava Not a valid IP address: 111.222.333.44
+err-msg         jspf Not a valid IP address: 111.222.333.44
 err-msg         /.*/ Invalid IPv4 address literal near ":111.222.333.44" in "ip4:111.222.333.44"
 rec-out         /.*/ Unknown
 
 spftest spf "v=spf1 ip4:111.222.333.444"
 rec-in          /.*/ SPF record in:  v=spf1 ip4:111.222.333.444
-err-msg         spfjava Not a valid IP address: 111.222.333.444
+err-msg         jspf Not a valid IP address: 111.222.333.444
 err-msg         /.*/ Invalid IPv4 address literal near ":111.222.333.444" in "ip4:111.222.333.444"
 rec-out         /.*/ Unknown
 
@@ -472,7 +472,7 @@ rec-out         /.*/ Unknown
 
 spftest spf "v=spf1 ipa4:111.222.133.144"
 rec-in          /.*/ SPF record in:  v=spf1 ipa4:111.222.133.144
-err-msg         spfjava Unknown mechanism found near "ipa4" in "ipa4:111.222.133.144"
+err-msg         jspf Unknown mechanism found near "ipa4" in "ipa4:111.222.133.144"
 err-msg         /.*/ Invalid character found near "ipa" in "ipa4:111.222.133.144"
 rec-out         /.*/ Unknown
 

@@ -25,22 +25,14 @@ import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPF1Record;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
-import org.apache.james.jspf.terms.AMechanism;
-import org.apache.james.jspf.terms.AllMechanism;
-import org.apache.james.jspf.terms.ExistsMechanism;
-import org.apache.james.jspf.terms.ExpModifier;
-import org.apache.james.jspf.terms.IP4Mechanism;
-import org.apache.james.jspf.terms.IP6Mechanism;
-import org.apache.james.jspf.terms.IncludeMechanism;
-import org.apache.james.jspf.terms.MXMechanism;
-import org.apache.james.jspf.terms.PTRMechanism;
-import org.apache.james.jspf.terms.RedirectModifier;
-import org.apache.james.jspf.terms.UnknownModifier;
 import org.apache.james.jspf.util.MatchResultSubset;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Properties;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -58,31 +50,12 @@ import java.util.regex.Pattern;
  *   - Somewhere is defined as "." TLD [ "." ]
  *   - Otherwise defined as ( *alphanum ALPHA *alphanum ) / ( 1*alphanum "-" *( * alphanum / "-" ) alphanum )
  *
- * TODO we must return a result of "unknown" if an unregonized mechanism was found. See: http://www.openspf.org/mechanisms.html
- * 
  * @see org.apache.james.jspf.core.SPF1Record
  * 
  * @author Norman Maurer <nm@byteaction.de>
  * @author Stefano Bagnara <apache@bago.org>
  */
 public class SPF1Parser {
-
-    private static final Class[] knownMechanisms = new Class[] {
-            AllMechanism.class, 
-            AMechanism.class, 
-            ExistsMechanism.class,
-            IncludeMechanism.class, 
-            IP4Mechanism.class, 
-            IP6Mechanism.class,
-            MXMechanism.class, 
-            PTRMechanism.class 
-    };
-
-    private static final Class[] knownModifiers = new Class[] {
-            ExpModifier.class, 
-            RedirectModifier.class, 
-            UnknownModifier.class 
-    };
 
     /**
      * Regex based on http://ftp.rfc-editor.org/in-notes/authors/rfc4408.txt.
@@ -217,8 +190,33 @@ public class SPF1Parser {
      */
     public SPF1Parser() {
         
-        mechanismsCollection = createTermCollection(knownMechanisms);
-        modifiersCollection = createTermCollection(knownModifiers);
+        try {
+            InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("org/apache/james/jspf/parser/jspf.default.terms");
+            Properties p = new Properties();
+            p.load(is);
+            String mechs = p.getProperty("mechanisms");
+            String mods = p.getProperty("modifiers");
+            String[] classes;
+            classes = mechs.split(",");
+            Class[] knownMechanisms = new Class[classes.length];
+            for (int i = 0; i < classes.length; i++) {
+                knownMechanisms[i] = Thread.currentThread().getContextClassLoader().loadClass(classes[i]);
+            }
+            mechanismsCollection = createTermCollection(knownMechanisms);
+            classes = mods.split(",");
+            Class[] knownModifiers = new Class[classes.length];
+            for (int i = 0; i < classes.length; i++) {
+                knownModifiers[i] = Thread.currentThread().getContextClassLoader().loadClass(classes[i]);
+            }
+            modifiersCollection = createTermCollection(knownModifiers);
+            
+        } catch (IOException e) {
+            // TODO log
+        } catch (ClassNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
         /**
          * ABNF: mechanism = ( all / include / A / MX / PTR / IP4 / IP6 / exists )
          */
