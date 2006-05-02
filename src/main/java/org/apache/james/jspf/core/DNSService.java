@@ -110,4 +110,10 @@ public interface DNSService {
     public List getMXRecords(String domainName, int mask)
             throws PermErrorException, NoneException,TempErrorException;
 
+    /**
+     * Set the timeout for DNS-Requests
+     * 
+     * @param timeOut The timeout in seconds
+     */
+    public void setTimeOut(int timeOut);
 }

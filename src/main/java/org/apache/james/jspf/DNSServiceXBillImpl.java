@@ -46,6 +46,9 @@ import org.xbill.DNS.Type;
  */
 
 public class DNSServiceXBillImpl implements DNSService {
+ 
+    // Set seconds after which we return and TempError
+    private static int timeOut = 2;
     
     /**
      * @see org.apache.james.jspf.core.DNSService#getSpfRecord(java.lang.String,
@@ -103,6 +106,7 @@ public class DNSServiceXBillImpl implements DNSService {
         ArrayList txtR = new ArrayList();
         Record[] records;
         try {
+            Lookup.getDefaultResolver().setTimeout(timeOut);
             Lookup query = new Lookup(hostname, Type.TXT);
             records = query.run();
             int queryResult = query.getResult();
@@ -117,7 +121,7 @@ public class DNSServiceXBillImpl implements DNSService {
                     throw new NoneException("No TXTRecord found for: " + hostname);
                 }
             } else {
-                throw new TempErrorException("DNS Server returns RCODE: " + query);
+                throw new TempErrorException("DNS Server returns RCODE: " + queryResult);
             }
         } catch (TextParseException e) {
             // I think thats the best we could do
@@ -142,6 +146,7 @@ public class DNSServiceXBillImpl implements DNSService {
             
             Record[] records;
             try {
+                Lookup.getDefaultResolver().setTimeout(timeOut);
                 Lookup query = new Lookup(strServer, Type.A);
                 records = query.run();
                 int queryResult = query.getResult();
@@ -162,7 +167,7 @@ public class DNSServiceXBillImpl implements DNSService {
                         throw new NoneException("No A record found for: " + strServer);
                     }
                 } else {
-                    throw new TempErrorException("DNS Server returns RCODE: " + query);
+                    throw new TempErrorException("DNS Server returns RCODE: " + queryResult);
                 }   
             } catch (TextParseException e) {
                 // i think this is the best we could do
@@ -188,6 +193,7 @@ public class DNSServiceXBillImpl implements DNSService {
             
             Record[] records;
             try {
+                Lookup.getDefaultResolver().setTimeout(timeOut);
                 Lookup query = new Lookup(strServer, Type.AAAA);
                 records = query.run();
                 int queryResult = query.getResult();
@@ -208,7 +214,7 @@ public class DNSServiceXBillImpl implements DNSService {
                         throw new NoneException("No AAAA record found for: " + strServer);
                     }
                 } else {
-                    throw new TempErrorException("DNS Server returns RCODE: " + query);
+                    throw new TempErrorException("DNS Server returns RCODE: " + queryResult);
                 }   
             } catch (TextParseException e) {
                 // i think this is the best we could do
@@ -275,7 +281,7 @@ public class DNSServiceXBillImpl implements DNSService {
         ip = IPAddr.getAddress(ipAddress);
 
         try {
-            
+            Lookup.getDefaultResolver().setTimeout(timeOut);
             Lookup query = new Lookup(ip.getReverseIP() + ".in-addr.arpa", Type.PTR);
             records = query.run();
             int queryResult = query.getResult();
@@ -292,7 +298,7 @@ public class DNSServiceXBillImpl implements DNSService {
                     throw new NoneException("No PTRRecord found for: " + ipAddress);
                 }
             } else {
-                throw new TempErrorException("DNS Server returns RCODE: " + query);
+                throw new TempErrorException("DNS Server returns RCODE: " + queryResult);
             }                
         } catch (TextParseException e) {
             // i think this is the best we could do
@@ -349,7 +355,9 @@ public class DNSServiceXBillImpl implements DNSService {
         ArrayList mxR = new ArrayList();
         Record[] records;
         try {
+            Lookup.getDefaultResolver().setTimeout(timeOut);
             Lookup query = new Lookup(host, Type.MX);
+
             records = query.run();
             int queryResult = query.getResult();
             
@@ -364,7 +372,7 @@ public class DNSServiceXBillImpl implements DNSService {
                     throw new NoneException("No MX Record found for: " + host);
                 }
             } else {
-                throw new TempErrorException("DNS Server returns RCODE: " + query);
+                throw new TempErrorException("DNS Server returns RCODE: " + queryResult);
             }   
         } catch (TextParseException e) {
             // i think this is the best we could do
@@ -372,5 +380,11 @@ public class DNSServiceXBillImpl implements DNSService {
         }
         return mxR;
     }
-
+    
+    /**
+     * @see org.apache.james.jspf.core.DNSService#setTimeOut(int)
+     */
+    public void setTimeOut(int timeOut) {
+        DNSServiceXBillImpl.timeOut = timeOut;
+    }
 }

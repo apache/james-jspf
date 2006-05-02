@@ -53,6 +53,8 @@ public class SPF {
 
     private SPF1Parser parser;
 
+    private int timeOut = 20;
+
     /**
      * 
      */
@@ -131,6 +133,9 @@ public class SPF {
             return result;
         }
 
+        // Set the dns timeout
+        dnsProbe.setTimeOut(timeOut);
+        
         // Get the raw dns txt entry which contains a spf entry
         String spfDnsEntry = dnsProbe.getSpfRecord(spfData
                 .getCurrentDomain(), SPF1Constants.SPF_VERSION);
@@ -296,6 +301,18 @@ public class SPF {
             headerTextAsString = headerText.toString();
         }
         header = headerName + ": " + headerTextAsString;
+    }
+    
+    /**
+     * Set the amount of time (in seconds) before an TermError
+     * is returned when the dnsserver not answer. Default is 20 
+     * seconds. 
+     * 
+     * TempError should be returned
+     * @param timeOut The timout in seconds
+     */
+    public void setTimeOut(int timeOut) {
+        this.timeOut  = timeOut;
     }
 
     /**

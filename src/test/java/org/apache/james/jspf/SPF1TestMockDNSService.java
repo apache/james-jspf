@@ -29,6 +29,8 @@ import java.util.Arrays;
 import java.util.List;
 
 final class SPF1TestMockDNSService implements DNSService {
+    
+    private int timeOut =20;
 
     /**
      * @param suite
@@ -620,5 +622,10 @@ final class SPF1TestMockDNSService implements DNSService {
             throw e;
         }
 
+    }
+
+    public void setTimeOut(int timeOut) {
+        this.timeOut = timeOut;
+        
     }
 }
