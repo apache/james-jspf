@@ -1,8 +1,20 @@
 We don't have a JIRA instance for jspf so here is a list of issues
 
 - change the 1999-2006 copyright to 2006 copyright.
+
 - add more javadocs (my part is mostly undocumented)
+
 - correctly implement the explanation modifier and his behaviour for includes and redirects.
+
 - add tests for every MUST and MUST NOT being in the rfc.
-- remove system.outs/e.printstacktrace
-- change the name to jspf
+
+- remove system.outs/e.printstacktrace and add correct logging everywhere.
+  Should we use log4j, sl4j
+
+- change the name to jspf (poject name, package name).
+  not sure wether the package should be org.apache.jspf or org.apache.james.jspf.
+  the top level project is james and the "server" currently use the org.apache.james instead of
+  org.apache.james.server but all the james subprojects should use org.apache.james prefix.
+
+- move the mockdsnservice data to zone files, like we did in james-server 
+  [assigned to Stefano Bagnara]
