@@ -1007,12 +1007,16 @@ smtp-comment    /.*/
 header-comment  /.*/ spfquery: domain of 103.spf1-test.mailzone.com designates 192.0.2.98 as permitted sender
 received-spf    /.*/ Received-SPF: pass (spfquery: domain of 103.spf1-test.mailzone.com designates 192.0.2.98 as permitted sender) client-ip=192.0.2.98; envelope-from=postmaster@103.spf1-test.mailzone.com; helo=103.spf1-test.mailzone.com;
 
-spfquery -ip=192.0.2.98 -sender=droid@104.spf1-test.mailzone.com -helo=104.spf1-test.mailzone.com
-result          /.*/ unknown
-smtp-comment    /^(perl|libspf)$/ explanation
-smtp-comment    /.*/ 
-header-comment  /.*/ spfquery: error in processing during lookup of domain of 104.spf1-test.mailzone.com: Mechanisms used too many DNS lookups
-received-spf    /.*/ Received-SPF: unknown (spfquery: error in processing during lookup of domain of 104.spf1-test.mailzone.com: Mechanisms used too many DNS lookups) client-ip=192.0.2.98; envelope-from=droid@104.spf1-test.mailzone.com; helo=104.spf1-test.mailzone.com;
+# This is wrong.
+# The spf implemention should return an permerror if the maximum lookups are reached. 
+# See http://www.schlitt.net/spf/spf_classic/draft-schlitt-spf-classic-02.html#anchor31
+#
+#spfquery -ip=192.0.2.98 -sender=droid@104.spf1-test.mailzone.com -helo=104.spf1-test.mailzone.com
+#result          /.*/ unknown
+#smtp-comment    /^(perl|libspf)$/ explanation
+#smtp-comment    /.*/ 
+#header-comment  /.*/ spfquery: error in processing during lookup of domain of 104.spf1-test.mailzone.com: Mechanisms used too many DNS lookups
+#received-spf    /.*/ Received-SPF: unknown (spfquery: error in processing during lookup of domain of 104.spf1-test.mailzone.com: Mechanisms used too many DNS lookups) client-ip=192.0.2.98; envelope-from=droid@104.spf1-test.mailzone.com; helo=104.spf1-test.mailzone.com;
 
 spfquery -ip=192.0.2.98 -sender=droid@110.spf1-test.mailzone.com -helo=110.spf1-test.mailzone.com
 result          /.*/ /^unknown/

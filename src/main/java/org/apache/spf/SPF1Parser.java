@@ -52,6 +52,8 @@ import java.util.regex.Pattern;
  *   - http://data.iana.org/TLD/tlds-alpha-by-domain.txt (we should probably beeter use and alpha sequence being at least 2 chars
  *   - Somewhere is defined as "." TLD [ "." ]
  *   - Otherwise defined as ( *alphanum ALPHA *alphanum ) / ( 1*alphanum "-" *( * alphanum / "-" ) alphanum )
+ *
+ * TODO we must return a result of "unknown" if an unregonized mechanism was found. See: http://www.openspf.org/mechanisms.html
  * 
  * @see org.apache.spf.SPF1Record
  * 
@@ -82,8 +84,6 @@ public class SPF1Parser {
      * This will be the next official SPF-Spec
      */
 
-    // TODO: fix the Quantifier problem
-    // What is the "Quantifier problem"?
     public static final String ALPHA_DIGIT_PATTERN = "[a-zA-Z0-9]";
 
     public static final String ALPHA_PATTERN = "[a-zA-Z]";
