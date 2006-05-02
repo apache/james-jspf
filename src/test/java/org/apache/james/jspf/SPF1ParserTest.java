@@ -25,9 +25,9 @@ import java.util.List;
 import java.util.Iterator;
 import java.util.regex.Pattern;
 
-import org.apache.james.jspf.NoneException;
-import org.apache.james.jspf.PermErrorException;
-import org.apache.james.jspf.SPF1Parser;
+import org.apache.james.jspf.exceptions.NoneException;
+import org.apache.james.jspf.exceptions.PermErrorException;
+import org.apache.james.jspf.parser.SPF1Parser;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

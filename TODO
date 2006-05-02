@@ -1,7 +1,5 @@
 We don't have a JIRA instance for jspf so here is a list of issues
 
-- change the 1999-2006 copyright to 2006 copyright.
-
 - add more javadocs (my part is mostly undocumented)
 
 - correctly implement the explanation modifier and his behaviour for includes and redirects.
@@ -32,8 +30,3 @@ We don't have a JIRA instance for jspf so here is a list of issues
 - add an ant script or other build mechanism: maven2 is an option
 
 - make a list of code we inherited from spfjava
-
-- class packages reorganization to avoid bidirectional package dependencies:
-	interfaces in a core package
-	mechanism and modifiers in a terms package
-	exception in the exception package
