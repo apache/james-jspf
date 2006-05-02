@@ -1,0 +1,8 @@
+We don't have a JIRA instance for jspf so here is a list of issues
+
+- change the 1999-2006 copyright to 2006 copyright.
+- add more javadocs (my part is mostly undocumented)
+- correctly implement the explanation modifier and his behaviour for includes and redirects.
+- add tests for every MUST and MUST NOT being in the rfc.
+- remove system.outs/e.printstacktrace
+- change the name to jspf
