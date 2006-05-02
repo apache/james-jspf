@@ -65,9 +65,6 @@ public class SPF {
     public SPF() {       
         this(new DNSServiceXBillImpl());
         
-        //init logger
-        log = Logger.getLogger(this.getClass());
-        BasicConfigurator.configure();   
     }
 
     /**
@@ -78,7 +75,10 @@ public class SPF {
         super();      
         this.dnsProbe = dnsProbe;
         this.parser = new SPF1Parser();
-        
+
+        //init logger
+        log = Logger.getLogger(this.getClass());
+        BasicConfigurator.configure();   
     }
 
     /**
@@ -348,7 +348,7 @@ public class SPF {
         String host = "20.spf1-test.mailzone.com";
 
         // run test !
-        String result = spf.checkSPF(ipAddress, mailFrom, host);
+        spf.checkSPF(ipAddress, mailFrom, host);
 /*
         System.out.println("result:     " + result);
         System.out.println("header:     " + spf.getHeader());

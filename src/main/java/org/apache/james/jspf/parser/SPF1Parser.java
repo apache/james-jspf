@@ -92,8 +92,8 @@ public class SPF1Parser {
      * ABNF: qualifier = "+" / "-" / "?" / "~"
      */
     private static final String QUALIFIER_PATTERN = "["
-            + Pattern.quote(SPF1Constants.PASS + SPF1Constants.FAIL
-                    + SPF1Constants.NEUTRAL + SPF1Constants.SOFTFAIL) + "]";
+            + "\\"+SPF1Constants.PASS + "\\"+SPF1Constants.FAIL
+                    + "\\"+SPF1Constants.NEUTRAL + "\\"+SPF1Constants.SOFTFAIL + "]";
 
     /**
      * ABNF: toplabel = ( *alphanum ALPHA *alphanum ) / ( 1*alphanum "-" *(
