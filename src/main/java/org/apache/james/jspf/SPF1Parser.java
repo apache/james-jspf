@@ -15,23 +15,23 @@
  * permissions and limitations under the License.                      *
  ***********************************************************************/
 
-package org.apache.james.spf;
+package org.apache.james.jspf;
 
-import org.apache.james.spf.mechanismn.AMechanism;
-import org.apache.james.spf.mechanismn.AllMechanism;
-import org.apache.james.spf.mechanismn.Directive;
-import org.apache.james.spf.mechanismn.ExistsMechanism;
-import org.apache.james.spf.mechanismn.IP4Mechanism;
-import org.apache.james.spf.mechanismn.IP6Mechanism;
-import org.apache.james.spf.mechanismn.IncludeMechanism;
-import org.apache.james.spf.mechanismn.MXMechanism;
-import org.apache.james.spf.mechanismn.Mechanism;
-import org.apache.james.spf.mechanismn.PTRMechanism;
-import org.apache.james.spf.modifier.ExpModifier;
-import org.apache.james.spf.modifier.Modifier;
-import org.apache.james.spf.modifier.RedirectModifier;
-import org.apache.james.spf.modifier.UnknownModifier;
-import org.apache.james.spf.util.MatchResultSubset;
+import org.apache.james.jspf.mechanismn.AMechanism;
+import org.apache.james.jspf.mechanismn.AllMechanism;
+import org.apache.james.jspf.mechanismn.Directive;
+import org.apache.james.jspf.mechanismn.ExistsMechanism;
+import org.apache.james.jspf.mechanismn.IP4Mechanism;
+import org.apache.james.jspf.mechanismn.IP6Mechanism;
+import org.apache.james.jspf.mechanismn.IncludeMechanism;
+import org.apache.james.jspf.mechanismn.MXMechanism;
+import org.apache.james.jspf.mechanismn.Mechanism;
+import org.apache.james.jspf.mechanismn.PTRMechanism;
+import org.apache.james.jspf.modifier.ExpModifier;
+import org.apache.james.jspf.modifier.Modifier;
+import org.apache.james.jspf.modifier.RedirectModifier;
+import org.apache.james.jspf.modifier.UnknownModifier;
+import org.apache.james.jspf.util.MatchResultSubset;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -55,7 +55,7 @@ import java.util.regex.Pattern;
  *
  * TODO we must return a result of "unknown" if an unregonized mechanism was found. See: http://www.openspf.org/mechanisms.html
  * 
- * @see org.apache.james.spf.SPF1Record
+ * @see org.apache.james.jspf.SPF1Record
  * 
  * @author Norman Maurer <nm@byteaction.de>
  * @author Stefano Bagnara <apache@bago.org>

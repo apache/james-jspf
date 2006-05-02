@@ -15,7 +15,7 @@
  * permissions and limitations under the License.                      *
  ***********************************************************************/
 
-package org.apache.james.spf;
+package org.apache.james.jspf;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -25,9 +25,9 @@ import java.util.List;
 import java.util.Iterator;
 import java.util.regex.Pattern;
 
-import org.apache.james.spf.NoneException;
-import org.apache.james.spf.PermErrorException;
-import org.apache.james.spf.SPF1Parser;
+import org.apache.james.jspf.NoneException;
+import org.apache.james.jspf.PermErrorException;
+import org.apache.james.jspf.SPF1Parser;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

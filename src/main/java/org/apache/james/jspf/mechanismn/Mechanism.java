@@ -15,12 +15,12 @@
  * permissions and limitations under the License.                      *
  ***********************************************************************/
 
-package org.apache.james.spf.mechanismn;
+package org.apache.james.jspf.mechanismn;
 
-import org.apache.james.spf.NoneException;
-import org.apache.james.spf.PermErrorException;
-import org.apache.james.spf.SPF1Data;
-import org.apache.james.spf.TempErrorException;
+import org.apache.james.jspf.NoneException;
+import org.apache.james.jspf.PermErrorException;
+import org.apache.james.jspf.SPF1Data;
+import org.apache.james.jspf.TempErrorException;
 
 /**
  * This Interface represent a mechanismn

@@ -15,12 +15,12 @@
  * permissions and limitations under the License.                      *
  ***********************************************************************/
 
-package org.apache.james.spf.modifier;
+package org.apache.james.jspf.modifier;
 
-import org.apache.james.spf.Configurable;
-import org.apache.james.spf.PermErrorException;
-import org.apache.james.spf.SPF1Data;
-import org.apache.james.spf.SPF1Parser;
+import org.apache.james.jspf.Configurable;
+import org.apache.james.jspf.PermErrorException;
+import org.apache.james.jspf.SPF1Data;
+import org.apache.james.jspf.SPF1Parser;
 
 import java.util.regex.MatchResult;
 
@@ -35,14 +35,14 @@ public class UnknownModifier implements Modifier, Configurable {
 
 
     /**
-     * @see org.apache.james.spf.modifier.Modifier#run(org.apache.james.spf.SPF1Data)
+     * @see org.apache.james.jspf.modifier.Modifier#run(org.apache.james.jspf.SPF1Data)
      */
     public String run(SPF1Data spfData) throws PermErrorException {
         return null;
     }
 
     /**
-     * @see org.apache.james.spf.modifier.Modifier#enforceSingleInstance()
+     * @see org.apache.james.jspf.modifier.Modifier#enforceSingleInstance()
      */
     public boolean enforceSingleInstance() {
         return false;

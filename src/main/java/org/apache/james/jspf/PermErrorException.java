@@ -16,7 +16,7 @@
  ***********************************************************************/
 
 
-package org.apache.james.spf;
+package org.apache.james.jspf;
 
 /**
  * This exception get thrown if the result should be PermError

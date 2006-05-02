@@ -15,11 +15,11 @@
  * permissions and limitations under the License.                      *
  ***********************************************************************/
 
-package org.apache.james.spf;
+package org.apache.james.jspf;
 
 import java.util.List;
 
-import org.apache.james.spf.util.IPAddr;
+import org.apache.james.jspf.util.IPAddr;
 
 /**
  * 
@@ -126,42 +126,42 @@ public class SPF1Data implements MacroData {
     }
 
     /**
-     * @see org.apache.james.spf.MacroData#getCurrentSenderPart()
+     * @see org.apache.james.jspf.MacroData#getCurrentSenderPart()
      */
     public String getCurrentSenderPart() {
         return currentSenderPart;
     }
 
     /**
-     * @see org.apache.james.spf.MacroData#getMailFrom()
+     * @see org.apache.james.jspf.MacroData#getMailFrom()
      */
     public String getMailFrom() {
         return mailFrom;
     }
 
     /**
-     * @see org.apache.james.spf.MacroData#getHostName()
+     * @see org.apache.james.jspf.MacroData#getHostName()
      */
     public String getHostName() {
         return hostName;
     }
 
     /**
-     * @see org.apache.james.spf.MacroData#getCurrentDomain()
+     * @see org.apache.james.jspf.MacroData#getCurrentDomain()
      */
     public String getCurrentDomain() {
         return currentDomain;
     }
 
     /**
-     * @see org.apache.james.spf.MacroData#getInAddress()
+     * @see org.apache.james.jspf.MacroData#getInAddress()
      */
     public String getInAddress() {
         return inAddress;
     }
 
     /**
-     * @see org.apache.james.spf.MacroData#getClientDomain()
+     * @see org.apache.james.jspf.MacroData#getClientDomain()
      */
     public String getClientDomain() {
         List domains;
@@ -179,35 +179,35 @@ public class SPF1Data implements MacroData {
     }
 
     /**
-     * @see org.apache.james.spf.MacroData#getSenderDomain()
+     * @see org.apache.james.jspf.MacroData#getSenderDomain()
      */
     public String getSenderDomain() {
         return senderDomain;
     }
 
     /**
-     * @see org.apache.james.spf.MacroData#getIpAddress()
+     * @see org.apache.james.jspf.MacroData#getIpAddress()
      */
     public String getIpAddress() {
         return ipAddress;
     }
 
     /**
-     * @see org.apache.james.spf.MacroData#getTimeStamp()
+     * @see org.apache.james.jspf.MacroData#getTimeStamp()
      */
     public long getTimeStamp() {
         return timeStamp;
     }
 
     /**
-     * @see org.apache.james.spf.MacroData#getReadableIP()
+     * @see org.apache.james.jspf.MacroData#getReadableIP()
      */
     public String getReadableIP() {
         return readableIP;
     }
 
     /**
-     * @see org.apache.james.spf.MacroData#getReceivingDomain()
+     * @see org.apache.james.jspf.MacroData#getReceivingDomain()
      */
     public String getReceivingDomain() {
         return receivingDomain;

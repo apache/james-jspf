@@ -15,14 +15,14 @@
  * permissions and limitations under the License.                      *
  ***********************************************************************/
 
-package org.apache.james.spf;
+package org.apache.james.jspf;
 
-import org.apache.james.spf.DNSService;
-import org.apache.james.spf.DNSServiceXBillImpl;
-import org.apache.james.spf.NoneException;
-import org.apache.james.spf.PermErrorException;
-import org.apache.james.spf.TempErrorException;
-import org.apache.james.spf.util.IPAddr;
+import org.apache.james.jspf.DNSService;
+import org.apache.james.jspf.DNSServiceXBillImpl;
+import org.apache.james.jspf.NoneException;
+import org.apache.james.jspf.PermErrorException;
+import org.apache.james.jspf.TempErrorException;
+import org.apache.james.jspf.util.IPAddr;
 
 import java.util.ArrayList;
 import java.util.Arrays;

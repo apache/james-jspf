@@ -15,7 +15,7 @@
  * permissions and limitations under the License.                      *
  ***********************************************************************/
 
-package org.apache.james.spf.util;
+package org.apache.james.jspf.util;
 
 import java.util.regex.MatchResult;
 

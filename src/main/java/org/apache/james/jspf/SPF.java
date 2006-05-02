@@ -15,10 +15,10 @@
  * permissions and limitations under the License.                      *
  ***********************************************************************/
 
-package org.apache.james.spf;
+package org.apache.james.jspf;
 
-import org.apache.james.spf.mechanismn.Directive;
-import org.apache.james.spf.modifier.Modifier;
+import org.apache.james.jspf.mechanismn.Directive;
+import org.apache.james.jspf.modifier.Modifier;
 
 import java.util.Iterator;
 

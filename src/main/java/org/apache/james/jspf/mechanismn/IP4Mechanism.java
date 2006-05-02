@@ -15,12 +15,12 @@
  * permissions and limitations under the License.                      *
  ***********************************************************************/
 
-package org.apache.james.spf.mechanismn;
+package org.apache.james.jspf.mechanismn;
 
-import org.apache.james.spf.PermErrorException;
-import org.apache.james.spf.SPF1Data;
-import org.apache.james.spf.util.IPAddr;
-import org.apache.james.spf.util.Inet6Util;
+import org.apache.james.jspf.PermErrorException;
+import org.apache.james.jspf.SPF1Data;
+import org.apache.james.jspf.util.IPAddr;
+import org.apache.james.jspf.util.Inet6Util;
 
 import java.util.regex.MatchResult;
 
@@ -44,7 +44,7 @@ public class IP4Mechanism extends GenericMechanism {
 
     /**
      * 
-     * @see org.apache.james.spf.mechanismn.GenericMechanism#run(org.apache.james.spf.SPF1Data)
+     * @see org.apache.james.jspf.mechanismn.GenericMechanism#run(org.apache.james.jspf.SPF1Data)
      */
     public boolean run(SPF1Data spfData) throws PermErrorException {
         IPAddr originalIP;

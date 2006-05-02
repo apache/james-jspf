@@ -15,11 +15,11 @@
  * permissions and limitations under the License.                      *
  ***********************************************************************/
 
-package org.apache.james.spf.modifier;
+package org.apache.james.jspf.modifier;
 
-import org.apache.james.spf.PermErrorException;
-import org.apache.james.spf.SPF1Data;
-import org.apache.james.spf.TempErrorException;
+import org.apache.james.jspf.PermErrorException;
+import org.apache.james.jspf.SPF1Data;
+import org.apache.james.jspf.TempErrorException;
 
 /**
  * This Interface represent a modifier

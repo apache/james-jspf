@@ -15,15 +15,15 @@
  * permissions and limitations under the License.                      *
  ***********************************************************************/
 
-package org.apache.james.spf.modifier;
+package org.apache.james.jspf.modifier;
 
-import org.apache.james.spf.MacroExpand;
-import org.apache.james.spf.NoneException;
-import org.apache.james.spf.PermErrorException;
-import org.apache.james.spf.SPF;
-import org.apache.james.spf.SPF1Data;
-import org.apache.james.spf.SPF1Parser;
-import org.apache.james.spf.TempErrorException;
+import org.apache.james.jspf.MacroExpand;
+import org.apache.james.jspf.NoneException;
+import org.apache.james.jspf.PermErrorException;
+import org.apache.james.jspf.SPF;
+import org.apache.james.jspf.SPF1Data;
+import org.apache.james.jspf.SPF1Parser;
+import org.apache.james.jspf.TempErrorException;
 
 /**
  * This class represent the redirect modifier
@@ -81,7 +81,7 @@ public class RedirectModifier extends GenericModifier {
     }
 
     /**
-     * @see org.apache.james.spf.modifier.Modifier#enforceSingleInstance()
+     * @see org.apache.james.jspf.modifier.Modifier#enforceSingleInstance()
      */
     public boolean enforceSingleInstance() {
         return true;

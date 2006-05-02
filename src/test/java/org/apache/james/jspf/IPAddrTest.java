@@ -14,10 +14,10 @@
  * implied.  See the License for the specific language governing       *
  * permissions and limitations under the License.                      *
  ***********************************************************************/
-package org.apache.james.spf;
+package org.apache.james.jspf;
 
-import org.apache.james.spf.PermErrorException;
-import org.apache.james.spf.util.IPAddr;
+import org.apache.james.jspf.PermErrorException;
+import org.apache.james.jspf.util.IPAddr;
 
 import junit.framework.TestCase;
 
