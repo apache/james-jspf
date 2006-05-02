@@ -2,10 +2,12 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.james.jspf</groupId>
   <artifactId>jspf</artifactId>
-  <name>jspf SPF Java Library</name>
+  <name>Apache James jSPF</name>
   <version>0.8</version>
   <description>jspf is an Apache James subproject that implements the spf specification</description>
   <url>http://james.apache.org/jspf</url>
+  <inceptionYear>2003</inceptionYear> 
+  
   <dependencies>
     <dependency>
       <groupId>dnsjava</groupId>
@@ -24,6 +26,7 @@
       <version>1.2.13</version>
     </dependency>
   </dependencies>
+  
   <developers>
   	<developer>
   		<id>bago</id>
@@ -38,24 +41,45 @@
   		<timezone>2</timezone>
   	</developer>
   </developers>
+  
+  <ciManagement>
+    <notifiers>
+      <notifier>
+        <type>mail</type>
+        <address>apache@bago.org</address>
+      </notifier>
+      <notifier>
+        <type>mail</type>
+        <address>nm@byteaction.de</address>
+      </notifier>
+    </notifiers>
+  </ciManagement>
+  
   <contributors>
   	<contributor>
       <name>Roger Fullerton</name>
       <properties><description>Wrote spfjava, the first spf implementation in java</description></properties>
     </contributor>
   </contributors>
-	<licenses>
+
+	<organization>
+    <name>Apache Software Foundation</name>
+    <url>http://www.apache.org</url>
+  </organization>  
+  
+  <licenses>
     <license>
-      <name>ASL2</name>
-      <url/>
-      <distribution/>
-      <comments/>
+      <name>Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+      <distribution>repo</distribution> 
     </license>
   </licenses>
+  
 	<issueManagement>
 		<system>JIRA</system>
 		<url>http://issues.apache.org/jira/browse/JSPF</url>
-  </issueManagement>      
+  </issueManagement>
+  
   <scm>
     <connection>scm:svn:svn://debian-made.de/svn/SPFJava</connection>
     <developerConnection>scm:svn:svn://debian-made.de/svn/SPFJava</developerConnection>
@@ -64,17 +88,26 @@
     <url/>
      -->
   </scm>
+  
   <reporting>
     <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>changelog-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>surefire-report-maven-plugin</artifactId>
+      </plugin> 
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>jxr-maven-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
       </plugin>
       <plugin>
         <artifactId>maven-clover-plugin</artifactId>
@@ -95,10 +128,6 @@
 
             <minimumTokens>100</minimumTokens>
          </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>changelog-maven-plugin</artifactId>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
