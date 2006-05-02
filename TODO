@@ -21,3 +21,9 @@ We don't have a JIRA instance for jspf so here is a list of issues
   [assigned to Norman Maurer]
   
 - make a list of code we inherited from spfjava
+
+- add a few xdocs for the site generation
+
+- complete macroData implementation and add macro expansion tests.
+
+- add tests for the DNSService implementation (mocking the xbill Resolver)

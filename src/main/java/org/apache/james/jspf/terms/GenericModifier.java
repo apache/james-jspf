@@ -22,7 +22,6 @@ import org.apache.james.jspf.core.Modifier;
 import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
-import org.apache.james.jspf.macro.MacroExpand;
 
 import java.util.regex.MatchResult;
 
@@ -35,25 +34,6 @@ import java.util.regex.MatchResult;
 public abstract class GenericModifier implements Modifier, Configurable {
 
     protected String host;
-
-    /**
-     * @param spfData
-     * @throws PermErrorException
-     */
-    protected String expandHost(SPF1Data spfData) throws PermErrorException {
-        String host = this.host;
-        if (host == null) {
-            host = spfData.getCurrentDomain();
-        } else {
-            try {
-                host = new MacroExpand(spfData).expandDomain(host);
-
-            } catch (Exception e) {
-                throw new PermErrorException(e.getMessage());
-            }
-        }
-        return host;
-    }
 
     /**
      * Run the mechanismn with the give SPF1Data

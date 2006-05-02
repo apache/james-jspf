@@ -76,37 +76,6 @@ public class IPAddr {
     }
 
     /**
-     * Get ipAddress for the given byte array and netmask
-     * 
-     * @param netAddress
-     *            The ipAddress given as byte Array
-     * @param maskLength
-     *            The netmask
-     * @return IpAddress
-     * @throws PermErrorException
-     *             on error
-     */
-    public static IPAddr getAddress(byte[] netAddress, int maskLength)
-            throws PermErrorException {
-        IPAddr returnAddress = new IPAddr();
-        returnAddress.byteToInternal(netAddress);
-        returnAddress.setMask(maskLength);
-        return returnAddress;
-    }
-
-    /**
-     * 
-     * @see #getAddress(byte[], int)
-     */
-    public static IPAddr getAddress(byte[] netAddress)
-            throws PermErrorException {
-        IPAddr returnAddress = new IPAddr();
-        returnAddress.byteToInternal(netAddress);
-        returnAddress.setMask(returnAddress.maskLength);
-        return returnAddress;
-    }
-
-    /**
      * Get ipAddress for the given String and netmask
      * 
      * @param netAddress
@@ -144,17 +113,10 @@ public class IPAddr {
      *            The object to check
      * @return true or false
      */
-    public static boolean isIPAddr(Object data) {
+    public static boolean isIPAddr(String data) {
         if (data instanceof String) {
             try {
                 getAddress((String) data);
-                return true;
-            } catch (Exception e) {
-                return false;
-            }
-        } else if (data instanceof byte[]) {
-            try {
-                getAddress((byte[]) data);
                 return true;
             } catch (Exception e) {
                 return false;
@@ -218,35 +180,6 @@ public class IPAddr {
     }
 
     /**
-     * Convert ipAddress given as byte Array to ipAddress
-     * 
-     * @param netAddress
-     *            The ipAddress given as byte Array
-     * 
-     * @throws PermErrorException
-     *             on error
-     */
-    private void byteToInternal(byte[] netAddress) throws PermErrorException {
-        if (netAddress.length == 16) {
-            // IP6 defaults
-            setIP6Defaults();
-            // set internal address
-            for (int i = 0; i < ipRun; i++) {
-                // TODO Endianess????
-                address[i] = get16Bit(unsigned(netAddress[i * 2]),
-                        unsigned(netAddress[i + 1]));
-            }
-        } else if (netAddress.length == 4) {
-            // set internal address
-            for (int i = 0; i < ipRun; i++) {
-                address[i] = unsigned(netAddress[i]);
-            }
-        } else {
-            throw new PermErrorException("Not a valid IP byte address");
-        }
-    }
-
-    /**
      * Strip the last char of a string when it ends with a dot
      * 
      * @param data
@@ -285,15 +218,11 @@ public class IPAddr {
         } else if (bytes.length == 16){
             setIP6Defaults();
             for (int i = 0; i < bytes.length / 2; i++) {
-                address[i] = bytes[i*2]*256+bytes[i*2+1];
+                address[i] = unsigned(bytes[i*2])*256+unsigned(bytes[i*2+1]);
             }
         } else {
             throw new PermErrorException("Not a valid address: "+netAddress);
         }
-    }
-
-    private int get16Bit(int msb, int lsb) {
-        return (msb * 256) + lsb;
     }
 
     private String getHex(long data) {
