@@ -16,8 +16,6 @@ We don't have a JIRA instance for jspf so here is a list of issues
 
 - add a README
 
-- add option to set DNS timeout (possible in dnsjava ?)
-
 - add SPFHeaders for all results
   [assigned to Norman Maurer]
   
