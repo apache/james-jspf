@@ -27,6 +27,8 @@ import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.parser.SPF1Parser;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Logger;
 
 import java.util.Iterator;
 
@@ -54,22 +56,29 @@ public class SPF {
     private SPF1Parser parser;
 
     private int timeOut = 20;
+    
+    private Logger log;
 
     /**
      * 
      */
-    public SPF() {
+    public SPF() {       
         this(new DNSServiceXBillImpl());
+        
+        //init logger
+        log = Logger.getLogger(this.getClass());
+        BasicConfigurator.configure();   
     }
 
     /**
      * @param dnsProbe
      *            the dns provider
      */
-    public SPF(DNSService dnsProbe) {
-        super();
+    public SPF(DNSService dnsProbe) {       
+        super();      
         this.dnsProbe = dnsProbe;
         this.parser = new SPF1Parser();
+        
     }
 
     /**
@@ -89,23 +98,27 @@ public class SPF {
         String result = null;
 
         spfData = null;
+
         try {
             // Setup the data
             spfData = new SPF1Data(mailFrom, hostName, ipAddress, dnsProbe);
             result = checkSPF(spfData);
         } catch (PermErrorException e) {
-            e.printStackTrace();
+            log.warn(e.getMessage());
             result = SPF1Utils.PERM_ERROR;
         } catch (NoneException e) {
-            e.printStackTrace();
+            log.warn(e.getMessage());
             result = SPF1Utils.NONE;
         } catch (TempErrorException e) {
-            e.printStackTrace();
+            log.warn(e.getMessage());
             result = SPF1Utils.TEMP_ERROR;
         }
 
+
         // convert raw result to name
         String convertedResult = SPF1Utils.resultToName(result);
+        
+        log.info("[ipAddress=" + ipAddress + "] [mailFrom=" + mailFrom + "] [helo=" + hostName + "] => " + convertedResult) ;
 
         // generate the SPF-Result header
         generateHeader(convertedResult);
@@ -129,6 +142,9 @@ public class SPF {
          * PASS if its from localhost.
          */
         if (spfData.getIpAddress().trim().startsWith("127.")) {
+            //logging
+            log.info("Connection was made from localhost => skip checking");
+            
             result = SPF1Constants.PASS;
             return result;
         }
@@ -140,11 +156,12 @@ public class SPF {
         String spfDnsEntry = dnsProbe.getSpfRecord(spfData
                 .getCurrentDomain(), SPF1Constants.SPF_VERSION);
 
-        System.out.println(spfDnsEntry);
+        //logging
+        log.debug("Start parsing SPF-Record:" + spfDnsEntry);
 
         SPF1Record spfRecord = parser.parse(spfDnsEntry);
         
-        System.out.println(spfRecord);
+        //System.out.println(spfRecord);
 
         String qualifier = null;
         boolean hasCommand = false;
@@ -161,12 +178,14 @@ public class SPF {
             hasCommand = true;
             Directive d = (Directive) com.next();
             
-            System.out.println("Processing directive: "+d.getQualifier()+d.getMechanism().toString());
+            // logging
+            log.debug("Processing directive: "+d.getQualifier()+d.getMechanism().toString());
 
             qualifier = d.run(spfData);
             
-            System.out.println("Processed directive: "+d.getQualifier()+d.getMechanism().toString()+" returned "+qualifier);
- 
+            // logging
+            log.debug("Processed directive: "+d.getQualifier()+d.getMechanism().toString()+" returned "+qualifier); 
+            
             if (qualifier != null) {
                 if(qualifier.equals("")) {
                     result = SPF1Constants.PASS;
@@ -193,11 +212,11 @@ public class SPF {
             
             Modifier m = (Modifier) mod.next();
 
-            System.out.println("Processing modifier: "+m.toString());
+            log.debug("Processing modifier: "+m.toString());
 
             String q = m.run(spfData);
             
-            System.out.println("Processed modifier: "+m.toString()+" resulted in "+q);
+            log.debug("Processed modifier: "+m.toString()+" resulted in "+q);
 
             if (q != null) {
                 qualifier = q;
@@ -220,8 +239,8 @@ public class SPF {
         if (!spfData.isMatch() && (hasCommand == true)) {
             result = SPF1Constants.NEUTRAL;
         }
-        // Catch the exceptions and set the result
-        // TODO: remove printStackTrace() if all was checked and works!
+
+        
         return result;
     }
 
@@ -312,6 +331,9 @@ public class SPF {
      * @param timeOut The timout in seconds
      */
     public void setTimeOut(int timeOut) {
+        
+        log.debug("TimeOut was set to: " + timeOut);
+        
         this.timeOut  = timeOut;
     }
 
@@ -327,11 +349,11 @@ public class SPF {
 
         // run test !
         String result = spf.checkSPF(ipAddress, mailFrom, host);
-
+/*
         System.out.println("result:     " + result);
         System.out.println("header:     " + spf.getHeader());
         System.out.println("exp:        " + spf.getExplanation());
-
+*/
     }
 
 }
