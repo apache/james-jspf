@@ -9,16 +9,10 @@ We don't have a JIRA instance for jspf so here is a list of issues
 - remove system.outs/e.printstacktrace and add correct logging everywhere.
   Should we use log4j, slf4j (http://www.slf4j.org/).
 
-- change the name to jspf (poject name, package name). Package name should be 
-  org.apache.james.jspf
-  [assigned to Norman Maurer]
-  
 - move the mockdsnservice data to zone files, like we did in james-server 
   [assigned to Stefano Bagnara]
   
 - add author sections
-
-- add license
 
 - add a README
 
