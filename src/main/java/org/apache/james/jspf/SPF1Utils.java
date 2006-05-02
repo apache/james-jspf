@@ -1,5 +1,5 @@
 /***********************************************************************
- * Copyright (c) 1999-2006 The Apache Software Foundation.             *
+ * Copyright (c) 2006 The Apache Software Foundation.             *
  * All rights reserved.                                                *
  * ------------------------------------------------------------------- *
  * Licensed under the Apache License, Version 2.0 (the "License"); you *
@@ -17,6 +17,8 @@
 
 package org.apache.james.jspf;
 
+import org.apache.james.jspf.core.SPF1Constants;
+
 
 
 /**
@@ -29,18 +31,6 @@ package org.apache.james.jspf;
  */
 
 public class SPF1Utils {
-	public static final String PASS = "+";
-
-	public static final String ALLOW = "+";
-
-	public static final String NEUTRAL = "?";
-
-	public static final String FAIL = "-";
-
-	public static final String DENY = "-";
-
-	public static final String SOFTFAIL = "~";
-
 	public static final String PERM_ERROR = "error";
 
 	public static final String NONE = "none";
@@ -69,8 +59,6 @@ public class SPF1Utils {
     
     public static final String TEMP_ERROR_CONV = "temperror";
 
-    public static final String SPF_VERSION = "v=spf1";
-
 
 	
 
@@ -83,13 +71,13 @@ public class SPF1Utils {
 	 */
 	protected static String resultToName(String result) {
 
-		if (result.equals(PASS)) {
+		if (result.equals(SPF1Constants.PASS)) {
 			return PASS_CONV;
-		} else if (result.equals(FAIL)) {
+		} else if (result.equals(SPF1Constants.FAIL)) {
 			return FAIL_CONV;
-		} else if (result.equals(NEUTRAL)) {
+		} else if (result.equals(SPF1Constants.NEUTRAL)) {
 			return NEUTRAL_CONV;
-		} else if (result.equals(SOFTFAIL)) {
+		} else if (result.equals(SPF1Constants.SOFTFAIL)) {
 			return SOFTFAIL_CONV;
 		} else if (result.equals(PERM_ERROR)) {
 			return PERM_ERROR_CONV;
@@ -114,17 +102,17 @@ public class SPF1Utils {
 	protected static String nameToResult(String result) {
 
 		if (result.equals(PASS_CONV)) {
-			return PASS;
+			return SPF1Constants.PASS;
 		} else if (result.equals(ALLOW_CONV)) {
-			return ALLOW;
+			return SPF1Constants.ALLOW;
 		} else if (result.equals(FAIL_CONV)) {
-			return FAIL;
+			return SPF1Constants.FAIL;
 		} else if (result.equals(DENY_CONV)) {
-			return DENY;
+			return SPF1Constants.DENY;
 		} else if (result.equals(NEUTRAL_CONV)) {
-			return NEUTRAL;
+			return SPF1Constants.NEUTRAL;
 		} else if (result.equals(SOFTFAIL_CONV)) {
-			return SOFTFAIL;
+			return SPF1Constants.SOFTFAIL;
 		} else if (result.equals(PERM_ERROR_CONV)) {
 			return PERM_ERROR;
         } else if (result.equals(TEMP_ERROR_CONV)) {
@@ -134,7 +122,7 @@ public class SPF1Utils {
 		} else if (result.equals(UNKNOWN_CONV)) {
 			return UNKNOWN;
 		} else {
-			return NEUTRAL;
+			return SPF1Constants.NEUTRAL;
 		}
 
 	}

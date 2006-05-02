@@ -1,5 +1,5 @@
 /***********************************************************************
- * Copyright (c) 1999-2006 The Apache Software Foundation.             *
+ * Copyright (c) 2006 The Apache Software Foundation.             *
  * All rights reserved.                                                *
  * ------------------------------------------------------------------- *
  * Licensed under the Apache License, Version 2.0 (the "License"); you *
@@ -17,8 +17,16 @@
 
 package org.apache.james.jspf;
 
-import org.apache.james.jspf.mechanismn.Directive;
-import org.apache.james.jspf.modifier.Modifier;
+import org.apache.james.jspf.core.DNSService;
+import org.apache.james.jspf.core.Directive;
+import org.apache.james.jspf.core.Modifier;
+import org.apache.james.jspf.core.SPF1Constants;
+import org.apache.james.jspf.core.SPF1Data;
+import org.apache.james.jspf.core.SPF1Record;
+import org.apache.james.jspf.exceptions.NoneException;
+import org.apache.james.jspf.exceptions.PermErrorException;
+import org.apache.james.jspf.exceptions.TempErrorException;
+import org.apache.james.jspf.parser.SPF1Parser;
 
 import java.util.Iterator;
 
@@ -112,20 +120,20 @@ public class SPF {
      */
     public String checkSPF(SPF1Data spfData) throws PermErrorException, NoneException, TempErrorException {
         String result;
-        result = SPF1Utils.NEUTRAL;
+        result = SPF1Constants.NEUTRAL;
 
         /**
          * Check if the connection was made from localhost. Set the result to
          * PASS if its from localhost.
          */
         if (spfData.getIpAddress().trim().startsWith("127.")) {
-            result = SPF1Utils.PASS;
+            result = SPF1Constants.PASS;
             return result;
         }
 
         // Get the raw dns txt entry which contains a spf entry
         String spfDnsEntry = dnsProbe.getSpfRecord(spfData
-                .getCurrentDomain(), SPF1Utils.SPF_VERSION);
+                .getCurrentDomain(), SPF1Constants.SPF_VERSION);
 
         System.out.println(spfDnsEntry);
 
@@ -156,7 +164,7 @@ public class SPF {
  
             if (qualifier != null) {
                 if(qualifier.equals("")) {
-                    result = SPF1Utils.PASS;
+                    result = SPF1Constants.PASS;
                 } else {
                     result = qualifier;
                 }
@@ -197,7 +205,7 @@ public class SPF {
                 spfData.setMatch(true);
 
                 
-                if (qualifier.equals(SPF1Utils.FAIL)) {
+                if (qualifier.equals(SPF1Constants.FAIL)) {
                     explanation = spfData.getExplanation();
                 }
             }
@@ -205,7 +213,7 @@ public class SPF {
 
         // If no match was found set the result to neutral 
         if (!spfData.isMatch() && (hasCommand == true)) {
-            result = SPF1Utils.NEUTRAL;
+            result = SPF1Constants.NEUTRAL;
         }
         // Catch the exceptions and set the result
         // TODO: remove printStackTrace() if all was checked and works!

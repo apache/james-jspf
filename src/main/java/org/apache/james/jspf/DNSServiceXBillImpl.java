@@ -1,5 +1,5 @@
 /***********************************************************************
- * Copyright (c) 1999-2006 The Apache Software Foundation.             *
+ * Copyright (c) 2006 The Apache Software Foundation.             *
  * All rights reserved.                                                *
  * ------------------------------------------------------------------- *
  * Licensed under the Apache License, Version 2.0 (the "License"); you *
@@ -21,6 +21,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.james.jspf.core.DNSService;
+import org.apache.james.jspf.exceptions.NoneException;
+import org.apache.james.jspf.exceptions.PermErrorException;
+import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.util.IPAddr;
 import org.xbill.DNS.AAAARecord;
 import org.xbill.DNS.ARecord;
@@ -44,7 +48,7 @@ import org.xbill.DNS.Type;
 public class DNSServiceXBillImpl implements DNSService {
     
     /**
-     * @see org.apache.james.jspf.DNSService#getSpfRecord(java.lang.String,
+     * @see org.apache.james.jspf.core.DNSService#getSpfRecord(java.lang.String,
      *      java.lang.String)
      */
     public String getSpfRecord(String hostname, String spfVersion)
@@ -123,7 +127,7 @@ public class DNSServiceXBillImpl implements DNSService {
     }
 
     /**
-     * @see org.apache.james.jspf.DNSService#getARecords(java.lang.String, int)
+     * @see org.apache.james.jspf.core.DNSService#getARecords(java.lang.String, int)
      */
     public List getARecords(String strServer, int mask) throws NoneException,
             PermErrorException, TempErrorException {
@@ -169,7 +173,7 @@ public class DNSServiceXBillImpl implements DNSService {
     }
 
     /**
-     * @see org.apache.james.jspf.DNSService#getAAAARecords(java.lang.String, int)
+     * @see org.apache.james.jspf.core.DNSService#getAAAARecords(java.lang.String, int)
      */
     public List getAAAARecords(String strServer, int mask) throws NoneException,
             PermErrorException, TempErrorException {
@@ -244,7 +248,7 @@ public class DNSServiceXBillImpl implements DNSService {
     }
 
     /**
-     * @see org.apache.james.jspf.DNSService#getTxtCatType(java.lang.String)
+     * @see org.apache.james.jspf.core.DNSService#getTxtCatType(java.lang.String)
      */
     public String getTxtCatType(String strServer) throws NoneException, TempErrorException {
 
@@ -257,7 +261,7 @@ public class DNSServiceXBillImpl implements DNSService {
     }
 
     /**
-     * @see org.apache.james.jspf.DNSService#getPTRRecords(java.lang.String)
+     * @see org.apache.james.jspf.core.DNSService#getPTRRecords(java.lang.String)
      */
     public List getPTRRecords(String ipAddress) throws NoneException,
             PermErrorException, TempErrorException {
@@ -299,7 +303,7 @@ public class DNSServiceXBillImpl implements DNSService {
     }
 
     /**
-     * @see org.apache.james.jspf.DNSService#getMXRecords(java.lang.String, int)
+     * @see org.apache.james.jspf.core.DNSService#getMXRecords(java.lang.String, int)
      */
     public List getMXRecords(String domainName, int mask)
             throws PermErrorException, NoneException, TempErrorException {
