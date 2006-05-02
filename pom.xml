@@ -4,7 +4,7 @@
   <artifactId>jspf</artifactId>
   <name>jspf SPF Java Library</name>
   <version>0.8</version>
-  <description></description>
+  <description>jspf is an Apache James subproject that implements the spf specification</description>
   <url>http://james.apache.org/jspf</url>
   <dependencies>
     <dependency>
@@ -24,4 +24,86 @@
       <version>1.2.13</version>
     </dependency>
   </dependencies>
+  <developers>
+  	<developer>
+  		<id>bago</id>
+  		<name>Stefano Bagnara</name>
+  		<email>apache@bago.org</email>
+  		<timezone>2</timezone>
+  	</developer>
+  	<developer>
+  		<id>maurer</id>
+  		<name>Norman Maurer</name>
+  		<email>nm@byteaction.de</email>
+  		<timezone>2</timezone>
+  	</developer>
+  </developers>
+  <contributors>
+  	<contributor>
+      <name>Roger Fullerton</name>
+      <properties><description>Wrote spfjava, the first spf implementation in java</description></properties>
+    </contributor>
+  </contributors>
+	<licenses>
+    <license>
+      <name>ASL2</name>
+      <url/>
+      <distribution/>
+      <comments/>
+    </license>
+  </licenses>
+	<issueManagement>
+		<system>JIRA</system>
+		<url>http://issues.apache.org/jira/browse/JSPF</url>
+  </issueManagement>      
+  <scm>
+    <connection>scm:svn:svn://debian-made.de/svn/SPFJava</connection>
+    <developerConnection>scm:svn:svn://debian-made.de/svn/SPFJava</developerConnection>
+    <!-- 
+    <tag/>
+    <url/>
+     -->
+  </scm>
+  <reporting>
+    <plugins>
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>jxr-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <artifactId>maven-clover-plugin</artifactId>
+      </plugin>
+      <plugin>
+         <groupId>org.apache.maven.plugins</groupId>
+
+         <artifactId>maven-pmd-plugin</artifactId>
+         <configuration>
+            <targetjdk>1.4</targetjdk>
+            <rulesets>
+               <ruleset>/rulesets/basic.xml</ruleset>
+               <ruleset>/rulesets/controversial.xml</ruleset>
+            </rulesets>
+            <format>xml</format>
+            <linkXref>true</linkXref>
+            <sourceEncoding>utf-8</sourceEncoding>
+
+            <minimumTokens>100</minimumTokens>
+         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>changelog-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>taglist-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </reporting>
 </project>
