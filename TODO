@@ -6,10 +6,10 @@ We don't have a JIRA instance for jspf so here is a list of issues
 
 - correctly implement the explanation modifier and his behaviour for includes and redirects.
 
-- add tests for every MUST and MUST NOT being in the rfc.
+- add tests for every MUST and MUST NOT written in the rfc.
 
 - remove system.outs/e.printstacktrace and add correct logging everywhere.
-  Should we use log4j, sl4j
+  Should we use log4j, slf4j (http://www.slf4j.org/).
 
 - change the name to jspf (poject name, package name). Package name should be 
   org.apache.james.jspf
@@ -22,7 +22,18 @@ We don't have a JIRA instance for jspf so here is a list of issues
 
 - add license
 
+- add a README
+
 - add option to set DNS timeout (possible in dnsjava ?)
 
 - add SPFHeaders for all results
   [assigned to Norman Maurer]
+  
+- add an ant script or other build mechanism: maven2 is an option
+
+- make a list of code we inherited from spfjava
+
+- class packages reorganization to avoid bidirectional package dependencies:
+	interfaces in a core package
+	mechanism and modifiers in a terms package
+	exception in the exception package
