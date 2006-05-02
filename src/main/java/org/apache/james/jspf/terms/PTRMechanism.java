@@ -19,6 +19,7 @@ package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.SPF1Data;
+import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.parser.SPF1Parser;
@@ -41,10 +42,9 @@ public class PTRMechanism extends GenericMechanism {
             + SPF1Parser.DOMAIN_SPEC_REGEX + ")?";
 
     /**
-     * 
      * @see org.apache.james.jspf.core.GenericMechanism#run(org.apache.james.jspf.core.SPF1Data)
      */
-    public boolean run(SPF1Data spfData) throws PermErrorException,TempErrorException {
+    public boolean run(SPF1Data spfData) throws PermErrorException,TempErrorException, NoneException {
         String compareDomain;
         IPAddr compareIP;
         ArrayList validatedHosts = new ArrayList();
@@ -83,9 +83,6 @@ public class PTRMechanism extends GenericMechanism {
             }
         } catch (TempErrorException e) {
             throw new TempErrorException(e.getMessage());
-        } catch (Exception e) {
-            // TODO what exceptions do we want to catch with this?
-            return false;
         }
 
         return false;

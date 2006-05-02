@@ -54,8 +54,6 @@ public class SPF1Data implements MacroData {
 
     private String senderDomain = ""; // (o)
 
-    private long timeStamp = System.currentTimeMillis(); // (t)
-
     private String readableIP = ""; // (c)
 
     private String receivingDomain = "unknown"; // (r)
@@ -63,7 +61,7 @@ public class SPF1Data implements MacroData {
 
     private int currentDepth = 0;
     
-    private int maxDepth = 10;
+    private static final int MAX_DEPTH = 10;
 
     private String explanation = "";
 
@@ -73,7 +71,8 @@ public class SPF1Data implements MacroData {
 
     public SPF1Data(String mailFrom, String heloDomain, String clientIP,
             DNSService dnsProbe) throws PermErrorException, NoneException {
-
+        super();
+        
         this.mailFrom = mailFrom.trim();
         this.hostName = heloDomain.trim();
         this.ipAddress = clientIP.trim();
@@ -161,16 +160,18 @@ public class SPF1Data implements MacroData {
      * @see org.apache.james.jspf.macro.MacroData#getClientDomain()
      */
     public String getClientDomain() {
-        List domains;
-        try {
-            domains = dnsProbe.getPTRRecords(ipAddress);
-            if (domains.size() > 0) {
-                clientDomain = (String) domains.get(0);
-            } else {
+        if (clientDomain == null) {
+            List domains;
+            try {
+                domains = dnsProbe.getPTRRecords(ipAddress);
+                if (domains.size() > 0) {
+                    clientDomain = (String) domains.get(0);
+                } else {
+                    clientDomain = ipAddress;
+                }
+            } catch (Exception e) {
                 clientDomain = ipAddress;
             }
-        } catch (Exception e) {
-            clientDomain = ipAddress;
         }
         return clientDomain;
     }
@@ -193,13 +194,14 @@ public class SPF1Data implements MacroData {
      * @see org.apache.james.jspf.macro.MacroData#getTimeStamp()
      */
     public long getTimeStamp() {
-        return timeStamp;
+        return System.currentTimeMillis();
     }
 
     /**
      * @see org.apache.james.jspf.macro.MacroData#getReadableIP()
      */
     public String getReadableIP() {
+        // TODO readable IP is not implemented
         return readableIP;
     }
 
@@ -207,6 +209,7 @@ public class SPF1Data implements MacroData {
      * @see org.apache.james.jspf.macro.MacroData#getReceivingDomain()
      */
     public String getReceivingDomain() {
+        // TODO receivingDomain is not implemented
         return receivingDomain;
     }
 
@@ -234,7 +237,7 @@ public class SPF1Data implements MacroData {
      * @return maxDepth
      */
     public int getMaxDepth() {
-        return maxDepth;
+        return MAX_DEPTH;
     }
 
     /**

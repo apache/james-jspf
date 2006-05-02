@@ -29,6 +29,6 @@ public interface Configurable {
      * @param params
      * @throws PermErrorException
      */
-    public void config(MatchResult params) throws PermErrorException;
+    void config(MatchResult params) throws PermErrorException;
 
 }

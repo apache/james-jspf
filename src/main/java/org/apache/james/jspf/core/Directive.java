@@ -28,6 +28,7 @@ public class Directive {
     private Mechanism mechanism = null;
 
     public Directive(String qualifier, Mechanism mechanism) throws PermErrorException {
+        super();
         if (qualifier != null && qualifier.length() > 0) {
             this.qualifier = qualifier;
         }

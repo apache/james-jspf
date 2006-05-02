@@ -123,7 +123,6 @@ public class SPF1Parser {
 
     private Pattern termPattern = null;
 
-    // TODO: this should be automatically calculated
     private int TERM_STEP_REGEX_QUALIFIER_POS;
 
     private int TERM_STEP_REGEX_MECHANISM_POS;
@@ -158,22 +157,18 @@ public class SPF1Parser {
          * @param pString
          */
         private void calcGroups(String pString) {
-            if (pString == null || pString.length() == 0) {
-                matchSize = 0;
-            } else {
-                int i = 0;
-                int c = 0;
-                while (i < pString.length()) {
-                    int p1 = pString.indexOf("(", i);
-                    int p2 = pString.indexOf("(?:", i);
-                    if (p1 < 0)
-                        break;
-                    if (p1 != p2)
-                        c++;
-                    i = p1 + 1;
-                }
-                matchSize = c;
+            int i = 0;
+            int c = 0;
+            while (true) {
+                int p1 = pString.indexOf("(", i);
+                int p2 = pString.indexOf("(?:", i);
+                if (p1 < 0)
+                    break;
+                if (p1 != p2)
+                    c++;
+                i = p1 + 1;
             }
+            matchSize = c;
         }
 
         public Pattern getPattern() {
@@ -182,10 +177,6 @@ public class SPF1Parser {
 
         public Class getTermDef() {
             return termDef;
-        }
-
-        public int matchSize() {
-            return matchSize;
         }
 
         public int getMatchSize() {
@@ -225,8 +216,7 @@ public class SPF1Parser {
         } catch (IOException e) {
             // TODO log
         } catch (ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            // TODO log
         }
 
         /**
