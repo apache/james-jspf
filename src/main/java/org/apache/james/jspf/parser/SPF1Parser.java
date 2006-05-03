@@ -26,6 +26,7 @@ import org.apache.james.jspf.core.SPF1Record;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.util.MatchResultSubset;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -134,6 +135,10 @@ public class SPF1Parser {
     private Collection modifiersCollection;
 
     private ArrayList matchResultPositions;
+    
+    private static Logger log = Logger.getLogger(SPF1Parser.class);
+    
+    private String termFile = "org/apache/james/jspf/parser/jspf.default.terms";
 
     private class TermDef {
         private Pattern pattern;
@@ -191,8 +196,7 @@ public class SPF1Parser {
 
         try {
             InputStream is = Thread.currentThread().getContextClassLoader()
-                    .getResourceAsStream(
-                            "org/apache/james/jspf/parser/jspf.default.terms");
+                    .getResourceAsStream(termFile);
             Properties p = new Properties();
             p.load(is);
             String mechs = p.getProperty("mechanisms");
@@ -201,6 +205,7 @@ public class SPF1Parser {
             classes = mechs.split(",");
             Class[] knownMechanisms = new Class[classes.length];
             for (int i = 0; i < classes.length; i++) {
+                log.debug("Add following class as known mechanismn: " + classes[i]);
                 knownMechanisms[i] = Thread.currentThread()
                         .getContextClassLoader().loadClass(classes[i]);
             }
@@ -208,15 +213,16 @@ public class SPF1Parser {
             classes = mods.split(",");
             Class[] knownModifiers = new Class[classes.length];
             for (int i = 0; i < classes.length; i++) {
+                log.debug("Add following class as known modifier: " + classes[i]);
                 knownModifiers[i] = Thread.currentThread()
                         .getContextClassLoader().loadClass(classes[i]);
             }
             modifiersCollection = createTermCollection(knownModifiers);
 
         } catch (IOException e) {
-            // TODO log
+            log.error("Term file not found: " + e.getMessage() );
         } catch (ClassNotFoundException e) {
-            // TODO log
+            log.error("The configed class cannot be found: " + e.getMessage());
         }
 
         /**
@@ -359,6 +365,8 @@ public class SPF1Parser {
 
     public SPF1Record parse(String spfRecord) throws PermErrorException,
             NoneException {
+        
+        log.debug("Start parsing SPF-Record: " + spfRecord);
 
         SPF1Record result = new SPF1Record();
 
