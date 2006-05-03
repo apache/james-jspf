@@ -222,7 +222,7 @@ public class SPF1Parser {
         } catch (IOException e) {
             log.error("Term file not found: " + e.getMessage() );
         } catch (ClassNotFoundException e) {
-            log.error("The configed class cannot be found: " + e.getMessage());
+            log.error("The configured class cannot be found: " + e.getMessage());
         }
 
         /**
@@ -305,6 +305,7 @@ public class SPF1Parser {
             }
         }
 
+        //TODO : Do we need to log this anymore ? Or can it removed ?
         // System.out.println("MODIFIER POS: "+TERM_STEP_REGEX_MODIFIER_POS);
         // System.out.println("QUALIFIER POS: "+TERM_STEP_REGEX_QUALIFIER_POS);
         // System.out.println("MECHANICM POS: "+TERM_STEP_REGEX_MECHANISM_POS);
