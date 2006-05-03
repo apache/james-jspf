@@ -1,6 +1,6 @@
 We don't have a JIRA instance for jspf so here is a list of issues
 
-- add more javadocs (my part is mostly undocumented)
+- add more javadocs
 
 - correctly implement the explanation modifier and his behaviour for includes and redirects.
 
@@ -21,17 +21,12 @@ We don't have a JIRA instance for jspf so here is a list of issues
 
 - add a few xdocs for the site generation
 
-- complete macroData implementation and add macro expansion tests.
+- complete macroData implementation (ipv6).
 
 - add tests for the DNSService implementation (mocking the xbill Resolver)
 
-- make termfile location configurable ( Maybe building one config file for all ? log4j etc...)
-
-- add tests for MacroExpand
-  [assigned to Stefano Bagnara]
-  
 - use dnsjava commands instead of InetAddress.methods for localhost and reverse lookups.
   
 Change proposals
 
-
+- make termfile location configurable ( Maybe building one config file for all ? log4j etc...)

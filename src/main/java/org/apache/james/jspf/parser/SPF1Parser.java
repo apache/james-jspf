@@ -39,12 +39,28 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * This class can be used to parse SPF1-Records from their textual form to an
+ * This class is used to parse SPF1-Records from their textual form to an
  * SPF1Record object that is composed by 2 collections: directives and
  * modifiers.
  * 
- * TODO this is work in progress and to be documented. The matchResultPositions
- * field should be made simpler and easier to understand.
+ * The parsing is modular and get informations from Mechanism and Modifiers
+ * classes declared in the org/apache/james/jspf/parser/jspf.default.terms file.
+ * 
+ * Each term implementation provide its own REGEX in the REGEX static public
+ * field. This parser simply join all the regexp in a single "alternative"
+ * pattern and count the number of catch groups (brackets) assigned to each
+ * regex fragment.
+ * 
+ * SO it creates a big regex and an array where it store what term is associated
+ * to each catch group of the big regex.
+ * 
+ * If the regex matches the input vspf1 record then it start looking for the
+ * matched group (not null) and lookup the term that created that part of the
+ * regex.
+ * 
+ * With this informations it creates a new instance of the term and, if the term
+ * is Configurable it calls the config() method passing to it only the specific
+ * subset of the MatchResult (using the MatchResultSubset).
  * 
  * TODO doubts about the specification - redirect or exp with no domain-spec are
  * evaluated as an unknown-modifiers according to the current spec (it does not
@@ -92,9 +108,9 @@ public class SPF1Parser {
     /**
      * ABNF: qualifier = "+" / "-" / "?" / "~"
      */
-    private static final String QUALIFIER_PATTERN = "["
-            + "\\"+SPF1Constants.PASS + "\\"+SPF1Constants.FAIL
-                    + "\\"+SPF1Constants.NEUTRAL + "\\"+SPF1Constants.SOFTFAIL + "]";
+    private static final String QUALIFIER_PATTERN = "[" + "\\"
+            + SPF1Constants.PASS + "\\" + SPF1Constants.FAIL + "\\"
+            + SPF1Constants.NEUTRAL + "\\" + SPF1Constants.SOFTFAIL + "]";
 
     /**
      * ABNF: toplabel = ( *alphanum ALPHA *alphanum ) / ( 1*alphanum "-" *(
@@ -135,9 +151,9 @@ public class SPF1Parser {
     private Collection modifiersCollection;
 
     private ArrayList matchResultPositions;
-    
+
     private static Logger log = Logger.getLogger(SPF1Parser.class);
-    
+
     private String termFile = "org/apache/james/jspf/parser/jspf.default.terms";
 
     private class TermDef {
@@ -205,7 +221,8 @@ public class SPF1Parser {
             classes = mechs.split(",");
             Class[] knownMechanisms = new Class[classes.length];
             for (int i = 0; i < classes.length; i++) {
-                log.debug("Add following class as known mechanismn: " + classes[i]);
+                log.debug("Add following class as known mechanismn: "
+                        + classes[i]);
                 knownMechanisms[i] = Thread.currentThread()
                         .getContextClassLoader().loadClass(classes[i]);
             }
@@ -213,16 +230,19 @@ public class SPF1Parser {
             classes = mods.split(",");
             Class[] knownModifiers = new Class[classes.length];
             for (int i = 0; i < classes.length; i++) {
-                log.debug("Add following class as known modifier: " + classes[i]);
+                log.debug("Add following class as known modifier: "
+                        + classes[i]);
                 knownModifiers[i] = Thread.currentThread()
                         .getContextClassLoader().loadClass(classes[i]);
             }
             modifiersCollection = createTermCollection(knownModifiers);
 
         } catch (IOException e) {
-            throw new IllegalStateException("Term configuration cannot be found");
+            throw new IllegalStateException(
+                    "Term configuration cannot be found");
         } catch (ClassNotFoundException e) {
-            throw new IllegalStateException("One configured class cannot be found");
+            throw new IllegalStateException(
+                    "One configured class cannot be found");
         }
 
         /**
@@ -305,14 +325,20 @@ public class SPF1Parser {
             }
         }
 
-        //TODO : Do we need to log this anymore ? Or can it removed ?
-        // System.out.println("MODIFIER POS: "+TERM_STEP_REGEX_MODIFIER_POS);
-        // System.out.println("QUALIFIER POS: "+TERM_STEP_REGEX_QUALIFIER_POS);
-        // System.out.println("MECHANICM POS: "+TERM_STEP_REGEX_MECHANISM_POS);
-        // for (int k = 0; k < matchResultPositions.size(); k++) {
-        // System.out.println(k+") "+(matchResultPositions.get(k) != null ?
-        // ((TermDef) matchResultPositions.get(k)).getPattern() : null));
-        // }
+        if (log.isDebugEnabled()) {
+            log.debug("Parsing catch group positions: Modifiers["
+                    + TERM_STEP_REGEX_MODIFIER_POS + "] Qualifier["
+                    + TERM_STEP_REGEX_QUALIFIER_POS + " Mechanism["
+                    + TERM_STEP_REGEX_MECHANISM_POS + "]");
+            for (int k = 0; k < matchResultPositions.size(); k++) {
+                log
+                        .debug(k
+                                + ") "
+                                + (matchResultPositions.get(k) != null ? ((TermDef) matchResultPositions
+                                        .get(k)).getPattern()
+                                        : null));
+            }
+        }
     }
 
     /**
@@ -358,7 +384,8 @@ public class SPF1Parser {
             try {
                 l.add(new TermDef(mechClass));
             } catch (Exception e) {
-
+                log.debug("Unable to create the term collection",e);
+                throw new IllegalStateException("Unable to create the term collection",e);
             }
         }
         return l;
@@ -366,7 +393,7 @@ public class SPF1Parser {
 
     public SPF1Record parse(String spfRecord) throws PermErrorException,
             NoneException {
-        
+
         log.debug("Start parsing SPF-Record: " + spfRecord);
 
         SPF1Record result = new SPF1Record();
@@ -433,20 +460,15 @@ public class SPF1Parser {
     }
 
     /**
-     * @param mechName
-     * @param mechValue
-     * @param mech
-     * @param termDefs
+     * @param res the MatchResult
+     * @param start the position where the terms starts
      * @return
      * @throws PermErrorException
      */
     private Object lookupAndCreateTerm(MatchResult res, int start)
             throws PermErrorException {
         for (int k = start + 1; k < res.groupCount(); k++) {
-            // System.out.println(k+"] "+(matchResultPositions.get(k) != null ?
-            // ((TermDef) matchResultPositions.get(k)).getPattern().pattern()+"
-            // => "+res.group(k) : null));
-            if (res.group(k) != null) {
+            if (res.group(k) != null && k != TERM_STEP_REGEX_QUALIFIER_POS) {
                 TermDef c = (TermDef) matchResultPositions.get(k);
                 MatchResult subres = new MatchResultSubset(res, k, c
                         .getMatchSize());
@@ -462,10 +484,10 @@ public class SPF1Parser {
                     return term;
                 } catch (IllegalAccessException e) {
                     throw new IllegalStateException(
-                            "Unexpected error creating term: " + e.getMessage());
+                            "Unexpected error creating term: " + e.getMessage(),e);
                 } catch (InstantiationException e) {
                     throw new IllegalStateException(
-                            "Unexpected error creating term: " + e.getMessage());
+                            "Unexpected error creating term: " + e.getMessage(),e);
                 }
 
             }
