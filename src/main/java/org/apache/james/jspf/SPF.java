@@ -312,8 +312,14 @@ public class SPF {
             headerText.append(result + " (spfCheck: transitioning domain of "
                     + spfData.getCurrentDomain() + " does not designate "
                     + spfData.getIpAddress() + " as permitted sender) ");
+        } else if (result.equals(SPF1Utils.PERM_ERROR_CONV)) {
+            headerText.append(result + " (spfCheck: Error in processing SPF Record) ");
+        
+        } else if (result.equals(SPF1Utils.TEMP_ERROR_CONV)) {
+            headerText.append(result + " (spfCheck: Error in retrieving data from DNS) ");
+   
         }
-
+        
         if (headerText.length() > 0) {
             headerText.append("client-ip=" + spfData.getIpAddress()
                     + "; envelope-from=" + spfData.getMailFrom() + "; helo="
