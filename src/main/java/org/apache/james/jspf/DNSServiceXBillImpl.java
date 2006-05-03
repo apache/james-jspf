@@ -18,6 +18,7 @@
 package org.apache.james.jspf;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -436,14 +437,18 @@ public class DNSServiceXBillImpl implements DNSService {
         DNSServiceXBillImpl.timeOut = timeOut;
     }
     
+    
     public List getLocalDomainName() {
         List names = new ArrayList();
-        
         try {
-                                InetAddress.getLocalHost();
-          } catch( Exception e ) {}
-          
-          return names;
+            InetAddress ia[] = InetAddress.getAllByName(InetAddress.getLocalHost().getHostName());
+            
+            for(int i = 0 ; i < ia.length; i++ ) {
+                names.add(ia[i].getHostName());
+            }
+        } catch (UnknownHostException e) {
+        }
+        return names;
 
     }
 }
