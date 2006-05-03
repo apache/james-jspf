@@ -26,7 +26,6 @@ import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
-import org.apache.james.jspf.terms.AMechanism;
 import org.apache.log4j.Logger;
 import org.xbill.DNS.AAAARecord;
 import org.xbill.DNS.ARecord;
