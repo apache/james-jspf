@@ -50,7 +50,7 @@ public class SPF1Data implements MacroData {
 
     private String inAddress = "in-addr"; // (v)
 
-    private String clientDomain = ""; // (p)
+    private String clientDomain = null; // (p)
 
     private String senderDomain = ""; // (o)
 
