@@ -25,6 +25,7 @@ import org.apache.james.jspf.exceptions.TempErrorException;
  * This Interface represent a mechanismn
  * 
  * @author Norman Maurer <nm@byteaction.de>
+ * @author Stefano Bagnara <apache@bago.org>
  * 
  */
 public interface Mechanism {
@@ -32,12 +33,11 @@ public interface Mechanism {
     /**
      * Run the mechanismn with the give SPF1Data
      * 
-     * @param spfData
-     *            The SPF1Data
-     * @return result if it matches
-     * @throws PermErrorException
-     *             if somethink strange happen
-     * @throws NoneException 
+     * @param spfData The SPF1Data
+     * @return true if the mechanism match. Otherwise false
+     * @throws PermErrorException Get thrown if there are any errors in modifiers
+     * @throws TempErrorException Get thrown if DNS problems detected
+     * @throws NoneException  Get thrown if no valid records was found
      */
     public boolean run(SPF1Data spfData) throws PermErrorException,TempErrorException, NoneException;
 

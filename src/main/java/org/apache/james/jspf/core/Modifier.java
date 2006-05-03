@@ -24,6 +24,7 @@ import org.apache.james.jspf.exceptions.TempErrorException;
  * This Interface represent a modifier
  * 
  * @author Norman Maurer <nm@byteaction.de>
+ * @author Stefano Bagnara <apache@bago.org>
  * 
  */
 public interface Modifier {
@@ -31,12 +32,10 @@ public interface Modifier {
     /**
      * Run the mechanismn with the give SPF1Data
      * 
-     * @param spfData
-     *            The SPF1Data we should use
+     * @param spfData The SPF1Data we should use
      * @return host The host we should redirect / include
-     * @throws PermErrorException
-     *             if there are any syntax problems etc
-     * @throws TempErrorException 
+     * @throws PermErrorException Get thrown if there are any errors in modifiers
+     * @throws TempErrorException Get thrown if DNS problems detected
      */
     public String run(SPF1Data spfData) throws PermErrorException, TempErrorException;
 

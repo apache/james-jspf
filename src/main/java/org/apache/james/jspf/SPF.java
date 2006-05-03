@@ -86,7 +86,7 @@ public class SPF {
      * @param hostName
      *            The hostname which was provided as HELO/EHLO
      * @return result. Possible results are: pass, neutral, fail, deny,
-     *         softfail, error, none
+     *         softfail, error,temperror none
      */
     public String checkSPF(String ipAddress, String mailFrom, String hostName) {
 
@@ -127,10 +127,12 @@ public class SPF {
     }
 
     /**
-     * @param ipAddress
-     * @throws PermErrorException
-     * @throws NoneException
-     * @throws TempErrorException
+     * Run check for SPF with the given values.
+     * 
+     * @param spfData The SPF1Data which should be used to run the check
+     * @throws PermErrorException Get thrown if an error was detected 
+     * @throws NoneException Get thrown if no Record was found
+     * @throws TempErrorException Get thrown if a DNS problem was detected
      */
     public String checkSPF(SPF1Data spfData) throws PermErrorException, NoneException, TempErrorException {
         String result;
