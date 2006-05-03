@@ -27,7 +27,6 @@ import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.parser.SPF1Parser;
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
 import java.util.Iterator;
@@ -57,7 +56,7 @@ public class SPF {
 
     private int timeOut = 20;
     
-    private Logger log;
+    private static Logger log = Logger.getLogger(SPF.class);
 
     /**
      * 
@@ -75,10 +74,6 @@ public class SPF {
         super();      
         this.dnsProbe = dnsProbe;
         this.parser = new SPF1Parser();
-
-        //init logger
-        log = Logger.getLogger(this.getClass());
-        BasicConfigurator.configure();   
     }
 
     /**
