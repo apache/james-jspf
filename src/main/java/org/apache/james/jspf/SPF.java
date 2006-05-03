@@ -107,6 +107,10 @@ public class SPF {
         } catch (TempErrorException e) {
             log.warn(e.getMessage());
             result = SPF1Utils.TEMP_ERROR;
+        } catch (IllegalStateException e) {
+            // this should never happen at all. But anyway we will set the result to neutral. Safety first ..
+            log.error(e.getMessage());
+            result = SPF1Constants.NEUTRAL;
         }
 
 

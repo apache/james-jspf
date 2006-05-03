@@ -220,9 +220,9 @@ public class SPF1Parser {
             modifiersCollection = createTermCollection(knownModifiers);
 
         } catch (IOException e) {
-            log.error("Term file not found: " + e.getMessage() );
+            throw new IllegalStateException("Term configuration cannot be found");
         } catch (ClassNotFoundException e) {
-            log.error("The configured class cannot be found: " + e.getMessage());
+            throw new IllegalStateException("One configured class cannot be found");
         }
 
         /**
@@ -461,10 +461,10 @@ public class SPF1Parser {
                     }
                     return term;
                 } catch (IllegalAccessException e) {
-                    throw new PermErrorException(
+                    throw new IllegalStateException(
                             "Unexpected error creating term: " + e.getMessage());
                 } catch (InstantiationException e) {
-                    throw new PermErrorException(
+                    throw new IllegalStateException(
                             "Unexpected error creating term: " + e.getMessage());
                 }
 
