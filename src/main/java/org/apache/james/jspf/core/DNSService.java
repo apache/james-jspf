@@ -109,6 +109,13 @@ public interface DNSService {
      */
     public List getMXRecords(String domainName, int mask)
             throws PermErrorException, NoneException,TempErrorException;
+    
+    /** 
+     * Try to get all domain names for the running host 
+     * 
+     * @return names A List contains all domain names which could resolved
+     */
+    public List getLocalDomainNames();
 
     /**
      * Set the timeout for DNS-Requests

@@ -437,8 +437,10 @@ public class DNSServiceXBillImpl implements DNSService {
         DNSServiceXBillImpl.timeOut = timeOut;
     }
     
-    
-    public List getLocalDomainName() {
+    /**
+     * @see org.apache.james.jspf.core.DNSService#getLocalDomainNames();
+     */
+    public List getLocalDomainNames() {
         List names = new ArrayList();
         try {
             InetAddress ia[] = InetAddress.getAllByName(InetAddress.getLocalHost().getHostName());

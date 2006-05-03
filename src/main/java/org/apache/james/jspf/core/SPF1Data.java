@@ -210,7 +210,15 @@ public class SPF1Data implements MacroData {
      * @see org.apache.james.jspf.macro.MacroData#getReceivingDomain()
      */
     public String getReceivingDomain() {
-        // TODO receivingDomain is not implemented
+        
+        List dNames = dnsProbe.getLocalDomainNames();
+        
+        if(dNames.size() > 0) {
+            // Just use the fist hostname we found as receivingDomain
+            // TODO: Should we check for FQDN first =
+            receivingDomain = dNames.get(0).toString();
+         
+        }
         return receivingDomain;
     }
 

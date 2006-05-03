@@ -191,6 +191,25 @@ final class SPF1TestMockDNSService implements DNSService {
         }
     }
     
+    public List getLocalDomainNames(){
+        List res = dnsService.getLocalDomainNames();
+        System.out.print("getLocalDomainNames() = ");
+        if (res != null) {
+            for (int i = 0; i < res.size(); i++) {
+                System.out.print(res.get(i));
+                if (i == res.size() - 1) {
+                    System.out.println("");
+                } else {
+                    System.out.print(",");
+                }
+            }
+        } else {
+            System.out.println("getLocalDomainNames-ret: null");
+        }
+        return res;
+       
+    }
+    
     public List getAAAARecords(String strServer, int mask)
         throws NoneException, PermErrorException, TempErrorException {
         
