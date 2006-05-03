@@ -20,13 +20,12 @@ package org.apache.james.jspf.exceptions;
 /**
   * This exception get thrown if a none result should be used
   * 
- * @author Mimecast Contact : spf@mimecast.net
- * @author Norman Maurer <nm@byteaction.de> @since 0.3
- * 
- */
+  * @author Norman Maurer <nm@byteaction.de>
+  * @author Stefano Bagnara <apache@bago.org>
+  */
 public class NoneException extends Exception {
 
-
+    
 	private static final long serialVersionUID = 1L;
 
 	public NoneException() {

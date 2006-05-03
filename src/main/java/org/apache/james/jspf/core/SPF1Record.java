@@ -20,6 +20,13 @@ package org.apache.james.jspf.core;
 import java.util.ArrayList;
 import java.util.Collection;
 
+/**
+ *  The Class represent the SPF1 Record and provide methods to get all
+ *  directives and modifiers.
+ *  
+ * @author Norman Maurer <nm@byteaction.de>
+ * @author Stefano Bagnara <apache@bago.org>
+ */
 public class SPF1Record {
 
     private Collection directives = new ArrayList();

@@ -29,6 +29,7 @@ import java.util.List;
  * 
  * @author Mimecast Contact : spf@mimecast.net
  * @author Norman Maurer <nm@byteaction.de>
+ * @author Stefano Bagnara <apache@bago.org>
  */
 
 public class SPF1Data implements MacroData {

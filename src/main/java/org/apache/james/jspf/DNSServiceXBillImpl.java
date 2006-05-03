@@ -17,6 +17,7 @@
 
 package org.apache.james.jspf;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -49,7 +50,7 @@ import org.xbill.DNS.Type;
 public class DNSServiceXBillImpl implements DNSService {
  
     // Set seconds after which we return and TempError
-    private static int timeOut = 2;
+    private static int timeOut = 20;
     
     private static Logger log = Logger.getLogger(DNSServiceXBillImpl.class);
     
@@ -433,5 +434,16 @@ public class DNSServiceXBillImpl implements DNSService {
      */
     public void setTimeOut(int timeOut) {
         DNSServiceXBillImpl.timeOut = timeOut;
+    }
+    
+    public List getLocalDomainName() {
+        List names = new ArrayList();
+        
+        try {
+                                InetAddress.getLocalHost();
+          } catch( Exception e ) {}
+          
+          return names;
+
     }
 }
