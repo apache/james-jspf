@@ -26,6 +26,8 @@ import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
+import org.apache.james.jspf.terms.AMechanism;
+import org.apache.log4j.Logger;
 import org.xbill.DNS.AAAARecord;
 import org.xbill.DNS.ARecord;
 import org.xbill.DNS.Lookup;
@@ -49,6 +51,9 @@ public class DNSServiceXBillImpl implements DNSService {
  
     // Set seconds after which we return and TempError
     private static int timeOut = 2;
+    
+    private static Logger log = Logger.getLogger(DNSServiceXBillImpl.class);
+    
     
     /**
      * @see org.apache.james.jspf.core.DNSService#getSpfRecord(java.lang.String,
@@ -106,6 +111,9 @@ public class DNSServiceXBillImpl implements DNSService {
         ArrayList txtR = new ArrayList();
         Record[] records;
         try {
+            
+            log.debug("Start TXT-Record lookup for : " + hostname);
+            
             Lookup.getDefaultResolver().setTimeout(timeOut);
             Lookup query = new Lookup(hostname, Type.TXT);
             records = query.run();
@@ -113,8 +121,14 @@ public class DNSServiceXBillImpl implements DNSService {
             
             if ((queryResult == Lookup.SUCCESSFUL) || (queryResult == Lookup.HOST_NOT_FOUND) ) {
                 if (records != null) {
+                    
+                    log.debug("Found " + records.length + " TXT-Records");
+                    
                     for (int i = 0; i < records.length; i++) {
                         TXTRecord txt = (TXTRecord) records[i];
+                        
+                        log.debug("Add txt " + txt.rdataToString() + " to list" );
+                        
                         txtR.add(txt.rdataToString());
                     }
                 } else {
@@ -146,6 +160,9 @@ public class DNSServiceXBillImpl implements DNSService {
             
             Record[] records;
             try {
+                
+                log.debug("Start A-Record lookup for : " + strServer);
+                
                 Lookup.getDefaultResolver().setTimeout(timeOut);
                 Lookup query = new Lookup(strServer, Type.A);
                 records = query.run();
@@ -153,6 +170,9 @@ public class DNSServiceXBillImpl implements DNSService {
                 
                 if ((queryResult == Lookup.SUCCESSFUL) || (queryResult == Lookup.HOST_NOT_FOUND) ) { 
                     if (records != null) {
+                        
+                        log.debug("Found " + records.length + " A-Records");
+                        
                         for (int i = 0; i < records.length; i++) {
                             ARecord a = (ARecord) records[i];
                                 
@@ -160,7 +180,10 @@ public class DNSServiceXBillImpl implements DNSService {
                             Iterator ip = ipArray.iterator();
 
                             while (ip.hasNext()) {
-                                listTxtData.add(ip.next());
+                                Object ipA = ip.next();
+                                
+                                log.debug("Add ipAddress " + ipA + " to list" );
+                                listTxtData.add(ipA);
                             }
                         }
                     } else {
@@ -193,6 +216,9 @@ public class DNSServiceXBillImpl implements DNSService {
             
             Record[] records;
             try {
+                
+                log.debug("Start AAAA-Record lookup for : " + strServer);
+                
                 Lookup.getDefaultResolver().setTimeout(timeOut);
                 Lookup query = new Lookup(strServer, Type.AAAA);
                 records = query.run();
@@ -200,6 +226,9 @@ public class DNSServiceXBillImpl implements DNSService {
                 
                 if ((queryResult == Lookup.SUCCESSFUL) || (queryResult == Lookup.HOST_NOT_FOUND) ) { 
                     if (records != null) {
+                        
+                        log.debug("Found " + records.length + " AAAA-Records");
+                        
                         for (int i = 0; i < records.length; i++) {
                             AAAARecord a = (AAAARecord) records[i];
                                 
@@ -207,7 +236,10 @@ public class DNSServiceXBillImpl implements DNSService {
                             Iterator ip = ipArray.iterator();
 
                             while (ip.hasNext()) {
-                                listTxtData.add(ip.next());
+                                Object ipA = ip.next();
+                                
+                                log.debug("Add ipAddress " + ipA + " to list" );
+                                listTxtData.add(ipA);
                             }
                         }
                     } else {
@@ -260,6 +292,9 @@ public class DNSServiceXBillImpl implements DNSService {
 
         StringBuffer txtData = new StringBuffer();
         ArrayList records = getTXTRecords(strServer);
+        
+        log.debug("Convert " + records.size() + " TXT-Records to one String");
+        
         for (int i = 0; i < records.size(); i++) {
             txtData.append(records.get(i));
         }
@@ -281,6 +316,9 @@ public class DNSServiceXBillImpl implements DNSService {
         ip = IPAddr.getAddress(ipAddress);
 
         try {
+            
+            log.debug("Start PTR-Record lookup for : " + ipAddress);
+            
             Lookup.getDefaultResolver().setTimeout(timeOut);
             Lookup query = new Lookup(ip.getReverseIP() + ".in-addr.arpa", Type.PTR);
             records = query.run();
@@ -288,11 +326,13 @@ public class DNSServiceXBillImpl implements DNSService {
             
             if ((queryResult == Lookup.SUCCESSFUL) || (queryResult == Lookup.HOST_NOT_FOUND) ) {
                 if (records != null) {
+                    
+                    log.debug("Found " + records.length + " PTR-Records");
+                    
                     for (int i = 0; i < records.length; i++) {
                         PTRRecord ptr = (PTRRecord) records[i];
                         ptrR.add(IPAddr.stripDot(ptr.getTarget().toString()));
-                        System.out.println("IP = "
-                                + IPAddr.stripDot(ptr.getTarget().toString()));
+                        log.debug("Add ipAddress " + IPAddr.stripDot(ptr.getTarget().toString()) + " to list" );
                     }
                 } else {
                     throw new NoneException("No PTRRecord found for: " + ipAddress);
@@ -355,6 +395,9 @@ public class DNSServiceXBillImpl implements DNSService {
         ArrayList mxR = new ArrayList();
         Record[] records;
         try {
+            
+            log.debug("Start MX-Record lookup for : " + host);
+            
             Lookup.getDefaultResolver().setTimeout(timeOut);
             Lookup query = new Lookup(host, Type.MX);
 
@@ -363,8 +406,13 @@ public class DNSServiceXBillImpl implements DNSService {
             
             if ((queryResult == Lookup.SUCCESSFUL) || (queryResult == Lookup.HOST_NOT_FOUND) ) { 
                 if (records != null) {
+                    
+                    log.debug("Found " + records.length + " MX-Records");
+                    
                     for (int i = 0; i < records.length; i++) {
                         MXRecord mx = (MXRecord) records[i];
+                        log.debug("Add MX-Record " + mx.getTarget() + " to list" );
+                        
                         mxR.add(mx.getTarget());
 
                     }
