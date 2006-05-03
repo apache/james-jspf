@@ -27,3 +27,5 @@ We don't have a JIRA instance for jspf so here is a list of issues
 - complete macroData implementation and add macro expansion tests.
 
 - add tests for the DNSService implementation (mocking the xbill Resolver)
+
+- make termfile location configurable ( Maybe building one config file for all ? log4j etc...)
