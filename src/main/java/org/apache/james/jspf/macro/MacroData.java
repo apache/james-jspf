@@ -17,6 +17,11 @@
 
 package org.apache.james.jspf.macro;
 
+/**
+ * This interface represent all the macros which can be used in SPF-Records. Read more 
+ * here : http://www.rfc-editor.org/rfc/rfc4408.txt Section 8
+ *
+ */
 public interface MacroData {
 
     /**
