@@ -32,32 +32,22 @@ import org.apache.james.jspf.core.SPF1Constants;
 
 public class SPF1Utils {
 	public static final String PERM_ERROR = "error";
+    public static final String PERM_ERROR_CONV = "error";
 
 	public static final String NONE = "none";
-	
-	public static final String UNKNOWN = "unknown";
+    public static final String NONE_CONV = "none";
     
     public static final String TEMP_ERROR = "temperror";
-
+    public static final String TEMP_ERROR_CONV = "temperror";
+    
 	public static final String PASS_CONV = "pass";
-
-	public static final String ALLOW_CONV = "pass";
-
+    
 	public static final String NEUTRAL_CONV = "neutral";
-
+    
 	public static final String FAIL_CONV = "fail";
-
-	public static final String DENY_CONV = "deny";
 
 	public static final String SOFTFAIL_CONV = "softfail";
 
-	public static final String PERM_ERROR_CONV = "error";
-
-	public static final String NONE_CONV = "none";
-	
-	public static final String UNKNOWN_CONV = "unknown";
-    
-    public static final String TEMP_ERROR_CONV = "temperror";
 
 
 	
@@ -85,8 +75,6 @@ public class SPF1Utils {
             return TEMP_ERROR_CONV;
 		} else if (result.equals(NONE)) {
 			return NONE_CONV;
-		} else if (result.equals(UNKNOWN)) {
-			return UNKNOWN;
 		} else {
 			return NEUTRAL_CONV;
 		}
@@ -103,12 +91,8 @@ public class SPF1Utils {
 
 		if (result.equals(PASS_CONV)) {
 			return SPF1Constants.PASS;
-		} else if (result.equals(ALLOW_CONV)) {
-			return SPF1Constants.ALLOW;
 		} else if (result.equals(FAIL_CONV)) {
 			return SPF1Constants.FAIL;
-		} else if (result.equals(DENY_CONV)) {
-			return SPF1Constants.DENY;
 		} else if (result.equals(NEUTRAL_CONV)) {
 			return SPF1Constants.NEUTRAL;
 		} else if (result.equals(SOFTFAIL_CONV)) {
@@ -119,8 +103,6 @@ public class SPF1Utils {
             return TEMP_ERROR;
 		} else if (result.equals(NONE_CONV)) {
 			return NONE;
-		} else if (result.equals(UNKNOWN_CONV)) {
-			return UNKNOWN;
 		} else {
 			return SPF1Constants.NEUTRAL;
 		}

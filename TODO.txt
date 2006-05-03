@@ -34,4 +34,4 @@ We don't have a JIRA instance for jspf so here is a list of issues
   
 Change proposals
 
-- remove duplicate constants: FAIL and DENY are the same, let's keep only one (same for PASS, ALLOW).
+

@@ -292,13 +292,11 @@ public class SPF {
 
         StringBuffer headerText = new StringBuffer();
 
-        if (result.equals(SPF1Utils.PASS_CONV)
-                || result.equals(SPF1Utils.ALLOW_CONV)) {
+        if (result.equals(SPF1Utils.PASS_CONV)) {
             headerText.append(result + " (spfCheck: domain of "
                     + spfData.getCurrentDomain() + " designates "
                     + spfData.getIpAddress() + " as permitted sender) ");
-        } else if (result.equals(SPF1Utils.FAIL_CONV)
-                || result.equals(SPF1Utils.DENY_CONV)) {
+        } else if (result.equals(SPF1Utils.FAIL_CONV)) {
             headerText.append(result + " (spfCheck: domain of "
                     + spfData.getCurrentDomain() + " does not designate "
                     + spfData.getIpAddress() + " as permitted sender) ");

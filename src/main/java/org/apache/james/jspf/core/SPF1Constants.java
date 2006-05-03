@@ -21,13 +21,9 @@ public interface SPF1Constants {
 
     public static final String PASS = "+";
 
-    public static final String ALLOW = "+";
-
     public static final String NEUTRAL = "?";
 
     public static final String FAIL = "-";
-
-    public static final String DENY = "-";
 
     public static final String SOFTFAIL = "~";
 
