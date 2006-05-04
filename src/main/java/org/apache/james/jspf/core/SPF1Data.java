@@ -17,6 +17,7 @@
 
 package org.apache.james.jspf.core;
 
+import org.apache.james.jspf.SPF1Utils;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.macro.MacroData;
@@ -212,13 +213,18 @@ public class SPF1Data implements MacroData {
      * @see org.apache.james.jspf.macro.MacroData#getReceivingDomain()
      */
     public String getReceivingDomain() {
+        List dNames;
         
-        List dNames = dnsProbe.getLocalDomainNames();
+        if (receivingDomain.equals("unknown")) {
+            dNames = dnsProbe.getLocalDomainNames();
         
-        if(dNames.size() > 0) {
-            // Just use the fist hostname we found as receivingDomain
-            receivingDomain = dNames.get(0).toString();
-         
+            for(int i = 0; i < dNames.size(); i++) {
+                // check if the domainname is a FQDN
+                if (SPF1Utils.checkFQDN(dNames.get(i).toString())) {
+                    receivingDomain = dNames.get(i).toString();
+                    return receivingDomain;
+                }
+            }
         }
         return receivingDomain;
     }

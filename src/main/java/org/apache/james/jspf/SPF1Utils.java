@@ -114,7 +114,7 @@ public class SPF1Utils {
 	 * @param host The hostname to check
 	 * @return false or true
 	 */
-	protected static boolean checkFQDN(String host) {
+	public static boolean checkFQDN(String host) {
 		String regex = "(([a-zA-Z0-9\\-])+\\.)+([a-zA-Z]+)$";
 		if (host.matches(regex)) {
 			return true;

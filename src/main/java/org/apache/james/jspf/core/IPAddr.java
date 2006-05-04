@@ -27,7 +27,7 @@ import org.xbill.DNS.Address;
 /**
  * @author MimeCast
  * @author Norman Maurer <nm@byteaction.de>
- * 
+ * @author Stefano Bagnara <apache@bago.org>
  */
 public class IPAddr {
 
