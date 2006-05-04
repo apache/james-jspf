@@ -17,10 +17,12 @@
 
 package org.apache.james.jspf.core;
 
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.util.Inet6Util;
+import org.xbill.DNS.Address;
 
 /**
  * @author MimeCast
@@ -404,5 +406,26 @@ public class IPAddr {
         return ip != null
                 && (Inet6Util.isValidIPV4Address(ip) || Inet6Util
                         .isValidIP6Address(ip));
+    }
+    
+    /**
+     * This method try to covnert an ip address to an easy readable ip. See
+     * http://java.sun.com/j2se/1.4.2/docs/api/java/net/Inet6Address.html for 
+     * the format it returns. For ipv4 it make no convertion
+     * 
+     * @param ip The ip which should be tried to convert
+     * @return ip The converted ip
+     */
+    public static String getReadableIP(String ip) {
+        
+        // Convert the ip if its an ipv6 ip. For ipv4 no conversion is needed
+        if (Inet6Util.isValidIP6Address(ip)) {
+            try {
+                return Address.getByName(ip).getHostAddress();
+            } catch (UnknownHostException e) {
+                // ignore this 
+            }
+        }
+        return ip;
     }
 }

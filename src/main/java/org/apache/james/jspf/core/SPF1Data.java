@@ -55,7 +55,7 @@ public class SPF1Data implements MacroData {
 
     private String senderDomain = ""; // (o)
 
-    private String readableIP = ""; // (c)
+    private String readableIP = null; // (c)
 
     private String receivingDomain = "unknown"; // (r)
     
@@ -202,7 +202,9 @@ public class SPF1Data implements MacroData {
      * @see org.apache.james.jspf.macro.MacroData#getReadableIP()
      */
     public String getReadableIP() {
-        // TODO readable IP is not implemented
+        if (readableIP == null) {
+            readableIP = IPAddr.getReadableIP(getIpAddress());
+        }
         return readableIP;
     }
 
@@ -215,7 +217,6 @@ public class SPF1Data implements MacroData {
         
         if(dNames.size() > 0) {
             // Just use the fist hostname we found as receivingDomain
-            // TODO: Should we check for FQDN first =
             receivingDomain = dNames.get(0).toString();
          
         }

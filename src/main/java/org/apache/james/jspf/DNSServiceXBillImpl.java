@@ -442,13 +442,19 @@ public class DNSServiceXBillImpl implements DNSService {
      */
     public List getLocalDomainNames() {
         List names = new ArrayList();
+        
+        log.debug("Start Local ipaddress lookup");
         try {
             InetAddress ia[] = InetAddress.getAllByName(InetAddress.getLocalHost().getHostName());
             
             for(int i = 0 ; i < ia.length; i++ ) {
-                names.add(ia[i].getHostName());
+                String host = ia[i].getHostName();
+                names.add(host);
+                
+                log.debug("Add hostname " + host + " to list");
             }
         } catch (UnknownHostException e) {
+            // just ignore this.. 
         }
         return names;
 
