@@ -17,16 +17,16 @@
 
 package org.apache.james.jspf.util;
 
-import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
 
 /**
  * @author Stefano Bagnara
  * 
  * Provides a MatchResult view of a subset of another MatchResult
  */
-public class MatchResultSubset implements MatchResult {
+public class ConfigurationMatch {
     
-    private MatchResult wrapped;
+    private Matcher wrapped;
     private int start;
     private int count;
     
@@ -36,7 +36,7 @@ public class MatchResultSubset implements MatchResult {
      * @param start the position where the subresult start
      * @param count number of groups part of the subresult
      */
-    public MatchResultSubset(MatchResult w, int start, int count) {
+    public ConfigurationMatch(Matcher w, int start, int count) {
         this.wrapped = w;
         this.count = count;
         this.start = start;

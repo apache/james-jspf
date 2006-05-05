@@ -22,8 +22,7 @@ import org.apache.james.jspf.core.Modifier;
 import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.parser.SPF1Parser;
-
-import java.util.regex.MatchResult;
+import org.apache.james.jspf.util.ConfigurationMatch;
 
 public class UnknownModifier implements Modifier, Configurable {
 
@@ -49,7 +48,7 @@ public class UnknownModifier implements Modifier, Configurable {
         return false;
     }
 
-    public void config(MatchResult params) throws PermErrorException {
+    public void config(ConfigurationMatch params) throws PermErrorException {
         // Nothing to do
     }
 

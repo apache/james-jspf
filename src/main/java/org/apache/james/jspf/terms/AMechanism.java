@@ -23,10 +23,10 @@ import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.parser.SPF1Parser;
 import org.apache.james.jspf.util.Inet6Util;
+import org.apache.james.jspf.util.ConfigurationMatch;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.MatchResult;
 
 /**
  * This class represent the a mechanism
@@ -105,7 +105,7 @@ public class AMechanism extends GenericMechanism {
         return false;
     }
 
-    public void config(MatchResult params) throws PermErrorException {
+    public void config(ConfigurationMatch params) throws PermErrorException {
         super.config(params);
         if (params.groupCount() >= 2 && params.group(2) != null) {
             ip4cidr = Integer.parseInt(params.group(2).toString());

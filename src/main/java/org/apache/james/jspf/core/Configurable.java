@@ -18,8 +18,7 @@
 package org.apache.james.jspf.core;
 
 import org.apache.james.jspf.exceptions.PermErrorException;
-
-import java.util.regex.MatchResult;
+import org.apache.james.jspf.util.ConfigurationMatch;
 
 public interface Configurable {
 
@@ -29,6 +28,6 @@ public interface Configurable {
      * @param params
      * @throws PermErrorException
      */
-    void config(MatchResult params) throws PermErrorException;
+    void config(ConfigurationMatch params) throws PermErrorException;
 
 }

@@ -25,7 +25,7 @@ import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPF1Record;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
-import org.apache.james.jspf.util.MatchResultSubset;
+import org.apache.james.jspf.util.ConfigurationMatch;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Properties;
-import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -385,7 +384,7 @@ public class SPF1Parser {
                 l.add(new TermDef(mechClass));
             } catch (Exception e) {
                 log.debug("Unable to create the term collection",e);
-                throw new IllegalStateException("Unable to create the term collection",e);
+                throw new IllegalStateException("Unable to create the term collection");
             }
         }
         return l;
@@ -465,12 +464,12 @@ public class SPF1Parser {
      * @return
      * @throws PermErrorException
      */
-    private Object lookupAndCreateTerm(MatchResult res, int start)
+    private Object lookupAndCreateTerm(Matcher res, int start)
             throws PermErrorException {
         for (int k = start + 1; k < res.groupCount(); k++) {
             if (res.group(k) != null && k != TERM_STEP_REGEX_QUALIFIER_POS) {
                 TermDef c = (TermDef) matchResultPositions.get(k);
-                MatchResult subres = new MatchResultSubset(res, k, c
+                ConfigurationMatch subres = new ConfigurationMatch(res, k, c
                         .getMatchSize());
                 try {
                     Object term = c.getTermDef().newInstance();
@@ -484,10 +483,10 @@ public class SPF1Parser {
                     return term;
                 } catch (IllegalAccessException e) {
                     throw new IllegalStateException(
-                            "Unexpected error creating term: " + e.getMessage(),e);
+                            "Unexpected error creating term: " + e.getMessage());
                 } catch (InstantiationException e) {
                     throw new IllegalStateException(
-                            "Unexpected error creating term: " + e.getMessage(),e);
+                            "Unexpected error creating term: " + e.getMessage());
                 }
 
             }

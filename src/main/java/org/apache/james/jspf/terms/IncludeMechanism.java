@@ -27,8 +27,7 @@ import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.parser.SPF1Parser;
-
-import java.util.regex.MatchResult;
+import org.apache.james.jspf.util.ConfigurationMatch;
 
 /**
  * This class represent the incude mechanism
@@ -116,7 +115,7 @@ public class IncludeMechanism implements Mechanism, Configurable {
             
     }
 
-    public void config(MatchResult params) throws PermErrorException {
+    public void config(ConfigurationMatch params) throws PermErrorException {
         if (params.groupCount() == 0) {
             throw new PermErrorException("Include mechanism without an host");
         }

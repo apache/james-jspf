@@ -22,8 +22,7 @@ import org.apache.james.jspf.core.Mechanism;
 import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
-
-import java.util.regex.MatchResult;
+import org.apache.james.jspf.util.ConfigurationMatch;
 
 /**
  * This class represent a gerneric mechanism
@@ -73,7 +72,7 @@ public abstract class GenericMechanism implements Mechanism, Configurable {
         return host;
     }
 
-    public void config(MatchResult params) throws PermErrorException {
+    public void config(ConfigurationMatch params) throws PermErrorException {
         if (params.groupCount() >= 1 && params.group(1) != null) {
             domain = params.group(1);
         } else {
