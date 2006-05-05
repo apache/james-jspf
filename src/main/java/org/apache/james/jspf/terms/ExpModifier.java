@@ -17,6 +17,7 @@
 
 package org.apache.james.jspf.terms;
 
+import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
@@ -28,6 +29,7 @@ import org.apache.james.jspf.parser.SPF1Parser;
  * This class represent the exp modifier
  * 
  * @author Norman Maurer <nm@byteaction.de>
+ * @author Stefano Bagnara <apache@bago.org>
  * 
  */
 public class ExpModifier extends GenericModifier {
@@ -45,24 +47,24 @@ public class ExpModifier extends GenericModifier {
      * Generate the explanation and set it in SPF1Data so it can be accessed
      * easy later if needed
      * 
-     * @param spfData
-     *            The SPF1Data which should used
-     * @throws PermErrorException 
+     * @param spfData The SPF1Data which should used
      * 
      */
-    public String run(SPF1Data spfData) throws PermErrorException {
+    public String run(SPF1Data spfData) {
         String exp = null;
         String host = this.host;
+        
+        // If the currentResult is not fail we have no need to run all these methods!
+        if (!spfData.getCurrentResult().equals(SPF1Constants.FAIL)) return null;
 
         try {
             host = new MacroExpand(spfData).expandDomain(host);
             try {
                 exp = spfData.getDnsProbe().getTxtCatType(host);
             } catch (NoneException e) {
-                // TODO what should we do here?
+                // Nothing todo here.. just return the default explanation
             } catch (TempErrorException e) {
-                // TODO what should we do here?
-                e.printStackTrace();
+                // Nothing todo here.. just return the default explanation
             }
             
             if ((exp == null) || (exp.equals(""))) {
@@ -73,11 +75,10 @@ public class ExpModifier extends GenericModifier {
                         .expandExplanation(exp));
             }
         } catch (PermErrorException e) {
+            // Only catch the error and set the explanation
             spfData.setExplanation("");
-            throw e;
         }
         return null;
-
     }
 
     /**
