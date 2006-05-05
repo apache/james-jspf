@@ -25,28 +25,24 @@ import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.util.ConfigurationMatch;
 
 /**
- * This class represent a gerneric modifier
+ * This abstract class represent a gerneric modifier
  * 
  * @author Norman Maurer <nm@byteaction.de>
- * 
+ * @author Stefano Bagnara <apache@bago.org>
  */
 public abstract class GenericModifier implements Modifier, Configurable {
 
     protected String host;
 
     /**
-     * Run the mechanismn with the give SPF1Data
+     * @see org.apache.james.jspf.core.Modifier#run(SPF1Data)
      * 
-     * @param spfData
-     *            The SPF1Data
-     * @return result If the not match it return null. Otherwise it returns the
-     *         modifier
-     * @throws PermErrorException
-     *             if somethink strange happen
-     * @throws TempErrorException 
      */
     public abstract String run(SPF1Data spfData) throws PermErrorException, TempErrorException;
 
+    /**
+     * @see org.apache.james.jspf.core.Configurable#config(ConfigurationMatch)
+     */
     public void config(ConfigurationMatch params) throws PermErrorException {
         if (params.groupCount() > 0) {
             this.host = params.group(1);

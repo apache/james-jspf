@@ -27,7 +27,7 @@ import org.apache.james.jspf.util.ConfigurationMatch;
  * This class represent the ip4 mechanism
  * 
  * @author Norman Maurer <nm@byteaction.de>
- * 
+ * @author Stefano Bagnara <apache@bago.org>
  */
 public class IP4Mechanism extends GenericMechanism {
 
@@ -58,6 +58,9 @@ public class IP4Mechanism extends GenericMechanism {
         }
     }
 
+    /**
+     * @see org.apache.james.jspf.terms.GenericMechanism#config(ConfigurationMatch)
+     */
     public void config(ConfigurationMatch params) throws PermErrorException {
         if (params.groupCount() == 0) {
             throw new PermErrorException("Missing ip");
@@ -76,10 +79,17 @@ public class IP4Mechanism extends GenericMechanism {
         ip = IPAddr.getAddress(ipString, maskLength);
     }
 
+    /**
+     * @see org.apache.james.jspf.util.Inet6Util#isValidIPV4Address(String)
+     */
     protected boolean isValidAddress(String ipString) {
         return Inet6Util.isValidIPV4Address(ipString);
     }
 
+    /**
+     * Returns the max cidr for ip4
+     * @return maxCidr The max cidr
+     */
     protected int getMaxCidr() {
         return 32;
     }

@@ -31,7 +31,7 @@ import java.util.List;
  * This class represent the ptr mechanism
  * 
  * @author Norman Maurer <nm@byteaction.de>
- * 
+ * @author Stefano Bagnara <apache@bago.org>
  */
 public class PTRMechanism extends GenericMechanism {
 

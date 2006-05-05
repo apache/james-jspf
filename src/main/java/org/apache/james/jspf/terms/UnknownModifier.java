@@ -24,6 +24,13 @@ import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.parser.SPF1Parser;
 import org.apache.james.jspf.util.ConfigurationMatch;
 
+
+/**
+ * This Class represent an Unknown Modifier
+ * 
+ * @author Norman Maurer <nm@byteaction.de>
+ * @author Stefano Bagnara <apache@bago.org>
+ */
 public class UnknownModifier implements Modifier, Configurable {
 
     /**
@@ -48,6 +55,9 @@ public class UnknownModifier implements Modifier, Configurable {
         return false;
     }
 
+    /**
+     * @see org.apache.james.jspf.core.Configurable#config(ConfigurationMatch)
+     */
     public void config(ConfigurationMatch params) throws PermErrorException {
         // Nothing to do
     }

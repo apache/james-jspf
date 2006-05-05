@@ -29,7 +29,7 @@ import org.apache.james.jspf.parser.SPF1Parser;
  * This class represent the redirect modifier
  * 
  * @author Norman Maurer <nm@byteaction.de>
- * 
+ * @author Stefano Bagnara <apache@bago.org>
  */
 public class RedirectModifier extends GenericModifier {
 
@@ -47,7 +47,7 @@ public class RedirectModifier extends GenericModifier {
      * @return host The host to which we shuld redirect
      * @throws PermErrorException
      *             if an error is in the redirect modifier
-     * @throws TempErrorException 
+     * @throws TempErrorException if an DNS problem accurred
      */
     public String run(SPF1Data spfData) throws PermErrorException, TempErrorException {
         // the redirect modifier is used only when we had no previous matches
@@ -70,12 +70,14 @@ public class RedirectModifier extends GenericModifier {
             try {
                 res = new SPF(spfData.getDnsProbe()).checkSPF(spfData);
             } catch (NoneException e) {
+                // no spf record assigned to the redirect domain
                 throw new PermErrorException("included checkSPF returned NoneException");
             }
             
             return res;
             
         } else {
+            // return null if we should not use the redirect at all
             return null;
         }
     }

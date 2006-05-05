@@ -27,21 +27,23 @@ import org.apache.james.jspf.util.ConfigurationMatch;
  * This class represent the all mechanism
  * 
  * @author Norman Maurer <nm@byteaction.de>
- * 
+ * @author Stefano Bagnara <apache@bago.org>
  */
 public class AllMechanism implements Mechanism, Configurable {
 
     public static final String REGEX = "[aA][lL][lL]";
 
+
     /**
-     * @param spfData
-     * @return
-     * @throws PermErrorException
+     * @see org.apache.james.jspf.core.Mechanism#run(SPF1Data)
      */
     public boolean run(SPF1Data spfData) throws PermErrorException {
         return true;
     }
 
+    /**
+     * @see org.apache.james.jspf.core.Configurable#config(ConfigurationMatch)
+     */
     public void config(ConfigurationMatch params) throws PermErrorException {
         // no checks needed
         // the regex only passes with no parameters

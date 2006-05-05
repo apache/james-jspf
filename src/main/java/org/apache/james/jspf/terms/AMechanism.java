@@ -105,6 +105,9 @@ public class AMechanism extends GenericMechanism {
         return false;
     }
 
+    /**
+     * @see org.apache.james.jspf.terms.GenericMechanism#config(ConfigurationMatch)
+     */
     public void config(ConfigurationMatch params) throws PermErrorException {
         super.config(params);
         if (params.groupCount() >= 2 && params.group(2) != null) {

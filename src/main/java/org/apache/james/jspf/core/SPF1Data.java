@@ -26,7 +26,8 @@ import java.util.List;
 
 /**
  * 
- * This Class is used as a Container between the other classes.
+ * This Class is used as a container between the other classes. All necessary
+ * values get stored here and get retrieved from here.
  * 
  * @author Mimecast Contact : spf@mimecast.net
  * @author Norman Maurer <nm@byteaction.de>
@@ -71,6 +72,16 @@ public class SPF1Data implements MacroData {
 
     private boolean match = false;
 
+    /**
+     * Build the SPF1Data from the given parameters
+     * 
+     * @param mailFrom The emailaddress of the sender
+     * @param heloDomain The helo provided by the sender
+     * @param clientIP The ipaddress of the client
+     * @param dnsProbe The DNSService
+     * @throws PermErrorException Get thrown if invalid data get passed
+     * @throws NoneException Get thrown if no valid emailaddress get passed
+     */
     public SPF1Data(String mailFrom, String heloDomain, String clientIP,
             DNSService dnsProbe) throws PermErrorException, NoneException {
         super();
@@ -94,18 +105,19 @@ public class SPF1Data implements MacroData {
 
     /**
      * Setup the data which used to retrieve the SPF-Record
-     * 
-     * @throws NoneException
-     *             if no valid emailaddress is provided
+
+     * @param mailFrom The emailaddress of the sender
+     * @param helo The provided helo 
+     * @throws NoneException Get thrown if an invalid emailaddress get passed
      */
-    private void setupData(String mailFrom, String hostName)
+    private void setupData(String mailFrom, String helo)
             throws NoneException {
 
         // if nullsender is used postmaster@helo will be used as email
         if (mailFrom.equals("")) {
             this.currentSenderPart = "postmaster";
-            this.senderDomain = hostName;
-            this.mailFrom = currentSenderPart + "@" + hostName;
+            this.senderDomain = helo;
+            this.mailFrom = currentSenderPart + "@" + helo;
         } else {
             String[] fromParts = mailFrom.split("@");
 
@@ -310,10 +322,20 @@ public class SPF1Data implements MacroData {
         return currentResult;
     }
 
+    /**
+     * Get set if an mechanismn or modifier match
+     * 
+     * @param match true or flase 
+     */
     public void setMatch(boolean match) {
         this.match = match;
     }
 
+    /**
+     * Return true if a mechanismn or modifier matched
+     * 
+     * @return true or false
+     */
     public boolean isMatch() {
         return match;
     }

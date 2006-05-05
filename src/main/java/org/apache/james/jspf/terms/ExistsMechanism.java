@@ -29,7 +29,7 @@ import java.util.List;
  * This class represent the exists mechanism
  * 
  * @author Norman Maurer <nm@byteaction.de>
- * 
+ * @author Stefano Bagnara <apache@bago.org>
  */
 public class ExistsMechanism extends GenericMechanism {
 

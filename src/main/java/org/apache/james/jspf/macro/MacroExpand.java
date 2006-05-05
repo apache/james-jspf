@@ -22,6 +22,7 @@ package org.apache.james.jspf.macro;
  * 
  * @author Mimecast Contact : spf@mimecast.net
  * @author Norman Maurer <nm@byteaction.de>
+ * @author Stefano Bagnara <apache@bago.org>
  */
 
 import org.apache.james.jspf.exceptions.PermErrorException;

@@ -29,7 +29,7 @@ import java.util.ArrayList;
  * This class represent the mx mechanism
  * 
  * @author Norman Maurer <nm@byteaction.de>
- * 
+ * @author Stefano Bagnara <apache@bago.org>
  */
 public class MXMechanism extends AMechanism {
 

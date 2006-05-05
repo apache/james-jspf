@@ -25,7 +25,7 @@ import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.util.ConfigurationMatch;
 
 /**
- * This class represent a gerneric mechanism
+ * This abstract class represent a gerneric mechanism
  * 
  * @author Norman Maurer <nm@byteaction.de>
  * 
@@ -72,6 +72,10 @@ public abstract class GenericMechanism implements Mechanism, Configurable {
         return host;
     }
 
+    
+    /**
+     * @see org.apache.james.jspf.core.Configurable#config(ConfigurationMatch)
+     */
     public void config(ConfigurationMatch params) throws PermErrorException {
         if (params.groupCount() >= 1 && params.group(1) != null) {
             domain = params.group(1);

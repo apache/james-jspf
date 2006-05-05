@@ -390,6 +390,14 @@ public class SPF1Parser {
         return l;
     }
 
+    /**
+     * This Method parse the given spf record and checks for syntax
+     * 
+     * @param spfRecord The String which represent the spf record in dns
+     * @return result The SPF1Record
+     * @throws PermErrorException Get thrown if an syntax error was detected
+     * @throws NoneException Getthrown if no spf record could be found
+     */
     public SPF1Record parse(String spfRecord) throws PermErrorException,
             NoneException {
 

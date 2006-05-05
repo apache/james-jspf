@@ -33,7 +33,7 @@ import org.apache.james.jspf.util.ConfigurationMatch;
  * This class represent the incude mechanism
  * 
  * @author Norman Maurer <nm@byteaction.de>
- * 
+ * @author Stefano Bagnara <apache@bago.org>
  */
 public class IncludeMechanism implements Mechanism, Configurable {
 
@@ -115,6 +115,9 @@ public class IncludeMechanism implements Mechanism, Configurable {
             
     }
 
+    /**
+     * @see org.apache.james.jspf.core.Configurable#config(ConfigurationMatch)
+     */
     public void config(ConfigurationMatch params) throws PermErrorException {
         if (params.groupCount() == 0) {
             throw new PermErrorException("Include mechanism without an host");
