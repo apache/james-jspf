@@ -25,6 +25,8 @@ We don't have a JIRA instance for jspf so here is a list of issues
 
 - add tests for the DNSService implementation (mocking the xbill Resolver)
 
+- make it jdk1.4 compliant (remove MatchResult and IllegalStateException(desc, nested) usage)
+
 Change proposals
 
 - make termfile location configurable ( Maybe building one config file for all ? log4j etc...)
