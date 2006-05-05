@@ -1,6 +1,6 @@
 We don't have a JIRA instance for jspf so here is a list of issues
 
-- add more javadocs
+- add more javadocs <- almost complete!
 
 - correctly implement the explanation modifier and his behaviour for includes and redirects.
 
