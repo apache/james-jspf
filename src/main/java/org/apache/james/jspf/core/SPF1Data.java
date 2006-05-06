@@ -40,7 +40,6 @@ public class SPF1Data implements MacroData {
 
     protected String spfVersion = "v=spf1";
 
-    
     private String ipAddress = ""; // (i)<sending-host>
 
     private String mailFrom = ""; // (s)<responsible-sender>
@@ -60,10 +59,9 @@ public class SPF1Data implements MacroData {
     private String readableIP = null; // (c)
 
     private String receivingDomain = "unknown"; // (r)
-    
 
     private int currentDepth = 0;
-    
+
     private static final int MAX_DEPTH = 10;
 
     private String explanation = "";
@@ -75,17 +73,23 @@ public class SPF1Data implements MacroData {
     /**
      * Build the SPF1Data from the given parameters
      * 
-     * @param mailFrom The emailaddress of the sender
-     * @param heloDomain The helo provided by the sender
-     * @param clientIP The ipaddress of the client
-     * @param dnsProbe The DNSService
-     * @throws PermErrorException Get thrown if invalid data get passed
-     * @throws NoneException Get thrown if no valid emailaddress get passed
+     * @param mailFrom
+     *            The emailaddress of the sender
+     * @param heloDomain
+     *            The helo provided by the sender
+     * @param clientIP
+     *            The ipaddress of the client
+     * @param dnsProbe
+     *            The DNSService
+     * @throws PermErrorException
+     *             Get thrown if invalid data get passed
+     * @throws NoneException
+     *             Get thrown if no valid emailaddress get passed
      */
     public SPF1Data(String mailFrom, String heloDomain, String clientIP,
             DNSService dnsProbe) throws PermErrorException, NoneException {
         super();
-        
+
         this.mailFrom = mailFrom.trim();
         this.hostName = heloDomain.trim();
         this.ipAddress = clientIP.trim();
@@ -105,13 +109,15 @@ public class SPF1Data implements MacroData {
 
     /**
      * Setup the data which used to retrieve the SPF-Record
-
-     * @param mailFrom The emailaddress of the sender
-     * @param helo The provided helo 
-     * @throws NoneException Get thrown if an invalid emailaddress get passed
+     * 
+     * @param mailFrom
+     *            The emailaddress of the sender
+     * @param helo
+     *            The provided helo
+     * @throws NoneException
+     *             Get thrown if an invalid emailaddress get passed
      */
-    private void setupData(String mailFrom, String helo)
-            throws NoneException {
+    private void setupData(String mailFrom, String helo) throws NoneException {
 
         // if nullsender is used postmaster@helo will be used as email
         if (mailFrom.equals("")) {
@@ -226,11 +232,11 @@ public class SPF1Data implements MacroData {
      */
     public String getReceivingDomain() {
         List dNames;
-        
+
         if (receivingDomain.equals("unknown")) {
             dNames = dnsProbe.getLocalDomainNames();
-        
-            for(int i = 0; i < dNames.size(); i++) {
+
+            for (int i = 0; i < dNames.size(); i++) {
                 // check if the domainname is a FQDN
                 if (SPF1Utils.checkFQDN(dNames.get(i).toString())) {
                     receivingDomain = dNames.get(i).toString();
@@ -258,7 +264,7 @@ public class SPF1Data implements MacroData {
     public void setCurrentDepth(int currentDepth) {
         this.currentDepth = currentDepth;
     }
-    
+
     /**
      * Get the maxDepth
      * 
@@ -307,7 +313,8 @@ public class SPF1Data implements MacroData {
     /**
      * Set the current result
      * 
-     * @param result result
+     * @param result
+     *            result
      */
     public void setCurrentResult(String result) {
         this.currentResult = result;
@@ -325,7 +332,8 @@ public class SPF1Data implements MacroData {
     /**
      * Get set if an mechanismn or modifier match
      * 
-     * @param match true or flase 
+     * @param match
+     *            true or flase
      */
     public void setMatch(boolean match) {
         this.match = match;

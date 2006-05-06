@@ -43,9 +43,10 @@ public class ExistsMechanism extends GenericMechanism {
      * 
      * @see org.apache.james.jspf.core.GenericMechanism#run(org.apache.james.jspf.core.SPF1Data)
      */
-    public boolean run(SPF1Data spfData) throws PermErrorException, TempErrorException {
+    public boolean run(SPF1Data spfData) throws PermErrorException,
+            TempErrorException {
         List aRecords;
-        
+
         // update currentDepth
         spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);
 

@@ -43,7 +43,7 @@ public class IP6Mechanism extends IP4Mechanism {
         // TODO
         throw new PermErrorException("Unimplemented");
     }
-    
+
     /**
      * @see org.apache.james.jspf.terms.IP4Mechanism#isValidAddress(String)
      */

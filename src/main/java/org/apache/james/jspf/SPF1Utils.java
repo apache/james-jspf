@@ -19,8 +19,6 @@ package org.apache.james.jspf;
 
 import org.apache.james.jspf.core.SPF1Constants;
 
-
-
 /**
  * 
  * Class that offer static methods to convert SPF Results and contains all
@@ -31,96 +29,98 @@ import org.apache.james.jspf.core.SPF1Constants;
  */
 
 public class SPF1Utils {
-	public static final String PERM_ERROR = "error";
+    public static final String PERM_ERROR = "error";
+
     public static final String PERM_ERROR_CONV = "error";
 
-	public static final String NONE = "none";
+    public static final String NONE = "none";
+
     public static final String NONE_CONV = "none";
-    
+
     public static final String TEMP_ERROR = "temperror";
+
     public static final String TEMP_ERROR_CONV = "temperror";
-    
-	public static final String PASS_CONV = "pass";
-    
-	public static final String NEUTRAL_CONV = "neutral";
-    
-	public static final String FAIL_CONV = "fail";
 
-	public static final String SOFTFAIL_CONV = "softfail";
+    public static final String PASS_CONV = "pass";
 
+    public static final String NEUTRAL_CONV = "neutral";
 
+    public static final String FAIL_CONV = "fail";
 
-	
+    public static final String SOFTFAIL_CONV = "softfail";
 
+    /**
+     * Convert raw SPF results to SPF names
+     * 
+     * @param result
+     *            The result which should converted
+     * @return coverted result
+     */
+    protected static String resultToName(String result) {
 
-	/**
-	 * Convert raw SPF results to SPF names
-	 * 
-	 * @param result The result which should converted
-	 * @return coverted result
-	 */
-	protected static String resultToName(String result) {
-
-		if (result.equals(SPF1Constants.PASS)) {
-			return PASS_CONV;
-		} else if (result.equals(SPF1Constants.FAIL)) {
-			return FAIL_CONV;
-		} else if (result.equals(SPF1Constants.NEUTRAL)) {
-			return NEUTRAL_CONV;
-		} else if (result.equals(SPF1Constants.SOFTFAIL)) {
-			return SOFTFAIL_CONV;
-		} else if (result.equals(PERM_ERROR)) {
-			return PERM_ERROR_CONV;
+        if (result.equals(SPF1Constants.PASS)) {
+            return PASS_CONV;
+        } else if (result.equals(SPF1Constants.FAIL)) {
+            return FAIL_CONV;
+        } else if (result.equals(SPF1Constants.NEUTRAL)) {
+            return NEUTRAL_CONV;
+        } else if (result.equals(SPF1Constants.SOFTFAIL)) {
+            return SOFTFAIL_CONV;
+        } else if (result.equals(PERM_ERROR)) {
+            return PERM_ERROR_CONV;
         } else if (result.equals(TEMP_ERROR)) {
             return TEMP_ERROR_CONV;
-		} else if (result.equals(NONE)) {
-			return NONE_CONV;
-		} else {
-			return NEUTRAL_CONV;
-		}
+        } else if (result.equals(NONE)) {
+            return NONE_CONV;
+        } else {
+            return NEUTRAL_CONV;
+        }
 
-	}
+    }
 
-	/**
-	 * Covert SPF names to raw SPF results
-	 * 
-	 * @param result The result which should converted
-	 * @return coverted result
-	 */
-	protected static String nameToResult(String result) {
+    /**
+     * Covert SPF names to raw SPF results
+     * 
+     * @param result
+     *            The result which should converted
+     * @return coverted result
+     */
+    protected static String nameToResult(String result) {
 
-		if (result.equals(PASS_CONV)) {
-			return SPF1Constants.PASS;
-		} else if (result.equals(FAIL_CONV)) {
-			return SPF1Constants.FAIL;
-		} else if (result.equals(NEUTRAL_CONV)) {
-			return SPF1Constants.NEUTRAL;
-		} else if (result.equals(SOFTFAIL_CONV)) {
-			return SPF1Constants.SOFTFAIL;
-		} else if (result.equals(PERM_ERROR_CONV)) {
-			return PERM_ERROR;
+        if (result.equals(PASS_CONV)) {
+            return SPF1Constants.PASS;
+        } else if (result.equals(FAIL_CONV)) {
+            return SPF1Constants.FAIL;
+        } else if (result.equals(NEUTRAL_CONV)) {
+            return SPF1Constants.NEUTRAL;
+        } else if (result.equals(SOFTFAIL_CONV)) {
+            return SPF1Constants.SOFTFAIL;
+        } else if (result.equals(PERM_ERROR_CONV)) {
+            return PERM_ERROR;
         } else if (result.equals(TEMP_ERROR_CONV)) {
             return TEMP_ERROR;
-		} else if (result.equals(NONE_CONV)) {
-			return NONE;
-		} else {
-			return SPF1Constants.NEUTRAL;
-		}
+        } else if (result.equals(NONE_CONV)) {
+            return NONE;
+        } else {
+            return SPF1Constants.NEUTRAL;
+        }
 
-	}
+    }
 
-	/**
-	 * Check for valid FQDN
-	 * @param host The hostname to check
-	 * @return false or true
-	 */
-	public static boolean checkFQDN(String host) {
-		String regex = "(([a-zA-Z0-9\\-])+\\.)+([a-zA-Z]+)$";
-		if (host.matches(regex)) {
-			return true;
-		} else {
-			return false;
-		}		
-	}
+    /**
+     * Check for valid FQDN
+     * 
+     * @param host
+     *            The hostname to check
+     * @return false or true
+     */
+    public static boolean checkFQDN(String host) {
+        String regex = "(([a-zA-Z0-9\\-])+\\.)+([a-zA-Z]+)$";
+        if (host.matches(regex)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
 }

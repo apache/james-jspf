@@ -55,23 +55,23 @@ public class SPF {
     private SPF1Parser parser;
 
     private int timeOut = 20;
-    
+
     private static Logger log = Logger.getLogger(SPF.class);
 
     /**
      * 
      */
-    public SPF() {       
+    public SPF() {
         this(new DNSServiceXBillImpl());
-        
+
     }
 
     /**
      * @param dnsProbe
      *            the dns provider
      */
-    public SPF(DNSService dnsProbe) {       
-        super();      
+    public SPF(DNSService dnsProbe) {
+        super();
         this.dnsProbe = dnsProbe;
         this.parser = new SPF1Parser();
     }
@@ -108,16 +108,17 @@ public class SPF {
             log.warn(e.getMessage());
             result = SPF1Utils.TEMP_ERROR;
         } catch (IllegalStateException e) {
-            // this should never happen at all. But anyway we will set the result to neutral. Safety first ..
+            // this should never happen at all. But anyway we will set the
+            // result to neutral. Safety first ..
             log.error(e.getMessage());
             result = SPF1Constants.NEUTRAL;
         }
 
-
         // convert raw result to name
         String convertedResult = SPF1Utils.resultToName(result);
-        
-        log.info("[ipAddress=" + ipAddress + "] [mailFrom=" + mailFrom + "] [helo=" + hostName + "] => " + convertedResult) ;
+
+        log.info("[ipAddress=" + ipAddress + "] [mailFrom=" + mailFrom
+                + "] [helo=" + hostName + "] => " + convertedResult);
 
         // generate the SPF-Result header
         generateHeader(convertedResult);
@@ -129,12 +130,17 @@ public class SPF {
     /**
      * Run check for SPF with the given values.
      * 
-     * @param spfData The SPF1Data which should be used to run the check
-     * @throws PermErrorException Get thrown if an error was detected 
-     * @throws NoneException Get thrown if no Record was found
-     * @throws TempErrorException Get thrown if a DNS problem was detected
+     * @param spfData
+     *            The SPF1Data which should be used to run the check
+     * @throws PermErrorException
+     *             Get thrown if an error was detected
+     * @throws NoneException
+     *             Get thrown if no Record was found
+     * @throws TempErrorException
+     *             Get thrown if a DNS problem was detected
      */
-    public String checkSPF(SPF1Data spfData) throws PermErrorException, NoneException, TempErrorException {
+    public String checkSPF(SPF1Data spfData) throws PermErrorException,
+            NoneException, TempErrorException {
         String result;
         result = SPF1Constants.NEUTRAL;
 
@@ -143,26 +149,26 @@ public class SPF {
          * PASS if its from localhost.
          */
         if (spfData.getIpAddress().trim().startsWith("127.")) {
-            //logging
+            // logging
             log.info("Connection was made from localhost => skip checking");
-            
+
             result = SPF1Constants.PASS;
             return result;
         }
 
         // Set the dns timeout
         dnsProbe.setTimeOut(timeOut);
-        
-        // Get the raw dns txt entry which contains a spf entry
-        String spfDnsEntry = dnsProbe.getSpfRecord(spfData
-                .getCurrentDomain(), SPF1Constants.SPF_VERSION);
 
-        //logging
+        // Get the raw dns txt entry which contains a spf entry
+        String spfDnsEntry = dnsProbe.getSpfRecord(spfData.getCurrentDomain(),
+                SPF1Constants.SPF_VERSION);
+
+        // logging
         log.debug("Start parsing SPF-Record:" + spfDnsEntry);
 
         SPF1Record spfRecord = parser.parse(spfDnsEntry);
-        
-        //System.out.println(spfRecord);
+
+        // System.out.println(spfRecord);
 
         String qualifier = null;
         boolean hasCommand = false;
@@ -170,54 +176,63 @@ public class SPF {
         // get all commands
         Iterator com = spfRecord.getDirectives().iterator();
         while (com.hasNext()) {
-            
-            // if we reach maximum calls we must throw a PermErrorException. See SPF-RFC Section 10.1.  Processing Limits
+
+            // if we reach maximum calls we must throw a PermErrorException. See
+            // SPF-RFC Section 10.1. Processing Limits
             if (spfData.getCurrentDepth() > spfData.getMaxDepth()) {
-                throw new PermErrorException("Maximum mechanism/modifier calls done: " + spfData.getCurrentDepth());
+                throw new PermErrorException(
+                        "Maximum mechanism/modifier calls done: "
+                                + spfData.getCurrentDepth());
             }
-            
+
             hasCommand = true;
             Directive d = (Directive) com.next();
-            
+
             // logging
-            log.debug("Processing directive: "+d.getQualifier()+d.getMechanism().toString());
+            log.debug("Processing directive: " + d.getQualifier()
+                    + d.getMechanism().toString());
 
             qualifier = d.run(spfData);
-            
+
             // logging
-            log.debug("Processed directive: "+d.getQualifier()+d.getMechanism().toString()+" returned "+qualifier); 
-            
+            log.debug("Processed directive: " + d.getQualifier()
+                    + d.getMechanism().toString() + " returned " + qualifier);
+
             if (qualifier != null) {
-                if(qualifier.equals("")) {
+                if (qualifier.equals("")) {
                     result = SPF1Constants.PASS;
                 } else {
                     result = qualifier;
                 }
-                
+
                 spfData.setCurrentResult(result);
                 spfData.setMatch(true);
-                
+
                 // If we have a match we should break the while loop
                 break;
             }
         }
-        
+
         Iterator mod = spfRecord.getModifiers().iterator();
         while (mod.hasNext()) {
             spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);
-            
-            // if we reach maximum calls we must throw a PermErrorException. See SPF-RFC Section 10.1.  Processing Limits
+
+            // if we reach maximum calls we must throw a PermErrorException. See
+            // SPF-RFC Section 10.1. Processing Limits
             if (spfData.getCurrentDepth() > spfData.getMaxDepth()) {
-                throw new PermErrorException("Maximum mechanism/modifiers calls done: " + spfData.getCurrentDepth());
+                throw new PermErrorException(
+                        "Maximum mechanism/modifiers calls done: "
+                                + spfData.getCurrentDepth());
             }
-            
+
             Modifier m = (Modifier) mod.next();
 
-            log.debug("Processing modifier: "+m.toString());
+            log.debug("Processing modifier: " + m.toString());
 
             String q = m.run(spfData);
-            
-            log.debug("Processed modifier: "+m.toString()+" resulted in "+q);
+
+            log.debug("Processed modifier: " + m.toString() + " resulted in "
+                    + q);
 
             if (q != null) {
                 qualifier = q;
@@ -225,23 +240,21 @@ public class SPF {
 
             if (qualifier != null) {
                 result = qualifier;
-                
+
                 spfData.setCurrentResult(result);
                 spfData.setMatch(true);
 
-                
                 if (qualifier.equals(SPF1Constants.FAIL)) {
                     explanation = spfData.getExplanation();
                 }
             }
         }
 
-        // If no match was found set the result to neutral 
+        // If no match was found set the result to neutral
         if (!spfData.isMatch() && (hasCommand == true)) {
             result = SPF1Constants.NEUTRAL;
         }
 
-        
         return result;
     }
 
@@ -311,13 +324,15 @@ public class SPF {
                     + spfData.getCurrentDomain() + " does not designate "
                     + spfData.getIpAddress() + " as permitted sender) ");
         } else if (result.equals(SPF1Utils.PERM_ERROR_CONV)) {
-            headerText.append(result + " (spfCheck: Error in processing SPF Record) ");
-        
+            headerText.append(result
+                    + " (spfCheck: Error in processing SPF Record) ");
+
         } else if (result.equals(SPF1Utils.TEMP_ERROR_CONV)) {
-            headerText.append(result + " (spfCheck: Error in retrieving data from DNS) ");
-   
+            headerText.append(result
+                    + " (spfCheck: Error in retrieving data from DNS) ");
+
         }
-        
+
         if (headerText.length() > 0) {
             headerText.append("client-ip=" + spfData.getIpAddress()
                     + "; envelope-from=" + spfData.getMailFrom() + "; helo="
@@ -326,20 +341,21 @@ public class SPF {
         }
         header = headerName + ": " + headerTextAsString;
     }
-    
+
     /**
-     * Set the amount of time (in seconds) before an TermError
-     * is returned when the dnsserver not answer. Default is 20 
-     * seconds. 
+     * Set the amount of time (in seconds) before an TermError is returned when
+     * the dnsserver not answer. Default is 20 seconds.
      * 
      * TempError should be returned
-     * @param timeOut The timout in seconds
+     * 
+     * @param timeOut
+     *            The timout in seconds
      */
     public void setTimeOut(int timeOut) {
-        
+
         log.debug("TimeOut was set to: " + timeOut);
-        
-        this.timeOut  = timeOut;
+
+        this.timeOut = timeOut;
     }
 
     /**
@@ -354,11 +370,10 @@ public class SPF {
 
         // run test !
         spf.checkSPF(ipAddress, mailFrom, host);
-/*
-        System.out.println("result:     " + result);
-        System.out.println("header:     " + spf.getHeader());
-        System.out.println("exp:        " + spf.getExplanation());
-*/
+        /*
+         * System.out.println("result: " + result); System.out.println("header: " +
+         * spf.getHeader()); System.out.println("exp: " + spf.getExplanation());
+         */
     }
 
 }

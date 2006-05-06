@@ -15,7 +15,6 @@
  * permissions and limitations under the License.                      *
  ***********************************************************************/
 
-
 package org.apache.james.jspf.exceptions;
 
 /**
@@ -26,14 +25,14 @@ package org.apache.james.jspf.exceptions;
  */
 public class TempErrorException extends Exception {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public TempErrorException() {
-		super();
-	}
+    public TempErrorException() {
+        super();
+    }
 
-	public TempErrorException(String strErrorMessage) {
-		super(strErrorMessage);
-	}
+    public TempErrorException(String strErrorMessage) {
+        super(strErrorMessage);
+    }
 
 }

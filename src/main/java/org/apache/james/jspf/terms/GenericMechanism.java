@@ -72,7 +72,6 @@ public abstract class GenericMechanism implements Mechanism, Configurable {
         return host;
     }
 
-    
     /**
      * @see org.apache.james.jspf.core.Configurable#config(ConfigurationMatch)
      */

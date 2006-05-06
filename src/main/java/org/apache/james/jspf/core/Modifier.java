@@ -32,12 +32,16 @@ public interface Modifier {
     /**
      * Run the mechanismn with the give SPF1Data
      * 
-     * @param spfData The SPF1Data we should use
+     * @param spfData
+     *            The SPF1Data we should use
      * @return host The host we should redirect / include
-     * @throws PermErrorException Get thrown if there are any errors in modifiers
-     * @throws TempErrorException Get thrown if DNS problems detected
+     * @throws PermErrorException
+     *             Get thrown if there are any errors in modifiers
+     * @throws TempErrorException
+     *             Get thrown if DNS problems detected
      */
-    public String run(SPF1Data spfData) throws PermErrorException, TempErrorException;
+    public String run(SPF1Data spfData) throws PermErrorException,
+            TempErrorException;
 
     /**
      * @return true if only one instance of this modifier is allowed

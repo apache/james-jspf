@@ -15,7 +15,6 @@
  * permissions and limitations under the License.                      *
  ***********************************************************************/
 
-
 package org.apache.james.jspf.exceptions;
 
 /**
@@ -26,14 +25,14 @@ package org.apache.james.jspf.exceptions;
  */
 public class PermErrorException extends Exception {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public PermErrorException() {
-		super();
-	}
+    public PermErrorException() {
+        super();
+    }
 
-	public PermErrorException(String strErrorMessage) {
-		super(strErrorMessage);
-	}
+    public PermErrorException(String strErrorMessage) {
+        super(strErrorMessage);
+    }
 
 }

@@ -25,65 +25,71 @@ import java.util.regex.Matcher;
  * Provides a MatchResult view of a subset of another MatchResult
  */
 public class ConfigurationMatch {
-    
+
     private Matcher wrapped;
+
     private int start;
+
     private int count;
-    
+
     /**
-     * @param w Original MatchResult
-     * @param zero The original index returned when group(0) is requested
-     * @param start the position where the subresult start
-     * @param count number of groups part of the subresult
+     * @param w
+     *            Original MatchResult
+     * @param zero
+     *            The original index returned when group(0) is requested
+     * @param start
+     *            the position where the subresult start
+     * @param count
+     *            number of groups part of the subresult
      */
     public ConfigurationMatch(Matcher w, int start, int count) {
         this.wrapped = w;
         this.count = count;
         this.start = start;
     }
-    
+
     /**
      * @see java.util.regex.MatchResult#end()
      */
     public int end() {
         throw new UnsupportedOperationException();
     }
-    
+
     /**
      * @see java.util.regex.MatchResult#end(int)
      */
     public int end(int arg0) {
         throw new UnsupportedOperationException();
     }
-    
+
     /**
      * @see java.util.regex.MatchResult#group()
      */
     public String group() {
         throw new UnsupportedOperationException();
     }
-    
+
     /**
      * @see java.util.regex.MatchResult#group(int)
      */
     public String group(int arg0) {
-        return wrapped.group(arg0+start);
+        return wrapped.group(arg0 + start);
     }
-    
+
     /**
      * @see java.util.regex.MatchResult#groupCount()
      */
     public int groupCount() {
         return count;
     }
-    
+
     /**
      * @see java.util.regex.MatchResult#start()
      */
     public int start() {
         throw new UnsupportedOperationException();
     }
-    
+
     /**
      * @see java.util.regex.MatchResult#start(int)
      */

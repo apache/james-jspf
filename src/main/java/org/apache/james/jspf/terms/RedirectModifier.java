@@ -36,7 +36,8 @@ public class RedirectModifier extends GenericModifier {
     /**
      * ABNF: redirect = "redirect" "=" domain-spec
      */
-    public static final String REGEX = "[rR][eE][dD][iI][rR][eE][cC][tT]" + "\\=" + SPF1Parser.DOMAIN_SPEC_REGEX;
+    public static final String REGEX = "[rR][eE][dD][iI][rR][eE][cC][tT]"
+            + "\\=" + SPF1Parser.DOMAIN_SPEC_REGEX;
 
     /**
      * Set the host which should be used for redirection and set it in SPF1Data
@@ -47,35 +48,39 @@ public class RedirectModifier extends GenericModifier {
      * @return host The host to which we shuld redirect
      * @throws PermErrorException
      *             if an error is in the redirect modifier
-     * @throws TempErrorException if an DNS problem accurred
+     * @throws TempErrorException
+     *             if an DNS problem accurred
      */
-    public String run(SPF1Data spfData) throws PermErrorException, TempErrorException {
+    public String run(SPF1Data spfData) throws PermErrorException,
+            TempErrorException {
         // the redirect modifier is used only when we had no previous matches
         if (!spfData.isMatch()) {
-            
+
             String host = this.host;
-            
+
             // update currentDepth
             spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);
-    
+
             try {
                 host = new MacroExpand(spfData).expandDomain(host);
             } catch (Exception e) {
-                throw new PermErrorException("Error in redirect modifier: " + host);
+                throw new PermErrorException("Error in redirect modifier: "
+                        + host);
             }
-            
+
             spfData.setCurrentDomain(host);
-            
+
             String res = null;
             try {
                 res = new SPF(spfData.getDnsProbe()).checkSPF(spfData);
             } catch (NoneException e) {
                 // no spf record assigned to the redirect domain
-                throw new PermErrorException("included checkSPF returned NoneException");
+                throw new PermErrorException(
+                        "included checkSPF returned NoneException");
             }
-            
+
             return res;
-            
+
         } else {
             // return null if we should not use the redirect at all
             return null;

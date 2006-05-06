@@ -18,7 +18,8 @@
 package org.apache.james.jspf.macro;
 
 /**
- * This Class is used to convert all macros which can used in SPF-Records to the right values!
+ * This Class is used to convert all macros which can used in SPF-Records to the
+ * right values!
  * 
  * @author Mimecast Contact : spf@mimecast.net
  * @author Norman Maurer <nm@byteaction.de>
@@ -36,7 +37,6 @@ import java.util.regex.Pattern;
 
 public class MacroExpand {
 
-
     public static final String MACRO_REGEX = "\\%\\{[lsoditpvhcrLSODITPVHCR]\\d*r?[\\.\\-\\+,/_\\=]*\\}";
 
     private MacroData spfData;
@@ -50,8 +50,7 @@ public class MacroExpand {
     private Matcher cellMatcher;
 
     private boolean isExplanation = false;
-    
-    
+
     private static Logger log = Logger.getLogger(MacroExpand.class);
 
     public MacroExpand(MacroData spfData) {
@@ -62,14 +61,16 @@ public class MacroExpand {
     /**
      * This method expand the given a explanation
      * 
-     * @param input The explanation which should be expanded
+     * @param input
+     *            The explanation which should be expanded
      * @return expanded The expanded explanation
-     * @throws PermErrorException Get thrown if invalid macros are used
+     * @throws PermErrorException
+     *             Get thrown if invalid macros are used
      */
     public String expandExplanation(String input) throws PermErrorException {
-        
+
         log.debug("Start do expand explanation: " + input);
-        
+
         isExplanation = true;
         return expand(input);
     }
@@ -80,12 +81,13 @@ public class MacroExpand {
      * @param input
      *            The domain which should be expand
      * @return expanded The domain with replaced macros
-     * @throws PermErrorException This get thrown if invalid macros are used
+     * @throws PermErrorException
+     *             This get thrown if invalid macros are used
      */
     public String expandDomain(String input) throws PermErrorException {
 
         log.debug("Start expand domain: " + input);
-        
+
         isExplanation = false;
         String domainName = expand(input);
         // reduce to less than 255 characters, deleting subdomains from left
@@ -100,9 +102,11 @@ public class MacroExpand {
     /**
      * Expand the given String
      * 
-     * @param input The inputString which should get expanded
+     * @param input
+     *            The inputString which should get expanded
      * @return expanded The expanded given String
-     * @throws PermErrorException This get thrown if invalid macros are used
+     * @throws PermErrorException
+     *             This get thrown if invalid macros are used
      */
     private String expand(String input) throws PermErrorException {
 
@@ -126,9 +130,11 @@ public class MacroExpand {
     /**
      * Replace the macros in given String
      * 
-     * @param replaceValue The String in which known macros should get replaced
+     * @param replaceValue
+     *            The String in which known macros should get replaced
      * @return returnData The String with replaced macros
-     * @throws PermErrorException Get thrown if  an error in processing happen 
+     * @throws PermErrorException
+     *             Get thrown if an error in processing happen
      */
     private String replaceCell(String replaceValue) throws PermErrorException {
 
@@ -212,15 +218,17 @@ public class MacroExpand {
     /**
      * Get the value for the given macro like descripted in the RFC
      * 
-     * @param macro The macro we want to get the value for
+     * @param macro
+     *            The macro we want to get the value for
      * @return rValue The value for the given macro
-     * @throws PermErrorException Get thrown if the given variable is an unknown macro
+     * @throws PermErrorException
+     *             Get thrown if the given variable is an unknown macro
      * 
      */
     private String matchMacro(String macro) throws PermErrorException {
-        
+
         String rValue = null;
-        
+
         String variable = macro.toLowerCase();
         if (variable.equalsIgnoreCase("i")) {
             rValue = spfData.getIpAddress();
@@ -245,15 +253,15 @@ public class MacroExpand {
         } else if (variable.equalsIgnoreCase("r")) {
             rValue = spfData.getReceivingDomain();
         }
-        
+
         if (rValue == null) {
             throw new PermErrorException("Unknown command : " + variable);
-    
+
         } else {
-            
+
             log.debug("Used macro: " + macro + " replaced with: " + rValue);
-            
-            return  rValue;
+
+            return rValue;
         }
     }
 
@@ -290,7 +298,8 @@ public class MacroExpand {
     /**
      * Reverse an ArrayList
      * 
-     * @param data The ArrayList we want to get reversed
+     * @param data
+     *            The ArrayList we want to get reversed
      * @return reversed The reversed given ArrayList
      */
     private ArrayList reverse(ArrayList data) {
@@ -333,13 +342,13 @@ public class MacroExpand {
     private String replaceLiterals(String data) {
 
         log.debug("Replace literals on String: " + data);
-        
+
         data = data.replaceAll("%%", "%");
         data = data.replaceAll("%_", " ");
         data = data.replaceAll("%-", "%20");
-        
+
         log.debug("Replaced String: " + data);
-        
+
         return data;
     }
 

@@ -33,7 +33,6 @@ public class AllMechanism implements Mechanism, Configurable {
 
     public static final String REGEX = "[aA][lL][lL]";
 
-
     /**
      * @see org.apache.james.jspf.core.Mechanism#run(SPF1Data)
      */

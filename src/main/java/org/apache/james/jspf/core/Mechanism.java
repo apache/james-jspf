@@ -33,12 +33,17 @@ public interface Mechanism {
     /**
      * Run the mechanismn with the give SPF1Data
      * 
-     * @param spfData The SPF1Data
+     * @param spfData
+     *            The SPF1Data
      * @return true if the mechanism match. Otherwise false
-     * @throws PermErrorException Get thrown if there are any errors in modifiers
-     * @throws TempErrorException Get thrown if DNS problems detected
-     * @throws NoneException  Get thrown if no valid records was found
+     * @throws PermErrorException
+     *             Get thrown if there are any errors in modifiers
+     * @throws TempErrorException
+     *             Get thrown if DNS problems detected
+     * @throws NoneException
+     *             Get thrown if no valid records was found
      */
-    public boolean run(SPF1Data spfData) throws PermErrorException,TempErrorException, NoneException;
+    public boolean run(SPF1Data spfData) throws PermErrorException,
+            TempErrorException, NoneException;
 
 }

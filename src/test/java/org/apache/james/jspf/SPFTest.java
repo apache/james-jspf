@@ -17,7 +17,6 @@
 
 package org.apache.james.jspf;
 
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -54,6 +53,7 @@ public class SPFTest extends TestCase {
     }
 
     private SPFTestDef data;
+
     private SPF spf;
 
     public SPFTest(SPF spf, SPFTestDef def) {
@@ -176,7 +176,8 @@ public class SPFTest extends TestCase {
                             def.name = tokens[1] + " " + tokens[2];
                             def.command = tokens[1] + " " + tokens[2] + " "
                                     + defaultCommands;
-                        } else if ("/.*/".equals(tokens[1]) || "jspf".equals(tokens[1])) {
+                        } else if ("/.*/".equals(tokens[1])
+                                || "jspf".equals(tokens[1])) {
 
                             if ("result".equals(tokens[0])) {
                                 if (def.result == null)
@@ -197,7 +198,7 @@ public class SPFTest extends TestCase {
                             }
 
                         } else {
-                            //System.out.println("Ignored line: " + line);
+                            // System.out.println("Ignored line: " + line);
                         }
 
                     } else {

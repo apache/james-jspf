@@ -38,24 +38,26 @@ public class ExpModifier extends GenericModifier {
      * ABNF: explanation = "exp" "=" domain-spec
      */
     public static final String REGEX = "[eE][xX][pP]" + "\\="
-        + SPF1Parser.DOMAIN_SPEC_REGEX;
+            + SPF1Parser.DOMAIN_SPEC_REGEX;
 
     private String defaultExplanation = "http://www.openspf.org/why.html?sender=%{S}&ip=%{I}";
-
 
     /**
      * Generate the explanation and set it in SPF1Data so it can be accessed
      * easy later if needed
      * 
-     * @param spfData The SPF1Data which should used
+     * @param spfData
+     *            The SPF1Data which should used
      * 
      */
     public String run(SPF1Data spfData) {
         String exp = null;
         String host = this.host;
-        
-        // If the currentResult is not fail we have no need to run all these methods!
-        if (!spfData.getCurrentResult().equals(SPF1Constants.FAIL)) return null;
+
+        // If the currentResult is not fail we have no need to run all these
+        // methods!
+        if (!spfData.getCurrentResult().equals(SPF1Constants.FAIL))
+            return null;
 
         try {
             host = new MacroExpand(spfData).expandDomain(host);
@@ -66,7 +68,7 @@ public class ExpModifier extends GenericModifier {
             } catch (TempErrorException e) {
                 // Nothing todo here.. just return the default explanation
             }
-            
+
             if ((exp == null) || (exp.equals(""))) {
                 spfData.setExplanation(new MacroExpand(spfData)
                         .expandExplanation(defaultExplanation));

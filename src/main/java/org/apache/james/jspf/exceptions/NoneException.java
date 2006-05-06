@@ -18,22 +18,21 @@
 package org.apache.james.jspf.exceptions;
 
 /**
-  * This exception get thrown if the result should be none
-  * 
-  * @author Norman Maurer <nm@byteaction.de>
-  * @author Stefano Bagnara <apache@bago.org>
-  */
+ * This exception get thrown if the result should be none
+ * 
+ * @author Norman Maurer <nm@byteaction.de>
+ * @author Stefano Bagnara <apache@bago.org>
+ */
 public class NoneException extends Exception {
 
-    
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public NoneException() {
-		super();
-	}
+    public NoneException() {
+        super();
+    }
 
-	public NoneException(String strErrorMessage) {
-		super(strErrorMessage);
-	}
+    public NoneException(String strErrorMessage) {
+        super(strErrorMessage);
+    }
 
 }

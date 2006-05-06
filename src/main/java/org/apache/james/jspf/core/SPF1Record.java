@@ -21,9 +21,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 /**
- *  The Class represent the SPF1 Record and provide methods to get all
- *  directives and modifiers.
- *  
+ * The Class represent the SPF1 Record and provide methods to get all directives
+ * and modifiers.
+ * 
  * @author Norman Maurer <nm@byteaction.de>
  * @author Stefano Bagnara <apache@bago.org>
  */
@@ -32,16 +32,16 @@ public class SPF1Record {
     private Collection directives = new ArrayList();
 
     private Collection modifiers = new ArrayList();
-    
+
     /**
      * Return the directives as Collection
      * 
-     * @return directives Collection of all qualifier+mechanism which should be used
+     * @return directives Collection of all qualifier+mechanism which should be
+     *         used
      */
     public Collection getDirectives() {
         return directives;
     }
-
 
     /**
      * Return the modifiers as Collection

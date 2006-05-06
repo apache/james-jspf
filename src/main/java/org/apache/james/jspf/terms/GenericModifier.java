@@ -38,7 +38,8 @@ public abstract class GenericModifier implements Modifier, Configurable {
      * @see org.apache.james.jspf.core.Modifier#run(SPF1Data)
      * 
      */
-    public abstract String run(SPF1Data spfData) throws PermErrorException, TempErrorException;
+    public abstract String run(SPF1Data spfData) throws PermErrorException,
+            TempErrorException;
 
     /**
      * @see org.apache.james.jspf.core.Configurable#config(ConfigurationMatch)

@@ -383,8 +383,9 @@ public class SPF1Parser {
             try {
                 l.add(new TermDef(mechClass));
             } catch (Exception e) {
-                log.debug("Unable to create the term collection",e);
-                throw new IllegalStateException("Unable to create the term collection");
+                log.debug("Unable to create the term collection", e);
+                throw new IllegalStateException(
+                        "Unable to create the term collection");
             }
         }
         return l;
@@ -393,10 +394,13 @@ public class SPF1Parser {
     /**
      * This Method parse the given spf record and checks for syntax
      * 
-     * @param spfRecord The String which represent the spf record in dns
+     * @param spfRecord
+     *            The String which represent the spf record in dns
      * @return result The SPF1Record
-     * @throws PermErrorException Get thrown if an syntax error was detected
-     * @throws NoneException Getthrown if no spf record could be found
+     * @throws PermErrorException
+     *             Get thrown if an syntax error was detected
+     * @throws NoneException
+     *             Getthrown if no spf record could be found
      */
     public SPF1Record parse(String spfRecord) throws PermErrorException,
             NoneException {
@@ -467,8 +471,10 @@ public class SPF1Parser {
     }
 
     /**
-     * @param res the MatchResult
-     * @param start the position where the terms starts
+     * @param res
+     *            the MatchResult
+     * @param start
+     *            the position where the terms starts
      * @return
      * @throws PermErrorException
      */

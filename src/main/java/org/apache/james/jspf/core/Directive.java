@@ -27,7 +27,8 @@ public class Directive {
 
     private Mechanism mechanism = null;
 
-    public Directive(String qualifier, Mechanism mechanism) throws PermErrorException {
+    public Directive(String qualifier, Mechanism mechanism)
+            throws PermErrorException {
         super();
         if (qualifier != null && qualifier.length() > 0) {
             this.qualifier = qualifier;
@@ -38,7 +39,8 @@ public class Directive {
         this.mechanism = mechanism;
     }
 
-    public String run(SPF1Data spfData) throws PermErrorException,TempErrorException, NoneException {
+    public String run(SPF1Data spfData) throws PermErrorException,
+            TempErrorException, NoneException {
         if (mechanism.run(spfData)) {
             return qualifier;
         } else {

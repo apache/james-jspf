@@ -29,7 +29,7 @@ import java.util.Arrays;
 import java.util.List;
 
 final class SPF1TestMockDNSService implements DNSService {
-    
+
     /**
      * @param suite
      */
@@ -170,28 +170,25 @@ final class SPF1TestMockDNSService implements DNSService {
         }
         try {
             String res = dnsService.getSpfRecord(hostname, spfVersion);
-            System.out.println("getSpfRecord(" + hostname + ","
-                    + spfVersion + ") = " + res);
+            System.out.println("getSpfRecord(" + hostname + "," + spfVersion
+                    + ") = " + res);
             return res;
         } catch (TempErrorException e) {
-            System.out.println("getSpfRecord(" + hostname + ","
-                    + spfVersion + ") = TempErrorException[" + e.getMessage()
-                    + "]");
+            System.out.println("getSpfRecord(" + hostname + "," + spfVersion
+                    + ") = TempErrorException[" + e.getMessage() + "]");
             throw e;
         } catch (PermErrorException e) {
-            System.out.println("getSpfRecord(" + hostname + ","
-                    + spfVersion + ") = PermErrorException[" + e.getMessage()
-                    + "]");
+            System.out.println("getSpfRecord(" + hostname + "," + spfVersion
+                    + ") = PermErrorException[" + e.getMessage() + "]");
             throw e;
         } catch (NoneException e) {
-            System.out.println("getSpfRecord(" + hostname + ","
-                    + spfVersion + ") = NoneException[" + e.getMessage()
-                    + "]");
+            System.out.println("getSpfRecord(" + hostname + "," + spfVersion
+                    + ") = NoneException[" + e.getMessage() + "]");
             throw e;
         }
     }
-    
-    public List getLocalDomainNames(){
+
+    public List getLocalDomainNames() {
         List res = dnsService.getLocalDomainNames();
         System.out.print("getLocalDomainNames() = ");
         if (res != null) {
@@ -207,12 +204,12 @@ final class SPF1TestMockDNSService implements DNSService {
             System.out.println("getLocalDomainNames-ret: null");
         }
         return res;
-       
+
     }
-    
+
     public List getAAAARecords(String strServer, int mask)
-        throws NoneException, PermErrorException, TempErrorException {
-        
+            throws NoneException, PermErrorException, TempErrorException {
+
         try {
             List res = dnsService.getAAAARecords(strServer, mask);
             System.out.print("getAAAARecords(" + strServer + "," + mask
@@ -246,8 +243,8 @@ final class SPF1TestMockDNSService implements DNSService {
         }
     }
 
-    public List getARecords(String strServer, int mask)
-            throws NoneException, PermErrorException, TempErrorException {
+    public List getARecords(String strServer, int mask) throws NoneException,
+            PermErrorException, TempErrorException {
         if (mask == 32
                 && "1.bob.lp._spf.spf1-test.mailzone.com".equals(strServer))
             return getAddressList("127.0.0.2", mask);
@@ -408,8 +405,7 @@ final class SPF1TestMockDNSService implements DNSService {
             throw new NoneException(
                     "No A record found for: 4.24.236.64.in-addr._spf.80.spf1-test.mailzone.com");
         if (mask == 32 && "45.spf1-test.mailzone.com".equals(strServer))
-            return getAddressList("192.0.2.147,192.0.2.145,192.0.2.146",
-                    mask);
+            return getAddressList("192.0.2.147,192.0.2.145,192.0.2.146", mask);
         if (mask == 32 && "80.spf1-test.mailzone.com".equals(strServer))
             return getAddressList("208.210.124.180", mask);
         if (mask == 32
@@ -456,8 +452,7 @@ final class SPF1TestMockDNSService implements DNSService {
 
         try {
             List res = dnsService.getARecords(strServer, mask);
-            System.out.print("getARecords(" + strServer + "," + mask
-                    + ") = ");
+            System.out.print("getARecords(" + strServer + "," + mask + ") = ");
             if (res != null) {
                 for (int i = 0; i < res.size(); i++) {
                     System.out.print(res.get(i));
@@ -517,14 +512,11 @@ final class SPF1TestMockDNSService implements DNSService {
         if ("208.210.124.1".equals(ipAddress))
             return Arrays.asList(new String[] { "pobox-gw.icgroup.com" });
         if ("208.210.124.130".equals(ipAddress))
-            return Arrays
-                    .asList(new String[] { "30.spf1-test.mailzone.com" });
+            return Arrays.asList(new String[] { "30.spf1-test.mailzone.com" });
         if ("208.210.124.131".equals(ipAddress))
-            return Arrays
-                    .asList(new String[] { "31.spf1-test.mailzone.com" });
+            return Arrays.asList(new String[] { "31.spf1-test.mailzone.com" });
         if ("208.210.124.180".equals(ipAddress))
-            return Arrays
-                    .asList(new String[] { "80.spf1-test.mailzone.com" });
+            return Arrays.asList(new String[] { "80.spf1-test.mailzone.com" });
         if ("208.210.124.192".equals(ipAddress))
             return Arrays.asList(new String[] { "spf1-test.mailzone.com" });
         if ("64.236.24.4".equals(ipAddress))
@@ -561,8 +553,7 @@ final class SPF1TestMockDNSService implements DNSService {
 
     }
 
-    public List getAddressList(String list, int mask)
-            throws PermErrorException {
+    public List getAddressList(String list, int mask) throws PermErrorException {
         if (list == null || "".equals(list)) {
             return new ArrayList();
         }
@@ -600,8 +591,7 @@ final class SPF1TestMockDNSService implements DNSService {
         if (mask == 26 && "98.spf1-test.mailzone.com".equals(domainName))
             return getAddressList("208.210.124.180", mask);
         if (mask == 32
-                && "fallback-relay.spf1-test.mailzone.com"
-                        .equals(domainName))
+                && "fallback-relay.spf1-test.mailzone.com".equals(domainName))
             return getAddressList(
                     "192.0.2.40,192.0.2.41,192.0.2.42,192.0.2.43", mask);
         if (mask == 32 && "spf1-test.mailzone.com".equals(domainName))
@@ -610,8 +600,8 @@ final class SPF1TestMockDNSService implements DNSService {
                     mask);
         try {
             List res = dnsService.getMXRecords(domainName, mask);
-            System.out.print("getMXRecords(" + domainName + "," + mask
-                    + ") = ");
+            System.out
+                    .print("getMXRecords(" + domainName + "," + mask + ") = ");
             if (res != null) {
                 for (int i = 0; i < res.size(); i++) {
                     System.out.print(res.get(i));

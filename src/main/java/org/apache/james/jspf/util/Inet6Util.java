@@ -49,20 +49,20 @@ public class Inet6Util {
 
             return byteAddress;
         }
-        
+
         if (ipAddressString.charAt(0) == '[') {
             ipAddressString = ipAddressString.substring(1, ipAddressString
                     .length() - 1);
         }
 
-        StringTokenizer tokenizer = new StringTokenizer(ipAddressString,
-                ":.", true);
+        StringTokenizer tokenizer = new StringTokenizer(ipAddressString, ":.",
+                true);
         ArrayList hexStrings = new ArrayList();
         ArrayList decStrings = new ArrayList();
         String token = "";
         String prevToken = "";
         int doubleColonIndex = -1; // If a double colon exists, we need to
-                                    // insert 0s.
+        // insert 0s.
 
         // Go through the tokens, including the seperators ':' and '.'
         // When we hit a : or . the previous token will be added to either
@@ -121,8 +121,8 @@ public class Inet6Util {
 
         // Now if there are any decimal values, we know where they go...
         for (int i = 0; i < decStrings.size(); i++) {
-            ipByteArray[i + 12] = (byte) (Integer
-                    .parseInt((String) decStrings.get(i)) & 255);
+            ipByteArray[i + 12] = (byte) (Integer.parseInt((String) decStrings
+                    .get(i)) & 255);
         }
 
         // now check to see if this guy is actually and IPv4 address
@@ -146,12 +146,11 @@ public class Inet6Util {
             }
             return ipv4ByteArray;
         }
-        
+
         return ipByteArray;
 
     }
-    
-    
+
     /** Converts a 4 character hex word into a 2 byte word equivalent */
     public static void convertToBytes(String hexWord, byte ipByteArray[],
             int byteIndex) {
@@ -184,7 +183,7 @@ public class Inet6Util {
         charValue = getIntValue(hexWord.charAt(hexWordIndex));
         ipByteArray[byteIndex + 1] = (byte) (ipByteArray[byteIndex + 1] | charValue & 15);
     }
-    
+
     static int getIntValue(char c) {
 
         switch (c) {
@@ -228,8 +227,6 @@ public class Inet6Util {
         return 0;
     }
 
-
-    
     public static boolean isValidIP6Address(String ipAddress) {
         int length = ipAddress.length();
         boolean doubleColon = false;

@@ -51,9 +51,10 @@ public class AMechanism extends GenericMechanism {
      * 
      * @see org.apache.james.jspf.core.GenericMechanism#run(org.apache.james.jspf.core.SPF1Data)
      */
-    public boolean run(SPF1Data spfData) throws PermErrorException,TempErrorException {
+    public boolean run(SPF1Data spfData) throws PermErrorException,
+            TempErrorException {
         ArrayList addressList = new ArrayList();
-        
+
         // update currentDepth
         spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);
 
@@ -62,14 +63,14 @@ public class AMechanism extends GenericMechanism {
 
         // get the ipAddress
         try {
-            if(Inet6Util.isValidIPV4Address(spfData.getIpAddress())) {
-            
+            if (Inet6Util.isValidIPV4Address(spfData.getIpAddress())) {
+
                 IPAddr checkAddress = IPAddr.getAddress(spfData.getIpAddress(),
-                    ip4cidr);
-            
+                        ip4cidr);
+
                 try {
                     addressList.addAll(spfData.getDnsProbe().getARecords(host,
-                        ip4cidr));
+                            ip4cidr));
                     if (checkAddressList(checkAddress, addressList)) {
                         return true;
                     }
@@ -82,20 +83,20 @@ public class AMechanism extends GenericMechanism {
             } else {
                 IPAddr checkAddress = IPAddr.getAddress(spfData.getIpAddress(),
                         ip6cidr);
-                
-                    try {
-                        addressList.addAll(spfData.getDnsProbe().getAAAARecords(host,
-                            ip6cidr));
-                        if (checkAddressList(checkAddress, addressList)) {
-                            return true;
-                        }
-                    } catch (TempErrorException e) {
-                        throw new TempErrorException(e.getMessage());
-                    } catch (Exception e) {
-                        // no a records just return null
-                        return false;
+
+                try {
+                    addressList.addAll(spfData.getDnsProbe().getAAAARecords(
+                            host, ip6cidr));
+                    if (checkAddressList(checkAddress, addressList)) {
+                        return true;
                     }
-                
+                } catch (TempErrorException e) {
+                    throw new TempErrorException(e.getMessage());
+                } catch (Exception e) {
+                    // no a records just return null
+                    return false;
+                }
+
             }
         } catch (Exception e) {
             throw new PermErrorException("No valid ipAddress: "

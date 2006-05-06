@@ -24,7 +24,6 @@ import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.parser.SPF1Parser;
 import org.apache.james.jspf.util.ConfigurationMatch;
 
-
 /**
  * This Class represent an Unknown Modifier
  * 
@@ -34,12 +33,12 @@ import org.apache.james.jspf.util.ConfigurationMatch;
 public class UnknownModifier implements Modifier, Configurable {
 
     /**
-     * ABNF: name = ALPHA *( ALPHA / DIGIT / "-" / "_" / "." )
-     * ABNF: unknown-modifier = name "=" macro-string
+     * ABNF: name = ALPHA *( ALPHA / DIGIT / "-" / "_" / "." ) ABNF:
+     * unknown-modifier = name "=" macro-string
      */
     public static final String REGEX = "(" + SPF1Parser.ALPHA_PATTERN + "{1}"
-        + "[A-Za-z0-9\\-\\_\\.]*" + ")" + "\\=(" + SPF1Parser.MACRO_STRING_REGEX + ")";
-
+            + "[A-Za-z0-9\\-\\_\\.]*" + ")" + "\\=("
+            + SPF1Parser.MACRO_STRING_REGEX + ")";
 
     /**
      * @see org.apache.james.jspf.core.Modifier#run(org.apache.james.jspf.core.SPF1Data)

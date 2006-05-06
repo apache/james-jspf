@@ -44,7 +44,8 @@ public class PTRMechanism extends GenericMechanism {
     /**
      * @see org.apache.james.jspf.core.GenericMechanism#run(org.apache.james.jspf.core.SPF1Data)
      */
-    public boolean run(SPF1Data spfData) throws PermErrorException,TempErrorException, NoneException {
+    public boolean run(SPF1Data spfData) throws PermErrorException,
+            TempErrorException, NoneException {
         String compareDomain;
         IPAddr compareIP;
         ArrayList validatedHosts = new ArrayList();

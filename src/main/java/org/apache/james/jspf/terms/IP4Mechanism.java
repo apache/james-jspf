@@ -48,7 +48,8 @@ public class IP4Mechanism extends GenericMechanism {
     public boolean run(SPF1Data spfData) throws PermErrorException {
         IPAddr originalIP;
 
-        originalIP = IPAddr.getAddress(spfData.getIpAddress(), ip.getMaskLength());
+        originalIP = IPAddr.getAddress(spfData.getIpAddress(), ip
+                .getMaskLength());
 
         if (ip.getMaskedIPAddress().equals(originalIP.getMaskedIPAddress())) {
             return true;
@@ -67,7 +68,7 @@ public class IP4Mechanism extends GenericMechanism {
         }
         String ipString = params.group(1);
         if (!isValidAddress(ipString)) {
-            throw new PermErrorException("Invalid Address: "+ipString);
+            throw new PermErrorException("Invalid Address: " + ipString);
         }
         maskLength = getMaxCidr();
         if (params.groupCount() >= 2 && params.group(2) != null) {
@@ -88,6 +89,7 @@ public class IP4Mechanism extends GenericMechanism {
 
     /**
      * Returns the max cidr for ip4
+     * 
      * @return maxCidr The max cidr
      */
     protected int getMaxCidr() {

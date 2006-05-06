@@ -44,7 +44,8 @@ public class MXMechanism extends AMechanism {
      * 
      * @see org.apache.james.jspf.core.GenericMechanism#run(org.apache.james.jspf.core.SPF1Data)
      */
-    public boolean run(SPF1Data spfData) throws PermErrorException,TempErrorException {
+    public boolean run(SPF1Data spfData) throws PermErrorException,
+            TempErrorException {
         ArrayList addressList = new ArrayList();
 
         // update currentDepth

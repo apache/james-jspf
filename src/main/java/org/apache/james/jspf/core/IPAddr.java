@@ -210,20 +210,21 @@ public class IPAddr {
      */
     private void stringToInternal(String netAddress) throws PermErrorException {
         netAddress = stripDot(netAddress);
-        
+
         byte[] bytes = Inet6Util.createByteArrayFromIPAddressString(netAddress);
-        
+
         if (bytes.length == 4) {
             for (int i = 0; i < bytes.length; i++) {
                 address[i] = bytes[i];
             }
-        } else if (bytes.length == 16){
+        } else if (bytes.length == 16) {
             setIP6Defaults();
             for (int i = 0; i < bytes.length / 2; i++) {
-                address[i] = unsigned(bytes[i*2])*256+unsigned(bytes[i*2+1]);
+                address[i] = unsigned(bytes[i * 2]) * 256
+                        + unsigned(bytes[i * 2 + 1]);
             }
         } else {
-            throw new PermErrorException("Not a valid address: "+netAddress);
+            throw new PermErrorException("Not a valid address: " + netAddress);
         }
     }
 
@@ -407,23 +408,24 @@ public class IPAddr {
                 && (Inet6Util.isValidIPV4Address(ip) || Inet6Util
                         .isValidIP6Address(ip));
     }
-    
+
     /**
      * This method try to covnert an ip address to an easy readable ip. See
-     * http://java.sun.com/j2se/1.4.2/docs/api/java/net/Inet6Address.html for 
+     * http://java.sun.com/j2se/1.4.2/docs/api/java/net/Inet6Address.html for
      * the format it returns. For ipv4 it make no convertion
      * 
-     * @param ip The ip which should be tried to convert
+     * @param ip
+     *            The ip which should be tried to convert
      * @return ip The converted ip
      */
     public static String getReadableIP(String ip) {
-        
+
         // Convert the ip if its an ipv6 ip. For ipv4 no conversion is needed
         if (Inet6Util.isValidIP6Address(ip)) {
             try {
                 return Address.getByName(ip).getHostAddress();
             } catch (UnknownHostException e) {
-                // ignore this 
+                // ignore this
             }
         }
         return ip;
