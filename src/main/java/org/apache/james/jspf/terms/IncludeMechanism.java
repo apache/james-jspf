@@ -18,7 +18,6 @@
 package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.SPF;
-import org.apache.james.jspf.SPF1Utils;
 import org.apache.james.jspf.core.Configurable;
 import org.apache.james.jspf.core.Mechanism;
 import org.apache.james.jspf.core.SPF1Constants;
@@ -84,8 +83,6 @@ public class IncludeMechanism implements Mechanism, Configurable {
             return true;
         } else if (res.equals(SPF1Constants.FAIL) || res.equals(SPF1Constants.SOFTFAIL) || res.equals(SPF1Constants.NEUTRAL)) {
             return false;
-        } else if (res.equals(SPF1Utils.NONE_CONV)) {
-            throw new PermErrorException("included checkSPF has no SPF Record");
         } else {
             throw new TempErrorException("included checkSPF returned an Illegal result");
         }
