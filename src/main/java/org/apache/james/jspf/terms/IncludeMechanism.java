@@ -60,33 +60,7 @@ public class IncludeMechanism implements Mechanism, Configurable {
         String host = this.host;
 
         // update currentDepth
-        spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);
-
-        /*
-         * TODO: Whether this mechanism matches, does not match, or throws an
-         * error depends on the result of the recursive evaluation of
-         * check_host():
-         * +---------------------------------+---------------------------------+
-         * | A recursive check_host() result | Causes the "include" mechanism  |
-         * | of:                             | to:                             |
-         * +---------------------------------+---------------------------------+
-         * | Pass                            | match                           |
-         * |                                 |                                 |
-         * | Fail                            | not match                       |
-         * |                                 |                                 |
-         * | SoftFail                        | not match                       |
-         * |                                 |                                 |
-         * | Neutral                         | not match                       |
-         * |                                 |                                 |
-         * | TempError                       | throw TempError                 |
-         * |                                 |                                 |
-         * | PermError                       | throw PermError                 |
-         * |                                 |                                 |
-         * | None                            | throw PermError                 |
-         * +---------------------------------+---------------------------------+
-         */
-        
-        
+        spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);      
         
         try {
             host = new MacroExpand(spfData).expandDomain(host);
