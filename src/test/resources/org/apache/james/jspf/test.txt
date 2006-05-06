@@ -1456,7 +1456,7 @@ header-comment  /.*/ spfquery:
 received-spf    /.*/ Received-SPF:
 
 spfquery -ip=192.0.2.200 -sender=spf5-test.foo.bar -helo=spf5-test.foo.bar
-result          /.*/ fail
+result          /.*/ error
 smtp-comment    /.*/ 
 header-comment  /.*/ spfquery:
 received-spf    /.*/ Received-SPF:

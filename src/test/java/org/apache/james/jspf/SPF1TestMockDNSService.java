@@ -178,9 +178,9 @@ final class SPF1TestMockDNSService implements DNSService {
             if ("spf3-test.foo.bar".equals(hostname))
                 return "v=spf1 redirect=spf2-test.foo.bar";
             if ("spf4-test.foo.bar".equals(hostname))
-                return "v=spf1 include=spf2-test.foo.bar +all";
+                return "v=spf1 include:spf2-test.foo.bar +all";
             if ("spf5-test.foo.bar".equals(hostname))
-                return "v=spf1 include=spf6-test.foo.bar -all";
+                return "v=spf1 include:spf6-test.foo.bar -all";
             if ("spf6-test.foo.bar".equals(hostname))
                 throw new NoneException(
                         "No TXTRecord found for: spf6-test.mailzone.com");
