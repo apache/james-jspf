@@ -1435,3 +1435,28 @@ smtp-comment    /.*/ explanation : Required option is missing
 header-comment  /.*/ spfquery: domain of 118.spf1-test.mailzone.com does not designate 192.0.2.200 as permitted sender
 received-spf    /.*/ Received-SPF: fail (spfquery: domain of 118.spf1-test.mailzone.com does not designate 192.0.2.200 as permitted sender) client-ip=192.0.2.200; envelope-from=postmaster@118.spf1-test.mailzone.com; helo=118.spf1-test.mailzone.com;
 
+# redirect tests
+spfquery -ip=192.0.2.200 -sender=spf1-test.foo.bar -helo=spf1-test.foo.bar
+result          /.*/ pass
+smtp-comment    /.*/ 
+header-comment  /.*/ spfquery:
+received-spf    /.*/ Received-SPF:
+
+spfquery -ip=192.0.2.200 -sender=spf3-test.foo.bar -helo=spf3-test.foo.bar
+result          /.*/ fail
+smtp-comment    /.*/ 
+header-comment  /.*/ spfquery:
+received-spf    /.*/ Received-SPF:
+
+# include
+spfquery -ip=192.0.2.200 -sender=spf4-test.foo.bar -helo=spf4-test.foo.bar
+result          /.*/ pass
+smtp-comment    /.*/ 
+header-comment  /.*/ spfquery:
+received-spf    /.*/ Received-SPF:
+
+spfquery -ip=192.0.2.200 -sender=spf5-test.foo.bar -helo=spf5-test.foo.bar
+result          /.*/ fail
+smtp-comment    /.*/ 
+header-comment  /.*/ spfquery:
+received-spf    /.*/ Received-SPF:

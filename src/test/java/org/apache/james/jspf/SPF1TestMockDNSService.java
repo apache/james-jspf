@@ -29,18 +29,22 @@ import java.util.Arrays;
 import java.util.List;
 
 final class SPF1TestMockDNSService implements DNSService {
+    
 
     /**
      * @param suite
      */
     public SPF1TestMockDNSService() {
+        System.out.println("HERE");
     }
 
     private DNSService dnsService = new DNSServiceXBillImpl();
 
     public String getSpfRecord(String hostname, String spfVersion)
             throws PermErrorException, NoneException, TempErrorException {
+       
         if ("v=spf1".equals(spfVersion)) {
+            
             if ("01.spf1-test.mailzone.com".equals(hostname))
                 return "v=spf1                                                             ";
             if ("02.spf1-test.mailzone.com".equals(hostname))
@@ -167,9 +171,23 @@ final class SPF1TestMockDNSService implements DNSService {
             if ("spf1-test.mailzone.com".equals(hostname))
                 throw new NoneException(
                         "No TXTRecord found for: spf1-test.mailzone.com");
-        }
+            if ("spf1-test.foo.bar".equals(hostname))
+                return "v=spf1 redirect=spf2-test.foo.bar +all";
+            if ("spf2-test.foo.bar".equals(hostname)) 
+                return "v=spf1 -all";
+            if ("spf3-test.foo.bar".equals(hostname))
+                return "v=spf1 redirect=spf2-test.foo.bar";
+            if ("spf4-test.foo.bar".equals(hostname))
+                return "v=spf1 include=spf2-test.foo.bar +all";
+            if ("spf5-test.foo.bar".equals(hostname))
+                return "v=spf1 include=spf6-test.foo.bar -all";
+            if ("spf6-test.foo.bar".equals(hostname))
+                throw new NoneException(
+                        "No TXTRecord found for: spf6-test.mailzone.com");
+        }      
         try {
             String res = dnsService.getSpfRecord(hostname, spfVersion);
+
             System.out.println("getSpfRecord(" + hostname + "," + spfVersion
                     + ") = " + res);
             return res;
