@@ -177,13 +177,27 @@ final class SPF1TestMockDNSService implements DNSService {
                 return "v=spf1 -all";
             if ("spf3-test.foo.bar".equals(hostname))
                 return "v=spf1 redirect=spf2-test.foo.bar";
+            
+            // include tests
             if ("spf4-test.foo.bar".equals(hostname))
                 return "v=spf1 include:spf2-test.foo.bar +all";
             if ("spf5-test.foo.bar".equals(hostname))
                 return "v=spf1 include:spf6-test.foo.bar -all";
             if ("spf6-test.foo.bar".equals(hostname))
                 throw new NoneException(
-                        "No TXTRecord found for: spf6-test.mailzone.com");
+                        "No TXTRecord found for: spf6-test.foo.bar");
+            if ("spf7-test.foo.bar".equals(hostname)) 
+                return "v=spf1 include:spf8-test.foo.bar";
+            if ("spf8-test.foo.bar".equals(hostname))
+                return "v=spf1 -all";
+            if ("spf9-test.foo.bar".equals(hostname))
+                return "v=spf1 include:spf10-test.foo.bar +all";
+            if ("spf10-test.foo.bar".equals(hostname))
+                return "v=spf1 ?all";
+            if ("spf11-test.foo.bar".equals(hostname))
+                return "v=spf1 include:spf12-test.foo.bar +all";
+            if ("spf12-test.foo.bar".equals(hostname))
+                return "v=spf1 ~all";
         }      
         try {
             String res = dnsService.getSpfRecord(hostname, spfVersion);
