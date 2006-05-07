@@ -29,4 +29,3 @@ We don't have a JIRA instance for jspf so here is a list of issues
 
 Change proposals
 
-- remove main from SPF or change it to read parameters from the command line args

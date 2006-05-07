@@ -357,23 +357,4 @@ public class SPF {
 
         this.timeOut = timeOut;
     }
-
-    /**
-     * @param args
-     */
-    public static void main(String[] args) {
-        SPF spf = new SPF();
-
-        String ipAddress = "192.0.2.120";
-        String mailFrom = "20.spf1-test.mailzone.com";
-        String host = "20.spf1-test.mailzone.com";
-
-        // run test !
-        spf.checkSPF(ipAddress, mailFrom, host);
-        /*
-         * System.out.println("result: " + result); System.out.println("header: " +
-         * spf.getHeader()); System.out.println("exp: " + spf.getExplanation());
-         */
-    }
-
 }
