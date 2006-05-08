@@ -3,7 +3,8 @@ We don't have a JIRA instance for jspf so here is a list of issues
 - add more javadocs <- almost complete!
 
 - correctly implement the explanation modifier and his behaviour for includes and redirects.
-  ( What is the correct ?)
+  NM - What is the correct ?
+  SB - IMHO to use the original explanation in includes and the destination explanation in redirects.
 
 - add tests for every MUST and MUST NOT written in the rfc.
 
