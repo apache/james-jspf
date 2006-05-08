@@ -40,7 +40,9 @@ public class SPF1Data implements MacroData {
 
     protected String spfVersion = "v=spf1";
 
-    private String ipAddress = ""; // (i)<sending-host>
+    private String ipAddress = ""; 
+    
+    private String macroIpAddress = ""; //(i)<sending-host>
 
     private String mailFrom = ""; // (s)<responsible-sender>
 
@@ -205,11 +207,29 @@ public class SPF1Data implements MacroData {
         return senderDomain;
     }
 
+
     /**
-     * @see org.apache.james.jspf.macro.MacroData#getIpAddress()
+     * Get the ipAddress which was used to connect
+     * @return ipAddres 
      */
     public String getIpAddress() {
         return ipAddress;
+    }
+    
+    /**
+     * @see org.apache.james.jspf.macro.MacroData#getMacroIpAddress()
+     */
+    public String getMacroIpAddress() {
+        
+        if (IPAddr.isIPV6(ipAddress)) {
+            try {
+                return IPAddr.getAddress(ipAddress).getNibbleFormat();
+            } catch (PermErrorException e) {
+            }
+        } 
+        
+        return ipAddress;
+
     }
 
     /**

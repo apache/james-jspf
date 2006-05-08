@@ -81,7 +81,7 @@ public interface MacroData {
      * 
      * @return sending-host
      */
-    public String getIpAddress();
+    public String getMacroIpAddress();
 
     /**
      * Get timeStamp (t)

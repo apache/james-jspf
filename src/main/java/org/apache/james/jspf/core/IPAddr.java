@@ -285,16 +285,31 @@ public class IPAddr {
             return getIPAddress(mask);
         }
     }
+    
+    /**
+     * Return the NibbleFormat of the IPAddr
+     * @return ipAddress 
+     */
+    public String getNibbleFormat() {
+        StringBuffer sb = new StringBuffer();
+        String ip = getIPAddress(reverseIP(address));
+        if (ip.contains(":")) {
+            String ipTemp = ip.replace(":","");
+            
+            for (int i = 0; i < ipTemp.length(); i++) {
+                System.out.println("I: " +i);
+                String c = String.valueOf(ipTemp.charAt(i));
+                sb.append(c);
+                if (i != ipTemp.length() -1) {
+                sb.append(".");
+                }
+            }
+            return sb.toString();
+        } else {
+            return ip;
+        } 
+    }
 
-    // TODO
-    // public String getNibbleFormat(){
-    // //ie : IP6 = 5f05:2000:80ad:5800::1 therefore nibble format =
-    // 5.f.0.5.0.0.0.0.2.0.0.0.8.0.a.d.5.8.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.1
-    // // IP4 = 192.0.0.1 therefore nibble format = 197.0.0.1
-    // return nibbledAddress;
-    // }
-
-    // TODO needs to changed to handle IP6 nibble format
     /**
      * Get reverse ipAddress
      * 
@@ -407,6 +422,15 @@ public class IPAddr {
         return ip != null
                 && (Inet6Util.isValidIPV4Address(ip) || Inet6Util
                         .isValidIP6Address(ip));
+    }
+    
+    /**
+     * Retrun if the given ipAddress is ipv6
+     * @param ip The ipAddress
+     * @return true or false
+     */
+    public static boolean isIPV6(String ip) {
+        return Inet6Util.isValidIP6Address(ip);
     }
 
     /**

@@ -231,7 +231,7 @@ public class MacroExpand {
 
         String variable = macro.toLowerCase();
         if (variable.equalsIgnoreCase("i")) {
-            rValue = spfData.getIpAddress();
+            rValue = spfData.getMacroIpAddress();
         } else if (variable.equalsIgnoreCase("s")) {
             rValue = spfData.getMailFrom();
         } else if (variable.equalsIgnoreCase("h")) {
