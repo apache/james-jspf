@@ -70,12 +70,18 @@ public class IncludeMechanism implements Mechanism, Configurable {
             
         spfData.setCurrentDomain(host);
         
+        // On includes we should not use the explanation of the included domain
+        spfData.setIgnoreExplanation(true);
+        
         String res = null;
         try {
             res = new SPF(spfData.getDnsProbe()).checkSPF(spfData);
         } catch (NoneException e) {
             throw new PermErrorException("included checkSPF returned NoneException");
         }
+        
+        // Reset the ignore
+        spfData.setIgnoreExplanation(false);
         
         if (res == null) {
             throw new TempErrorException("included checkSPF returned null");

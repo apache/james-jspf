@@ -58,6 +58,10 @@ public class ExpModifier extends GenericModifier {
         // methods!
         if (!spfData.getCurrentResult().equals(SPF1Constants.FAIL))
             return null;
+        
+        // If we should ignore the explanation we don't have to run this class
+        if (spfData.ignoreExplanation() == true)
+            return null;
 
         try {
             host = new MacroExpand(spfData).expandDomain(host);

@@ -69,6 +69,8 @@ public class SPF1Data implements MacroData {
     private String currentResult = null;
 
     private boolean match = false;
+    
+    private boolean ignoreExplanation = false;
 
     /**
      * Build the SPF1Data from the given parameters
@@ -346,6 +348,22 @@ public class SPF1Data implements MacroData {
      */
     public boolean isMatch() {
         return match;
+    }
+    
+    /**
+     * Get set to true if the explanation should be ignored
+     * @param ignoreExplanation
+     */
+    public void setIgnoreExplanation(boolean ignoreExplanation) {
+        this.ignoreExplanation = ignoreExplanation; 
+    }
+    
+    /**
+     * Return true if the explanation should be ignored
+     * @return true of false
+     */
+    public boolean ignoreExplanation() {
+        return ignoreExplanation;
     }
 
 }

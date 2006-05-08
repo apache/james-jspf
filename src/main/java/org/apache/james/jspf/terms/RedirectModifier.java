@@ -73,10 +73,15 @@ public class RedirectModifier extends GenericModifier {
             String res = null;
             try {
                 res = new SPF(spfData.getDnsProbe()).checkSPF(spfData);
+                
+
             } catch (NoneException e) {
                 // no spf record assigned to the redirect domain
                 throw new PermErrorException(
                         "included checkSPF returned NoneException");
+            } finally {
+                //After the redirect we should not use the explanation from the orginal record
+                spfData.setIgnoreExplanation(true);
             }
 
             return res;
