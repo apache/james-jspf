@@ -3,12 +3,9 @@ We don't have a JIRA instance for jspf so here is a list of issues
 - add more javadocs <- almost complete!
 
 - correctly implement the explanation modifier and his behaviour for includes and redirects.
+  ( What is the correct ?)
 
 - add tests for every MUST and MUST NOT written in the rfc.
-
-- remove system.outs/e.printstacktrace and add correct logging everywhere.
-  Should we use log4j, slf4j (http://www.slf4j.org/).
-  [assigned to Norman Maurer]
 
 - move the mockdsnservice data to zone files, like we did in james-server 
   [assigned to Stefano Bagnara]
@@ -21,7 +18,8 @@ We don't have a JIRA instance for jspf so here is a list of issues
 
 - add a few xdocs for the site generation
 
-- complete macroData implementation (ipv6).
+- complete macroData implementation (ipv6). 
+  [assigned to Norman Maurer]
 
 - add tests for the DNSService implementation (mocking the xbill Resolver)
 
