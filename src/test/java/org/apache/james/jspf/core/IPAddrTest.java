@@ -14,7 +14,7 @@
  * implied.  See the License for the specific language governing       *
  * permissions and limitations under the License.                      *
  ***********************************************************************/
-package org.apache.james.jspf;
+package org.apache.james.jspf.core;
 
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.exceptions.PermErrorException;
@@ -30,70 +30,70 @@ public class IPAddrTest extends TestCase {
     }
 
     public void testValidIp4OverIpv6Address() throws PermErrorException {
-        assertEquals("ipv6", IPAddr.getInAddress("0:0:0:0:0:0:13.1.68.3"));
-        assertEquals("ipv6", IPAddr
+        assertEquals("ip6", IPAddr.getInAddress("0:0:0:0:0:0:13.1.68.3"));
+        assertEquals("ip6", IPAddr
                 .getInAddress("0:0:0:0:0:FFFF:129.144.52.38"));
-        assertEquals("ipv6", IPAddr.getInAddress("::13.1.68.3"));
-        assertEquals("ipv6", IPAddr.getInAddress("::FFFF:129.144.52.38"));
+        assertEquals("ip6", IPAddr.getInAddress("::13.1.68.3"));
+        assertEquals("ip6", IPAddr.getInAddress("::FFFF:129.144.52.38"));
     }
 
     public void testValidIp6Address() throws PermErrorException {
-        assertEquals("ipv6", IPAddr
+        assertEquals("ip6", IPAddr
                 .getInAddress("FEDC:BA98:7654:3210:FEDC:BA98:7654:3210"));
-        assertEquals("ipv6", IPAddr.getInAddress("1080:0:0:0:8:800:200C:417A"));
-        assertEquals("ipv6", IPAddr.getInAddress("FF01:0:0:0:0:0:0:101"));
-        assertEquals("ipv6", IPAddr.getInAddress("0:0:0:0:0:0:0:1"));
-        assertEquals("ipv6", IPAddr.getInAddress("0:0:0:0:0:0:0:0"));
-        assertEquals("ipv6", IPAddr.getInAddress("1080::8:800:200C:417A"));
-        assertEquals("ipv6", IPAddr.getInAddress("FF01::101"));
-        assertEquals("ipv6", IPAddr.getInAddress("::1"));
-        assertEquals("ipv6", IPAddr.getInAddress("::"));
+        assertEquals("ip6", IPAddr.getInAddress("1080:0:0:0:8:800:200C:417A"));
+        assertEquals("ip6", IPAddr.getInAddress("FF01:0:0:0:0:0:0:101"));
+        assertEquals("ip6", IPAddr.getInAddress("0:0:0:0:0:0:0:1"));
+        assertEquals("ip6", IPAddr.getInAddress("0:0:0:0:0:0:0:0"));
+        assertEquals("ip6", IPAddr.getInAddress("1080::8:800:200C:417A"));
+        assertEquals("ip6", IPAddr.getInAddress("FF01::101"));
+        assertEquals("ip6", IPAddr.getInAddress("::1"));
+        assertEquals("ip6", IPAddr.getInAddress("::"));
     }
 
     public void testInvalidIp6Address() throws PermErrorException {
         try {
-            assertEquals("ipv6", IPAddr.getInAddress("12AB:0:0:CD3"));
+            assertEquals("ip6", IPAddr.getInAddress("12AB:0:0:CD3"));
             fail();
         } catch (PermErrorException e) {
         }
         try {
-            assertEquals("ipv6", IPAddr
+            assertEquals("ip6", IPAddr
                     .getInAddress("1080:0:0:0:8::800:200C:417A"));
             fail();
         } catch (PermErrorException e) {
         }
         try {
-            assertEquals("ipv6", IPAddr.getInAddress("FF01:0:0:0:0:0:0:00000"));
+            assertEquals("ip6", IPAddr.getInAddress("FF01:0:0:0:0:0:0:00000"));
             fail();
         } catch (PermErrorException e) {
         }
         try {
-            assertEquals("ipv6", IPAddr.getInAddress("0:0:0:0:0:0:0:0:1"));
+            assertEquals("ip6", IPAddr.getInAddress("0:0:0:0:0:0:0:0:1"));
             fail();
         } catch (PermErrorException e) {
         }
         try {
-            assertEquals("ipv6", IPAddr.getInAddress("0:0:0:0:0:0:0:O"));
+            assertEquals("ip6", IPAddr.getInAddress("0:0:0:0:0:0:0:O"));
             fail();
         } catch (PermErrorException e) {
         }
         try {
-            assertEquals("ipv6", IPAddr.getInAddress("1080::8:800::200C:417A"));
+            assertEquals("ip6", IPAddr.getInAddress("1080::8:800::200C:417A"));
             fail();
         } catch (PermErrorException e) {
         }
         try {
-            assertEquals("ipv6", IPAddr.getInAddress("FF01:::101"));
+            assertEquals("ip6", IPAddr.getInAddress("FF01:::101"));
             fail();
         } catch (PermErrorException e) {
         }
         try {
-            assertEquals("ipv6", IPAddr.getInAddress(":1:"));
+            assertEquals("ip6", IPAddr.getInAddress(":1:"));
             fail();
         } catch (PermErrorException e) {
         }
         try {
-            assertEquals("ipv6", IPAddr.getInAddress(":"));
+            assertEquals("ip6", IPAddr.getInAddress(":"));
             fail();
         } catch (PermErrorException e) {
         }

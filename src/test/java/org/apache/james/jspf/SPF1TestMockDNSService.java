@@ -24,7 +24,7 @@ import org.apache.james.jspf.exceptions.TempErrorException;
 
 import java.util.List;
 
-final class SPF1TestMockDNSService implements DNSService {
+public final class SPF1TestMockDNSService implements DNSService {
     
     public String getSpfRecord(String hostname, String spfVersion)
             throws PermErrorException, NoneException, TempErrorException {

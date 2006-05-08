@@ -40,9 +40,7 @@ public class SPF1Data implements MacroData {
 
     protected String spfVersion = "v=spf1";
 
-    private String ipAddress = ""; 
-    
-    private String macroIpAddress = ""; //(i)<sending-host>
+    private String ipAddress = ""; // also used for (i)<sending-host>
 
     private String mailFrom = ""; // (s)<responsible-sender>
 

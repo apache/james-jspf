@@ -27,7 +27,11 @@ public class MacroExpandTest extends TestCase {
 
     private final class rfcIP6MacroData extends rfcIP4MacroData {
         public String getInAddress() {
-            return "ipv6";
+            return "ip6";
+        }
+
+        public String getMacroIpAddress() {
+            return "2.0.0.1.0.D.B.8.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.C.B.0.1";
         }
 
         public String getIpAddress() {
@@ -152,10 +156,9 @@ public class MacroExpandTest extends TestCase {
     }
 
     public void testExample6_ipv6() throws PermErrorException {
-        // TODO fix this
-        //assertEquals(
-        //"1.0.B.C.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.B.D.0.1.0.0.2.ip6._spf.example.com",
-        //defIp6me.expandDomain("%{ir}.%{v}._spf.%{d2}"));
+        assertEquals(
+                "1.0.B.C.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.B.D.0.1.0.0.2.ip6._spf.example.com",
+                defIp6me.expandDomain("%{ir}.%{v}._spf.%{d2}"));
     }
 
 }

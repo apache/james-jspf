@@ -292,22 +292,17 @@ public class IPAddr {
      */
     public String getNibbleFormat() {
         StringBuffer sb = new StringBuffer();
-        String ip = getIPAddress(reverseIP(address));
-        if (ip.contains(":")) {
-            String ipTemp = ip.replace(":","");
-            
-            for (int i = 0; i < ipTemp.length(); i++) {
-                System.out.println("I: " +i);
-                String c = String.valueOf(ipTemp.charAt(i));
-                sb.append(c);
-                if (i != ipTemp.length() -1) {
-                sb.append(".");
+        int[] ip = address;
+        for (int i = 0; i < ip.length; i++) {
+            String hex = getHex(ip[i]);
+            for (int j = 0; j < hex.length(); j++) {
+                sb.append(hex.charAt(j));
+                if (i != ip.length -1 || j != hex.length() -1) {
+                    sb.append(".");
                 }
             }
-            return sb.toString();
-        } else {
-            return ip;
-        } 
+        }
+        return sb.toString();
     }
 
     /**
@@ -404,7 +399,7 @@ public class IPAddr {
         } else if (Inet6Util.isValidIPV4Address(ipAddress)) {
             return "in-addr";
         } else if (Inet6Util.isValidIP6Address(ipAddress)) {
-            return "ipv6";
+            return "ip6";
         } else {
             throw new PermErrorException(
                     "IP is not a valid ipv4 or ipv6 address");
