@@ -24,5 +24,7 @@ We don't have a JIRA instance for jspf so here is a list of issues
 
 - make the libray threadsafe (Terms and SPF should be reentrant)
 
+- try to contact Wayne Schlitt again to have permissions to include test.txt and to share back our changes.
+
 Change proposals
 
