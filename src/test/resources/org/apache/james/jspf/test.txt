@@ -77,6 +77,7 @@ result          /.*/ fail
 smtp-comment    /.*/ 
 header-comment  /.*/ spfquery:
 received-spf    /.*/ Received-SPF:
+explanation     /.*/ http://www.openspf.org/why.html?sender=spf3-test.foo.bar&ip=192.0.2.200
 
 # include tests
 spfquery -ip=192.0.2.200 -sender=spf4-test.foo.bar -helo=spf4-test.foo.bar
@@ -108,3 +109,18 @@ result          /.*/ pass
 smtp-comment    /.*/ 
 header-comment  /.*/ spfquery:
 received-spf    /.*/ Received-SPF:
+
+# explanation tests
+spfquery -ip=192.0.2.200 -sender=spf13-test.foo.bar -helo=spf13-test.foo.bar
+result          /.*/ fail
+smtp-comment    /.*/ 
+header-comment  /.*/ spfquery:
+received-spf    /.*/ Received-SPF:
+explanation     /.*/ original.explanation
+
+spfquery -ip=192.0.2.200 -sender=spf15-test.foo.bar -helo=spf15-test.foo.bar
+result          /.*/ fail
+smtp-comment    /.*/ 
+header-comment  /.*/ spfquery:
+received-spf    /.*/ Received-SPF:
+explanation     /.*/ redirect.explanation

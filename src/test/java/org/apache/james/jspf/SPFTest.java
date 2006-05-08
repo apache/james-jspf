@@ -117,6 +117,10 @@ public class SPFTest extends TestCase {
                         data.result.substring(1, data.result.length() - 1),
                         resultSPF));
             }
+
+            assertEquals(data.explanation, spf.getExplanation());
+
+            
         } else {
             // TODO
             System.out
@@ -192,6 +196,9 @@ public class SPFTest extends TestCase {
                             } else if ("header-comment".equals(tokens[0])) {
                                 if (def.headerComment == null)
                                     def.headerComment = tokens[2];
+                            } else if ("explanation".equals(tokens[0])) {
+                                if (def.explanation.equals(""))
+                                        def.explanation = tokens[2];
                             } else {
                                 System.err.println("Unknown token: "
                                         + tokens[0]);
@@ -250,6 +257,8 @@ public class SPFTest extends TestCase {
         public String headerComment = null;
 
         public String receivedSPF = null;
+
+        public String explanation = "";
     }
 
 }

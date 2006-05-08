@@ -40,8 +40,6 @@ public class ExpModifier extends GenericModifier {
     public static final String REGEX = "[eE][xX][pP]" + "\\="
             + SPF1Parser.DOMAIN_SPEC_REGEX;
 
-    private String defaultExplanation = "http://www.openspf.org/why.html?sender=%{S}&ip=%{I}";
-
     /**
      * Generate the explanation and set it in SPF1Data so it can be accessed
      * easy later if needed
@@ -73,13 +71,10 @@ public class ExpModifier extends GenericModifier {
                 // Nothing todo here.. just return the default explanation
             }
 
-            if ((exp == null) || (exp.equals(""))) {
-                spfData.setExplanation(new MacroExpand(spfData)
-                        .expandExplanation(defaultExplanation));
-            } else {
+            if ((exp != null) || (!exp.equals(""))) {
                 spfData.setExplanation(new MacroExpand(spfData)
                         .expandExplanation(exp));
-            }
+            } 
         } catch (PermErrorException e) {
             // Only catch the error and set the explanation
             spfData.setExplanation("");

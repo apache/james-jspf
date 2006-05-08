@@ -64,7 +64,7 @@ public class SPF1Data implements MacroData {
 
     private static final int MAX_DEPTH = 10;
 
-    private String explanation = "";
+    private String explanation = null;
 
     private String currentResult = null;
 

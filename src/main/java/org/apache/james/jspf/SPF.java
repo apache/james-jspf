@@ -26,6 +26,7 @@ import org.apache.james.jspf.core.SPF1Record;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
+import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.parser.SPF1Parser;
 import org.apache.log4j.Logger;
 
@@ -44,7 +45,7 @@ public class SPF {
 
     private SPF1Data spfData;
 
-    private String explanation = "";
+    private String explanation = null;
 
     private String headerTextAsString = "";
 
@@ -93,6 +94,7 @@ public class SPF {
         String result = null;
 
         spfData = null;
+        explanation = "";
 
         try {
             // Setup the data
@@ -119,6 +121,7 @@ public class SPF {
 
         log.info("[ipAddress=" + ipAddress + "] [mailFrom=" + mailFrom
                 + "] [helo=" + hostName + "] => " + convertedResult);
+
 
         // generate the SPF-Result header
         generateHeader(convertedResult);
@@ -244,7 +247,13 @@ public class SPF {
                 spfData.setCurrentResult(result);
                 spfData.setMatch(true);
 
-                if (qualifier.equals(SPF1Constants.FAIL)) {
+                if (qualifier.equals(SPF1Constants.FAIL)) {  
+                    if (spfData.getExplanation()==null || spfData.getExplanation().equals("")) {
+                        try {
+                            spfData.setExplanation(new MacroExpand(spfData)
+                                    .expandExplanation(SPF1Utils.DEFAULT_EXPLANATION));
+                        } catch (PermErrorException e) {}
+                    }
                     explanation = spfData.getExplanation();
                 }
             }

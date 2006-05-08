@@ -59,10 +59,14 @@ final class SPF1TestMockDNSService implements DNSService {
                 return "v=spf1 ~all";
             if ("spf13-test.foo.bar".equals(hostname))
                 return "v=spf1 include:spf14-test.foo.bar -all exp=spf17-test.foo.bar";
+            if ("spf14-test.foo.bar".equals(hostname))
+                return "v=spf1 -all exp=spf14-test.foo.bar";
             if ("spf15-test.foo.bar".equals(hostname))
                 return "v=spf1 redirect=spf16-test.foo.bar exp=spf17-test.foo.bar";
+            if ("spf16-test.foo.bar".equals(hostname))
+                return "v=spf1 -all exp=spf16-test.foo.bar";
         }
-        throw new IllegalStateException("Mock data not available for " + hostname);
+        throw new IllegalStateException("Mock data not available");
     }
 
     public List getLocalDomainNames() {

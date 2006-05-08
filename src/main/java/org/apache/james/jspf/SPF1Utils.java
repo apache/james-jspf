@@ -48,6 +48,8 @@ public class SPF1Utils {
     public static final String FAIL_CONV = "fail";
 
     public static final String SOFTFAIL_CONV = "softfail";
+    
+    public static final String DEFAULT_EXPLANATION = "http://www.openspf.org/why.html?sender=%{S}&ip=%{I}";
 
     /**
      * Convert raw SPF results to SPF names
