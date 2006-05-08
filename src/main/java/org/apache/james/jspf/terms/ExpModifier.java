@@ -71,7 +71,7 @@ public class ExpModifier extends GenericModifier {
                 // Nothing todo here.. just return the default explanation
             }
 
-            if ((exp != null) || (!exp.equals(""))) {
+            if ((exp != null) && (!exp.equals(""))) {
                 spfData.setExplanation(new MacroExpand(spfData)
                         .expandExplanation(exp));
             } 
