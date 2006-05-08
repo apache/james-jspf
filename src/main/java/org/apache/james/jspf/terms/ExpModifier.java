@@ -66,9 +66,11 @@ public class ExpModifier extends GenericModifier {
             try {
                 exp = spfData.getDnsProbe().getTxtCatType(host);
             } catch (NoneException e) {
-                // Nothing todo here.. just return the default explanation
+                // Nothing todo here.. just return null
+                return null;
             } catch (TempErrorException e) {
-                // Nothing todo here.. just return the default explanation
+                // Nothing todo here.. just return null
+                return null;
             }
 
             if ((exp != null) && (!exp.equals(""))) {
@@ -76,8 +78,8 @@ public class ExpModifier extends GenericModifier {
                         .expandExplanation(exp));
             } 
         } catch (PermErrorException e) {
-            // Only catch the error and set the explanation
-            spfData.setExplanation("");
+            // Only catch the error and return null
+            return null;
         }
         return null;
     }
