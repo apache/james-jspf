@@ -57,8 +57,12 @@ final class SPF1TestMockDNSService implements DNSService {
                 return "v=spf1 include:spf12-test.foo.bar +all";
             if ("spf12-test.foo.bar".equals(hostname))
                 return "v=spf1 ~all";
+            if ("spf13-test.foo.bar".equals(hostname))
+                return "v=spf1 include:spf14-test.foo.bar -all exp=spf17-test.foo.bar";
+            if ("spf15-test.foo.bar".equals(hostname))
+                return "v=spf1 redirect=spf16-test.foo.bar exp=spf17-test.foo.bar";
         }
-        throw new IllegalStateException("Mock data not available");
+        throw new IllegalStateException("Mock data not available for " + hostname);
     }
 
     public List getLocalDomainNames() {
@@ -78,8 +82,15 @@ final class SPF1TestMockDNSService implements DNSService {
     public String getTxtCatType(String strServer) throws NoneException,
             PermErrorException, TempErrorException {
         if ("".equals(strServer))
-            throw new NoneException("No TXTRecord found for: ");
-        throw new IllegalStateException("Mock data not available");
+            throw new NoneException("No TXTRecord found for: " + strServer);
+        if ("spf14-test.foo.bar".equals(strServer))
+            return "include.explanation";
+        if ("spf16-test.foo.bar".equals(strServer))
+            return "redirect.explanation";
+        if ("spf17-test.foo.bar".equals(strServer))
+            return "original.explanation";
+        
+        throw new IllegalStateException("Mock data not available for: " + strServer);
     }
 
     public List getPTRRecords(String ipAddress) throws PermErrorException,
