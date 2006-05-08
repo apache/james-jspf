@@ -5,6 +5,8 @@ We don't have a JIRA instance for jspf so here is a list of issues
 - correctly implement the explanation modifier and his behaviour for includes and redirects.
   NM - What is the correct ?
   SB - IMHO to use the original explanation in includes and the destination explanation in redirects.
+  [assigned to Norman Maurer]
+
 
 - add tests for every MUST and MUST NOT written in the rfc.
 
