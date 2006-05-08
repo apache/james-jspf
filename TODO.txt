@@ -22,5 +22,7 @@ We don't have a JIRA instance for jspf so here is a list of issues
 
 - find out how to request dnsjava-2.0.1 to be added to maven2 repository.
 
+- make the libray threadsafe (Terms and SPF should be reentrant)
+
 Change proposals
 
