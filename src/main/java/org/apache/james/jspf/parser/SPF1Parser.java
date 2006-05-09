@@ -78,7 +78,7 @@ import java.util.regex.Pattern;
 public class SPF1Parser {
 
     /**
-     * Regex based on http://ftp.rfc-editor.org/in-notes/authors/rfc4408.txt.
+     * Regex based on http://www.ietf.org/rfc/rfc4408.txt.
      * This will be the next official SPF-Spec
      */
 

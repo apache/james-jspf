@@ -1009,7 +1009,7 @@ received-spf    /.*/ Received-SPF: pass (spfquery: domain of 103.spf1-test.mailz
 
 # This is wrong.
 # The spf implemention should return an permerror if the maximum lookups are reached. 
-# See http://www.schlitt.net/spf/spf_classic/draft-schlitt-spf-classic-02.html#anchor31
+# See http://www.ietf.org/rfc/rfc4408.txt Section 10.1
 #
 #spfquery -ip=192.0.2.98 -sender=droid@104.spf1-test.mailzone.com -helo=104.spf1-test.mailzone.com
 #result          /.*/ unknown

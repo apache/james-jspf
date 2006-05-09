@@ -63,7 +63,6 @@ public class PTRMechanism extends GenericMechanism {
             for (int i = 0; i < domainList.size(); i++) {
 
                 // Get a record for this
-                // TODO with no maskLength what should we get?
                 List aList = spfData.getDnsProbe().getARecords(
                         (String) domainList.get(i), 32);
                 for (int j = 0; j < aList.size(); j++) {

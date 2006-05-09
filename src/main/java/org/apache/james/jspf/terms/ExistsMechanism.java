@@ -58,7 +58,6 @@ public class ExistsMechanism extends GenericMechanism {
         }
 
         try {
-            // TODO: is 32 the correct default?
             aRecords = spfData.getDnsProbe().getARecords(host, 32);
         } catch (TempErrorException e) {
             throw new TempErrorException(e.getMessage());
