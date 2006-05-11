@@ -65,6 +65,11 @@ public final class SPF1TestMockDNSService implements DNSService {
                 return "v=spf1 redirect=spf16-test.foo.bar exp=spf17-test.foo.bar";
             if ("spf16-test.foo.bar".equals(hostname))
                 return "v=spf1 -all exp=spf16-test.foo.bar";
+            if ("spf18-test.foo.bar".equals(hostname))
+                return "v=spf1 +ip6:FEDC:BA98:7654:3210:FEDC:BA98:7654:3210 -all";
+            if ("spf19-test.foo.bar".equals(hostname))
+                return "v=spf1 +ip6:::1 -all";
+            
         }
         throw new IllegalStateException("Mock data not available");
     }

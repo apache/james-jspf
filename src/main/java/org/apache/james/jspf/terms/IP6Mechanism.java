@@ -17,8 +17,6 @@
 
 package org.apache.james.jspf.terms;
 
-import org.apache.james.jspf.core.SPF1Data;
-import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.util.Inet6Util;
 
 /**
@@ -36,15 +34,6 @@ public class IP6Mechanism extends IP4Mechanism {
             + "\\:([0-9A-Fa-f\\:\\.]+)" + "(?:" + IP6_CIDR_LENGTH_REGEX + ")?";
 
     /**
-     * 
-     * @see org.apache.james.jspf.core.GenericMechanism#run(org.apache.james.jspf.core.SPF1Data)
-     */
-    public boolean run(SPF1Data spfData) throws PermErrorException {
-        // TODO
-        throw new PermErrorException("Unimplemented");
-    }
-
-    /**
      * @see org.apache.james.jspf.terms.IP4Mechanism#isValidAddress(String)
      */
     protected boolean isValidAddress(String ipString) {
@@ -57,5 +46,4 @@ public class IP6Mechanism extends IP4Mechanism {
     protected int getMaxCidr() {
         return 128;
     }
-
 }
