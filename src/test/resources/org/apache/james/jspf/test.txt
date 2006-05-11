@@ -137,4 +137,8 @@ smtp-comment    /.*/
 header-comment  /.*/ spfquery:
 received-spf    /.*/ Received-SPF:
 
-
+spfquery -ip=2001:1234:5678:9ABC:FFFF:FFFF:FFFF:FFFF -sender=spf20-test.foo.bar -helo=spf20-test.foo.bar
+result          /.*/ pass
+smtp-comment    /.*/ 
+header-comment  /.*/ spfquery:
+received-spf    /.*/ Received-SPF:
