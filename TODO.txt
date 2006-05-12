@@ -13,16 +13,7 @@ We don't have a JIRA instance for jspf so here is a list of issues
   
 - make a list of code we inherited from spfjava
 
-- add a few xdocs for the site generation
-
 - add tests for the DNSService implementation (mocking the xbill Resolver)
-
-- find out how to request dnsjava-2.0.1 to be added to maven2 repository.
-
-- make the libray threadsafe (Terms and SPF should be reentrant)
-  [assigned to Stefano Bagnara]
-
-- try to contact Wayne Schlitt again to have permissions to include test.txt and to share back our changes.
 
 - Submit this issues to http://issues.apache.org/jira/browse/JSPF
 
