@@ -106,7 +106,7 @@ public class SPFMailZoneTest extends TestCase {
             // TODO
         } else if (rcptTo == null && local == null) {
 
-            String resultSPF = spf.checkSPF(ip, sender, helo);
+            String resultSPF = spf.checkSPF(ip, sender, helo).getResult();
 
             if (!data.result.startsWith("/")) {
                 assertEquals(data.result, resultSPF);

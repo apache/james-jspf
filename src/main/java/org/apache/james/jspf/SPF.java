@@ -43,19 +43,7 @@ public class SPF {
 
     private DNSService dnsProbe = null;
 
-    private SPF1Data spfData;
-
-    private String explanation = null;
-
-    private String headerTextAsString = "";
-
-    private String headerName = "Received-SPF";
-
-    private String header = "";
-
     private SPF1Parser parser;
-
-    private int timeOut = 20;
 
     private static Logger log = Logger.getLogger(SPF.class);
 
@@ -89,17 +77,19 @@ public class SPF {
      * @return result. Possible results are: pass, neutral, fail, deny,
      *         softfail, error,temperror none
      */
-    public String checkSPF(String ipAddress, String mailFrom, String hostName) {
-
+    public SPFResult checkSPF(String ipAddress, String mailFrom, String hostName) {
+        SPF1Data spfData = null;
         String result = null;
-
-        spfData = null;
-        explanation = "";
+        String resultChar = null;
+        String explanation = null;
 
         try {
             // Setup the data
             spfData = new SPF1Data(mailFrom, hostName, ipAddress, dnsProbe);
-            result = checkSPF(spfData);
+            SPFInternalResult res = checkSPF(spfData);
+            resultChar = res.getResultChar();
+            result = SPF1Utils.resultToName(resultChar);
+            explanation = res.getExplanation();
         } catch (PermErrorException e) {
             log.warn(e.getMessage());
             result = SPF1Utils.PERM_ERROR;
@@ -116,17 +106,12 @@ public class SPF {
             result = SPF1Constants.NEUTRAL;
         }
 
-        // convert raw result to name
-        String convertedResult = SPF1Utils.resultToName(result);
-
+        SPFResult ret = new SPFResult(result, resultChar, explanation, spfData);
+        
         log.info("[ipAddress=" + ipAddress + "] [mailFrom=" + mailFrom
-                + "] [helo=" + hostName + "] => " + convertedResult);
+                + "] [helo=" + hostName + "] => " + ret.getResult());
 
-
-        // generate the SPF-Result header
-        generateHeader(convertedResult);
-
-        return convertedResult;
+        return ret;
 
     }
 
@@ -142,10 +127,10 @@ public class SPF {
      * @throws TempErrorException
      *             Get thrown if a DNS problem was detected
      */
-    public String checkSPF(SPF1Data spfData) throws PermErrorException,
+    public SPFInternalResult checkSPF(SPF1Data spfData) throws PermErrorException,
             NoneException, TempErrorException {
-        String result;
-        result = SPF1Constants.NEUTRAL;
+        String result = SPF1Constants.NEUTRAL;
+        String explanation = null;
 
         /**
          * Check if the connection was made from localhost. Set the result to
@@ -156,11 +141,8 @@ public class SPF {
             log.info("Connection was made from localhost => skip checking");
 
             result = SPF1Constants.PASS;
-            return result;
+            return new SPFInternalResult(result, explanation);
         }
-
-        // Set the dns timeout
-        dnsProbe.setTimeOut(timeOut);
 
         // Get the raw dns txt entry which contains a spf entry
         String spfDnsEntry = dnsProbe.getSpfRecord(spfData.getCurrentDomain(),
@@ -263,92 +245,8 @@ public class SPF {
         if (!spfData.isMatch() && (hasCommand == true)) {
             result = SPF1Constants.NEUTRAL;
         }
-
-        return result;
-    }
-
-    /**
-     * Get the explanation. The explanation is only set if the result is "-" =
-     * fail
-     * 
-     * @return explanation
-     */
-    public String getExplanation() {
-        return explanation;
-    }
-
-    /**
-     * Get the full SPF-Header (headername and headertext)
-     * 
-     * @return SPF-Header
-     */
-    public String getHeader() {
-        return header;
-    }
-
-    /**
-     * Get the SPF-Headername
-     * 
-     * @return headername
-     */
-    public String getHeaderName() {
-        return headerName;
-    }
-
-    /**
-     * Get SPF-Headertext
-     * 
-     * @return headertext
-     */
-    public String getHeaderText() {
-        return headerTextAsString;
-    }
-
-    /**
-     * Generate a SPF-Result header
-     * 
-     * @param result
-     *            The result we should use to generate the header
-     */
-    private void generateHeader(String result) {
-
-        StringBuffer headerText = new StringBuffer();
-
-        if (result.equals(SPF1Utils.PASS_CONV)) {
-            headerText.append(result + " (spfCheck: domain of "
-                    + spfData.getCurrentDomain() + " designates "
-                    + spfData.getIpAddress() + " as permitted sender) ");
-        } else if (result.equals(SPF1Utils.FAIL_CONV)) {
-            headerText.append(result + " (spfCheck: domain of "
-                    + spfData.getCurrentDomain() + " does not designate "
-                    + spfData.getIpAddress() + " as permitted sender) ");
-        } else if (result.equals(SPF1Utils.NEUTRAL_CONV)
-                || result.equals(SPF1Utils.NONE_CONV)) {
-            headerText.append(result + " (spfCheck: " + spfData.getIpAddress()
-                    + " is neither permitted nor denied by domain of "
-                    + spfData.getCurrentDomain() + ") ");
-
-        } else if (result.equals(SPF1Utils.SOFTFAIL_CONV)) {
-            headerText.append(result + " (spfCheck: transitioning domain of "
-                    + spfData.getCurrentDomain() + " does not designate "
-                    + spfData.getIpAddress() + " as permitted sender) ");
-        } else if (result.equals(SPF1Utils.PERM_ERROR_CONV)) {
-            headerText.append(result
-                    + " (spfCheck: Error in processing SPF Record) ");
-
-        } else if (result.equals(SPF1Utils.TEMP_ERROR_CONV)) {
-            headerText.append(result
-                    + " (spfCheck: Error in retrieving data from DNS) ");
-
-        }
-
-        if (headerText.length() > 0) {
-            headerText.append("client-ip=" + spfData.getIpAddress()
-                    + "; envelope-from=" + spfData.getMailFrom() + "; helo="
-                    + spfData.getHostName() + ";");
-            headerTextAsString = headerText.toString();
-        }
-        header = headerName + ": " + headerTextAsString;
+        
+        return new SPFInternalResult(result, explanation);
     }
 
     /**
@@ -360,10 +258,8 @@ public class SPF {
      * @param timeOut
      *            The timout in seconds
      */
-    public void setTimeOut(int timeOut) {
-
+    public synchronized void setTimeOut(int timeOut) {
         log.debug("TimeOut was set to: " + timeOut);
-
-        this.timeOut = timeOut;
+        dnsProbe.setTimeOut(timeOut);
     }
 }

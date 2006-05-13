@@ -75,7 +75,7 @@ public class IncludeMechanism implements Mechanism, Configurable {
         
         String res = null;
         try {
-            res = new SPF(spfData.getDnsProbe()).checkSPF(spfData);
+            res = new SPF(spfData.getDnsProbe()).checkSPF(spfData).getResultChar();
         } catch (NoneException e) {
             throw new PermErrorException("included checkSPF returned NoneException");
         }

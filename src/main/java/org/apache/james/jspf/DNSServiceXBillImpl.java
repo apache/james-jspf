@@ -471,7 +471,7 @@ public class DNSServiceXBillImpl implements DNSService {
     /**
      * @see org.apache.james.jspf.core.DNSService#setTimeOut(int)
      */
-    public void setTimeOut(int timeOut) {
+    public synchronized void setTimeOut(int timeOut) {
         DNSServiceXBillImpl.timeOut = timeOut;
     }
 

@@ -72,7 +72,7 @@ public class RedirectModifier extends GenericModifier {
 
             String res = null;
             try {
-                res = new SPF(spfData.getDnsProbe()).checkSPF(spfData);
+                res = new SPF(spfData.getDnsProbe()).checkSPF(spfData).getResultChar();
                 
 
             } catch (NoneException e) {

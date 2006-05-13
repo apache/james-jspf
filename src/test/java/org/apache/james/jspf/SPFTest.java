@@ -106,7 +106,8 @@ public class SPFTest extends TestCase {
             // TODO
         } else if (rcptTo == null && local == null) {
 
-            String resultSPF = spf.checkSPF(ip, sender, helo);
+            SPFResult res = spf.checkSPF(ip, sender, helo);
+            String resultSPF = res.getResult();
 
             if (!data.result.startsWith("/")) {
                 assertEquals(data.result, resultSPF);
@@ -118,7 +119,7 @@ public class SPFTest extends TestCase {
                         resultSPF));
             }
 
-            assertEquals(data.explanation, spf.getExplanation());
+            assertEquals(data.explanation, res.getExplanation());
 
             
         } else {
