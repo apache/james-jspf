@@ -32,7 +32,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -149,7 +151,7 @@ public class SPF1Parser {
 
     private Collection modifiersCollection;
 
-    private ArrayList matchResultPositions;
+    private List matchResultPositions;
 
     private static Logger log = Logger.getLogger(SPF1Parser.class);
 
@@ -283,7 +285,7 @@ public class SPF1Parser {
      * regex.
      */
     private void initializePositions() {
-        matchResultPositions = new ArrayList();
+        ArrayList matchResultPositions = new ArrayList();
 
         // FULL MATCH
         int posIndex = 0;
@@ -338,6 +340,8 @@ public class SPF1Parser {
                                         : null));
             }
         }
+        
+        this.matchResultPositions = Collections.synchronizedList(matchResultPositions);
     }
 
     /**
@@ -388,11 +392,13 @@ public class SPF1Parser {
                         "Unable to create the term collection");
             }
         }
-        return l;
+        return Collections.synchronizedCollection(l);
     }
 
     /**
      * This Method parse the given spf record and checks for syntax
+     * 
+     * parse can be called by multiple concurrent threads.
      * 
      * @param spfRecord
      *            The String which represent the spf record in dns
