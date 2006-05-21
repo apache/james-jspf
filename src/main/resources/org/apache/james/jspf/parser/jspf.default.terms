@@ -1,2 +1,0 @@
-mechanisms=org.apache.james.jspf.terms.AllMechanism,org.apache.james.jspf.terms.AMechanism,org.apache.james.jspf.terms.ExistsMechanism,org.apache.james.jspf.terms.IncludeMechanism,org.apache.james.jspf.terms.IP4Mechanism,org.apache.james.jspf.terms.IP6Mechanism,org.apache.james.jspf.terms.MXMechanism,org.apache.james.jspf.terms.PTRMechanism
-modifiers=org.apache.james.jspf.terms.ExpModifier,org.apache.james.jspf.terms.RedirectModifier,org.apache.james.jspf.terms.UnknownModifier
