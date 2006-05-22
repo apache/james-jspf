@@ -6,8 +6,7 @@
 	<name>Apache James jSPF</name>
 	<version>0.8</version>
 	<description>
-		jspf is an Apache James subproject that implements the spf
-		specification
+		jspf implements the spf specification
 	</description>
 	<url>http://james.apache.org/jspf</url>
 	<inceptionYear>2006</inceptionYear>
