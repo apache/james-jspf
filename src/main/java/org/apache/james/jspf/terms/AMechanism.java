@@ -43,9 +43,9 @@ public class AMechanism extends GenericMechanism {
             + SPF1Parser.DOMAIN_SPEC_REGEX + ")?" + "(?:"
             + DUAL_CIDR_LENGTH_REGEX + ")?";
 
-    protected int ip4cidr;
+    private int ip4cidr;
 
-    protected int ip6cidr;
+    private int ip6cidr;
 
     /**
      * 
@@ -66,11 +66,11 @@ public class AMechanism extends GenericMechanism {
             if (Inet6Util.isValidIPV4Address(spfData.getIpAddress())) {
 
                 IPAddr checkAddress = IPAddr.getAddress(spfData.getIpAddress(),
-                        ip4cidr);
+                        getIp4cidr());
 
                 try {
                     addressList.addAll(spfData.getDnsProbe().getARecords(host,
-                            ip4cidr));
+                            getIp4cidr()));
                     if (checkAddressList(checkAddress, addressList)) {
                         return true;
                     }
@@ -82,11 +82,11 @@ public class AMechanism extends GenericMechanism {
                 }
             } else {
                 IPAddr checkAddress = IPAddr.getAddress(spfData.getIpAddress(),
-                        ip6cidr);
+                        getIp6cidr());
 
                 try {
                     addressList.addAll(spfData.getDnsProbe().getAAAARecords(
-                            host, ip6cidr));
+                            host, getIp6cidr()));
                     if (checkAddressList(checkAddress, addressList)) {
                         return true;
                     }
@@ -109,7 +109,7 @@ public class AMechanism extends GenericMechanism {
     /**
      * @see org.apache.james.jspf.terms.GenericMechanism#config(ConfigurationMatch)
      */
-    public void config(ConfigurationMatch params) throws PermErrorException {
+    public synchronized void config(ConfigurationMatch params) throws PermErrorException {
         super.config(params);
         if (params.groupCount() >= 2 && params.group(2) != null) {
             ip4cidr = Integer.parseInt(params.group(2).toString());
@@ -151,6 +151,20 @@ public class AMechanism extends GenericMechanism {
             }
         }
         return false;
+    }
+
+    /**
+     * @return Returns the ip4cidr.
+     */
+    protected synchronized int getIp4cidr() {
+        return ip4cidr;
+    }
+
+    /**
+     * @return Returns the ip6cidr.
+     */
+    protected synchronized int getIp6cidr() {
+        return ip6cidr;
     }
 
 }

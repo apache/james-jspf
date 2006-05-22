@@ -50,7 +50,7 @@ public class ExpModifier extends GenericModifier {
      */
     public String run(SPF1Data spfData) {
         String exp = null;
-        String host = this.host;
+        String host = getHost();
 
         // If the currentResult is not fail we have no need to run all these
         // methods!

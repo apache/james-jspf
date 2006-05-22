@@ -49,7 +49,7 @@ public abstract class GenericMechanism implements Mechanism, Configurable {
             + IP4_CIDR_LENGTH_REGEX + ")?" + "(?:/" + IP6_CIDR_LENGTH_REGEX
             + ")?";
 
-    protected String domain;
+    private String domain;
 
     /**
      * Expand the hostname
@@ -58,7 +58,7 @@ public abstract class GenericMechanism implements Mechanism, Configurable {
      * @throws PermErrorException
      */
     protected String expandHost(SPF1Data spfData) throws PermErrorException {
-        String host = this.domain;
+        String host = getDomain();
         if (host == null) {
             host = spfData.getCurrentDomain();
         } else {
@@ -75,12 +75,19 @@ public abstract class GenericMechanism implements Mechanism, Configurable {
     /**
      * @see org.apache.james.jspf.core.Configurable#config(ConfigurationMatch)
      */
-    public void config(ConfigurationMatch params) throws PermErrorException {
+    public synchronized void config(ConfigurationMatch params) throws PermErrorException {
         if (params.groupCount() >= 1 && params.group(1) != null) {
             domain = params.group(1);
         } else {
             domain = null;
         }
+    }
+
+    /**
+     * @return Returns the domain.
+     */
+    protected synchronized String getDomain() {
+        return domain;
     }
 
 }

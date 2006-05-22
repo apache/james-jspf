@@ -57,7 +57,7 @@ public class IncludeMechanism implements Mechanism, Configurable {
      * @throws NoneException 
      */
     public boolean run(SPF1Data spfData) throws PermErrorException, TempErrorException, NoneException {
-        String host = this.host;
+        String host = getHost();
 
         // update currentDepth
         spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);      
@@ -98,11 +98,18 @@ public class IncludeMechanism implements Mechanism, Configurable {
     /**
      * @see org.apache.james.jspf.core.Configurable#config(ConfigurationMatch)
      */
-    public void config(ConfigurationMatch params) throws PermErrorException {
+    public synchronized void config(ConfigurationMatch params) throws PermErrorException {
         if (params.groupCount() == 0) {
             throw new PermErrorException("Include mechanism without an host");
         }
         host = params.group(1);
+    }
+
+    /**
+     * @return Returns the host.
+     */
+    protected synchronized String getHost() {
+        return host;
     }
 
 }

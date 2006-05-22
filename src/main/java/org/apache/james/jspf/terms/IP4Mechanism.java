@@ -39,8 +39,6 @@ public class IP4Mechanism extends GenericMechanism {
 
     private IPAddr ip = null;
 
-    private int maskLength = 0;
-
     /**
      * 
      * @see org.apache.james.jspf.core.GenericMechanism#run(org.apache.james.jspf.core.SPF1Data)
@@ -48,10 +46,10 @@ public class IP4Mechanism extends GenericMechanism {
     public boolean run(SPF1Data spfData) throws PermErrorException {
         IPAddr originalIP;
 
-        originalIP = IPAddr.getAddress(spfData.getIpAddress(), ip
+        originalIP = IPAddr.getAddress(spfData.getIpAddress(), getIp()
                 .getMaskLength());
 
-        if (ip.getMaskedIPAddress().equals(originalIP.getMaskedIPAddress())) {
+        if (getIp().getMaskedIPAddress().equals(originalIP.getMaskedIPAddress())) {
             return true;
         } else {
             // No match
@@ -62,7 +60,7 @@ public class IP4Mechanism extends GenericMechanism {
     /**
      * @see org.apache.james.jspf.terms.GenericMechanism#config(ConfigurationMatch)
      */
-    public void config(ConfigurationMatch params) throws PermErrorException {
+    public synchronized void config(ConfigurationMatch params) throws PermErrorException {
         if (params.groupCount() == 0) {
             throw new PermErrorException("Missing ip");
         }
@@ -70,7 +68,7 @@ public class IP4Mechanism extends GenericMechanism {
         if (!isValidAddress(ipString)) {
             throw new PermErrorException("Invalid Address: " + ipString);
         }
-        maskLength = getMaxCidr();
+        int maskLength = getMaxCidr();
         if (params.groupCount() >= 2 && params.group(2) != null) {
             maskLength = Integer.parseInt(params.group(2).toString());
             if (maskLength > getMaxCidr()) {
@@ -94,6 +92,13 @@ public class IP4Mechanism extends GenericMechanism {
      */
     protected int getMaxCidr() {
         return 32;
+    }
+
+    /**
+     * @return Returns the ip.
+     */
+    protected synchronized IPAddr getIp() {
+        return ip;
     }
 
 }

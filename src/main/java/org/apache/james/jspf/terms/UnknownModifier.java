@@ -57,7 +57,7 @@ public class UnknownModifier implements Modifier, Configurable {
     /**
      * @see org.apache.james.jspf.core.Configurable#config(ConfigurationMatch)
      */
-    public void config(ConfigurationMatch params) throws PermErrorException {
+    public synchronized void config(ConfigurationMatch params) throws PermErrorException {
         // Nothing to do
     }
 

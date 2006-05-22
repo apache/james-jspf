@@ -56,7 +56,7 @@ public class RedirectModifier extends GenericModifier {
         // the redirect modifier is used only when we had no previous matches
         if (!spfData.isMatch()) {
 
-            String host = this.host;
+            String host = getHost();
 
             // update currentDepth
             spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);

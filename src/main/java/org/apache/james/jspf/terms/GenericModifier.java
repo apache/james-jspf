@@ -32,7 +32,7 @@ import org.apache.james.jspf.util.ConfigurationMatch;
  */
 public abstract class GenericModifier implements Modifier, Configurable {
 
-    protected String host;
+    private String host;
 
     /**
      * @see org.apache.james.jspf.core.Modifier#run(SPF1Data)
@@ -44,10 +44,17 @@ public abstract class GenericModifier implements Modifier, Configurable {
     /**
      * @see org.apache.james.jspf.core.Configurable#config(ConfigurationMatch)
      */
-    public void config(ConfigurationMatch params) throws PermErrorException {
+    public synchronized void config(ConfigurationMatch params) throws PermErrorException {
         if (params.groupCount() > 0) {
             this.host = params.group(1);
         }
+    }
+
+    /**
+     * @return Returns the host.
+     */
+    protected synchronized String getHost() {
+        return host;
     }
 
 }

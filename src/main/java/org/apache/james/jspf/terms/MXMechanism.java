@@ -57,10 +57,10 @@ public class MXMechanism extends AMechanism {
         // get the ipAddress
         try {
             IPAddr checkAddress = IPAddr.getAddress(spfData.getIpAddress(),
-                    ip4cidr);
+                    getIp4cidr());
             try {
                 addressList.addAll(spfData.getDnsProbe().getMXRecords(host,
-                        ip4cidr));
+                        getIp4cidr()));
                 if (checkAddressList(checkAddress, addressList)) {
                     return true;
                 }
