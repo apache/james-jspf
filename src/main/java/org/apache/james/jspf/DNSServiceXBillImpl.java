@@ -122,9 +122,7 @@ public class DNSServiceXBillImpl implements DNSService {
             Lookup query = new Lookup(hostname, Type.TXT);
             records = query.run();
             int queryResult = query.getResult();
-
-            if ((queryResult == Lookup.SUCCESSFUL)
-                    || (queryResult == Lookup.HOST_NOT_FOUND)) {
+            if ((queryResult != Lookup.TRY_AGAIN)) {
                 if (records != null) {
 
                     log.debug("Found " + records.length + " TXT-Records");
@@ -178,8 +176,7 @@ public class DNSServiceXBillImpl implements DNSService {
                 records = query.run();
                 int queryResult = query.getResult();
 
-                if ((queryResult == Lookup.SUCCESSFUL)
-                        || (queryResult == Lookup.HOST_NOT_FOUND)) {
+                if ((queryResult != Lookup.TRY_AGAIN)) {
                     if (records != null) {
 
                         log.debug("Found " + records.length + " A-Records");
@@ -239,8 +236,7 @@ public class DNSServiceXBillImpl implements DNSService {
                 records = query.run();
                 int queryResult = query.getResult();
 
-                if ((queryResult == Lookup.SUCCESSFUL)
-                        || (queryResult == Lookup.HOST_NOT_FOUND)) {
+                if ((queryResult != Lookup.TRY_AGAIN)) {
                     if (records != null) {
 
                         log.debug("Found " + records.length + " AAAA-Records");
@@ -346,10 +342,8 @@ public class DNSServiceXBillImpl implements DNSService {
             records = query.run();
             int queryResult = query.getResult();
 
-            if ((queryResult == Lookup.SUCCESSFUL)
-                    || (queryResult == Lookup.HOST_NOT_FOUND)) {
+            if ((queryResult != Lookup.TRY_AGAIN)) {
                 if (records != null) {
-
                     log.debug("Found " + records.length + " PTR-Records");
 
                     for (int i = 0; i < records.length; i++) {
@@ -440,10 +434,8 @@ public class DNSServiceXBillImpl implements DNSService {
             records = query.run();
             int queryResult = query.getResult();
 
-            if ((queryResult == Lookup.SUCCESSFUL)
-                    || (queryResult == Lookup.HOST_NOT_FOUND)) {
+            if ((queryResult != Lookup.TRY_AGAIN)) {
                 if (records != null) {
-
                     log.debug("Found " + records.length + " MX-Records");
 
                     for (int i = 0; i < records.length; i++) {
