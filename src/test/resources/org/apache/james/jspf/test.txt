@@ -136,6 +136,7 @@ result          /.*/ fail
 smtp-comment    /.*/ 
 header-comment  /.*/ spfquery:
 received-spf    /.*/ Received-SPF:
+explanation     /.*/ http://www.openspf.org/why.html?sender=spf19-test.foo.bar&ip=F.E.D.C.B.A.9.8.7.6.5.4.3.2.1.0.F.E.D.C.B.A.9.8.7.6.5.4.3.2.1.0
 
 spfquery -ip=2001:1234:5678:9ABC:FFFF:FFFF:FFFF:FFFF -sender=spf20-test.foo.bar -helo=spf20-test.foo.bar
 result          /.*/ pass

@@ -228,22 +228,22 @@ public class SPF {
 
                 spfData.setCurrentResult(result);
                 spfData.setMatch(true);
-
-                if (qualifier.equals(SPF1Constants.FAIL)) {  
-                    if (spfData.getExplanation()==null || spfData.getExplanation().equals("")) {
-                        try {
-                            spfData.setExplanation(new MacroExpand(spfData)
-                                    .expandExplanation(SPF1Utils.DEFAULT_EXPLANATION));
-                        } catch (PermErrorException e) {}
-                    }
-                    explanation = spfData.getExplanation();
-                }
             }
         }
 
         // If no match was found set the result to neutral
         if (!spfData.isMatch() && (hasCommand == true)) {
             result = SPF1Constants.NEUTRAL;
+        } 
+        
+        if (result.equals(SPF1Constants.FAIL)) {  
+            if (spfData.getExplanation()==null || spfData.getExplanation().equals("")) {
+                try {
+                    spfData.setExplanation(new MacroExpand(spfData)
+                            .expandExplanation(SPF1Utils.DEFAULT_EXPLANATION));
+                } catch (PermErrorException e) {}
+            }
+            explanation = spfData.getExplanation();
         }
         
         return new SPFInternalResult(result, explanation);
