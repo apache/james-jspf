@@ -17,6 +17,8 @@
 
 package org.apache.james.jspf;
 
+import org.apache.log4j.BasicConfigurator;
+
 /**
  * This class is used for commandline usage of JSPF
  * 
@@ -33,6 +35,8 @@ public class SPFQuery {
         String ip = null;
         String sender = null;
         String helo = null;
+
+        BasicConfigurator.configure();
 
         // Parse the command line arguments
         if (args.length < 3) {
