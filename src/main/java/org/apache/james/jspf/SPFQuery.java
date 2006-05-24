@@ -30,6 +30,22 @@ import org.apache.log4j.SimpleLayout;
  */
 public class SPFQuery {
 
+    private final static int PASS_RCODE = 0;
+    
+    private final static int FAIL_RCODE =  1;
+    
+    private final static int SOFTFAIL_RCODE = 2;
+    
+    private final static int NEUTRAL_RCODE = 3;
+    
+    private final static int TEMP_ERROR_RCODE = 4;
+    
+    private final static int PERM_ERROR_RCODE = 5;
+    
+    private final static int NONE_RCODE = 6;
+    
+    private final static int UNKNOWN_RCODE = 255;
+
     private static Logger logger = Logger.getRootLogger();
 
     /**
@@ -77,27 +93,7 @@ public class SPFQuery {
                 SPFResult result = spf.checkSPF(ip, sender, helo);
                 System.out.println(result.getResult());
                 System.out.println(result.getHeader());
-
-                // exit with the same code as the perl implemention do
-                if (result.getResult().equals(SPF1Utils.PASS_CONV)) {
-                    System.exit(0);
-                } else if (result.getResult().equals(SPF1Utils.FAIL_CONV)) {
-                    System.exit(1);
-                } else if (result.getResult().equals(SPF1Utils.SOFTFAIL_CONV)) {
-                    System.exit(2);
-                } else if (result.getResult().equals(SPF1Utils.NEUTRAL_CONV)) {
-                    System.exit(3);
-                } else if (result.getResult().equals(SPF1Utils.TEMP_ERROR_CONV)) {
-                    System.exit(4);
-                } else if (result.getResult().equals(SPF1Utils.PERM_ERROR_CONV)) {
-                    System.exit(5);
-                } else if (result.getResult().equals(SPF1Utils.NONE_CONV)) {
-                    System.exit(6);
-                } else {
-                    // this should never happen anyway
-                    System.exit(255);
-                }
-
+                System.exit(getReturnCode(result.getResult()));
             } else {
                 usage();
             }
@@ -110,7 +106,33 @@ public class SPFQuery {
     private static void usage() {
         System.out
                 .println("Usage: java -jar jspf-x.jar -ip=192.168.100.1 -sender=postmaster@foo.bar -helo=foo.bar [-debug] [-verbose]");
-        System.exit(255);
+        System.exit(UNKNOWN_RCODE);
+    }
+    
+    
+    /**
+     * Return the return code for the result
+     * 
+     * @param result The result 
+     * @return returnCode
+     */
+    public static int getReturnCode(String result) {
+        if (result.equals(SPF1Utils.PASS_CONV)) {
+            return PASS_RCODE;
+        } else if (result.equals(SPF1Utils.FAIL_CONV)) {
+            return FAIL_RCODE;
+        } else if (result.equals(SPF1Utils.SOFTFAIL_CONV)) {
+            return SOFTFAIL_RCODE;
+        } else if (result.equals(SPF1Utils.NEUTRAL_CONV)) {
+            return NEUTRAL_RCODE;
+        } else if (result.equals(SPF1Utils.TEMP_ERROR_CONV)) {
+            return TEMP_ERROR_RCODE;
+        } else if (result.equals(SPF1Utils.PERM_ERROR_CONV)) {
+            return PERM_ERROR_RCODE;
+        } else if (result.equals(SPF1Utils.NONE_CONV)) {
+            return NONE_RCODE;
+        } 
+        return UNKNOWN_RCODE;
     }
 
 }
