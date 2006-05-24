@@ -1,8 +1,0 @@
-Manifest-Version: 1.0
-Implementation-Version: 1.0
-Specification-Title: Sender Policy Framework (SPF) for Authorizing Use of Domains in E-Mail
-Specification-Version: 1.0
-Implementation-Title: org.apache.james.jspf
-Created-By: 1.5.0 (Sun Microsystems Inc.)
-Implementation-Vendor-Id: org.apache
-Implementation-Vendor: Apache Software Foundation
