@@ -89,7 +89,7 @@ public class SPFQuery {
      */
     private static void usage() {
         System.out
-                .println("Usage: SPFQuery -ip=192.168.100.1 -sender=postmaster@foo.bar -helo=foo.bar [-debug] [-verbose]");
+                .println("Usage: java -jar jspf-x.jar -ip=192.168.100.1 -sender=postmaster@foo.bar -helo=foo.bar [-debug] [-verbose]");
         System.exit(0);
     }
 
