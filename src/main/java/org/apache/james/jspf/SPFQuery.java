@@ -17,7 +17,10 @@
 
 package org.apache.james.jspf;
 
-import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.log4j.SimpleLayout;
 
 /**
  * This class is used for commandline usage of JSPF
@@ -27,33 +30,41 @@ import org.apache.log4j.BasicConfigurator;
  */
 public class SPFQuery {
 
+    private static Logger logger = Logger.getRootLogger();
+
     /**
      * @param args
      *            The commandline arguments to parse
      */
     public static void main(String[] args) {
+
         String ip = null;
         String sender = null;
         String helo = null;
 
-        BasicConfigurator.configure();
+        SimpleLayout layout = new SimpleLayout();
+        ConsoleAppender consoleAppender = new ConsoleAppender(layout);
+        logger.addAppender(consoleAppender);
+
+        logger.setLevel(Level.ERROR);
 
         // Parse the command line arguments
-        if (args.length < 3) {
+        if (args.length < 3 || args.length > 4) {
             usage();
         } else {
             for (int i = 0; i < args.length; i++) {
                 String[] arguments = args[i].split("=");
-                if (arguments.length == 2) {
-                    if (arguments[0].equals("-ip")) {
-                        ip = arguments[1];
-                    } else if (arguments[0].equals("-sender")) {
-                        sender = arguments[1];
-                    } else if (arguments[0].equals("-helo")) {
-                        helo = arguments[1];
-                    } else {
-                        usage();
-                    }
+
+                if (arguments[0].equals("-ip")) {
+                    ip = arguments[1];
+                } else if (arguments[0].equals("-sender")) {
+                    sender = arguments[1];
+                } else if (arguments[0].equals("-helo")) {
+                    helo = arguments[1];
+                } else if (arguments[0].equals("-debug")) {
+                    logger.setLevel(Level.DEBUG);
+                } else if (arguments[0].equals("-verbose")) {
+                    logger.setLevel(Level.TRACE);
                 } else {
                     usage();
                 }
@@ -78,7 +89,7 @@ public class SPFQuery {
      */
     private static void usage() {
         System.out
-                .println("Usage: SPFQuery -ip=192.168.100.1 -sender=postmaster@foo.bar -helo=foo.bar");
+                .println("Usage: SPFQuery -ip=192.168.100.1 -sender=postmaster@foo.bar -helo=foo.bar [-debug] [-verbose]");
         System.exit(0);
     }
 
