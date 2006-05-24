@@ -77,7 +77,27 @@ public class SPFQuery {
                 SPFResult result = spf.checkSPF(ip, sender, helo);
                 System.out.println(result.getResult());
                 System.out.println(result.getHeader());
-                System.exit(0);
+
+                // exit with the same code as the perl implemention do
+                if (result.getResult().equals(SPF1Utils.PASS_CONV)) {
+                    System.exit(0);
+                } else if (result.getResult().equals(SPF1Utils.FAIL_CONV)) {
+                    System.exit(1);
+                } else if (result.getResult().equals(SPF1Utils.SOFTFAIL_CONV)) {
+                    System.exit(2);
+                } else if (result.getResult().equals(SPF1Utils.NEUTRAL_CONV)) {
+                    System.exit(3);
+                } else if (result.getResult().equals(SPF1Utils.TEMP_ERROR_CONV)) {
+                    System.exit(4);
+                } else if (result.getResult().equals(SPF1Utils.PERM_ERROR_CONV)) {
+                    System.exit(5);
+                } else if (result.getResult().equals(SPF1Utils.NONE_CONV)) {
+                    System.exit(6);
+                } else {
+                    // this should never happen anyway
+                    System.exit(255);
+                }
+
             } else {
                 usage();
             }
@@ -90,7 +110,7 @@ public class SPFQuery {
     private static void usage() {
         System.out
                 .println("Usage: java -jar jspf-x.jar -ip=192.168.100.1 -sender=postmaster@foo.bar -helo=foo.bar [-debug] [-verbose]");
-        System.exit(0);
+        System.exit(255);
     }
 
 }
