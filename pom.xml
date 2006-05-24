@@ -176,4 +176,30 @@
 			</plugin>
 		</plugins>
 	</reporting>
+
+	<build>
+		<plugins>
+      		<plugin>
+        		<groupId>org.apache.maven.plugins</groupId>
+        		<artifactId>maven-jar-plugin</artifactId>
+        
+      		  	<configuration>
+        	  		<archive>
+            			<!--
+            			<index>true</true>
+            			-->
+            			<manifest>
+              				<mainClass>org.apache.james.jspf.SPFQuery</mainClass>
+              				<packageName>org.apache.james.jspf</packageName>
+              				<addClasspath>true</addClasspath>
+            			</manifest>
+            			<manifestEntries>
+              				<mode>development</mode>
+              				<url>${pom.url}</url>
+            			</manifestEntries>
+          			</archive>
+        		</configuration>
+      		</plugin>
+    	</plugins>
+  </build>
 </project>
