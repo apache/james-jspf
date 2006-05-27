@@ -143,3 +143,15 @@ result          /.*/ pass
 smtp-comment    /.*/ 
 header-comment  /.*/ spfquery:
 received-spf    /.*/ Received-SPF:
+
+spfquery -ip=FEDC:BA98:7654:3210:FEDC:BA98:7654:3210 -sender=spf21-test.foo.bar -helo=spf21-test.foo.bar
+result          /.*/ pass
+smtp-comment    /.*/ 
+header-comment  /.*/ spfquery:
+received-spf    /.*/ Received-SPF:
+
+spfquery -ip=192.168.0.1 -sender=spf22-test.foo.bar -helo=spf21-test.foo.bar
+result          /.*/ temperror
+smtp-comment    /.*/ 
+header-comment  /.*/ spfquery:
+received-spf    /.*/ Received-SPF:

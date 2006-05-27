@@ -18,10 +18,13 @@
 package org.apache.james.jspf;
 
 import org.apache.james.jspf.core.DNSService;
+import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public final class SPF1TestMockDNSService implements DNSService {
@@ -70,7 +73,11 @@ public final class SPF1TestMockDNSService implements DNSService {
             if ("spf19-test.foo.bar".equals(hostname))
                 return "v=spf1 +ip6:::1 -all";
             if ("spf20-test.foo.bar".equals(hostname))
-                return "v=spf1 +ip6:2001:1234:5678:9ABC::/64 -all";          
+                return "v=spf1 +ip6:2001:1234:5678:9ABC::/64 -all"; 
+            if ("spf21-test.foo.bar".equals(hostname))
+                return "v=spf1 +a:myipv6a.record -all";
+            if ("spf22-test.foo.bar".equals(hostname))
+                throw new TempErrorException("DNS Server returns temperror");          
         }
         throw new IllegalStateException("Mock data not available");
     }
@@ -81,6 +88,8 @@ public final class SPF1TestMockDNSService implements DNSService {
 
     public List getAAAARecords(String strServer, int mask)
             throws NoneException, PermErrorException, TempErrorException {
+        if ("myipv6a.record".equals(strServer))      
+            return getAddressList("FEDC:BA98:7654:3210:FEDC:BA98:7654:3210",mask);
         throw new IllegalStateException("Mock data not available");
     }
 
@@ -115,5 +124,17 @@ public final class SPF1TestMockDNSService implements DNSService {
 
     public void setTimeOut(int timeOut) {
         // MOCK
+    }
+    
+    public List getAddressList(String list, int mask) throws PermErrorException {
+        if (list == null || "".equals(list)) {
+            return new ArrayList();
+        }
+        String[] s = list.split(",");
+        IPAddr[] ips = new IPAddr[s.length];
+        for (int i = 0; i < s.length; i++) {
+            ips[i] = IPAddr.getAddress(s[i], mask);
+        }
+        return new ArrayList(Arrays.asList(ips));
     }
 }
