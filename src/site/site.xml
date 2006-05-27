@@ -40,12 +40,13 @@
       <item name="License" href="license.html"/>
     </menu>
 
-
     <menu name="Useful Information">
       <item name="Get Involved" href="http://jakarta.apache.org/site/getinvolved.html"/>
       <item name="Reference Library" href="http://jakarta.apache.org/site/library.html"/>
       <item name="Apache" href="http://apache.org/foundation/faq.html" />
     </menu>
+    
+    ${reports}
 
   </body>
 </project>
