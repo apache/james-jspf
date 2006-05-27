@@ -105,8 +105,7 @@ public class DNSServiceXBillImpl implements DNSService {
      * @throws NoneException
      *             if none TXT-Records were found.
      * @throws TempErrorException
-     *             if the lookup result was not "HOST NOT FOUND" or
-     *             "SUCCESSFULLY"
+     *             if the lookup result was "TRY_AGAIN"
      * @throws PermErrorException
      *             if an PermError should be returned
      */
@@ -389,7 +388,7 @@ public class DNSServiceXBillImpl implements DNSService {
      *            ips
      * @param mask
      *            The netmask
-     * @return ipAddresses
+     * @return ipAddresses Array which contains all ipAddresses
      */
     private static ArrayList getIPList(String host, int mask)
             throws PermErrorException {
@@ -417,8 +416,7 @@ public class DNSServiceXBillImpl implements DNSService {
      * @throws NoneException
      *             if no MX-Records was found
      * @throws TempErrorException
-     *             if the lookup result was not "HOST NOT FOUND" or
-     *             "SUCCESSFULLY"
+     *             if the lookup result was "TRY_AGAIN"
      */
     private static ArrayList getMXNames(String host) throws NoneException,
             TempErrorException {

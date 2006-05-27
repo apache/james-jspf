@@ -47,8 +47,7 @@ public interface DNSService {
      * @throws NoneException
      *             if no SPF-Record was found.
      * @throws TempErrorException
-     *             if the lookup result was not "HOST NOT FOUND" or
-     *             "SUCCESSFULLY"
+     *             if the lookup result was "TRY_AGAIN"
      */
     public String getSpfRecord(String hostname, String spfVersion)
             throws PermErrorException, NoneException, TempErrorException;
@@ -66,8 +65,7 @@ public interface DNSService {
      * @throws PermErrorException
      *             if an PermError should be returned
      * @throws TempErrorException
-     *             if the lookup result was not "HOST NOT FOUND" or
-     *             "SUCCESSFULLY"
+     *             if the lookup result was "TRY_AGAIN"
      */
     public List getARecords(String strServer, int mask) throws NoneException,
             PermErrorException, TempErrorException;
@@ -85,8 +83,7 @@ public interface DNSService {
      * @throws PermErrorException
      *             if an PermError should be returned
      * @throws TempErrorException
-     *             if the lookup result was not "HOST NOT FOUND" or
-     *             "SUCCESSFULLY"
+     *             if the lookup result was "TRY_AGAIN"
      */
     public List getAAAARecords(String strServer, int mask)
             throws NoneException, PermErrorException, TempErrorException;
@@ -102,8 +99,7 @@ public interface DNSService {
      * @throws PermErrorException
      *             if the hostname is not resolvable
      * @throws TempErrorException
-     *             if the lookup result was not "HOST NOT FOUND" or
-     *             "SUCCESSFULLY"
+     *             if the lookup result was "TRY_AGAIN"
      */
     public String getTxtCatType(String strServer) throws NoneException,
             PermErrorException, TempErrorException;
@@ -119,8 +115,7 @@ public interface DNSService {
      * @throws PermErrorException
      *             if an PermError should be returned
      * @throws TempErrorException
-     *             if the lookup result was not "HOST NOT FOUND" or
-     *             "SUCCESSFULLY"
+     *             if the lookup result was "TRY_AGAIN"
      */
 
     public List getPTRRecords(String ipAddress) throws PermErrorException,
@@ -139,8 +134,7 @@ public interface DNSService {
      * @throws PermErrorException
      *             if an PermError should be returned
      * @throws TempErrorException
-     *             if the lookup result was not "HOST NOT FOUND" or
-     *             "SUCCESSFULLY"
+     *             if the lookup result was "TRY_AGAIN"
      */
     public List getMXRecords(String domainName, int mask)
             throws PermErrorException, NoneException, TempErrorException;

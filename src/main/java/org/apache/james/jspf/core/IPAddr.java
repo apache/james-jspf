@@ -61,7 +61,7 @@ public class IPAddr {
      *            The hostname or ip we want to retrieve the ipaddresses for
      * @param mask
      *            The netmask
-     * @return ipAddresses
+     * @return ipAddresses An Arraylist which contains all ipAddresses
      * @throws PermErrorException
      *             on error
      */
@@ -84,7 +84,7 @@ public class IPAddr {
      *            The ipAddress given as String
      * @param maskLength
      *            The netmask
-     * @return IpAddress
+     * @return IpAddress AAn Arraylist which contains all ipAddresses
      * @throws PermErrorException
      *             on error
      */
@@ -186,7 +186,7 @@ public class IPAddr {
      * 
      * @param data
      *            The String where the dot should removed
-     * @return modified String
+     * @return modified The Given String with last char stripped
      */
     public static String stripDot(String data) {
 
@@ -228,6 +228,12 @@ public class IPAddr {
         }
     }
 
+    /**
+     * Return the Hexdecimal representation of the given long value
+     * 
+     * @param data The value to retrieve the Hexdecimal for
+     * @return The Hexdecimal representation of the given value
+     */
     private String getHex(long data) {
         StringBuffer fullHex = new StringBuffer();
         fullHex.append("0000" + Long.toHexString(data).toUpperCase());
@@ -247,7 +253,7 @@ public class IPAddr {
      * 
      * @param addressData
      *            The int Array
-     * @return ipAddress
+     * @return ipAddress The ipAddress
      */
     private String getIPAddress(int[] addressData) {
         StringBuffer createAddress = new StringBuffer();
@@ -274,10 +280,19 @@ public class IPAddr {
         return createAddress.toString();
     }
 
+    /**
+     * 
+     * @see #getIPAddress(int[])
+     */
     public String getMaskedIPAddress() {
         return getIPAddress(maskedAddress(address, mask));
     }
 
+    /**
+     * Get the maskAddress
+     * 
+     * @return The maskAddress
+     */
     public String getMaskAddress() {
         if (ipLength == 4) {
             return getIPAddress(get8BitAddress(mask));
@@ -288,7 +303,8 @@ public class IPAddr {
     
     /**
      * Return the NibbleFormat of the IPAddr
-     * @return ipAddress 
+     * 
+     * @return ipAddress The ipAddress in nibbleFormat 
      */
     public String getNibbleFormat() {
         StringBuffer sb = new StringBuffer();
@@ -374,6 +390,7 @@ public class IPAddr {
         return maskLength;
     }
 
+    
     public String toString() {
         return getIPAddress();
     }
@@ -420,7 +437,8 @@ public class IPAddr {
     }
     
     /**
-     * Retrun if the given ipAddress is ipv6
+     * Return if the given ipAddress is ipv6
+     * 
      * @param ip The ipAddress
      * @return true or false
      */
