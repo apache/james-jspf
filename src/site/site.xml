@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="jSPF">
+  <bannerLeft>
+    <name>James jSPF</name>
+    <src>http://www.apache.org/images/asf_logo_wide.gif</src>
+    <href>http://james.apache.org/</href>
+  </bannerLeft>
+  <bannerRight>
+    <src>http://james.apache.org//images/james-logo.jpg</src>
+  </bannerRight>
+  <body>
+    <links>
+      <item name="Apache" href="http://www.apache.org/" />
+      <item name="James" href="http://james.apache.org/"/>
+      <item name="jSPF" href="http://james.apache.org/jspf/"/>
+      <item name="jSieve" href="http://james.apache.org/jsieve/"/>
+      <item name="Mime4J" href="http://james.apache.org/mime4j/"/>
+      <item name="Postage" href="http://james.apache.org/postage/"/>
+    </links>
+
+    <menu name="jSPF">
+      <item name="Overview" href="index.html"/>
+      <item name="jSPF FAQ" href="FAQ.html"/>
+      <item name="Mailing Lists" href="mail-lists.html" />
+    </menu>
+
+    <menu name="Documentation">
+      <item name="jSPF" href="documentation.html"/>
+      <item name="Design" href="design.html"/>
+      <item name="jSPF Javadocs" href="apidocs/index.html" />
+      <item name="Useful RFCs" href="rfclist.html"/>
+    </menu>
+
+    <menu name="Project">
+      <item name="Bug Database" href="issue-tracking.html"/>
+      <item name="Source Code" href="source-repository.html"/>
+      <item name="Who We Are" href="team-list.html" />
+      <item name="Contributing" href="contribute.html"/>
+      <item name="Standards" href="code-standards.html"/>
+      <item name="License" href="license.html"/>
+    </menu>
+
+
+    <menu name="Useful Information">
+      <item name="Get Involved" href="http://jakarta.apache.org/site/getinvolved.html"/>
+      <item name="Reference Library" href="http://jakarta.apache.org/site/library.html"/>
+      <item name="Apache" href="http://apache.org/foundation/faq.html" />
+    </menu>
+
+  </body>
+</project>

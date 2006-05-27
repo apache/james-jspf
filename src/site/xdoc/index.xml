@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<document>
+  <properties>
+    <title>Overview</title>
+    <author email="server-dev@james.apache.org">James jSPF Project Team</author>
+  </properties>
+  <body>
+    <section name="What is it?">
+      <p>
+        The jSPF library is pure Java SPF implementation. It was designed to match the current
+        SPF-Specs of 2006 (See RFC section). SPF is also knows as Sender Policy Framework.     
+        It was designed to detect email spoofing.This is the solution if you ever was tired
+        of getting spam from yourself. For more informations see 
+        <a href="http://www.openspf.org"> openspf website </a>
+      </p>
+    </section>
+    <section name="News">
+
+    <subsection name="2006">
+
+      <h4>First public release of jSPF</h4>
+      <p>After a fully rewrite of spf-java we finally release jSPF.</p>
+
+    </subsection>
+    </section>
+    
+    <section name="releases">
+      <p>
+        <b>Latest and Stable: jSPF v1.0b1</b>
+        <br/>
+jSPF v1.0b1 is the current release.
+Both <a href="http://james.apache.org/download.cgi">binary and source</a> distributions are available.</p>
+      <p>
+        <b>Get your hands on the latest versions..</b>
+        <br/>We put significant milestones, and potential release candidates in the <a href="http://cvs.apache.org/dist/james/">download area.</a>
+        <br/>Whilst the quality of these versions cannot be guaranteed they may contain important bug fixes and cool new features.<br/>
+      </p>
+    </section>
+  </body>
+</document>

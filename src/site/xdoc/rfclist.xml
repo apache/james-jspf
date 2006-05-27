@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<document>
+  <properties>
+    <title>Overview</title>
+    <author email="server-dev@james.apache.org">James jSPF Project Team</author>
+  </properties>
+  <body>
+    <section name="Usefull RFC's">
+      <p>
+        The actual SPF-RFC: <a href="http://new.openspf.org/svn/project/specs/rfc4408.html"> RFC </a>
+      </p>
+    </section>
+  </body>
+</document>
+
