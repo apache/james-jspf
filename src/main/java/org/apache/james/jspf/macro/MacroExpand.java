@@ -311,10 +311,20 @@ public class MacroExpand {
         return reversed;
     }
 
+    /**
+     * @see #subset(ArrayList, int)
+     */
     private String subset(ArrayList data) {
         return subset(data, data.size());
     }
 
+    /**
+     * Convert a ArrayList to a String which holds the entries seperated by dots
+     * 
+     * @param data The ArrayList which should be converted
+     * @param length The ArrayLength
+     * @return A String which holds all entries seperated by dots
+     */
     private String subset(ArrayList data, int length) {
 
         StringBuffer buildString = new StringBuffer();

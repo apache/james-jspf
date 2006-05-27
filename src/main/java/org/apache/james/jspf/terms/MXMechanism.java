@@ -64,8 +64,6 @@ public class MXMechanism extends AMechanism {
                 if (checkAddressList(checkAddress, addressList)) {
                     return true;
                 }
-            } catch (TempErrorException e) {
-                throw new TempErrorException(e.getMessage());
             } catch (Exception e) {
                 // no a records just return null
                 return false;

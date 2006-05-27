@@ -74,8 +74,8 @@ public class SPF {
      *            The mailFrom which was provided
      * @param hostName
      *            The hostname which was provided as HELO/EHLO
-     * @return result. Possible results are: pass, neutral, fail, deny,
-     *         softfail, error,temperror none
+     * @return result. Possible results are: pass, neutral, fail,
+     *         softfail, error,temperror, none
      */
     public SPFResult checkSPF(String ipAddress, String mailFrom, String hostName) {
         SPF1Data spfData = null;

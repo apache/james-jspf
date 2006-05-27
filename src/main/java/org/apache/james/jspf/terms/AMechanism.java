@@ -74,8 +74,6 @@ public class AMechanism extends GenericMechanism {
                     if (checkAddressList(checkAddress, addressList)) {
                         return true;
                     }
-                } catch (TempErrorException e) {
-                    throw new TempErrorException(e.getMessage());
                 } catch (Exception e) {
                     // no a records just return null
                     return false;
@@ -90,10 +88,8 @@ public class AMechanism extends GenericMechanism {
                     if (checkAddressList(checkAddress, addressList)) {
                         return true;
                     }
-                } catch (TempErrorException e) {
-                    throw new TempErrorException(e.getMessage());
                 } catch (Exception e) {
-                    // no a records just return null
+                    // no aaaa records just return null
                     return false;
                 }
 

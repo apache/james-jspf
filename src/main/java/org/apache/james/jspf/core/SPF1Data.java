@@ -208,6 +208,7 @@ public class SPF1Data implements MacroData {
 
     /**
      * Get the ipAddress which was used to connect
+     * 
      * @return ipAddres 
      */
     public String getIpAddress() {
@@ -268,18 +269,20 @@ public class SPF1Data implements MacroData {
     }
 
     /**
-     * Get currentDepth
+     * Get currentDepth 
      * 
-     * @return currentDepth
+     * @return currentDepth The currentDeph
      */
     public int getCurrentDepth() {
         return currentDepth;
     }
 
     /**
-     * Set currentDepth
+     * Set currentDepth which is just processed. This will called from
+     * modifiers/mechanismn
      * 
      * @param currentDepth
+     *            The currentDepth
      */
     public void setCurrentDepth(int currentDepth) {
         this.currentDepth = currentDepth;
@@ -288,7 +291,8 @@ public class SPF1Data implements MacroData {
     /**
      * Get the maxDepth
      * 
-     * @return maxDepth
+     * @return maxDepth The maximum mechanismn/modifier which are allowed to
+     *         proccessed
      */
     public int getMaxDepth() {
         return MAX_DEPTH;
@@ -297,16 +301,26 @@ public class SPF1Data implements MacroData {
     /**
      * Set the currentDomain
      * 
-     * @param domain
+     * @param domain The current used domain
      */
     public void setCurrentDomain(String domain) {
         this.currentDomain = domain;
     }
 
+    /**
+     * Get the used DNSService
+     * 
+     * @return dnsProbe The DNSService
+     */
     public DNSService getDnsProbe() {
         return dnsProbe;
     }
 
+    /**
+     * Set the DNSService which will be used
+     * 
+     * @param dnsProbe The DNSService
+     */
     public void setDnsProbe(DNSService dnsProbe) {
         this.dnsProbe = dnsProbe;
     }
@@ -370,6 +384,7 @@ public class SPF1Data implements MacroData {
     
     /**
      * Get set to true if the explanation should be ignored
+     * 
      * @param ignoreExplanation
      */
     public void setIgnoreExplanation(boolean ignoreExplanation) {
@@ -378,6 +393,7 @@ public class SPF1Data implements MacroData {
     
     /**
      * Return true if the explanation should be ignored
+     * 
      * @return true of false
      */
     public boolean ignoreExplanation() {

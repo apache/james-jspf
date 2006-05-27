@@ -59,11 +59,10 @@ public class ExistsMechanism extends GenericMechanism {
 
         try {
             aRecords = spfData.getDnsProbe().getARecords(host, 32);
-        } catch (TempErrorException e) {
-            throw new TempErrorException(e.getMessage());
         } catch (Exception e) {
             return false;
         }
+        
         if (aRecords.size() > 0) {
             return true;
         }

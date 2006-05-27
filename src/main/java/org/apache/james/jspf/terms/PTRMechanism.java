@@ -56,34 +56,32 @@ public class PTRMechanism extends GenericMechanism {
         // Get the right host.
         String host = expandHost(spfData);
 
-        try {
-            // Get PTR Records for the ipAddress which is provided by SPF1Data
-            List domainList = spfData.getDnsProbe().getPTRRecords(
-                    spfData.getIpAddress());
-            for (int i = 0; i < domainList.size(); i++) {
+        
+        // Get PTR Records for the ipAddress which is provided by SPF1Data
+        List domainList = spfData.getDnsProbe().getPTRRecords(
+                spfData.getIpAddress());
+        for (int i = 0; i < domainList.size(); i++) {
 
-                // Get a record for this
-                List aList = spfData.getDnsProbe().getARecords(
-                        (String) domainList.get(i), 32);
-                for (int j = 0; j < aList.size(); j++) {
-                    compareIP = (IPAddr) aList.get(j);
-                    if (compareIP.toString().equals(spfData.getIpAddress())) {
-                        validatedHosts.add(domainList.get(i));
-                    }
+            // Get a record for this
+            List aList = spfData.getDnsProbe().getARecords(
+                    (String) domainList.get(i), 32);
+            for (int j = 0; j < aList.size(); j++) {
+                compareIP = (IPAddr) aList.get(j);
+                if (compareIP.toString().equals(spfData.getIpAddress())) {
+                    validatedHosts.add(domainList.get(i));
                 }
             }
-
-            // Check if we match one of this ptr!
-            for (int j = 0; j < validatedHosts.size(); j++) {
-                compareDomain = (String) validatedHosts.get(j);
-                if (compareDomain.equals(host)
-                        || compareDomain.endsWith("." + host)) {
-                    return true;
-                }
-            }
-        } catch (TempErrorException e) {
-            throw new TempErrorException(e.getMessage());
         }
+
+        // Check if we match one of this ptr!
+        for (int j = 0; j < validatedHosts.size(); j++) {
+            compareDomain = (String) validatedHosts.get(j);
+            if (compareDomain.equals(host)
+                    || compareDomain.endsWith("." + host)) {
+                return true;
+            }
+        }
+        
 
         return false;
 
