@@ -1,13 +1,24 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
 <document>
   <properties>
     <title>Overview</title>
     <author email="server-dev@james.apache.org">James jSPF Project Team</author>
   </properties>
   <body>
-    <section name="Frequally asked questions">
-      <p>
-        TODO!
-      </p>
+    <section name="Frequently asked questions">
+      <subsection name="Questions">      
+        <p>
+          <ul>
+            <li>
+              <a href="#1">Can I run jSPF from the commandline?</a>
+            </li>            
+          </ul>
+        </p>
+      </subsection>    
+      <subsection name="Answers"> 
+        <a name ="1"><h5>Can I run jSPF from the commandline?</h5></a>
+        <p> Sure you can. Just enter "java -jar jspf-xxx.jar" for getting the usage. </p>      
+      </subsection>
     </section>
   </body>
 </document>
