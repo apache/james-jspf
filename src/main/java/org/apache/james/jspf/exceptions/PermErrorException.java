@@ -20,8 +20,6 @@ package org.apache.james.jspf.exceptions;
 /**
  * This exception get thrown if the result should be PermError
  * 
- * @author Norman Maurer <nm@byteaction.de>
- * @author Stefano Bagnara <apache@bago.org>
  */
 public class PermErrorException extends Exception {
 

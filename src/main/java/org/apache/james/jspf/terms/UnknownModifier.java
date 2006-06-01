@@ -27,8 +27,6 @@ import org.apache.james.jspf.util.ConfigurationMatch;
 /**
  * This Class represent an Unknown Modifier
  * 
- * @author Norman Maurer <nm@byteaction.de>
- * @author Stefano Bagnara <apache@bago.org>
  */
 public class UnknownModifier implements Modifier, Configurable {
 

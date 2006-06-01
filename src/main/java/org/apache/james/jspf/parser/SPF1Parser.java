@@ -74,8 +74,6 @@ import java.util.regex.Pattern;
  * 
  * @see org.apache.james.jspf.core.SPF1Record
  * 
- * @author Norman Maurer <nm@byteaction.de>
- * @author Stefano Bagnara <apache@bago.org>
  */
 public class SPF1Parser {
 

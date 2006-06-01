@@ -17,11 +17,6 @@
 
 package org.apache.james.jspf.core;
 
-/**
- * 
- * @author Norman Maurer <nm@byteaction.de>
- * @author Stefano Bagnara <apache@bago.org>
- */
 public interface SPF1Constants {
 
     public static final String PASS = "+";

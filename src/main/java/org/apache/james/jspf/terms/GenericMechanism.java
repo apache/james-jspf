@@ -26,9 +26,7 @@ import org.apache.james.jspf.util.ConfigurationMatch;
 
 /**
  * This abstract class represent a gerneric mechanism
- * 
- * @author Norman Maurer <nm@byteaction.de>
- * 
+ *  
  */
 public abstract class GenericMechanism implements Mechanism, Configurable {
 

@@ -21,9 +21,6 @@ package org.apache.james.jspf.macro;
  * This Class is used to convert all macros which can used in SPF-Records to the
  * right values!
  * 
- * @author Mimecast Contact : spf@mimecast.net
- * @author Norman Maurer <nm@byteaction.de>
- * @author Stefano Bagnara <apache@bago.org>
  */
 
 import org.apache.james.jspf.exceptions.PermErrorException;

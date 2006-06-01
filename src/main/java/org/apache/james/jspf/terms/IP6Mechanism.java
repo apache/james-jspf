@@ -22,8 +22,6 @@ import org.apache.james.jspf.util.Inet6Util;
 /**
  * This class represent the ip6 mechanism
  * 
- * @author Norman Maurer <nm@byteaction.de>
- * @author Stefano Bagnara <apache@bago.org>
  */
 public class IP6Mechanism extends IP4Mechanism {
 

@@ -24,9 +24,6 @@ import org.apache.james.jspf.exceptions.TempErrorException;
 /**
  * This Interface represent a mechanismn
  * 
- * @author Norman Maurer <nm@byteaction.de>
- * @author Stefano Bagnara <apache@bago.org>
- * 
  */
 public interface Mechanism {
 

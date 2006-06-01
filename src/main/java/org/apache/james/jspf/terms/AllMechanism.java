@@ -26,8 +26,6 @@ import org.apache.james.jspf.util.ConfigurationMatch;
 /**
  * This class represent the all mechanism
  * 
- * @author Norman Maurer <nm@byteaction.de>
- * @author Stefano Bagnara <apache@bago.org>
  */
 public class AllMechanism implements Mechanism, Configurable {
 

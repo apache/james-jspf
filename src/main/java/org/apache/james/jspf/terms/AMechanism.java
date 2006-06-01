@@ -31,8 +31,6 @@ import java.util.List;
 /**
  * This class represent the a mechanism
  * 
- * @author Norman Maurer <nm@byteaction.de>
- * @author Stefano Bagnara <apache@bago.org>
  */
 public class AMechanism extends GenericMechanism {
 

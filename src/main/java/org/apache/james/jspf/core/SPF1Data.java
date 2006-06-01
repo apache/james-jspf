@@ -29,9 +29,6 @@ import java.util.List;
  * This Class is used as a container between the other classes. All necessary
  * values get stored here and get retrieved from here.
  * 
- * @author Mimecast Contact : spf@mimecast.net
- * @author Norman Maurer <nm@byteaction.de>
- * @author Stefano Bagnara <apache@bago.org>
  */
 
 public class SPF1Data implements MacroData {

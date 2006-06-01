@@ -21,9 +21,7 @@ import org.apache.james.jspf.core.SPF1Constants;
 
 /**
  * This class is used to return the result of an SPF lookup.
- * 
- * @author Norman Maurer <nm@byteaction.de>
- * @author Stefano Bagnara <apache@bago.org>
+ *
  */
 
 public class SPFInternalResult {

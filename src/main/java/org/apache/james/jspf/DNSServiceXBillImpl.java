@@ -43,9 +43,6 @@ import org.xbill.DNS.Type;
  * This class contains helper to get all neccassary DNS infos that are needed
  * for SPF
  * 
- * @author Norman Maurer <nm@byteaction.de>
- * @author Stefano Bagnara <apache@bago.org>
- * 
  */
 
 public class DNSServiceXBillImpl implements DNSService {

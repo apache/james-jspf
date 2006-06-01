@@ -23,9 +23,7 @@ import org.apache.james.jspf.core.SPF1Constants;
  * 
  * Class that offer static methods to convert SPF Results and contains all
  * possible results as static Strings.
- * 
- * @author Norman Maurer <nm@byteaction.de>
- * @author Stefano Bagnara <apache@bago.org>
+ *
  */
 
 public class SPF1Utils {

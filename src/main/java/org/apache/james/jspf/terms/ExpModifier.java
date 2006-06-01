@@ -28,9 +28,6 @@ import org.apache.james.jspf.parser.SPF1Parser;
 /**
  * This class represent the exp modifier
  * 
- * @author Norman Maurer <nm@byteaction.de>
- * @author Stefano Bagnara <apache@bago.org>
- * 
  */
 public class ExpModifier extends GenericModifier {
 

@@ -35,8 +35,6 @@ import java.util.Iterator;
 /**
  * This class is used to generate a SPF-Test and provided all intressting data.
  * 
- * @author Norman Maurer <nm@byteaction.de>
- * @author Stefano Bagnara <apache@bago.org>
  */
 
 public class SPF {

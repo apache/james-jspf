@@ -27,8 +27,6 @@ import org.apache.james.jspf.util.ConfigurationMatch;
 /**
  * This abstract class represent a gerneric modifier
  * 
- * @author Norman Maurer <nm@byteaction.de>
- * @author Stefano Bagnara <apache@bago.org>
  */
 public abstract class GenericModifier implements Modifier, Configurable {
 

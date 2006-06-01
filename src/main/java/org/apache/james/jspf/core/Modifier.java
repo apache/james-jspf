@@ -23,9 +23,6 @@ import org.apache.james.jspf.exceptions.TempErrorException;
 /**
  * This Interface represent a modifier
  * 
- * @author Norman Maurer <nm@byteaction.de>
- * @author Stefano Bagnara <apache@bago.org>
- * 
  */
 public interface Modifier {
 

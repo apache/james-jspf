@@ -26,8 +26,6 @@ import org.apache.james.jspf.util.ConfigurationMatch;
 /**
  * This class represent the ip4 mechanism
  * 
- * @author Norman Maurer <nm@byteaction.de>
- * @author Stefano Bagnara <apache@bago.org>
  */
 public class IP4Mechanism extends GenericMechanism {
 

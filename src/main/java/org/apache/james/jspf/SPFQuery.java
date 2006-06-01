@@ -25,8 +25,6 @@ import org.apache.log4j.SimpleLayout;
 /**
  * This class is used for commandline usage of JSPF
  * 
- * @author Norman Maurer <nm@byteaction.de>
- * @author Stefano Bagnara <apache@bago.org>
  */
 public class SPFQuery {
 
