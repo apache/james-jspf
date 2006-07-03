@@ -2,12 +2,13 @@
   <property file="${user.home}/.m2/maven.properties"/>
   <property name="maven.build.output" value="target/classes"/>
   <property name="maven.build.directory" value="target"/>
-  <property name="maven.build.final.name" value="jspf-0.8"/>
+  <property name="maven.build.final.name" value="jspf-svn409826"/>
   <property name="maven.test.reports" value="${maven.build.directory}/test-reports"/>
   <property name="maven.test.output" value="target/test-classes"/>
   <property name="maven.repo.local" value="${user.home}/.m2/repository"/>
   <path id="build.classpath">
     <fileset dir="${maven.repo.local}">
+      <include name="dnsjava/dnsjava/2.0.1/dnsjava-2.0.1.jar"/>
       <include name="log4j/log4j/1.2.13/log4j-1.2.13.jar"/>
     </fileset>
   </path>
@@ -78,6 +79,7 @@
   </target>
   <target name="get-deps" depends="test-offline" description="Download all dependencies" unless="maven.mode.offline">
     <mkdir dir="${maven.repo.local}"/>
+    <get src="http://repo1.maven.org/maven2/dnsjava/dnsjava/2.0.1/dnsjava-2.0.1.jar" dest="${maven.repo.local}/dnsjava/dnsjava/2.0.1/dnsjava-2.0.1.jar" usetimestamp="true" ignoreerrors="true"/>
     <get src="http://repo1.maven.org/maven2/log4j/log4j/1.2.13/log4j-1.2.13.jar" dest="${maven.repo.local}/log4j/log4j/1.2.13/log4j-1.2.13.jar" usetimestamp="true" ignoreerrors="true"/>
   </target>
 </project>
