@@ -4,7 +4,7 @@
   <groupId>org.apache.james.jspf</groupId>
   <artifactId>jspf</artifactId>
   <name>Apache James jSPF</name>
-  <version>1.0b1</version>
+  <version>svn409826</version>
   <description>
     jspf implements the spf specification
   </description>
