@@ -13,9 +13,11 @@
       <item name="Apache" href="http://www.apache.org/" />
       <item name="James" href="http://james.apache.org/"/>
       <item name="jSPF" href="http://james.apache.org/jspf/"/>
+      <!-- Not yet there
       <item name="jSieve" href="http://james.apache.org/jsieve/"/>
       <item name="Mime4J" href="http://james.apache.org/mime4j/"/>
       <item name="Postage" href="http://james.apache.org/postage/"/>
+      -->
     </links>
 
     <menu name="jSPF">
@@ -25,8 +27,10 @@
     </menu>
 
     <menu name="Documentation">
+      <!-- Not yet there
       <item name="jSPF" href="documentation.html"/>
       <item name="Design" href="design.html"/>
+      -->
       <item name="jSPF Javadocs" href="apidocs/index.html" />
       <item name="Useful RFCs" href="rfclist.html"/>
     </menu>
@@ -35,7 +39,9 @@
       <item name="Bug Database" href="issue-tracking.html"/>
       <item name="Source Code" href="source-repository.html"/>
       <item name="Who We Are" href="team-list.html" />
+      <!-- Not yet there
       <item name="Contributing" href="contribute.html"/>
+      -->
       <item name="Standards" href="code-standards.html"/>
       <item name="License" href="license.html"/>
     </menu>
