@@ -1,23 +1,26 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <project name="jSPF">
+
   <bannerLeft>
     <name>James jSPF</name>
-    <src>http://www.apache.org/images/asf_logo_wide.gif</src>
-    <href>http://james.apache.org/</href>
+    <src>images/james-jspf-logo.gif</src>
+    <href>http://james.apache.org/jspf</href>
   </bannerLeft>
+  
   <bannerRight>
-    <src>http://james.apache.org//images/james-logo.jpg</src>
-  </bannerRight>
+    <name>The Apache Software Foundation</name>
+    <src>images/asf-logo-reduced.gif</src>
+    <href>http://www.apache.org/</href>
+  </bannerRight> 
+
   <body>
     <links>
-      <item name="Apache" href="http://www.apache.org/" />
-      <item name="James" href="http://james.apache.org/"/>
-      <item name="jSPF" href="http://james.apache.org/jspf/"/>
-      <!-- Not yet there
-      <item name="jSieve" href="http://james.apache.org/jsieve/"/>
-      <item name="Mime4J" href="http://james.apache.org/mime4j/"/>
-      <item name="Postage" href="http://james.apache.org/postage/"/>
-      -->
+      <item name="James" href="http://james.apache.org/index.html" />
+      <item name="Server" href="http://james.apache.org/server/index.html" />
+      <item name="jSPF" href="http://james.apache.org/jspf/index.html" />
+      <item name="Mime4J" href="http://james.apache.org/mime4j/index.html" />
+      <item name="JSieve" href="http://james.apache.org/jsieve/index.html" />
+      <item name="Postage" href="http://james.apache.org/postage/index.html" />
     </links>
 
     <menu name="jSPF">
@@ -42,16 +45,9 @@
       <!-- Not yet there
       <item name="Contributing" href="contribute.html"/>
       -->
-      <item name="Standards" href="code-standards.html"/>
       <item name="License" href="license.html"/>
     </menu>
 
-    <menu name="Useful Information">
-      <item name="Get Involved" href="http://jakarta.apache.org/site/getinvolved.html"/>
-      <item name="Reference Library" href="http://jakarta.apache.org/site/library.html"/>
-      <item name="Apache" href="http://apache.org/foundation/faq.html" />
-    </menu>
-    
     ${reports}
 
   </body>
