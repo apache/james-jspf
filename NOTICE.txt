@@ -15,3 +15,7 @@
   which is open source software licensed under the BSD license,
   written and copyright by Brian Wellington. The original software 
   is available from http://www.dnsjava.org/
+  
+  SPF Test (test*.txt) contains resources derived from the
+  libspf2 library (http://www.libspf2.org/) and distributed under 
+  the BSD license and copyright by Wayne Schlitt, Shevek.
