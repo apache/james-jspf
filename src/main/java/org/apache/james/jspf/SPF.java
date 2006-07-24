@@ -22,6 +22,7 @@ package org.apache.james.jspf;
 
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.Directive;
+import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.Modifier;
 import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPF1Data;
@@ -31,7 +32,6 @@ import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.parser.SPF1Parser;
-import org.apache.log4j.Logger;
 
 import java.util.Iterator;
 
@@ -42,28 +42,36 @@ import java.util.Iterator;
 
 public class SPF {
 
-    private DNSService dnsProbe = null;
+    private DNSService dnsProbe;
 
     private SPF1Parser parser;
 
-    private static Logger log = Logger.getLogger(SPF.class);
+    private Logger log;
 
     /**
-     * 
+     * Uses default Log4JLogger and DNSJava based dns resolver
      */
     public SPF() {
-        this(new DNSServiceXBillImpl());
-
+        this(new Log4JLogger(org.apache.log4j.Logger.getLogger(SPF.class)));
+    }
+    
+    /**
+     * Uses passed logger and DNSJava based dns resolver
+     * @param logger logger
+     */
+    public SPF(Logger logger) {
+        this(new DNSServiceXBillImpl(logger), logger);
     }
 
     /**
      * @param dnsProbe
      *            the dns provider
      */
-    public SPF(DNSService dnsProbe) {
+    public SPF(DNSService dnsProbe, Logger logger) {
         super();
         this.dnsProbe = dnsProbe;
-        this.parser = new SPF1Parser();
+        this.parser = new SPF1Parser(logger);
+        this.log = logger;
     }
 
     /**
@@ -92,18 +100,18 @@ public class SPF {
             result = SPF1Utils.resultToName(resultChar);
             explanation = res.getExplanation();
         } catch (PermErrorException e) {
-            log.warn(e.getMessage());
+            log.warn(e.getMessage(),e);
             result = SPF1Utils.PERM_ERROR;
         } catch (NoneException e) {
-            log.warn(e.getMessage());
+            log.warn(e.getMessage(),e);
             result = SPF1Utils.NONE;
         } catch (TempErrorException e) {
-            log.warn(e.getMessage());
+            log.warn(e.getMessage(),e);
             result = SPF1Utils.TEMP_ERROR;
         } catch (IllegalStateException e) {
             // this should never happen at all. But anyway we will set the
             // result to neutral. Safety first ..
-            log.error(e.getMessage());
+            log.error(e.getMessage(),e);
             result = SPF1Constants.NEUTRAL;
         }
 
@@ -240,7 +248,7 @@ public class SPF {
         if (result.equals(SPF1Constants.FAIL)) {  
             if (spfData.getExplanation()==null || spfData.getExplanation().equals("")) {
                 try {
-                    spfData.setExplanation(new MacroExpand(spfData)
+                    spfData.setExplanation(new MacroExpand(spfData, log)
                             .expandExplanation(SPF1Utils.DEFAULT_EXPLANATION));
                 } catch (PermErrorException e) {}
             }

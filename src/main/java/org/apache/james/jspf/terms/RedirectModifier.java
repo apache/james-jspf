@@ -21,6 +21,8 @@
 package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.SPF;
+import org.apache.james.jspf.core.LogEnabled;
+import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
@@ -32,13 +34,15 @@ import org.apache.james.jspf.parser.SPF1Parser;
  * This class represent the redirect modifier
  * 
  */
-public class RedirectModifier extends GenericModifier {
+public class RedirectModifier extends GenericModifier implements LogEnabled {
 
     /**
      * ABNF: redirect = "redirect" "=" domain-spec
      */
     public static final String REGEX = "[rR][eE][dD][iI][rR][eE][cC][tT]"
             + "\\=" + SPF1Parser.DOMAIN_SPEC_REGEX;
+    
+    private Logger log;
 
     /**
      * Set the host which should be used for redirection and set it in SPF1Data
@@ -63,7 +67,7 @@ public class RedirectModifier extends GenericModifier {
             spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);
 
             try {
-                host = new MacroExpand(spfData).expandDomain(host);
+                host = new MacroExpand(spfData, log).expandDomain(host);
             } catch (Exception e) {
                 throw new PermErrorException("Error in redirect modifier: "
                         + host);
@@ -73,7 +77,7 @@ public class RedirectModifier extends GenericModifier {
 
             String res = null;
             try {
-                res = new SPF(spfData.getDnsProbe()).checkSPF(spfData).getResultChar();
+                res = new SPF(spfData.getDnsProbe(),log).checkSPF(spfData).getResultChar();
                 
 
             } catch (NoneException e) {
@@ -98,6 +102,14 @@ public class RedirectModifier extends GenericModifier {
      */
     public boolean enforceSingleInstance() {
         return true;
+    }
+
+
+    /**
+     * @see org.apache.james.jspf.core.LogEnabled#enableLogging(org.apache.james.jspf.core.Logger)
+     */
+    public void enableLogging(Logger logger) {
+        this.log = logger;
     }
 
 }

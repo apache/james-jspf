@@ -53,7 +53,7 @@ public class ExistsMechanism extends GenericMechanism {
 
         String host = expandHost(spfData);
         try {
-            host = new MacroExpand(spfData).expandDomain(host);
+            host = new MacroExpand(spfData, log).expandDomain(host);
         } catch (Exception e) {
             throw new PermErrorException(e.getMessage());
         }

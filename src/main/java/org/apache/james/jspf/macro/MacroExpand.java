@@ -26,8 +26,8 @@ package org.apache.james.jspf.macro;
  * 
  */
 
+import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.exceptions.PermErrorException;
-import org.apache.log4j.Logger;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -51,11 +51,12 @@ public class MacroExpand {
 
     private boolean isExplanation = false;
 
-    private static Logger log = Logger.getLogger(MacroExpand.class);
+    private Logger log;
 
-    public MacroExpand(MacroData spfData) {
+    public MacroExpand(MacroData spfData, Logger logger) {
         this.spfData = spfData;
         inputPattern = Pattern.compile(MACRO_REGEX);
+        log = logger;
     }
 
     /**

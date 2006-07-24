@@ -90,7 +90,7 @@ public class SPFQuery {
 
             // check if all needed values was set
             if (ip != null && sender != null && helo != null) {
-                SPF spf = new SPF();
+                SPF spf = new SPF(new Log4JLogger(logger));
                 SPFResult result = spf.checkSPF(ip, sender, helo);
                 System.out.println(result.getResult());
                 System.out.println(result.getHeader());

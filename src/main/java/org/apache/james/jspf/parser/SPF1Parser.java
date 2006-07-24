@@ -22,6 +22,8 @@ package org.apache.james.jspf.parser;
 
 import org.apache.james.jspf.core.Configurable;
 import org.apache.james.jspf.core.Directive;
+import org.apache.james.jspf.core.LogEnabled;
+import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.Mechanism;
 import org.apache.james.jspf.core.Modifier;
 import org.apache.james.jspf.core.SPF1Constants;
@@ -29,7 +31,6 @@ import org.apache.james.jspf.core.SPF1Record;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.util.ConfigurationMatch;
-import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -154,7 +155,7 @@ public class SPF1Parser {
 
     private List matchResultPositions;
 
-    private static Logger log = Logger.getLogger(SPF1Parser.class);
+    private Logger log;
 
     private String termFile = "org/apache/james/jspf/parser/jspf.default.terms";
 
@@ -210,8 +211,8 @@ public class SPF1Parser {
     /**
      * Constructor. Creates all the values needed to run the parsing
      */
-    public SPF1Parser() {
-
+    public SPF1Parser(Logger logger) {
+        log = logger;
         try {
             InputStream is = Thread.currentThread().getContextClassLoader()
                     .getResourceAsStream(termFile);
@@ -494,6 +495,9 @@ public class SPF1Parser {
                         .getMatchSize());
                 try {
                     Object term = c.getTermDef().newInstance();
+                    if (term instanceof LogEnabled) {
+                        ((LogEnabled) term).enableLogging(log);
+                    }
                     if (term instanceof Configurable) {
                         if (subres == null || subres.groupCount() == 0) {
                             ((Configurable) term).config(null);

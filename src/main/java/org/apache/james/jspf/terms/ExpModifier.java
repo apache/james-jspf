@@ -20,6 +20,8 @@
 
 package org.apache.james.jspf.terms;
 
+import org.apache.james.jspf.core.LogEnabled;
+import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.exceptions.NoneException;
@@ -32,13 +34,15 @@ import org.apache.james.jspf.parser.SPF1Parser;
  * This class represent the exp modifier
  * 
  */
-public class ExpModifier extends GenericModifier {
+public class ExpModifier extends GenericModifier implements LogEnabled {
 
     /**
      * ABNF: explanation = "exp" "=" domain-spec
      */
     public static final String REGEX = "[eE][xX][pP]" + "\\="
             + SPF1Parser.DOMAIN_SPEC_REGEX;
+
+    private Logger log;
 
     /**
      * Generate the explanation and set it in SPF1Data so it can be accessed
@@ -62,7 +66,7 @@ public class ExpModifier extends GenericModifier {
             return null;
 
         try {
-            host = new MacroExpand(spfData).expandDomain(host);
+            host = new MacroExpand(spfData, log).expandDomain(host);
             try {
                 exp = spfData.getDnsProbe().getTxtCatType(host);
             } catch (NoneException e) {
@@ -74,7 +78,7 @@ public class ExpModifier extends GenericModifier {
             }
 
             if ((exp != null) && (!exp.equals(""))) {
-                spfData.setExplanation(new MacroExpand(spfData)
+                spfData.setExplanation(new MacroExpand(spfData, log)
                         .expandExplanation(exp));
             } 
         } catch (PermErrorException e) {
@@ -89,6 +93,13 @@ public class ExpModifier extends GenericModifier {
      */
     public boolean enforceSingleInstance() {
         return true;
+    }
+
+    /**
+     * @see org.apache.james.jspf.core.LogEnabled#enableLogging(org.apache.james.jspf.core.Logger)
+     */
+    public void enableLogging(Logger logger) {
+        this.log = logger;
     }
 
 }

@@ -28,10 +28,10 @@ import java.util.List;
 
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.IPAddr;
+import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
-import org.apache.log4j.Logger;
 import org.xbill.DNS.AAAARecord;
 import org.xbill.DNS.ARecord;
 import org.xbill.DNS.Lookup;
@@ -53,7 +53,14 @@ public class DNSServiceXBillImpl implements DNSService {
     // Set seconds after which we return and TempError
     private static int timeOut = 20;
 
-    private static Logger log = Logger.getLogger(DNSServiceXBillImpl.class);
+    private Logger log;
+
+    /**
+     * Default Constructor
+     */
+    public DNSServiceXBillImpl(Logger logger) {
+        this.log = logger;
+    }
 
     /**
      * @see org.apache.james.jspf.core.DNSService#getSpfRecord(java.lang.String,
@@ -109,7 +116,7 @@ public class DNSServiceXBillImpl implements DNSService {
      * @throws PermErrorException
      *             if an PermError should be returned
      */
-    private static ArrayList getTXTRecords(String hostname)
+    private ArrayList getTXTRecords(String hostname)
             throws NoneException, TempErrorException {
         ArrayList txtR = new ArrayList();
         Record[] records;
@@ -418,7 +425,7 @@ public class DNSServiceXBillImpl implements DNSService {
      * @throws TempErrorException
      *             if the lookup result was "TRY_AGAIN"
      */
-    private static ArrayList getMXNames(String host) throws NoneException,
+    private ArrayList getMXNames(String host) throws NoneException,
             TempErrorException {
         ArrayList mxR = new ArrayList();
         Record[] records;

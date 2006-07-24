@@ -48,7 +48,7 @@ public class SPFMailZoneTest extends TestCase {
             }
         }
         assertNotNull(data);
-        spf = new SPF(new SPF1TestMZMockDNSService());
+        spf = new SPF(new SPF1TestMZMockDNSService(), new ConsoleLogger());
     }
 
     public static Test suite() throws IOException {
@@ -233,7 +233,7 @@ public class SPFMailZoneTest extends TestCase {
             super();
             List tests = loadTests();
             Iterator i = tests.iterator();
-            SPF spf = new SPF(new SPF1TestMZMockDNSService());
+            SPF spf = new SPF(new SPF1TestMZMockDNSService(), new ConsoleLogger());
             while (i.hasNext()) {
                 addTest(new SPFMailZoneTest(spf, (SPFTestDef) i.next()));
             }

@@ -22,6 +22,8 @@ package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.SPF;
 import org.apache.james.jspf.core.Configurable;
+import org.apache.james.jspf.core.LogEnabled;
+import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.Mechanism;
 import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPF1Data;
@@ -36,7 +38,7 @@ import org.apache.james.jspf.util.ConfigurationMatch;
  * This class represent the incude mechanism
  * 
  */
-public class IncludeMechanism implements Mechanism, Configurable {
+public class IncludeMechanism implements Mechanism, Configurable, LogEnabled {
 
     /**
      * ABNF: include = "include" ":" domain-spec
@@ -45,6 +47,8 @@ public class IncludeMechanism implements Mechanism, Configurable {
             + SPF1Parser.DOMAIN_SPEC_REGEX;
 
     private String host;
+    
+    private Logger log;
 
     /**
      * Set the host which should be used for include
@@ -64,7 +68,7 @@ public class IncludeMechanism implements Mechanism, Configurable {
         spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);      
         
         try {
-            host = new MacroExpand(spfData).expandDomain(host);
+            host = new MacroExpand(spfData, log).expandDomain(host);
         } catch (Exception e) {
             throw new PermErrorException("Error in include modifier: " + host);
         }
@@ -76,7 +80,7 @@ public class IncludeMechanism implements Mechanism, Configurable {
         
         String res = null;
         try {
-            res = new SPF(spfData.getDnsProbe()).checkSPF(spfData).getResultChar();
+            res = new SPF(spfData.getDnsProbe(),log).checkSPF(spfData).getResultChar();
         } catch (NoneException e) {
             throw new PermErrorException("included checkSPF returned NoneException");
         }
@@ -111,6 +115,13 @@ public class IncludeMechanism implements Mechanism, Configurable {
      */
     protected synchronized String getHost() {
         return host;
+    }
+
+    /**
+     * @see org.apache.james.jspf.core.LogEnabled#enableLogging(org.apache.james.jspf.core.Logger)
+     */
+    public void enableLogging(Logger logger) {
+        this.log = logger;
     }
 
 }

@@ -32,7 +32,7 @@ import java.util.List;
 
 public class LoggingDNSService implements DNSService {
     
-    private DNSService dnsService = new DNSServiceXBillImpl();
+    private DNSService dnsService = new DNSServiceXBillImpl(new ConsoleLogger());
 
     public String getSpfRecord(String hostname, String spfVersion)
             throws PermErrorException, NoneException, TempErrorException {

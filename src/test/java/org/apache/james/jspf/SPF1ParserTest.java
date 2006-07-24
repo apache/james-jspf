@@ -50,7 +50,7 @@ public class SPF1ParserTest extends TestCase {
             }
         }
         assertNotNull(data);
-        parser = new SPF1Parser();
+        parser = new SPF1Parser(new ConsoleLogger());
     }
 
     public static Test suite() throws IOException {
@@ -176,7 +176,7 @@ public class SPF1ParserTest extends TestCase {
             super();
             List tests = loadTests();
             Iterator i = tests.iterator();
-            SPF1Parser parser = new SPF1Parser();
+            SPF1Parser parser = new SPF1Parser(new ConsoleLogger());
             while (i.hasNext()) {
                 addTest(new SPF1ParserTest((SPF1RecordTestDef) i.next(), parser));
             }

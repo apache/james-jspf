@@ -21,6 +21,8 @@
 package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.Configurable;
+import org.apache.james.jspf.core.LogEnabled;
+import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.Mechanism;
 import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.exceptions.PermErrorException;
@@ -31,7 +33,7 @@ import org.apache.james.jspf.util.ConfigurationMatch;
  * This abstract class represent a gerneric mechanism
  *  
  */
-public abstract class GenericMechanism implements Mechanism, Configurable {
+public abstract class GenericMechanism implements Mechanism, Configurable, LogEnabled {
 
     /**
      * ABNF: ip4-cidr-length = "/" 1*DIGIT
@@ -52,6 +54,8 @@ public abstract class GenericMechanism implements Mechanism, Configurable {
 
     private String domain;
 
+    protected Logger log;
+
     /**
      * Expand the hostname
      * 
@@ -64,7 +68,7 @@ public abstract class GenericMechanism implements Mechanism, Configurable {
             host = spfData.getCurrentDomain();
         } else {
             try {
-                host = new MacroExpand(spfData).expandDomain(host);
+                host = new MacroExpand(spfData, log).expandDomain(host);
 
             } catch (Exception e) {
                 throw new PermErrorException(e.getMessage());
@@ -89,6 +93,13 @@ public abstract class GenericMechanism implements Mechanism, Configurable {
      */
     protected synchronized String getDomain() {
         return domain;
+    }
+
+    /**
+     * @see org.apache.james.jspf.core.LogEnabled#enableLogging(org.apache.james.jspf.core.Logger)
+     */
+    public void enableLogging(Logger logger) {
+        this.log = logger;
     }
 
 }
