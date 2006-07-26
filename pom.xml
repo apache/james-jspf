@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="ISO-8859-1"?>
 <!--
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
@@ -19,12 +19,17 @@
 -->
 <project>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.apache.james.jspf</groupId>
+  <groupId>org.apache.james</groupId>
   <artifactId>jspf</artifactId>
+  <parent>
+    <groupId>org.apache.james</groupId>
+    <artifactId>james-project</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
   <name>Apache James jSPF</name>
-  <version>0.9b2</version>
+  <version>0.9-SNAPSHOT</version>
   <description>
-    jspf implements the spf specification
+    Apache James jSPF is an SPF spec implementation written in Java
   </description>
   <url>http://james.apache.org/jspf</url>
   <inceptionYear>2006</inceptionYear>
@@ -48,40 +53,6 @@
     </dependency>
   </dependencies>
 
-  <developers>
-    <developer>
-      <id>bago</id>
-      <name>Stefano Bagnara</name>
-      <email>apache@bago.org</email>
-      <timezone>2</timezone>
-      <roles>
-        <role>Developer</role>
-      </roles>
-    </developer>
-    <developer>
-      <id>norman</id>
-      <name>Norman Maurer</name>
-      <email>nm@byteaction.de</email>
-      <timezone>2</timezone>
-      <roles>
-        <role>Developer</role>
-      </roles>
-    </developer>
-  </developers>
-
-  <ciManagement>
-    <notifiers>
-      <notifier>
-        <type>mail</type>
-        <address>apache@bago.org</address>
-      </notifier>
-      <notifier>
-        <type>mail</type>
-        <address>nm@byteaction.de</address>
-      </notifier>
-    </notifiers>
-  </ciManagement>
-
   <contributors>
     <contributor>
       <name>Roger Fullerton</name>
@@ -93,61 +64,44 @@
     </contributor>
   </contributors>
 
-  <organization>
-    <name>Apache Software Foundation</name>
-    <url>http://www.apache.org</url>
-  </organization>
-
-  <licenses>
-    <license>
-      <name>Apache License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
-
   <issueManagement>
     <system>JIRA</system>
     <url>http://issues.apache.org/jira/browse/JSPF</url>
   </issueManagement>
 
   <scm>
-    <connection>
-      scm:svn:http://svn.apache.org/repos/asf/james/jspf/trunk
-    </connection>
-    <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/james/jspf/trunk
-    </developerConnection>
-    <url>
-      http://svn.apache.org/viewcvs.cgi/james/jspf/trunk/?root=Apache-SVN
-    </url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/james/jspf/trunk</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/james/jspf/trunk</developerConnection>
+    <url>http://svn.apache.org/viewvc/james/jspf/trunk/</url>
   </scm>
+
+  <!-- temporary to support simpler deploy -->
+  <repositories>
+    <repository>
+      <id>bago-dist-m1</id>
+      <name>Temporary Repository</name>
+      <url>http://people.apache.org/~bago/maven/dist-m1</url>
+      <layout>legacy</layout>
+      <snapshots>
+        <enabled>true</enabled>
+        <checksumPolicy>ignore</checksumPolicy>
+      </snapshots>
+    </repository>
+  </repositories>
 
   <mailingLists>
     <mailingList>
       <name>Apache jSPF Developement</name>
       <subscribe>server-dev-subscribe@james.apache.org</subscribe>
-      <unsubscribe>
-        server-dev-unsubscribe@james.apache.org
-      </unsubscribe>
+      <unsubscribe>server-dev-unsubscribe@james.apache.org</unsubscribe>
       <post>server-dev@james.apache.org</post>
-      <archive>
-        http://mail-archives.apache.org/mod_mbox/james-server-dev/
-      </archive>
+      <archive>http://mail-archives.apache.org/mod_mbox/james-server-dev/</archive>
     </mailingList>
   </mailingLists>
 
   <reporting>
     <plugins>
-      <!-- 
-        <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>changelog-maven-plugin</artifactId>
-        </plugin>
-        <plugin>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        </plugin>
-      -->
+      <!--
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
       </plugin>
@@ -155,6 +109,7 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>surefire-report-maven-plugin</artifactId>
       </plugin> 
+      -->
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
       </plugin>
@@ -174,7 +129,6 @@
           <format>xml</format>
           <linkXref>true</linkXref>
           <sourceEncoding>utf-8</sourceEncoding>
-        
           <minimumTokens>100</minimumTokens>
         </configuration>
       </plugin>
@@ -190,6 +144,19 @@
   </reporting>
   <build>
     <plugins>
+      <!--
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>cobertura-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>clean</phase>
+            <goals>
+              <goal>clean</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <artifactId>maven-clover-plugin</artifactId>
         <configuration>
@@ -207,14 +174,12 @@
           </execution>
         </executions>
       </plugin>
+      -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
         <configuration>
           <archive>
-            <!--
-            <index>true</true>
-            -->
             <manifest>
               <mainClass>org.apache.james.jspf.SPFQuery</mainClass>
               <packageName>org.apache.james.jspf</packageName>
@@ -231,8 +196,8 @@
         <artifactId>maven-assembly-plugin</artifactId>
         <configuration>
           <descriptorRefs>
-          	<descriptorRef>bin</descriptorRef>
-          	<descriptorRef>src</descriptorRef>
+            <descriptorRef>bin</descriptorRef>
+            <descriptorRef>src</descriptorRef>
           </descriptorRefs>
         </configuration>
       </plugin>

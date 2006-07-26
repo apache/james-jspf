@@ -18,28 +18,19 @@
   under the License.    
 -->
 <project name="jSPF">
-
   <bannerLeft>
     <name>James jSPF</name>
     <src>images/james-jspf-logo.gif</src>
-    <href>http://james.apache.org/jspf</href>
+    <href>http://james.apache.org/jspf/index.html</href>
   </bannerLeft>
-  
+
   <bannerRight>
     <name>The Apache Software Foundation</name>
     <src>images/asf-logo-reduced.gif</src>
-    <href>http://www.apache.org/</href>
+    <href>http://www.apache.org/index.html</href>
   </bannerRight> 
 
   <body>
-    <links>
-      <item name="James" href="http://james.apache.org/index.html" />
-      <item name="Server" href="http://james.apache.org/server/index.html" />
-      <item name="jSPF" href="http://james.apache.org/jspf/index.html" />
-      <item name="Mime4J" href="http://james.apache.org/mime4j/index.html" />
-      <item name="JSieve" href="http://james.apache.org/jsieve/index.html" />
-      <item name="Postage" href="http://james.apache.org/postage/index.html" />
-    </links>
 
     <menu name="jSPF">
       <item name="Overview" href="index.html"/>
