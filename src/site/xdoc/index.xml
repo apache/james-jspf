@@ -29,7 +29,8 @@
         SPF-Specs of 2006 (See RFC section). SPF is also knows as Sender Policy Framework.     
         It was designed to detect email spoofing.This is the solution if you ever was tired
         of getting spam from yourself. For more informations see 
-        <a href="http://www.openspf.org"> openspf website </a>
+        <a href="http://www.openspf.org"> openspf website</a> or <a href="http://new.openspf.org"> 
+        new openspf website </a>.
       </p>
     </section>
     <section name="News">
@@ -44,9 +45,9 @@
     
     <section name="releases">
       <p>
-        <b>Latest and Stable: jSPF v0.9b1</b>
+        <b>Latest and Stable: jSPF v0.9b2</b>
         <br/>
-jSPF v0.9b1 is the current release.
+jSPF v0.9b2 is the current release.
 Both <a href=" http://james.apache.org/download.cgi">binary and source</a> distributions are available.</p>
       <p>
         <b>Get your hands on the latest versions..</b>
