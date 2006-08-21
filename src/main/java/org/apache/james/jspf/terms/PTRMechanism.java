@@ -43,47 +43,51 @@ public class PTRMechanism extends GenericMechanism {
             + SPF1Parser.DOMAIN_SPEC_REGEX + ")?";
 
     /**
-     * @see org.apache.james.jspf.core.GenericMechanism#run(org.apache.james.jspf.core.SPF1Data)
+     * @see org.apache.james.jspf.core.Mechanism#run(org.apache.james.jspf.core.SPF1Data)
      */
     public boolean run(SPF1Data spfData) throws PermErrorException,
-            TempErrorException, NoneException {
+            TempErrorException {
         String compareDomain;
         IPAddr compareIP;
         ArrayList validatedHosts = new ArrayList();
 
-        // update currentDepth
-        spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);
+        try { 
+            // update currentDepth
+            spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);
 
-        // Get the right host.
-        String host = expandHost(spfData);
+            // Get the right host.
+            String host = expandHost(spfData);
 
         
-        // Get PTR Records for the ipAddress which is provided by SPF1Data
-        List domainList = spfData.getDnsProbe().getPTRRecords(
-                spfData.getIpAddress());
-        for (int i = 0; i < domainList.size(); i++) {
+            // Get PTR Records for the ipAddress which is provided by SPF1Data
+            List domainList = spfData.getDnsProbe().getPTRRecords(
+                    spfData.getIpAddress());
+            for (int i = 0; i < domainList.size(); i++) {
 
-            // Get a record for this
-            List aList = spfData.getDnsProbe().getARecords(
-                    (String) domainList.get(i), 32);
-            for (int j = 0; j < aList.size(); j++) {
-                compareIP = (IPAddr) aList.get(j);
-                if (compareIP.toString().equals(spfData.getIpAddress())) {
-                    validatedHosts.add(domainList.get(i));
+                // Get a record for this
+                List aList = spfData.getDnsProbe().getARecords(
+                        (String) domainList.get(i), 32);
+                for (int j = 0; j < aList.size(); j++) {
+                    compareIP = (IPAddr) aList.get(j);
+                    if (compareIP.toString().equals(spfData.getIpAddress())) {
+                        validatedHosts.add(domainList.get(i));
+                    }
                 }
             }
-        }
 
-        // Check if we match one of this ptr!
-        for (int j = 0; j < validatedHosts.size(); j++) {
-            compareDomain = (String) validatedHosts.get(j);
-            if (compareDomain.equals(host)
-                    || compareDomain.endsWith("." + host)) {
-                return true;
+            // Check if we match one of this ptr!
+            for (int j = 0; j < validatedHosts.size(); j++) {
+                compareDomain = (String) validatedHosts.get(j);
+                if (compareDomain.equals(host)
+                        || compareDomain.endsWith("." + host)) {
+                    return true;
+                }
             }
+        } catch (NoneException e) {
+            // No PTR record found    
+            return false;    
         }
         
-
         return false;
 
     }

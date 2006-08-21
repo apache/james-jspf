@@ -155,3 +155,11 @@ result          /.*/ temperror
 smtp-comment    /.*/ 
 header-comment  /.*/ spfquery:
 received-spf    /.*/ Received-SPF:
+
+spfquery -ip=10.0.0.1 -sender=spf23-test.foo.bar -helo=spf23-test.foo.bar
+result          /.*/ fail
+smtp-comment    /.*/ 
+header-comment  /.*/ spfquery:
+received-spf    /.*/ Received-SPF:
+explanation     /.*/ http://www.openspf.org/why.html?sender=spf23-test.foo.bar&ip=10.0.0.1
+

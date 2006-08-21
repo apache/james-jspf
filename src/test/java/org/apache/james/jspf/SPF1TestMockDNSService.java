@@ -81,6 +81,8 @@ public final class SPF1TestMockDNSService implements DNSService {
                 return "v=spf1 +a:myipv6a.record -all";
             if ("spf22-test.foo.bar".equals(hostname))
                 throw new TempErrorException("DNS Server returns temperror");          
+            if ("spf23-test.foo.bar".equals(hostname))
+                return "v=spf1 ptr -all";
         }
         throw new IllegalStateException("Mock data not available");
     }
@@ -117,6 +119,8 @@ public final class SPF1TestMockDNSService implements DNSService {
 
     public List getPTRRecords(String ipAddress) throws PermErrorException,
             NoneException, TempErrorException {
+        if (ipAddress.equals("10.0.0.1")) 
+            throw new NoneException("No PTR rrecord");
         throw new IllegalStateException("Mock data not available");
     }
 
