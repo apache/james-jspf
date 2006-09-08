@@ -26,13 +26,20 @@
     <artifactId>james-project</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
-  <name>Apache James jSPF</name>
-  <version>0.9b3</version>
+  <name>Apache JAMES jSPF</name>
+  <version>0.9-SNAPSHOT</version>
   <description>
     Apache James jSPF is an SPF spec implementation written in Java
   </description>
   <url>http://james.apache.org/jspf</url>
   <inceptionYear>2006</inceptionYear>
+
+  <distributionManagement>
+    <site>
+      <id>jspf-website</id>
+      <url>scp://minotaur.apache.org/www/james.apache.org/jspf/</url>
+    </site>
+  </distributionManagement>
 
   <dependencies>
     <dependency>
