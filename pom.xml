@@ -58,6 +58,12 @@
       <artifactId>log4j</artifactId>
       <version>1.2.13</version>
     </dependency>
+    <dependency>
+      <groupId>org.jvyaml</groupId>
+      <artifactId>jvyaml</artifactId>
+      <version>0.1</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <contributors>
@@ -85,10 +91,21 @@
   <!-- temporary to support simpler deploy -->
   <repositories>
     <repository>
+      <!--
+      <id>local-jspf-3rd-party-m1</id>
+      <name>Local jSPF third party repository</name>
+      <url>file://${basedir}/repos/third-party-m1</url>
+      -->
       <id>bago-dist-m1</id>
       <name>Temporary Repository</name>
       <url>http://people.apache.org/~bago/maven/dist-m1</url>
       <layout>legacy</layout>
+      <!--
+      <releases>
+        <enabled>true</enabled>
+        <checksumPolicy>ignore</checksumPolicy>
+      </releases>
+      -->
       <snapshots>
         <enabled>true</enabled>
         <checksumPolicy>ignore</checksumPolicy>
