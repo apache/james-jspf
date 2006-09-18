@@ -82,7 +82,7 @@ public class SPFYamlTest extends TestCase {
 
     private SPFYamlTestSuite data;
 
-    public SPFYamlTest(SPFYamlTestSuite def, String test) {
+    protected SPFYamlTest(SPFYamlTestSuite def, String test) {
         super(def.getComment()+" #"+test);
         this.data = def;
         this.test = test;

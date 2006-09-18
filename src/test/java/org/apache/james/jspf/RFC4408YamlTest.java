@@ -25,7 +25,7 @@ public class RFC4408YamlTest extends SPFYamlTest {
         super(name);
     }
 
-    public RFC4408YamlTest(SPFYamlTestSuite def, String test) {
+    protected RFC4408YamlTest(SPFYamlTestSuite def, String test) {
         super(def, test);
     }
 
@@ -34,16 +34,16 @@ public class RFC4408YamlTest extends SPFYamlTest {
     }
 
     public static Test suite() throws IOException {
-        return new SPFSuite();
+        return new RFC4408Suite();
     }
 
     protected List internalLoadTests(String filename) throws IOException {
         return loadTests(filename);
     }
 
-    static class SPFSuite extends TestSuite {
+    static class RFC4408Suite extends TestSuite {
 
-        public SPFSuite() throws IOException {
+        public RFC4408Suite() throws IOException {
             super();
             List tests = loadTests(YAMLFILE2);
             Iterator i = tests.iterator();
@@ -51,7 +51,7 @@ public class RFC4408YamlTest extends SPFYamlTest {
                 SPFYamlTestSuite o = (SPFYamlTestSuite) i.next();
                 Iterator ttt = o.getTests().keySet().iterator();
                 while (ttt.hasNext()) {
-                    addTest(new SPFYamlTest(o,(String) ttt.next()));
+                    addTest(new RFC4408YamlTest(o,(String) ttt.next()));
                 }
             }
         }
