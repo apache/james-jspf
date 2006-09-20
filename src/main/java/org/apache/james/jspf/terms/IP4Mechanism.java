@@ -71,9 +71,11 @@ public class IP4Mechanism extends GenericMechanism {
         }
         int maskLength = getMaxCidr();
         if (params.groupCount() >= 2 && params.group(2) != null) {
-            maskLength = Integer.parseInt(params.group(2).toString());
-            if (maskLength > getMaxCidr()) {
-                throw new PermErrorException("Invalid CIDR");
+            String maskLengthString = params.group(2).toString();
+            maskLength = Integer.parseInt(maskLengthString);
+
+            if (maskLength > getMaxCidr() || (maskLengthString.length() > 1 && maskLengthString.startsWith("0"))) {
+                throw new PermErrorException("Invalid CIDR: " + maskLengthString);
             }
         }
         ip = IPAddr.getAddress(ipString, maskLength);

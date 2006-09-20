@@ -29,6 +29,7 @@ import java.util.List;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.Logger;
+import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
@@ -75,6 +76,9 @@ public class DNSServiceXBillImpl implements DNSService {
         // do DNS lookup for TXT
         txtR = getTXTRecords(hostname);
 
+
+        System.err.println("CIM:");
+        
         // process returned records
         if (!txtR.isEmpty()) {
 
@@ -86,7 +90,6 @@ public class DNSServiceXBillImpl implements DNSService {
                 // remove '"'
                 compare = compare.toLowerCase().substring(1,
                         compare.length() - 1);
-
                 if (compare.startsWith(spfVersion + " ")) {
                     if (returnValue == null) {
                         returnValue = compare;
@@ -166,6 +169,7 @@ public class DNSServiceXBillImpl implements DNSService {
 
         ArrayList listTxtData = new ArrayList();
 
+        System.err.println("server: " + strServer);
         if (IPAddr.isIPAddr(strServer)) {
             IPAddr ipTest = IPAddr.getAddress(strServer);
             // Address is already an IP address, so add it to list
@@ -193,6 +197,7 @@ public class DNSServiceXBillImpl implements DNSService {
                             ArrayList ipArray = getIPList(a.getAddress()
                                     .getHostAddress(), mask);
                             Iterator ip = ipArray.iterator();
+                            System.err.println("IP: " + ip);
 
                             while (ip.hasNext()) {
                                 Object ipA = ip.next();
@@ -256,7 +261,7 @@ public class DNSServiceXBillImpl implements DNSService {
 
                             while (ip.hasNext()) {
                                 Object ipA = ip.next();
-
+                                //IPAddr ipA = (IPAddr) ip.next();
                                 log.debug("Add ipAddress " + ipA + " to list");
                                 listTxtData.add(ipA);
                             }
@@ -352,6 +357,9 @@ public class DNSServiceXBillImpl implements DNSService {
                 if (records != null) {
                     log.debug("Found " + records.length + " PTR-Records");
 
+                    // check if the maximum lookup count is reached
+                    if (records.length >= SPF1Data.MAX_DEPTH) throw new PermErrorException("Maximum PTR lookup count reached");
+              
                     for (int i = 0; i < records.length; i++) {
                         PTRRecord ptr = (PTRRecord) records[i];
                         ptrR.add(IPAddr.stripDot(ptr.getTarget().toString()));
@@ -381,7 +389,6 @@ public class DNSServiceXBillImpl implements DNSService {
      */
     public List getMXRecords(String domainName, int mask)
             throws PermErrorException, NoneException, TempErrorException {
-
         ArrayList mxAddresses = getAList(getMXNames(domainName), mask);
         return mxAddresses;
 
@@ -424,9 +431,10 @@ public class DNSServiceXBillImpl implements DNSService {
      *             if no MX-Records was found
      * @throws TempErrorException
      *             if the lookup result was "TRY_AGAIN"
+     * @throws PermErrorException 
      */
     private ArrayList getMXNames(String host) throws NoneException,
-            TempErrorException {
+            TempErrorException, PermErrorException {
         ArrayList mxR = new ArrayList();
         Record[] records;
         try {
@@ -442,7 +450,10 @@ public class DNSServiceXBillImpl implements DNSService {
             if ((queryResult != Lookup.TRY_AGAIN)) {
                 if (records != null) {
                     log.debug("Found " + records.length + " MX-Records");
-
+                    
+                    // check if the maximum lookup count is reached
+                    if (records.length >= SPF1Data.MAX_DEPTH) throw new PermErrorException("Maximum MX lookup count reached");
+              
                     for (int i = 0; i < records.length; i++) {
                         MXRecord mx = (MXRecord) records[i];
                         log.debug("Add MX-Record " + mx.getTarget()

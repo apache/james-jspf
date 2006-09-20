@@ -58,7 +58,7 @@ public class ExpModifier extends GenericModifier implements LogEnabled {
 
         // If the currentResult is not fail we have no need to run all these
         // methods!
-        if (!spfData.getCurrentResult().equals(SPF1Constants.FAIL))
+        if (spfData.getCurrentResult()== null || !spfData.getCurrentResult().equals(SPF1Constants.FAIL))
             return null;
         
         // If we should ignore the explanation we don't have to run this class

@@ -62,6 +62,10 @@ public class PTRMechanism extends GenericMechanism {
             // Get PTR Records for the ipAddress which is provided by SPF1Data
             List domainList = spfData.getDnsProbe().getPTRRecords(
                     spfData.getIpAddress());
+            
+            // Should never happen
+            if (domainList == null) return false;
+           
             for (int i = 0; i < domainList.size(); i++) {
 
                 // Get a record for this

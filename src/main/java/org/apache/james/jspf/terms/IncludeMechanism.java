@@ -27,6 +27,7 @@ import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.Mechanism;
 import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPF1Data;
+import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
@@ -80,9 +81,12 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled {
         
         String res = null;
         try {
-            res = new SPF(spfData.getDnsProbe(),log).checkSPF(spfData).getResultChar();
+             res = new SPF(spfData.getDnsProbe(),log).checkSPF(spfData).getResultChar();
+          
         } catch (NoneException e) {
             throw new PermErrorException("included checkSPF returned NoneException");
+        } catch (NeutralException e) {
+            throw new PermErrorException("included checkSPF returned NeutralException");
         }
         
         // Reset the ignore

@@ -65,32 +65,35 @@
 
 default -default-explanation=explanation -sanitize=1
 
-spfquery -ip=127.0.0.1 -sender=localhost.localdomain -helo=localhost.localdomain
-result          /.*/ pass
-smtp-comment    perl localhost is always allowed.
-smtp-comment    libspf explanation
-smtp-comment    /.*/ 
-header-comment  libspf spfquery: domain of localhost.localdomain designates 127.0.0.1 as permitted sender
-header-comment  /.*/ spfquery: localhost is always allowed.
-received-spf    /.*/ Received-SPF: pass (spfquery: localhost is always allowed.) client-ip=127.0.0.1; envelope-from=postmaster@localhost.localdomain; helo=localhost.localdomain;
-
-spfquery -ip=127.1.2.3 -sender=my.domain -helo=my.domain
-result          /.*/ pass
-smtp-comment    perl localhost is always allowed.
-smtp-comment    libspf explanation
-smtp-comment    /.*/ 
-header-comment  libspf domain of localhost.localdomain designates 127.1.2.3 as permitted sender
-header-comment  /.*/ spfquery: localhost is always allowed.
-received-spf    /.*/ Received-SPF: pass (spfquery: localhost is always allowed.) client-ip=127.1.2.3; envelope-from=postmaster@my.domain; helo=my.domain;
-
-spfquery -ip=1.2.3.4 -sender=localhost -helo=localhost
-result          /.*/ none
+############ INVALID ###################
+#spfquery -ip=127.0.0.1 -sender=localhost.localdomain -helo=localhost.localdomain
+#result          /.*/ pass
 #smtp-comment    perl localhost is always allowed.
 #smtp-comment    libspf explanation
-smtp-comment    /.*/ 
-header-comment  libspf domain of localhost.localdomain designates 127.1.2.3 as permitted sender
-header-comment  /.*/ spfquery: 1.2.3.4 is neither permitted nor denied by domain of localhost
-received-spf    /.*/ Received-SPF: none (spfquery: 1.2.3.4 is neither permitted nor denied by domain of localhost) client-ip=1.2.3.4; envelope-from=postmaster@localhost; helo=localhost;
+#smtp-comment    /.*/ 
+#header-comment  libspf spfquery: domain of localhost.localdomain designates 127.0.0.1 as permitted sender
+#header-comment  /.*/ spfquery: localhost is always allowed.
+#received-spf    /.*/ Received-SPF: pass (spfquery: localhost is always allowed.) client-ip=127.0.0.1; envelope-from=postmaster@localhost.localdomain; helo=localhost.localdomain;
+#
+#spfquery -ip=127.1.2.3 -sender=my.domain -helo=my.domain
+#result          /.*/ pass
+#smtp-comment    perl localhost is always allowed.
+#smtp-comment    libspf explanation
+#smtp-comment    /.*/ 
+#header-comment  libspf domain of localhost.localdomain designates 127.1.2.3 as permitted sender
+#header-comment  /.*/ spfquery: localhost is always allowed.
+#received-spf    /.*/ Received-SPF: pass (spfquery: localhost is always allowed.) client-ip=127.1.2.3; envelope-from=postmaster@my.domain; helo=my.domain;
+#
+#spfquery -ip=1.2.3.4 -sender=localhost -helo=localhost
+#result          /.*/ none
+#smtp-comment    perl localhost is always allowed.
+#smtp-comment    libspf explanation
+#smtp-comment    /.*/ 
+#header-comment  libspf domain of localhost.localdomain designates 127.1.2.3 as permitted sender
+#header-comment  /.*/ spfquery: 1.2.3.4 is neither permitted nor denied by domain of localhost
+#received-spf    /.*/ Received-SPF: none (spfquery: 1.2.3.4 is neither permitted nor denied by domain of localhost) client-ip=1.2.3.4; envelope-from=postmaster@localhost; helo=localhost;
+#
+#############################################
 
 spfquery -ip=192.0.2.1 -sender=01.spf1-test.mailzone.com -helo=01.spf1-test.mailzone.com
 result          /.*/ neutral

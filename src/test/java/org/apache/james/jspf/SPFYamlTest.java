@@ -21,6 +21,8 @@
 package org.apache.james.jspf;
 
 import org.apache.james.jspf.core.DNSService;
+import org.apache.james.jspf.core.IPAddr;
+import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
@@ -132,7 +134,14 @@ public class SPFYamlTest extends TestCase {
         }
         
         if (currentTest.get("explanation") != null) {
-            assertEquals(currentTest.get("explanation"),res.getExplanation());
+            
+            // Check for our default explanation!
+            if (currentTest.get("explanation").equals("DEFAULT") || currentTest.get("explanation").equals("postmaster") ) {
+                assertTrue(res.getExplanation().startsWith("http://www.openspf.org/why.html?sender="));
+            } else {
+                assertEquals(currentTest.get("explanation"),res.getExplanation());
+            }
+
         }
 
     }
@@ -180,10 +189,11 @@ public class SPFYamlTest extends TestCase {
         }
 
         public List getAAAARecords(String strServer, int mask) throws NoneException, PermErrorException, TempErrorException {
+            ArrayList res = new ArrayList();
             if (zonedata.get(strServer) != null) {
                 List l = (List) zonedata.get(strServer);
                 Iterator i = l.iterator();
-                ArrayList res = new ArrayList();
+
                 while (i.hasNext()) {
                     HashMap hm = (HashMap) i.next();
                     if (hm.get("AAAA") != null) {
@@ -191,45 +201,34 @@ public class SPFYamlTest extends TestCase {
                         res.add(a);
                     }
                 }
-                if (res.size() > 0) return res;
             }
-            try {
-                throw new UnsupportedOperationException("getAAAARecord("+strServer+","+mask+")");
-            } catch (UnsupportedOperationException e) {
-                e.printStackTrace();
-                throw new NoneException(e.getMessage());
-            }
+            if (res.size() > 0 ) return res;
+            
+            throw new NoneException("No AAAA Record found");
         }
 
         public List getARecords(String strServer, int mask) throws NoneException, PermErrorException, TempErrorException {
+            ArrayList res = new ArrayList();
+       
             if (zonedata.get(strServer) != null) {
                 List l = (List) zonedata.get(strServer);
                 Iterator i = l.iterator();
-                ArrayList res = new ArrayList();
                 while (i.hasNext()) {
                     HashMap hm = (HashMap) i.next();
                     if (hm.get("A") != null) {
                         String a = (String) hm.get("A");
                         res.add(a);
+                        
                     }
                 }
-                return res.size() > 0 ? res : null;
             }
-            try {
-                throw new UnsupportedOperationException("getARecord("+strServer+","+mask+")");
-            } catch (UnsupportedOperationException e) {
-                e.printStackTrace();
-                throw new NoneException(e.getMessage());
-            }
+            if (res.size() > 0 ) return res;
+            
+            throw new NoneException("No A Record found for: " + strServer);
         }
 
         public List getLocalDomainNames() {
-            try {
-                throw new UnsupportedOperationException("getLocalDomainNames");
-            } catch (UnsupportedOperationException e) {
-                e.printStackTrace();
-                throw e;
-            }
+            return new ArrayList();
         }
 
         public List getMXRecords(String domainName, int mask) throws PermErrorException, NoneException, TempErrorException {
@@ -240,32 +239,33 @@ public class SPFYamlTest extends TestCase {
                 while (i.hasNext()) {
                     HashMap hm = (HashMap) i.next();
                     if (hm.get("MX") != null) {
-                        Iterator mxs = ((List) hm.get("MX")).iterator();
+                        List mxList = (List) hm.get("MX");
+                         
+                        Iterator mxs = mxList.iterator();
+                
                         while (mxs.hasNext()) {
                             // skip the MX priority
                             mxs.next();
                             String mx = (String) mxs.next();
-                            res.add(mx);
+                           
+                            // resolv the record
+                            List records = getARecords(mx,32);
+                            for (int i2 = 0; i2 < records.size();i2++ ) {
+                                res.add(records.get(i2));
+                            }
                         }
                     }
                 }
+                // check if the maximum lookup count is reached
+                if (res.size() >= SPF1Data.MAX_DEPTH) throw new PermErrorException("Maximum MX lookup count reached");
+
                 return res.size() > 0 ? res : null;
             }
-            try {
-                throw new UnsupportedOperationException("getMXRecord("+domainName+","+mask+")");
-            } catch (UnsupportedOperationException e) {
-                e.printStackTrace();
-                throw new NoneException(e.getMessage());
-            }
+            throw new NoneException("No MX Record found");
         }
 
         public List getPTRRecords(String ipAddress) throws PermErrorException, NoneException, TempErrorException {
-            try {
-                throw new UnsupportedOperationException("getPTRRecords("+ipAddress+")");
-            } catch (UnsupportedOperationException e) {
-                e.printStackTrace();
-                throw new NoneException(e.getMessage());
-            }
+            throw new NoneException("No PTR Record found");
         }
 
         public String getSpfRecord(String hostname, String spfVersion) throws PermErrorException, NoneException, TempErrorException {
@@ -306,7 +306,7 @@ public class SPFYamlTest extends TestCase {
                                 String spfrecord = (String) hm.get("TXT");
                                 if (spfrecord.startsWith(spfVersion+" ") || spfrecord.equals(spfVersion)) {
                                     if (res != null) {
-                                        throw new TempErrorException("Multiple TXT records!");
+                                        throw new PermErrorException("Multiple TXT records!");
                                     } else {
                                         res = spfrecord;
                                     }
@@ -314,6 +314,8 @@ public class SPFYamlTest extends TestCase {
                                     System.err.println("#####2 unmatched: "+spfrecord);
                                 }
                             }
+                        } else if (o.toString().equals("TIMEOUT")) {
+                            throw new TempErrorException("Timeout");
                         } else {
                             System.err.println("[[[[[[[[[[[[[[[[[[[[2 "+o.getClass().toString()+" ! "+o);
                         }
@@ -330,21 +332,16 @@ public class SPFYamlTest extends TestCase {
                     }
                 }
             }
-            try {
-                throw new UnsupportedOperationException("getSPFRecord("+hostname+","+spfVersion+")");
-            } catch (UnsupportedOperationException e) {
-                e.printStackTrace();
-                //throw e;
-                throw new TempErrorException(e.getMessage());
-            }
+            throw new NoneException("No SPF Record for : " + hostname);
         }
 
         public String getTxtCatType(String strServer) throws NoneException, PermErrorException, TempErrorException {
+            String res = null;
             if (strServer.endsWith(".")) strServer = strServer.substring(0, strServer.length()-1);
             if (zonedata.get(strServer) != null) {
                 List l = (List) zonedata.get(strServer);
                 Iterator i = l.iterator();
-                String res = null;
+
                 while (i.hasNext()) {
                     HashMap hm = (HashMap) i.next();
                     if (hm.get("TXT") != null) {
@@ -353,14 +350,9 @@ public class SPFYamlTest extends TestCase {
                         res += spfrecord;
                     }
                 }
-                return res;
+
             }
-            try {
-                throw new UnsupportedOperationException("getTXTCatType("+strServer+")");
-            } catch (UnsupportedOperationException e) {
-                e.printStackTrace();
-                throw new NoneException(e.getMessage());
-            }
+            return res;
         }
 
         public void setTimeOut(int timeOut) {

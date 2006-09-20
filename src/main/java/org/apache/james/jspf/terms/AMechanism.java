@@ -22,6 +22,7 @@ package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.SPF1Data;
+import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.parser.SPF1Parser;
@@ -70,12 +71,23 @@ public class AMechanism extends GenericMechanism {
                         getIp4cidr());
 
                 try {
-                    addressList.addAll(spfData.getDnsProbe().getARecords(host,
-                            getIp4cidr()));
+                    List aRecords =spfData.getDnsProbe().getARecords(host,getIp4cidr());
+         
+                    if (aRecords != null) {
+                        addressList.addAll(aRecords);
+                    } else {
+                        return false;
+                    }
+
+
+                    // We should match if any A Record was found!
+                    if (addressList.size() > 0 && spfData.matchAnyARecord()) return true;
+                    
                     if (checkAddressList(checkAddress, addressList)) {
                         return true;
                     }
-                } catch (Exception e) {
+                } catch (NoneException e) {
+                    e.printStackTrace();
                     // no a records just return null
                     return false;
                 }
@@ -84,12 +96,22 @@ public class AMechanism extends GenericMechanism {
                         getIp6cidr());
 
                 try {
-                    addressList.addAll(spfData.getDnsProbe().getAAAARecords(
-                            host, getIp6cidr()));
+                    List aaaaRecords =spfData.getDnsProbe().getAAAARecords(host, getIp6cidr());
+                    
+                    if (aaaaRecords != null) {
+                        addressList.addAll(aaaaRecords);
+                    } else {
+                        return false;
+                    }
+
+                    // We should match if any A Record was found!
+                    if (addressList.size() > 0 && spfData.matchAnyAAAARecord()) return true;
+                    
+                    
                     if (checkAddressList(checkAddress, addressList)) {
                         return true;
                     }
-                } catch (Exception e) {
+                } catch (NoneException e) {
                     // no aaaa records just return null
                     return false;
                 }
@@ -134,17 +156,22 @@ public class AMechanism extends GenericMechanism {
      * @param addressList
      *            The ip ArrayList.
      * @return true or false
+     * @throws PermErrorException 
      */
-    public boolean checkAddressList(IPAddr checkAddress, List addressList) {
+    public boolean checkAddressList(IPAddr checkAddress, List addressList) throws PermErrorException {
 
         IPAddr aValue = null;
         for (int i = 0; i < addressList.size(); i++) {
+            Object ip = addressList.get(i);
 
-            aValue = (IPAddr) addressList.get(i);
-
-            if (checkAddress.getMaskedIPAddress().equals(
-                    aValue.getMaskedIPAddress())) {
-                return true;
+            // Check for empty record
+            if (ip != null) {
+                aValue = (IPAddr.getAddress(ip.toString()));
+            
+                if (checkAddress.getMaskedIPAddress().equals(
+                        aValue.getMaskedIPAddress()) || checkAddress.toString().equals(ip.toString()) ) {
+                    return true;
+                }
             }
         }
         return false;

@@ -22,11 +22,13 @@ package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.SPF1Data;
+import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.parser.SPF1Parser;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class represent the mx mechanism
@@ -43,11 +45,13 @@ public class MXMechanism extends AMechanism {
 
     /**
      * 
+     * @throws NoneException 
      * @see org.apache.james.jspf.core.GenericMechanism#run(org.apache.james.jspf.core.SPF1Data)
      */
     public boolean run(SPF1Data spfData) throws PermErrorException,
-            TempErrorException {
+            TempErrorException{
         ArrayList addressList = new ArrayList();
+        IPAddr checkAddress;
 
         // update currentDepth
         spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);
@@ -56,20 +60,26 @@ public class MXMechanism extends AMechanism {
         String host = expandHost(spfData);
 
         // get the ipAddress
+        checkAddress = IPAddr.getAddress(spfData.getIpAddress(), getIp4cidr());
+        
         try {
-            IPAddr checkAddress = IPAddr.getAddress(spfData.getIpAddress(),
-                    getIp4cidr());
-            try {
-                addressList.addAll(spfData.getDnsProbe().getMXRecords(host,
-                        getIp4cidr()));
-                if (checkAddressList(checkAddress, addressList)) {
-                    return true;
-                }
-            } catch (Exception e) {
-                // no a records just return null
-                return false;
+            List mxRecords = spfData.getDnsProbe().getMXRecords(host,getIp4cidr());
+
+            // should never happen. 
+            if (mxRecords == null) return false;
+            
+            addressList.addAll(mxRecords);
+          } catch (NoneException e ) {
+              e.printStackTrace();
+              return false;
+          }
+        
+        try {    
+            if (checkAddressList(checkAddress, addressList)) {
+                return true;
             }
         } catch (Exception e) {
+            e.printStackTrace();
             throw new PermErrorException("No valid ipAddress: "
                     + spfData.getIpAddress());
         }

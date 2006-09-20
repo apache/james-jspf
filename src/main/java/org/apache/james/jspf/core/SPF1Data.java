@@ -62,7 +62,7 @@ public class SPF1Data implements MacroData {
 
     private int currentDepth = 0;
 
-    private static final int MAX_DEPTH = 10;
+    public static final int MAX_DEPTH = 10;
 
     private String explanation = null;
 
@@ -71,6 +71,10 @@ public class SPF1Data implements MacroData {
     private boolean match = false;
     
     private boolean ignoreExplanation = false;
+    
+    private boolean matchAnyARecord = false;
+    
+    private boolean matchAnyAAAARecord = false;
 
     /**
      * Build the SPF1Data from the given parameters
@@ -385,7 +389,7 @@ public class SPF1Data implements MacroData {
     /**
      * Get set to true if the explanation should be ignored
      * 
-     * @param ignoreExplanation
+     * @param ignoreExplanation true or false
      */
     public void setIgnoreExplanation(boolean ignoreExplanation) {
         this.ignoreExplanation = ignoreExplanation; 
@@ -398,6 +402,42 @@ public class SPF1Data implements MacroData {
      */
     public boolean ignoreExplanation() {
         return ignoreExplanation;
+    }
+    
+    /**
+     * Set to true if a match should returned if a ARecord was found
+     * 
+     * @param matchAnyARecord true or false
+     */
+    public void setMatchAnyARecord(boolean matchAnyARecord) {
+        this.matchAnyARecord = matchAnyARecord;
+    }
+    
+    /**
+     * Return true if a match should return if a ARecord was found
+     * 
+     * @return true or false
+     */
+    public boolean matchAnyARecord() {
+        return matchAnyARecord;
+    }
+    
+    /**
+     * Set to true if a match should returned if a AAAARecord was found
+     * 
+     * @param matchAnyAAAARecord true of false
+     */
+    public void setMatchAnyAAAARecord(boolean matchAnyAAAARecord) {
+        this.matchAnyAAAARecord = matchAnyAAAARecord;
+    }
+    
+    /**
+     * Return true if a match should return if a AAAARecord was found
+     * 
+     * @return true or false
+     */
+    public boolean matchAnyAAAARecord() {
+        return matchAnyAAAARecord;
     }
 
 }

@@ -61,11 +61,17 @@ public class ExistsMechanism extends GenericMechanism {
         try {
             aRecords = spfData.getDnsProbe().getARecords(host, 32);
         } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
-        
-        if (aRecords.size() > 0) {
-            return true;
+       
+        if (aRecords != null) {
+            // check for maximum lookup limit       
+            if (aRecords.size() > spfData.getMaxDepth()) {
+                throw new PermErrorException("Maximum Records checked");
+            } else if (aRecords.size() > 0) {
+                return true;
+            }
         }
 
         // No match found

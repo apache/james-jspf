@@ -24,6 +24,7 @@ import org.apache.james.jspf.SPF;
 import org.apache.james.jspf.core.LogEnabled;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPF1Data;
+import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
@@ -84,6 +85,9 @@ public class RedirectModifier extends GenericModifier implements LogEnabled {
                 // no spf record assigned to the redirect domain
                 throw new PermErrorException(
                         "included checkSPF returned NoneException");
+            } catch (NeutralException e) {
+                throw new PermErrorException("included checkSPF returned NeutralException");
+            
             } finally {
                 //After the redirect we should not use the explanation from the orginal record
                 spfData.setIgnoreExplanation(true);

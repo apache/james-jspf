@@ -9,6 +9,7 @@
 #   that is alternatively a .TLD.? or a "%"macro.
 # - all the "a:as%-//24//4" with wrong slash numbers for the CIDR are
 #   invalid. CIDR is [ "/" \d+ ] [ "//" \d+ ].
+# - CIDR with leading 0 should return PermError
 #-----------------------------------------------------
 #
 # This file is read by test_parser.pl, use "test_parser.pl --help" for
@@ -392,7 +393,7 @@ rec-out-auto    /.*/
 
 spftest spf "v=spf1 ip4:111.222.133.144/22 ip4:1.2.3.4/004"
 rec-in          /.*/ SPF record in:  v=spf1 ip4:111.222.133.144/22 ip4:1.2.3.4/004
-err-msg         /.*/ no errors
+err-msg         jspf ERROR, Read RFC!
 rec-out         /.*/ SPF record:  v=spf1 ip4:111.222.133.144/22 ip4:1.2.3.4/4
 
 spftest spf "v=spf1 ip4:111.222.133.144/22 ip4:1.2.3.4/4"
@@ -457,7 +458,7 @@ rec-out         /.*/ SPF record:  v=spf1 ip6:::
 
 spftest spf "v=spf1 ip6:::1 ip4:111.222.133.144/22 ip4:1.2.3.4/004"
 rec-in          /.*/ SPF record in:  v=spf1 ip6:::1 ip4:111.222.133.144/22 ip4:1.2.3.4/004
-err-msg         /.*/ no errors
+err-msg         jspf ERROR, Read RFC!
 rec-out         /.*/ SPF record:  v=spf1 ip6:::1 ip4:111.222.133.144/22 ip4:1.2.3.4/4
 
 spftest spf "v=spf1 ip6:::1"

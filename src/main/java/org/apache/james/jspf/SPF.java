@@ -27,6 +27,7 @@ import org.apache.james.jspf.core.Modifier;
 import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.core.SPF1Record;
+import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
@@ -105,6 +106,8 @@ public class SPF {
         } catch (NoneException e) {
             log.warn(e.getMessage(),e);
             result = SPF1Utils.NONE;
+        } catch (NeutralException e) {
+            result = SPF1Utils.NEUTRAL_CONV;
         } catch (TempErrorException e) {
             log.warn(e.getMessage(),e);
             result = SPF1Utils.TEMP_ERROR;
@@ -135,23 +138,12 @@ public class SPF {
      *             Get thrown if no Record was found
      * @throws TempErrorException
      *             Get thrown if a DNS problem was detected
+     * @throws NeutralException 
      */
     public SPFInternalResult checkSPF(SPF1Data spfData) throws PermErrorException,
-            NoneException, TempErrorException {
+            NoneException, TempErrorException, NeutralException {
         String result = SPF1Constants.NEUTRAL;
         String explanation = null;
-
-        /**
-         * Check if the connection was made from localhost. Set the result to
-         * PASS if its from localhost.
-         */
-        if (spfData.getIpAddress().trim().startsWith("127.")) {
-            // logging
-            log.info("Connection was made from localhost => skip checking");
-
-            result = SPF1Constants.PASS;
-            return new SPFInternalResult(result, explanation);
-        }
 
         // Get the raw dns txt entry which contains a spf entry
         String spfDnsEntry = dnsProbe.getSpfRecord(spfData.getCurrentDomain(),
@@ -162,8 +154,10 @@ public class SPF {
 
         SPF1Record spfRecord = parser.parse(spfDnsEntry);
 
-        // System.out.println(spfRecord);
-
+        //TODO: Check if this is the right place for do this
+        if (spfDnsEntry.contains("a/0")) spfData.setMatchAnyARecord(true) ;
+        if (spfDnsEntry.contains("a//0")) spfData.setMatchAnyAAAARecord(true);
+            
         String qualifier = null;
         boolean hasCommand = false;
 

@@ -28,6 +28,7 @@ import org.apache.james.jspf.core.Mechanism;
 import org.apache.james.jspf.core.Modifier;
 import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPF1Record;
+import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.util.ConfigurationMatch;
@@ -408,17 +409,20 @@ public class SPF1Parser {
      * @throws PermErrorException
      *             Get thrown if an syntax error was detected
      * @throws NoneException
-     *             Getthrown if no spf record could be found
+     *             Get thrown if no spf record could be found
+     * @throws NeutralException Get thrown if an empty spf record was found 
      */
     public SPF1Record parse(String spfRecord) throws PermErrorException,
-            NoneException {
+            NoneException, NeutralException {
 
         log.debug("Start parsing SPF-Record: " + spfRecord);
 
         SPF1Record result = new SPF1Record();
 
         // check the version "header"
-        if (!spfRecord.startsWith(SPF1Constants.SPF_VERSION + " ")) {
+        if (spfRecord.startsWith(SPF1Constants.SPF_VERSION + " ") || spfRecord.equalsIgnoreCase(SPF1Constants.SPF_VERSION)) {
+            if (!spfRecord.startsWith(SPF1Constants.SPF_VERSION + " ")) throw new NeutralException("Empty SPF Record");
+        } else {
             throw new NoneException("No valid SPF Record: " + spfRecord);
         }
 
