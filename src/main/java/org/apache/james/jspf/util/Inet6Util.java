@@ -286,6 +286,13 @@ public class Inet6Util {
                 break;
 
             case ':':
+                // FIX "IP6 mechanism syntax #ip6-bad1"
+                // An IPV6 address cannot start with a single ":".
+                // Either it can starti with "::" or with a number.
+                if (i == offset && (ipAddress.length() <= i || ipAddress.charAt(i+1) != ':')) {
+                    return false;
+                }
+                // END FIX "IP6 mechanism syntax #ip6-bad1"
                 numberOfColons++;
                 if (numberOfColons > 7)
                     return false;
