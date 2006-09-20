@@ -28,7 +28,7 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-public class MailZoneYamlTest extends SPFYamlTest {
+public class MailZoneYamlTest extends AbstractYamlTest {
 
     private static final String YAMLFILE2 = "mailzone-tests.yml";
 

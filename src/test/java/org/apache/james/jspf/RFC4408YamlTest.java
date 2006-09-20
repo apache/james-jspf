@@ -26,7 +26,7 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-public class RFC4408YamlTest extends SPFYamlTest {
+public class RFC4408YamlTest extends AbstractYamlTest {
 
     private static final String YAMLFILE2 = "rfc4408-tests.yml";
 
