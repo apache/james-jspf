@@ -74,10 +74,6 @@ public class AMechanism extends GenericMechanism {
                         return false;
                     }
 
-
-                    // We should match if any A Record was found!
-                    if (aRecords.size() > 0 && spfData.matchAnyARecord()) return true;
-                    
                     if (checkAddressList(checkAddress, aRecords, getIp4cidr())) {
                         return true;
                     }
@@ -98,7 +94,7 @@ public class AMechanism extends GenericMechanism {
                     }
 
                     // We should match if any A Record was found!
-                    if (aaaaRecords.size() > 0 && spfData.matchAnyAAAARecord()) return true;
+                    //if (aaaaRecords.size() > 0 && spfData.matchAnyAAAARecord()) return true;
                     
                     
                     if (checkAddressList(checkAddress, aaaaRecords, getIp6cidr())) {

@@ -343,7 +343,7 @@ public class DNSServiceXBillImpl implements DNSService {
                     log.debug("Found " + records.length + " PTR-Records");
 
                     // check if the maximum lookup count is reached
-                    if (records.length >= SPF1Data.MAX_DEPTH) throw new PermErrorException("Maximum PTR lookup count reached");
+                    if (records.length >= SPF1Data.MAX_DEPTH_DNS) throw new PermErrorException("Maximum PTR lookup count reached");
               
                     for (int i = 0; i < records.length; i++) {
                         PTRRecord ptr = (PTRRecord) records[i];
@@ -411,7 +411,7 @@ public class DNSServiceXBillImpl implements DNSService {
                     log.debug("Found " + records.length + " MX-Records");
 
                     // check if the maximum lookup count is reached
-                    if (records.length >= SPF1Data.MAX_DEPTH) throw new PermErrorException("Maximum MX lookup count reached");
+                    if (records.length >= SPF1Data.MAX_DEPTH_DNS) throw new PermErrorException("Maximum MX lookup count reached");
               
                     for (int i = 0; i < records.length; i++) {
                         MXRecord mx = (MXRecord) records[i];

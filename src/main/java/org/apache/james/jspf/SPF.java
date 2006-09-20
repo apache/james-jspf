@@ -154,10 +154,6 @@ public class SPF {
 
         SPF1Record spfRecord = parser.parse(spfDnsEntry);
 
-        //TODO: Check if this is the right place for do this
-        if (spfDnsEntry.contains("a/0")) spfData.setMatchAnyARecord(true) ;
-        if (spfDnsEntry.contains("a//0")) spfData.setMatchAnyAAAARecord(true);
-            
         String qualifier = null;
         boolean hasCommand = false;
 
