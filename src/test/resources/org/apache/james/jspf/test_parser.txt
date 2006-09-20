@@ -108,6 +108,11 @@ rec-in          /.*/ SPF record in:  v=spf1a a
 err-msg         /.*/ Could not find a valid SPF record near "v=spf1" in "v=spf1a"
 rec-out         /.*/ Unknown
 
+spftest spf "v=spf1mx"
+rec-in          /.*/ SPF record in:  v=spf1mx
+err-msg         /.*/ Could not find a valid SPF record near "v=spf1" in "v=spf1mx"
+rec-out         /.*/ Unknown
+
 spftest spf "v=spf1 al"
 rec-in          /.*/ SPF record in:  v=spf1 al
 err-msg         /.*/ Unknown mechanism found in "al"

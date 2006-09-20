@@ -70,7 +70,7 @@ public class PTRMechanism extends GenericMechanism {
 
                 // Get a record for this
                 List aList = spfData.getDnsProbe().getARecords(
-                        (String) domainList.get(i), 32);
+                        (String) domainList.get(i));
                 for (int j = 0; j < aList.size(); j++) {
                     compareIP = (IPAddr) aList.get(j);
                     if (compareIP.toString().equals(spfData.getIpAddress())) {

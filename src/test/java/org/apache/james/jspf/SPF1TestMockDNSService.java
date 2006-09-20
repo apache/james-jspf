@@ -91,14 +91,14 @@ public final class SPF1TestMockDNSService implements DNSService {
         throw new IllegalStateException("Mock data not available");
     }
 
-    public List getAAAARecords(String strServer, int mask)
+    public List getAAAARecords(String strServer)
             throws NoneException, PermErrorException, TempErrorException {
         if ("myipv6a.record".equals(strServer))      
-            return getAddressList("FEDC:BA98:7654:3210:FEDC:BA98:7654:3210",mask);
+            return getAddressList("FEDC:BA98:7654:3210:FEDC:BA98:7654:3210");
         throw new IllegalStateException("Mock data not available");
     }
 
-    public List getARecords(String strServer, int mask) throws NoneException,
+    public List getARecords(String strServer) throws NoneException,
             PermErrorException, TempErrorException {
         throw new IllegalStateException("Mock data not available");
     }
@@ -124,7 +124,7 @@ public final class SPF1TestMockDNSService implements DNSService {
         throw new IllegalStateException("Mock data not available");
     }
 
-    public List getMXRecords(String domainName, int mask)
+    public List getMXRecords(String domainName)
             throws PermErrorException, NoneException, TempErrorException {
         throw new IllegalStateException("Mock data not available");
     }
@@ -133,14 +133,14 @@ public final class SPF1TestMockDNSService implements DNSService {
         // MOCK
     }
     
-    public List getAddressList(String list, int mask) throws PermErrorException {
+    public List getAddressList(String list) throws PermErrorException {
         if (list == null || "".equals(list)) {
             return new ArrayList();
         }
         String[] s = list.split(",");
         IPAddr[] ips = new IPAddr[s.length];
         for (int i = 0; i < s.length; i++) {
-            ips[i] = IPAddr.getAddress(s[i], mask);
+            ips[i] = IPAddr.getAddress(s[i]);
         }
         return new ArrayList(Arrays.asList(ips));
     }

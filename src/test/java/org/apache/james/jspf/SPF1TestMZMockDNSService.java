@@ -171,217 +171,179 @@ final class SPF1TestMZMockDNSService implements DNSService {
         throw new IllegalStateException("Mock data not available");
     }
 
-    public List getAAAARecords(String strServer, int mask)
+    public List getAAAARecords(String strServer)
             throws NoneException, PermErrorException, TempErrorException {
         throw new IllegalStateException("Mock data not available");
     }
 
-    public List getARecords(String strServer, int mask) throws NoneException,
+    public List getARecords(String strServer) throws NoneException,
             PermErrorException, TempErrorException {
-        if (mask == 32
-                && "1.bob.lp._spf.spf1-test.mailzone.com".equals(strServer))
-            return getAddressList("127.0.0.2", mask);
-        if (mask == 32
-                && "1.joe.lp._spf.spf1-test.mailzone.com".equals(strServer))
+        if ("1.bob.lp._spf.spf1-test.mailzone.com".equals(strServer))
+            return getAddressList("127.0.0.2");
+        if ("1.joe.lp._spf.spf1-test.mailzone.com".equals(strServer))
             throw new NoneException(
                     "No A record found for: 1.joe.lp._spf.spf1-test.mailzone.com");
-        if (mask == 32
-                && "100.2.0.192.in-addr._spf.40.spf1-test.mailzone.com"
+        if ("100.2.0.192.in-addr._spf.40.spf1-test.mailzone.com"
                         .equals(strServer))
-            return getAddressList("127.0.0.2", mask);
-        if (mask == 32
-                && "100.2.0.192.in-addr._spf.42.spf1-test.mailzone.com"
+            return getAddressList("127.0.0.2");
+        if ("100.2.0.192.in-addr._spf.42.spf1-test.mailzone.com"
                         .equals(strServer))
             throw new NoneException(
                     "No A record found for: 100.2.0.192.in-addr._spf.42.spf1-test.mailzone.com");
-        if (mask == 32
-                && "100.2.0.192.in-addr._spf.spf1-test.mailzone.com"
+        if ("100.2.0.192.in-addr._spf.spf1-test.mailzone.com"
                         .equals(strServer))
             throw new NoneException(
                     "No A record found for: 100.2.0.192.in-addr._spf.spf1-test.mailzone.com");
-        if (mask == 32
-                && "100.2.0.192.in-addr._spf.spf1-test.mailzone.com"
+        if ("100.2.0.192.in-addr._spf.spf1-test.mailzone.com"
                         .equals(strServer))
             throw new NoneException(
                     "No A record found for: 100.2.0.192.in-addr._spf.spf1-test.mailzone.com");
-        if (mask == 32
-                && "101.2.0.192.in-addr._spf.40.spf1-test.mailzone.com"
+        if ("101.2.0.192.in-addr._spf.40.spf1-test.mailzone.com"
                         .equals(strServer))
-            return getAddressList("127.0.0.2", mask);
-        if (mask == 32
-                && "102.2.0.192.in-addr._spf.40.spf1-test.mailzone.com"
+            return getAddressList("127.0.0.2");
+        if ("102.2.0.192.in-addr._spf.40.spf1-test.mailzone.com"
                         .equals(strServer))
             throw new NoneException(
                     "No A record found for: 102.2.0.192.in-addr._spf.40.spf1-test.mailzone.com");
-        if (mask == 32
-                && "110.2.0.192.in-addr._spf.42.spf1-test.mailzone.com"
+        if ("110.2.0.192.in-addr._spf.42.spf1-test.mailzone.com"
                         .equals(strServer))
             throw new NoneException(
                     "No A record found for: 110.2.0.192.in-addr._spf.42.spf1-test.mailzone.com");
-        if (mask == 32
-                && "110.2.0.192.in-addr._spf.spf1-test.mailzone.com"
+        if ("110.2.0.192.in-addr._spf.spf1-test.mailzone.com"
                         .equals(strServer))
-            return getAddressList("127.0.0.2", mask);
-        if (mask == 32
-                && "111.2.0.192.in-addr._spf.spf1-test.mailzone.com"
+            return getAddressList("127.0.0.2");
+        if ("111.2.0.192.in-addr._spf.spf1-test.mailzone.com"
                         .equals(strServer))
-            return getAddressList("127.0.0.2", mask);
-        if (mask == 32 && "111.spf1-test.mailzone.com".equals(strServer))
-            return getAddressList("192.0.2.200", mask);
-        if (mask == 32 && "112.spf1-test.mailzone.com".equals(strServer))
-            return getAddressList("192.0.2.200", mask);
-        if (mask == 32 && "113.spf1-test.mailzone.com".equals(strServer))
-            return getAddressList("192.0.2.200", mask);
-        if (mask == 32 && "114.spf1-test.mailzone.com".equals(strServer))
-            return getAddressList("192.0.2.200", mask);
-        if (mask == 32 && "115.spf1-test.mailzone.com".equals(strServer))
-            return getAddressList("192.0.2.200", mask);
-        if (mask == 32 && "116.spf1-test.mailzone.com".equals(strServer))
-            return getAddressList("192.0.2.200", mask);
-        if (mask == 32
-                && "130.2.0.192.in-addr._spf.42.spf1-test.mailzone.com"
+            return getAddressList("127.0.0.2");
+        if ("111.spf1-test.mailzone.com".equals(strServer))
+            return getAddressList("192.0.2.200");
+        if ("112.spf1-test.mailzone.com".equals(strServer))
+            return getAddressList("192.0.2.200");
+        if ("113.spf1-test.mailzone.com".equals(strServer))
+            return getAddressList("192.0.2.200");
+        if ("114.spf1-test.mailzone.com".equals(strServer))
+            return getAddressList("192.0.2.200");
+        if ("115.spf1-test.mailzone.com".equals(strServer))
+            return getAddressList("192.0.2.200");
+        if ("116.spf1-test.mailzone.com".equals(strServer))
+            return getAddressList("192.0.2.200");
+        if ("130.2.0.192.in-addr._spf.42.spf1-test.mailzone.com"
                         .equals(strServer))
-            return getAddressList("127.0.0.2", mask);
-        if (mask == 32
-                && "131.2.0.192.in-addr._spf.42.spf1-test.mailzone.com"
+            return getAddressList("127.0.0.2");
+        if ("131.2.0.192.in-addr._spf.42.spf1-test.mailzone.com"
                         .equals(strServer))
-            return getAddressList("127.0.0.2", mask);
-        if (mask == 32
-                && "2.bob.lp._spf.spf1-test.mailzone.com".equals(strServer))
-            return getAddressList("127.0.0.2", mask);
-        if (mask == 32 && "20.spf1-test.mailzone.com".equals(strServer))
-            return getAddressList("192.0.2.120", mask);
-        if (mask == 32
-                && "200.2.0.192.in-addr._spf.42.spf1-test.mailzone.com"
+            return getAddressList("127.0.0.2");
+        if ("2.bob.lp._spf.spf1-test.mailzone.com".equals(strServer))
+            return getAddressList("127.0.0.2");
+        if ("20.spf1-test.mailzone.com".equals(strServer))
+            return getAddressList("192.0.2.120");
+        if ("200.2.0.192.in-addr._spf.42.spf1-test.mailzone.com"
                         .equals(strServer))
             throw new NoneException(
                     "No A record found for: 200.2.0.192.in-addr._spf.42.spf1-test.mailzone.com");
-        if (mask == 32
-                && "200.2.0.192.in-addr._spf.42.spf1-test.mailzone.com"
+        if ("200.2.0.192.in-addr._spf.42.spf1-test.mailzone.com"
                         .equals(strServer))
             throw new NoneException(
                     "No A record found for: 200.2.0.192.in-addr._spf.42.spf1-test.mailzone.com");
-        if (mask == 32
-                && "200.2.0.192.in-addr._spf.42.spf1-test.mailzone.com"
+        if ("200.2.0.192.in-addr._spf.42.spf1-test.mailzone.com"
                         .equals(strServer))
             throw new NoneException(
                     "No A record found for: 200.2.0.192.in-addr._spf.42.spf1-test.mailzone.com");
-        if (mask == 32
-                && "200.2.0.192.in-addr._spf.42.spf1-test.mailzone.com"
+        if ("200.2.0.192.in-addr._spf.42.spf1-test.mailzone.com"
                         .equals(strServer))
             throw new NoneException(
                     "No A record found for: 200.2.0.192.in-addr._spf.42.spf1-test.mailzone.com");
-        if (mask == 32
-                && "200.2.0.192.in-addr._spf.42.spf1-test.mailzone.com"
+        if ("200.2.0.192.in-addr._spf.42.spf1-test.mailzone.com"
                         .equals(strServer))
             throw new NoneException(
                     "No A record found for: 200.2.0.192.in-addr._spf.42.spf1-test.mailzone.com");
-        if (mask == 32
-                && "200.2.0.192.in-addr._spf.42.spf1-test.mailzone.com"
+        if ("200.2.0.192.in-addr._spf.42.spf1-test.mailzone.com"
                         .equals(strServer))
             throw new NoneException(
                     "No A record found for: 200.2.0.192.in-addr._spf.42.spf1-test.mailzone.com");
-        if (mask == 32
-                && "200.2.0.192.in-addr._spf.spf1-test.mailzone.com"
+        if ("200.2.0.192.in-addr._spf.spf1-test.mailzone.com"
                         .equals(strServer))
             throw new NoneException(
                     "No A record found for: 200.2.0.192.in-addr._spf.spf1-test.mailzone.com");
-        if (mask == 32
-                && "200.2.0.192.in-addr._spf.spf1-test.mailzone.com"
+        if ("200.2.0.192.in-addr._spf.spf1-test.mailzone.com"
                         .equals(strServer))
             throw new NoneException(
                     "No A record found for: 200.2.0.192.in-addr._spf.spf1-test.mailzone.com");
-        if (mask == 32
-                && "200.2.0.192.in-addr._spf.spf1-test.mailzone.com"
+        if ("200.2.0.192.in-addr._spf.spf1-test.mailzone.com"
                         .equals(strServer))
             throw new NoneException(
                     "No A record found for: 200.2.0.192.in-addr._spf.spf1-test.mailzone.com");
-        if (mask == 32
-                && "200.2.0.192.in-addr._spf.spf1-test.mailzone.com"
+        if ("200.2.0.192.in-addr._spf.spf1-test.mailzone.com"
                         .equals(strServer))
             throw new NoneException(
                     "No A record found for: 200.2.0.192.in-addr._spf.spf1-test.mailzone.com");
-        if (mask == 32
-                && "200.2.0.192.in-addr._spf.spf1-test.mailzone.com"
+        if ("200.2.0.192.in-addr._spf.spf1-test.mailzone.com"
                         .equals(strServer))
             throw new NoneException(
                     "No A record found for: 200.2.0.192.in-addr._spf.spf1-test.mailzone.com");
-        if (mask == 32
-                && "200.2.0.192.in-addr._spf.spf1-test.mailzone.com"
+        if ("200.2.0.192.in-addr._spf.spf1-test.mailzone.com"
                         .equals(strServer))
             throw new NoneException(
                     "No A record found for: 200.2.0.192.in-addr._spf.spf1-test.mailzone.com");
-        if (mask == 32
-                && "208.210.124.1.whitelist.spf1-test.mailzone.com"
+        if ("208.210.124.1.whitelist.spf1-test.mailzone.com"
                         .equals(strServer))
             throw new NoneException(
                     "No A record found for: 208.210.124.1.whitelist.spf1-test.mailzone.com");
-        if (mask == 32
-                && "208.210.124.180.whitelist.spf1-test.mailzone.com"
+        if ("208.210.124.180.whitelist.spf1-test.mailzone.com"
                         .equals(strServer))
             throw new NoneException(
                     "No A record found for: 208.210.124.180.whitelist.spf1-test.mailzone.com");
-        if (mask == 32
-                && "208.210.124.180.whitelist.spf1-test.mailzone.com"
+        if ("208.210.124.180.whitelist.spf1-test.mailzone.com"
                         .equals(strServer))
             throw new NoneException(
                     "No A record found for: 208.210.124.180.whitelist.spf1-test.mailzone.com");
-        if (mask == 32 && "22.spf1-test.mailzone.com".equals(strServer))
-            return getAddressList("192.0.2.122", mask);
-        if (mask == 32 && "30.spf1-test.mailzone.com".equals(strServer))
-            return getAddressList("208.210.124.130", mask);
-        if (mask == 32 && "31.spf1-test.mailzone.com".equals(strServer))
-            return getAddressList("208.210.124.131", mask);
-        if (mask == 32
-                && "4.24.236.64.in-addr._spf.80.spf1-test.mailzone.com"
+        if ("22.spf1-test.mailzone.com".equals(strServer))
+            return getAddressList("192.0.2.122");
+        if ("30.spf1-test.mailzone.com".equals(strServer))
+            return getAddressList("208.210.124.130");
+        if ("31.spf1-test.mailzone.com".equals(strServer))
+            return getAddressList("208.210.124.131");
+        if ("4.24.236.64.in-addr._spf.80.spf1-test.mailzone.com"
                         .equals(strServer))
             throw new NoneException(
                     "No A record found for: 4.24.236.64.in-addr._spf.80.spf1-test.mailzone.com");
-        if (mask == 32 && "45.spf1-test.mailzone.com".equals(strServer))
-            return getAddressList("192.0.2.147,192.0.2.145,192.0.2.146", mask);
-        if (mask == 32 && "80.spf1-test.mailzone.com".equals(strServer))
-            return getAddressList("208.210.124.180", mask);
-        if (mask == 32
-                && "80.spf1-test.mailzone.com.whitelist.spf1-test.mailzone.com"
+        if ("45.spf1-test.mailzone.com".equals(strServer))
+            return getAddressList("192.0.2.147,192.0.2.145,192.0.2.146");
+        if ("80.spf1-test.mailzone.com".equals(strServer))
+            return getAddressList("208.210.124.180");
+        if ("80.spf1-test.mailzone.com.whitelist.spf1-test.mailzone.com"
                         .equals(strServer))
-            return getAddressList("127.0.0.2", mask);
-        if (mask == 32
-                && "80.2.0.192.in-addr._spf.80.spf1-test.mailzone.com"
+            return getAddressList("127.0.0.2");
+        if ("80.2.0.192.in-addr._spf.80.spf1-test.mailzone.com"
                         .equals(strServer))
-            return getAddressList("127.0.0.2", mask);
-        if (mask == 32
-                && "96.spf1-test.mailzone.com.blacklist.spf1-test.mailzone.com"
+            return getAddressList("127.0.0.2");
+        if ("96.spf1-test.mailzone.com.blacklist.spf1-test.mailzone.com"
                         .equals(strServer))
-            return getAddressList("127.0.0.2", mask);
-        if (mask == 32
-                && "97.spf1-test.mailzone.com.blacklist.spf1-test.mailzone.com"
+            return getAddressList("127.0.0.2");
+        if ("97.spf1-test.mailzone.com.blacklist.spf1-test.mailzone.com"
                         .equals(strServer))
-            return getAddressList("127.0.0.2", mask);
-        if (mask == 26 && "98.spf1-test.mailzone.com".equals(strServer))
-            return getAddressList("192.0.2.98", mask);
-        if (mask == 32
-                && "bob.lp._spf.spf1-test.mailzone.com".equals(strServer))
-            return getAddressList("127.0.0.2", mask);
-        if (mask == 32
-                && "droid.lp._spf.spf1-test.mailzone.com".equals(strServer))
+            return getAddressList("127.0.0.2");
+        // this was with mask 26.. let's check!
+        if ("98.spf1-test.mailzone.com".equals(strServer))
+            return getAddressList("192.0.2.98");
+        if ("bob.lp._spf.spf1-test.mailzone.com".equals(strServer))
+            return getAddressList("127.0.0.2");
+        if ("droid.lp._spf.spf1-test.mailzone.com".equals(strServer))
             throw new NoneException(
                     "No A record found for: droid.lp._spf.spf1-test.mailzone.com");
-        if (mask == 32
-                && "joe-2.lp._spf.spf1-test.mailzone.com".equals(strServer))
+        if ("joe-2.lp._spf.spf1-test.mailzone.com".equals(strServer))
             throw new NoneException(
                     "No A record found for: joe-2.lp._spf.spf1-test.mailzone.com");
-        if (mask == 32
-                && "moe-1.lp._spf.spf1-test.mailzone.com".equals(strServer))
+        if ("moe-1.lp._spf.spf1-test.mailzone.com".equals(strServer))
             throw new NoneException(
                     "No A record found for: moe-1.lp._spf.spf1-test.mailzone.com");
-        if (mask == 32
-                && "postmaster.lp._spf.spf1-test.mailzone.com"
+        if ("postmaster.lp._spf.spf1-test.mailzone.com"
                         .equals(strServer))
-            return getAddressList("127.0.0.2", mask);
-        if (mask == 32 && "spf1-test.mailzone.com".equals(strServer))
-            return getAddressList("208.210.124.192,192.0.2.200", mask);
-        if (mask == 32 && "www1.cnn.com".equals(strServer))
-            return getAddressList("64.236.24.4", mask);
+            return getAddressList("127.0.0.2");
+        if ("spf1-test.mailzone.com".equals(strServer))
+            return getAddressList("208.210.124.192,192.0.2.200");
+        if ("www1.cnn.com".equals(strServer))
+            return getAddressList("64.236.24.4");
 
         throw new IllegalStateException("Mock data not available");
     }
@@ -413,51 +375,47 @@ final class SPF1TestMZMockDNSService implements DNSService {
         throw new IllegalStateException("Mock data not available");
     }
 
-    public List getAddressList(String list, int mask) throws PermErrorException {
+    public List getAddressList(String list) throws PermErrorException {
         if (list == null || "".equals(list)) {
             return new ArrayList();
         }
         String[] s = list.split(",");
         IPAddr[] ips = new IPAddr[s.length];
         for (int i = 0; i < s.length; i++) {
-            ips[i] = IPAddr.getAddress(s[i], mask);
+            ips[i] = IPAddr.getAddress(s[i]);
         }
         return new ArrayList(Arrays.asList(ips));
     }
 
-    public List getMXRecords(String domainName, int mask)
+    public List getMXRecords(String domainName)
             throws PermErrorException, NoneException, TempErrorException {
-        if (mask == 32 && "10.spf1-test.mailzone.com".equals(domainName))
+        if ("10.spf1-test.mailzone.com".equals(domainName))
             return getAddressList(
-                    "192.0.2.23,192.0.2.20,192.0.2.21,192.0.2.22,192.0.2.30,192.0.2.31,192.0.2.32,192.0.2.33,192.0.2.12,192.0.2.13,192.0.2.10,192.0.2.11",
-                    mask);
-        if (mask == 32 && "12.spf1-test.mailzone.com".equals(domainName))
+                    "192.0.2.23,192.0.2.20,192.0.2.21,192.0.2.22,192.0.2.30,192.0.2.31,192.0.2.32,192.0.2.33,192.0.2.12,192.0.2.13,192.0.2.10,192.0.2.11");
+        if ("12.spf1-test.mailzone.com".equals(domainName))
             return getAddressList(
-                    "192.0.2.23,192.0.2.20,192.0.2.21,192.0.2.22,192.0.2.30,192.0.2.31,192.0.2.32,192.0.2.33,192.0.2.12,192.0.2.13,192.0.2.10,192.0.2.11",
-                    mask);
-        if (mask == 32 && "14.spf1-test.mailzone.com".equals(domainName))
+                    "192.0.2.23,192.0.2.20,192.0.2.21,192.0.2.22,192.0.2.30,192.0.2.31,192.0.2.32,192.0.2.33,192.0.2.12,192.0.2.13,192.0.2.10,192.0.2.11");
+        if ("14.spf1-test.mailzone.com".equals(domainName))
             return getAddressList(
-                    "192.0.2.23,192.0.2.20,192.0.2.21,192.0.2.22,192.0.2.30,192.0.2.31,192.0.2.32,192.0.2.33,192.0.2.12,192.0.2.13,192.0.2.10,192.0.2.11",
-                    mask);
-        if (mask == 32 && "111.spf1-test.mailzone.com".equals(domainName))
+                    "192.0.2.23,192.0.2.20,192.0.2.21,192.0.2.22,192.0.2.30,192.0.2.31,192.0.2.32,192.0.2.33,192.0.2.12,192.0.2.13,192.0.2.10,192.0.2.11");
+        if ("111.spf1-test.mailzone.com".equals(domainName))
             return getAddressList(
-                    "192.0.2.12,192.0.2.13,192.0.2.10,192.0.2.11", mask);
-        if (mask == 32 && "114.spf1-test.mailzone.com".equals(domainName))
+                    "192.0.2.12,192.0.2.13,192.0.2.10,192.0.2.11");
+        if ("114.spf1-test.mailzone.com".equals(domainName))
             return getAddressList(
-                    "192.0.2.11,192.0.2.12,192.0.2.13,192.0.2.10", mask);
-        if (mask == 32 && "80.spf1-test.mailzone.com".equals(domainName))
+                    "192.0.2.11,192.0.2.12,192.0.2.13,192.0.2.10");
+        if ("80.spf1-test.mailzone.com".equals(domainName))
             throw new NoneException(
                     "No MX Record found for: 80.spf1-test.mailzone.com");
-        if (mask == 26 && "98.spf1-test.mailzone.com".equals(domainName))
-            return getAddressList("208.210.124.180", mask);
-        if (mask == 32
-                && "fallback-relay.spf1-test.mailzone.com".equals(domainName))
+        // this was with mask 26
+        if ("98.spf1-test.mailzone.com".equals(domainName))
+            return getAddressList("208.210.124.180");
+        if ("fallback-relay.spf1-test.mailzone.com".equals(domainName))
             return getAddressList(
-                    "192.0.2.40,192.0.2.41,192.0.2.42,192.0.2.43", mask);
-        if (mask == 32 && "spf1-test.mailzone.com".equals(domainName))
+                    "192.0.2.40,192.0.2.41,192.0.2.42,192.0.2.43");
+        if ("spf1-test.mailzone.com".equals(domainName))
             return getAddressList(
-                    "192.0.2.23,192.0.2.20,192.0.2.21,192.0.2.22,192.0.2.30,192.0.2.31,192.0.2.32,192.0.2.33,192.0.2.12,192.0.2.13,192.0.2.10,192.0.2.11",
-                    mask);
+                    "192.0.2.23,192.0.2.20,192.0.2.21,192.0.2.22,192.0.2.30,192.0.2.31,192.0.2.32,192.0.2.33,192.0.2.12,192.0.2.13,192.0.2.10,192.0.2.11");
 
         throw new IllegalStateException("Mock data not available");
 

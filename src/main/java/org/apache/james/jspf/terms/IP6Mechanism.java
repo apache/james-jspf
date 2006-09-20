@@ -38,8 +38,10 @@ public class IP6Mechanism extends IP4Mechanism {
      * @see org.apache.james.jspf.terms.IP4Mechanism#isValidAddress(String)
      */
     protected boolean isValidAddress(String ipString) {
-        System.err.println("IP6: " + ipString);
-        return Inet6Util.isValidIP6Address(ipString);
+        // TODO: this check is not accurate ":CAFE::BABE" pass the test but is invalid
+        boolean res = Inet6Util.isValidIP6Address(ipString);
+        // System.err.println("IP6: " + ipString + " valid? "+res);
+        return res;
     }
 
     /**

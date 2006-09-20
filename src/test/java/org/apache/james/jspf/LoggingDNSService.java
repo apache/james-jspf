@@ -76,13 +76,12 @@ public class LoggingDNSService implements DNSService {
 
     }
 
-    public List getAAAARecords(String strServer, int mask)
+    public List getAAAARecords(String strServer)
             throws NoneException, PermErrorException, TempErrorException {
 
         try {
-            List res = dnsService.getAAAARecords(strServer, mask);
-            System.out.print("getAAAARecords(" + strServer + "," + mask
-                    + ") = ");
+            List res = dnsService.getAAAARecords(strServer);
+            System.out.print("getAAAARecords(" + strServer + ") = ");
             if (res != null) {
                 for (int i = 0; i < res.size(); i++) {
                     System.out.print(res.get(i));
@@ -98,25 +97,22 @@ public class LoggingDNSService implements DNSService {
             return res;
 
         } catch (TempErrorException e) {
-            System.out.println("getAAAARecords(" + strServer + "," + mask
-                    + ") = TermErrorException[" + e.getMessage() + "]");
+            System.out.println("getAAAARecords(" + strServer + ") = TermErrorException[" + e.getMessage() + "]");
             throw e;
         } catch (PermErrorException e) {
-            System.out.println("getAAAARecords(" + strServer + "," + mask
-                    + ") = PermErrorException[" + e.getMessage() + "]");
+            System.out.println("getAAAARecords(" + strServer + ") = PermErrorException[" + e.getMessage() + "]");
             throw e;
         } catch (NoneException e) {
-            System.out.println("getAAAARecords(" + strServer + "," + mask
-                    + ") = NoneException[" + e.getMessage() + "]");
+            System.out.println("getAAAARecords(" + strServer + ") = NoneException[" + e.getMessage() + "]");
             throw e;
         }
     }
 
-    public List getARecords(String strServer, int mask) throws NoneException,
+    public List getARecords(String strServer) throws NoneException,
             PermErrorException, TempErrorException {
         try {
-            List res = dnsService.getARecords(strServer, mask);
-            System.out.print("getARecords(" + strServer + "," + mask + ") = ");
+            List res = dnsService.getARecords(strServer);
+            System.out.print("getARecords(" + strServer + ") = ");
             if (res != null) {
                 for (int i = 0; i < res.size(); i++) {
                     System.out.print(res.get(i));
@@ -132,16 +128,13 @@ public class LoggingDNSService implements DNSService {
             return res;
 
         } catch (TempErrorException e) {
-            System.out.println("getARecords(" + strServer + "," + mask
-                    + ") = TermErrorException[" + e.getMessage() + "]");
+            System.out.println("getARecords(" + strServer + ") = TermErrorException[" + e.getMessage() + "]");
             throw e;
         } catch (PermErrorException e) {
-            System.out.println("getARecords(" + strServer + "," + mask
-                    + ") = PermErrorException[" + e.getMessage() + "]");
+            System.out.println("getARecords(" + strServer + ") = PermErrorException[" + e.getMessage() + "]");
             throw e;
         } catch (NoneException e) {
-            System.out.println("getARecords(" + strServer + "," + mask
-                    + ") = NoneException[" + e.getMessage() + "]");
+            System.out.println("getARecords(" + strServer + ") = NoneException[" + e.getMessage() + "]");
             throw e;
         }
 
@@ -215,12 +208,12 @@ public class LoggingDNSService implements DNSService {
         return new ArrayList(Arrays.asList(ips));
     }
 
-    public List getMXRecords(String domainName, int mask)
+    public List getMXRecords(String domainName)
             throws PermErrorException, NoneException, TempErrorException {
         try {
-            List res = dnsService.getMXRecords(domainName, mask);
+            List res = dnsService.getMXRecords(domainName);
             System.out
-                    .print("getMXRecords(" + domainName + "," + mask + ") = ");
+                    .print("getMXRecords(" + domainName + ") = ");
             if (res != null) {
                 for (int i = 0; i < res.size(); i++) {
                     System.out.print(res.get(i));
@@ -235,16 +228,13 @@ public class LoggingDNSService implements DNSService {
             }
             return res;
         } catch (TempErrorException e) {
-            System.out.println("getMXRecords(" + domainName + "," + mask
-                    + ") = TempErrorException[" + e.getMessage() + "]");
+            System.out.println("getMXRecords(" + domainName + ") = TempErrorException[" + e.getMessage() + "]");
             throw e;
         } catch (PermErrorException e) {
-            System.out.println("getMXRecords(" + domainName + "," + mask
-                    + ") = ErrorException[" + e.getMessage() + "]");
+            System.out.println("getMXRecords(" + domainName + ") = ErrorException[" + e.getMessage() + "]");
             throw e;
         } catch (NoneException e) {
-            System.out.println("getMXRecords(" + domainName + "," + mask
-                    + ") = NoneException[" + e.getMessage() + "]");
+            System.out.println("getMXRecords(" + domainName + ") = NoneException[" + e.getMessage() + "]");
             throw e;
         }
 

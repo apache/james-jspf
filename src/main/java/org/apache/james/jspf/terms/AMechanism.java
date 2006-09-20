@@ -29,7 +29,6 @@ import org.apache.james.jspf.parser.SPF1Parser;
 import org.apache.james.jspf.util.Inet6Util;
 import org.apache.james.jspf.util.ConfigurationMatch;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -55,8 +54,6 @@ public class AMechanism extends GenericMechanism {
      */
     public boolean run(SPF1Data spfData) throws PermErrorException,
             TempErrorException {
-        ArrayList addressList = new ArrayList();
-
         // update currentDepth
         spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);
 
@@ -71,19 +68,17 @@ public class AMechanism extends GenericMechanism {
                         getIp4cidr());
 
                 try {
-                    List aRecords =spfData.getDnsProbe().getARecords(host,getIp4cidr());
+                    List aRecords =spfData.getDnsProbe().getARecords(host);
          
-                    if (aRecords != null) {
-                        addressList.addAll(aRecords);
-                    } else {
+                    if (aRecords == null) {
                         return false;
                     }
 
 
                     // We should match if any A Record was found!
-                    if (addressList.size() > 0 && spfData.matchAnyARecord()) return true;
+                    if (aRecords.size() > 0 && spfData.matchAnyARecord()) return true;
                     
-                    if (checkAddressList(checkAddress, addressList)) {
+                    if (checkAddressList(checkAddress, aRecords, getIp4cidr())) {
                         return true;
                     }
                 } catch (NoneException e) {
@@ -96,19 +91,17 @@ public class AMechanism extends GenericMechanism {
                         getIp6cidr());
 
                 try {
-                    List aaaaRecords =spfData.getDnsProbe().getAAAARecords(host, getIp6cidr());
+                    List aaaaRecords =spfData.getDnsProbe().getAAAARecords(host);
                     
-                    if (aaaaRecords != null) {
-                        addressList.addAll(aaaaRecords);
-                    } else {
+                    if (aaaaRecords == null) {
                         return false;
                     }
 
                     // We should match if any A Record was found!
-                    if (addressList.size() > 0 && spfData.matchAnyAAAARecord()) return true;
+                    if (aaaaRecords.size() > 0 && spfData.matchAnyAAAARecord()) return true;
                     
                     
-                    if (checkAddressList(checkAddress, addressList)) {
+                    if (checkAddressList(checkAddress, aaaaRecords, getIp6cidr())) {
                         return true;
                     }
                 } catch (NoneException e) {
@@ -158,18 +151,18 @@ public class AMechanism extends GenericMechanism {
      * @return true or false
      * @throws PermErrorException 
      */
-    public boolean checkAddressList(IPAddr checkAddress, List addressList) throws PermErrorException {
+    public boolean checkAddressList(IPAddr checkAddress, List addressList, int cidr) throws PermErrorException {
 
-        IPAddr aValue = null;
         for (int i = 0; i < addressList.size(); i++) {
-            Object ip = addressList.get(i);
+            IPAddr ip = (IPAddr) addressList.get(i);
 
             // Check for empty record
             if (ip != null) {
-                aValue = (IPAddr.getAddress(ip.toString()));
-            
+                // set the mask in the address.
+                // TODO should we use cidr from the parameters or the input checkAddress cidr?
+                ip.setMask(checkAddress.getMaskLength());
                 if (checkAddress.getMaskedIPAddress().equals(
-                        aValue.getMaskedIPAddress()) || checkAddress.toString().equals(ip.toString()) ) {
+                        ip.getMaskedIPAddress())) {
                     return true;
                 }
             }

@@ -59,7 +59,7 @@ public class ExistsMechanism extends GenericMechanism {
         }
 
         try {
-            aRecords = spfData.getDnsProbe().getARecords(host, 32);
+            aRecords = spfData.getDnsProbe().getARecords(host);
         } catch (Exception e) {
             e.printStackTrace();
             return false;

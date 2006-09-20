@@ -188,7 +188,7 @@ public class SPFYamlTest extends TestCase {
             this.zonedata = zonedata;
         }
 
-        public List getAAAARecords(String strServer, int mask) throws NoneException, PermErrorException, TempErrorException {
+        public List getAAAARecords(String strServer) throws NoneException, PermErrorException, TempErrorException {
             ArrayList res = new ArrayList();
             if (zonedata.get(strServer) != null) {
                 List l = (List) zonedata.get(strServer);
@@ -198,7 +198,7 @@ public class SPFYamlTest extends TestCase {
                     HashMap hm = (HashMap) i.next();
                     if (hm.get("AAAA") != null) {
                         String a = (String) hm.get("AAAA");
-                        res.add(a);
+                        res.add(IPAddr.getAddress(a));
                     }
                 }
             }
@@ -207,7 +207,7 @@ public class SPFYamlTest extends TestCase {
             throw new NoneException("No AAAA Record found");
         }
 
-        public List getARecords(String strServer, int mask) throws NoneException, PermErrorException, TempErrorException {
+        public List getARecords(String strServer) throws NoneException, PermErrorException, TempErrorException {
             ArrayList res = new ArrayList();
        
             if (zonedata.get(strServer) != null) {
@@ -217,7 +217,7 @@ public class SPFYamlTest extends TestCase {
                     HashMap hm = (HashMap) i.next();
                     if (hm.get("A") != null) {
                         String a = (String) hm.get("A");
-                        res.add(a);
+                        res.add(IPAddr.getAddress(a));
                         
                     }
                 }
@@ -231,7 +231,7 @@ public class SPFYamlTest extends TestCase {
             return new ArrayList();
         }
 
-        public List getMXRecords(String domainName, int mask) throws PermErrorException, NoneException, TempErrorException {
+        public List getMXRecords(String domainName) throws PermErrorException, NoneException, TempErrorException {
             if (zonedata.get(domainName) != null) {
                 List l = (List) zonedata.get(domainName);
                 Iterator i = l.iterator();
@@ -249,7 +249,7 @@ public class SPFYamlTest extends TestCase {
                             String mx = (String) mxs.next();
                            
                             // resolv the record
-                            List records = getARecords(mx,32);
+                            List records = getARecords(mx);
                             for (int i2 = 0; i2 < records.size();i2++ ) {
                                 res.add(records.get(i2));
                             }

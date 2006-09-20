@@ -27,7 +27,6 @@ import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.parser.SPF1Parser;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -50,7 +49,6 @@ public class MXMechanism extends AMechanism {
      */
     public boolean run(SPF1Data spfData) throws PermErrorException,
             TempErrorException{
-        ArrayList addressList = new ArrayList();
         IPAddr checkAddress;
 
         // update currentDepth
@@ -63,26 +61,27 @@ public class MXMechanism extends AMechanism {
         checkAddress = IPAddr.getAddress(spfData.getIpAddress(), getIp4cidr());
         
         try {
-            List mxRecords = spfData.getDnsProbe().getMXRecords(host,getIp4cidr());
+            List mxRecords = spfData.getDnsProbe().getMXRecords(host);
 
             // should never happen. 
             if (mxRecords == null) return false;
             
-            addressList.addAll(mxRecords);
-          } catch (NoneException e ) {
-              e.printStackTrace();
-              return false;
-          }
         
-        try {    
-            if (checkAddressList(checkAddress, addressList)) {
-                return true;
+            try {    
+                if (checkAddressList(checkAddress, mxRecords, getIp4cidr())) {
+                    return true;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new PermErrorException("No valid ipAddress: "
+                        + spfData.getIpAddress());
             }
-        } catch (Exception e) {
+        
+        } catch (NoneException e ) {
             e.printStackTrace();
-            throw new PermErrorException("No valid ipAddress: "
-                    + spfData.getIpAddress());
+            return false;
         }
+
         // No match found
         return false;
     }

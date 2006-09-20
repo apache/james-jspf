@@ -76,9 +76,6 @@ public class DNSServiceXBillImpl implements DNSService {
         // do DNS lookup for TXT
         txtR = getTXTRecords(hostname);
 
-
-        System.err.println("CIM:");
-        
         // process returned records
         if (!txtR.isEmpty()) {
 
@@ -90,6 +87,7 @@ public class DNSServiceXBillImpl implements DNSService {
                 // remove '"'
                 compare = compare.toLowerCase().substring(1,
                         compare.length() - 1);
+
                 if (compare.startsWith(spfVersion + " ")) {
                     if (returnValue == null) {
                         returnValue = compare;
@@ -164,12 +162,11 @@ public class DNSServiceXBillImpl implements DNSService {
      * @see org.apache.james.jspf.core.DNSService#getARecords(java.lang.String,
      *      int)
      */
-    public List getARecords(String strServer, int mask) throws NoneException,
+    public List getARecords(String strServer) throws NoneException,
             PermErrorException, TempErrorException {
 
         ArrayList listTxtData = new ArrayList();
 
-        System.err.println("server: " + strServer);
         if (IPAddr.isIPAddr(strServer)) {
             IPAddr ipTest = IPAddr.getAddress(strServer);
             // Address is already an IP address, so add it to list
@@ -193,18 +190,11 @@ public class DNSServiceXBillImpl implements DNSService {
 
                         for (int i = 0; i < records.length; i++) {
                             ARecord a = (ARecord) records[i];
+                            
+                            IPAddr ip = IPAddr.getAddress(a.getAddress().getHostAddress());
 
-                            ArrayList ipArray = getIPList(a.getAddress()
-                                    .getHostAddress(), mask);
-                            Iterator ip = ipArray.iterator();
-                            System.err.println("IP: " + ip);
-
-                            while (ip.hasNext()) {
-                                Object ipA = ip.next();
-
-                                log.debug("Add ipAddress " + ipA + " to list");
-                                listTxtData.add(ipA);
-                            }
+                            log.debug("Add ipAddress " + ip + " to list");
+                            listTxtData.add(ip);
                         }
                     } else {
                         throw new NoneException("No A record found for: "
@@ -226,7 +216,7 @@ public class DNSServiceXBillImpl implements DNSService {
      * @see org.apache.james.jspf.core.DNSService#getAAAARecords(java.lang.String,
      *      int)
      */
-    public List getAAAARecords(String strServer, int mask)
+    public List getAAAARecords(String strServer)
             throws NoneException, PermErrorException, TempErrorException {
 
         ArrayList listTxtData = new ArrayList();
@@ -255,16 +245,11 @@ public class DNSServiceXBillImpl implements DNSService {
                         for (int i = 0; i < records.length; i++) {
                             AAAARecord a = (AAAARecord) records[i];
 
-                            ArrayList ipArray = getIPList(a.getAddress()
-                                    .getHostAddress(), mask);
-                            Iterator ip = ipArray.iterator();
+                            IPAddr ip = IPAddr.getAddress(a.getAddress()
+                                    .getHostAddress());
 
-                            while (ip.hasNext()) {
-                                Object ipA = ip.next();
-                                //IPAddr ipA = (IPAddr) ip.next();
-                                log.debug("Add ipAddress " + ipA + " to list");
-                                listTxtData.add(ipA);
-                            }
+                            log.debug("Add ipAddress " + ip + " to list");
+                            listTxtData.add(ip);
                         }
                     } else {
                         throw new NoneException("No AAAA record found for: "
@@ -295,7 +280,7 @@ public class DNSServiceXBillImpl implements DNSService {
      * @throws PermErrorException
      *             if an PermError should be returned
      */
-    private ArrayList getAList(ArrayList addressList, int maskLength)
+    private ArrayList getAList(ArrayList addressList)
             throws PermErrorException {
 
         ArrayList listAddresses = new ArrayList();
@@ -304,7 +289,7 @@ public class DNSServiceXBillImpl implements DNSService {
         for (int i = 0; i < addressList.size(); i++) {
             aValue = addressList.get(i).toString();
             try {
-                listAddresses.addAll(getARecords(aValue, maskLength));
+                listAddresses.addAll(getARecords(aValue));
             } catch (Exception e) {
                 // Carry on regardless?
             }
@@ -387,37 +372,11 @@ public class DNSServiceXBillImpl implements DNSService {
      * @see org.apache.james.jspf.core.DNSService#getMXRecords(java.lang.String,
      *      int)
      */
-    public List getMXRecords(String domainName, int mask)
+    public List getMXRecords(String domainName)
             throws PermErrorException, NoneException, TempErrorException {
-        ArrayList mxAddresses = getAList(getMXNames(domainName), mask);
+
+        ArrayList mxAddresses = getAList(getMXNames(domainName));
         return mxAddresses;
-
-    }
-
-    /**
-     * Get an ArrayList of IPAddr's given the DNS type and mask
-     * 
-     * @param host
-     *            The hostname or ip of the server for which we want to get the
-     *            ips
-     * @param mask
-     *            The netmask
-     * @return ipAddresses Array which contains all ipAddresses
-     */
-    private static ArrayList getIPList(String host, int mask)
-            throws PermErrorException {
-
-        ArrayList listIP = new ArrayList();
-
-        try {
-            if (host != null) {
-                listIP.addAll(IPAddr.getAddresses(host, mask));
-            }
-        } catch (Exception e1) {
-            throw new PermErrorException(e1.getMessage());
-        }
-
-        return listIP;
 
     }
 
@@ -450,7 +409,7 @@ public class DNSServiceXBillImpl implements DNSService {
             if ((queryResult != Lookup.TRY_AGAIN)) {
                 if (records != null) {
                     log.debug("Found " + records.length + " MX-Records");
-                    
+
                     // check if the maximum lookup count is reached
                     if (records.length >= SPF1Data.MAX_DEPTH) throw new PermErrorException("Maximum MX lookup count reached");
               

@@ -53,12 +53,10 @@ public interface DNSService {
             throws PermErrorException, NoneException, TempErrorException;
 
     /**
-     * Get a list of IPAddr's for a server using the mask length
+     * Get a list of IPAddr's for a server
      * 
      * @param strServer
      *            The hostname or ipAddress whe should get the A-Records for
-     * @param mask
-     *            The netmask to use
      * @return The ipAddresses
      * @throws NoneException
      *             if no A records was found
@@ -67,16 +65,14 @@ public interface DNSService {
      * @throws TempErrorException
      *             if the lookup result was "TRY_AGAIN"
      */
-    public List getARecords(String strServer, int mask) throws NoneException,
+    public List getARecords(String strServer) throws NoneException,
             PermErrorException, TempErrorException;
 
     /**
-     * Get a list of IPAddr's for a server using the mask length
+     * Get a list of IPAddr's for a server
      * 
      * @param strServer
      *            The hostname or ipAddress whe should get the AAAA-Records for
-     * @param mask
-     *            The netmask to use
      * @return The ipAddresses
      * @throws NoneException
      *             if no AAAA records was found
@@ -85,7 +81,7 @@ public interface DNSService {
      * @throws TempErrorException
      *             if the lookup result was "TRY_AGAIN"
      */
-    public List getAAAARecords(String strServer, int mask)
+    public List getAAAARecords(String strServer)
             throws NoneException, PermErrorException, TempErrorException;
 
     /**
@@ -126,8 +122,6 @@ public interface DNSService {
      * 
      * @param domainName
      *            The domainName or ipaddress we want to get the ips for
-     * @param mask
-     *            The netmask
      * @return IPAddresses of the MX-Records
      * @throws NoneException
      *             if no MX-Record was found
@@ -136,7 +130,7 @@ public interface DNSService {
      * @throws TempErrorException
      *             if the lookup result was "TRY_AGAIN"
      */
-    public List getMXRecords(String domainName, int mask)
+    public List getMXRecords(String domainName)
             throws PermErrorException, NoneException, TempErrorException;
 
     /**
