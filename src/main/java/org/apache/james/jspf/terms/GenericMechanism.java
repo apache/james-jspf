@@ -59,8 +59,8 @@ public abstract class GenericMechanism implements Mechanism, Configurable, LogEn
     /**
      * Expand the hostname
      * 
-     * @param spfData
-     * @throws PermErrorException
+     * @param spfData The SPF1Data to use
+     * @throws PermErrorException get Thrown if invalid macros are used
      */
     protected String expandHost(SPF1Data spfData) throws PermErrorException {
         String host = getDomain();

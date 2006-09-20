@@ -26,13 +26,18 @@ import org.apache.james.jspf.core.SPF1Constants;
  * This class is used to return the result of an SPF lookup.
  *
  */
-
 public class SPFInternalResult {
 
     protected String explanation = null;
     
     private String resultChar = null;
 
+    /**
+     * Construct SPFInternalResult 
+     * 
+     * @param resultChar The result
+     * @param explanation The explanation
+     */
     public SPFInternalResult(String resultChar, String explanation) {
         this.resultChar = resultChar;
         this.explanation = explanation;

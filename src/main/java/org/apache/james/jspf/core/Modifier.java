@@ -44,6 +44,8 @@ public interface Modifier {
             TempErrorException;
 
     /**
+     * Return true if the Modifier is only allowed once 
+     * 
      * @return true if only one instance of this modifier is allowed
      */
     public boolean enforceSingleInstance();

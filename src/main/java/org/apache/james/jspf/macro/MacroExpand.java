@@ -39,7 +39,7 @@ public class MacroExpand {
 
     public static final String MACRO_REGEX = "\\%\\{[lsoditpvhcrLSODITPVHCR]\\d*r?[\\.\\-\\+,/_\\=]*\\}";
 
-    private MacroData spfData;
+    private MacroData macroData;
 
     private Pattern inputPattern;
 
@@ -53,8 +53,14 @@ public class MacroExpand {
 
     private Logger log;
 
-    public MacroExpand(MacroData spfData, Logger logger) {
-        this.spfData = spfData;
+    /**
+     * Construct MacroExpand
+     * 
+     * @param spfData the MacroData to use
+     * @param logger the logget to use
+     */
+    public MacroExpand(MacroData macroData, Logger logger) {
+        this.macroData = macroData;
         inputPattern = Pattern.compile(MACRO_REGEX);
         log = logger;
     }
@@ -232,34 +238,33 @@ public class MacroExpand {
 
         String variable = macro.toLowerCase();
         if (variable.equalsIgnoreCase("i")) {
-            rValue = spfData.getMacroIpAddress();
+            rValue = macroData.getMacroIpAddress();
         } else if (variable.equalsIgnoreCase("s")) {
-            rValue = spfData.getMailFrom();
+            rValue = macroData.getMailFrom();
         } else if (variable.equalsIgnoreCase("h")) {
-            rValue = spfData.getHostName();
+            rValue = macroData.getHostName();
         } else if (variable.equalsIgnoreCase("l")) {
-            rValue = spfData.getCurrentSenderPart();
+            rValue = macroData.getCurrentSenderPart();
         } else if (variable.equalsIgnoreCase("d")) {
-            rValue = spfData.getCurrentDomain();
+            rValue = macroData.getCurrentDomain();
         } else if (variable.equalsIgnoreCase("v")) {
-            rValue = spfData.getInAddress();
+            rValue = macroData.getInAddress();
         } else if (variable.equalsIgnoreCase("t")) {
-            rValue = Long.toString(spfData.getTimeStamp());
+            rValue = Long.toString(macroData.getTimeStamp());
         } else if (variable.equalsIgnoreCase("c")) {
-            rValue = spfData.getReadableIP();
+            rValue = macroData.getReadableIP();
         } else if (variable.equalsIgnoreCase("p")) {
-            rValue = spfData.getClientDomain();
+            rValue = macroData.getClientDomain();
         } else if (variable.equalsIgnoreCase("o")) {
-            rValue = spfData.getSenderDomain();
+            rValue = macroData.getSenderDomain();
         } else if (variable.equalsIgnoreCase("r")) {
-            rValue = spfData.getReceivingDomain();
+            rValue = macroData.getReceivingDomain();
         }
 
         if (rValue == null) {
             throw new PermErrorException("Unknown command : " + variable);
 
         } else {
-
             log.debug("Used macro: " + macro + " replaced with: " + rValue);
 
             return rValue;

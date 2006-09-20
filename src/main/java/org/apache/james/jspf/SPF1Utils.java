@@ -30,15 +30,10 @@ import org.apache.james.jspf.core.SPF1Constants;
  */
 
 public class SPF1Utils {
-    public static final String PERM_ERROR = "error";
 
     public static final String PERM_ERROR_CONV = "error";
 
-    public static final String NONE = "none";
-
     public static final String NONE_CONV = "none";
-
-    public static final String TEMP_ERROR = "temperror";
 
     public static final String TEMP_ERROR_CONV = "temperror";
 
@@ -55,8 +50,7 @@ public class SPF1Utils {
     /**
      * Convert raw SPF results to SPF names
      * 
-     * @param result
-     *            The result which should converted
+     * @param result The result which should converted
      * @return coverted result
      */
     protected static String resultToName(String result) {
@@ -69,11 +63,11 @@ public class SPF1Utils {
             return NEUTRAL_CONV;
         } else if (result.equals(SPF1Constants.SOFTFAIL)) {
             return SOFTFAIL_CONV;
-        } else if (result.equals(PERM_ERROR)) {
+        } else if (result.equals(PERM_ERROR_CONV)) {
             return PERM_ERROR_CONV;
-        } else if (result.equals(TEMP_ERROR)) {
+        } else if (result.equals(TEMP_ERROR_CONV)) {
             return TEMP_ERROR_CONV;
-        } else if (result.equals(NONE)) {
+        } else if (result.equals(NONE_CONV)) {
             return NONE_CONV;
         } else {
             return NEUTRAL_CONV;
@@ -84,8 +78,7 @@ public class SPF1Utils {
     /**
      * Covert SPF names to raw SPF results
      * 
-     * @param result
-     *            The result which should converted
+     * @param result The result which should converted
      * @return coverted result
      */
     protected static String nameToResult(String result) {
@@ -99,11 +92,11 @@ public class SPF1Utils {
         } else if (result.equals(SOFTFAIL_CONV)) {
             return SPF1Constants.SOFTFAIL;
         } else if (result.equals(PERM_ERROR_CONV)) {
-            return PERM_ERROR;
+            return PERM_ERROR_CONV;
         } else if (result.equals(TEMP_ERROR_CONV)) {
-            return TEMP_ERROR;
+            return TEMP_ERROR_CONV;
         } else if (result.equals(NONE_CONV)) {
-            return NONE;
+            return NONE_CONV;
         } else {
             return SPF1Constants.NEUTRAL;
         }
@@ -113,8 +106,7 @@ public class SPF1Utils {
     /**
      * Check for valid FQDN
      * 
-     * @param host
-     *            The hostname to check
+     * @param host The hostname to check
      * @return false or true
      */
     public static boolean checkFQDN(String host) {

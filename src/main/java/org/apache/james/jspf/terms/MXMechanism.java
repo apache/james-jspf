@@ -65,20 +65,13 @@ public class MXMechanism extends AMechanism {
 
             // should never happen. 
             if (mxRecords == null) return false;
-            
-        
-            try {    
-                if (checkAddressList(checkAddress, mxRecords, getIp4cidr())) {
-                    return true;
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new PermErrorException("No valid ipAddress: "
-                        + spfData.getIpAddress());
+              
+            if (checkAddressList(checkAddress, mxRecords, getIp4cidr())) {
+                return true;
             }
-        
+
         } catch (NoneException e ) {
-            e.printStackTrace();
+            // no mx record found
             return false;
         }
 

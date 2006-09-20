@@ -92,10 +92,6 @@ public class AMechanism extends GenericMechanism {
                     if (aaaaRecords == null) {
                         return false;
                     }
-
-                    // We should match if any A Record was found!
-                    //if (aaaaRecords.size() > 0 && spfData.matchAnyAAAARecord()) return true;
-                    
                     
                     if (checkAddressList(checkAddress, aaaaRecords, getIp6cidr())) {
                         return true;

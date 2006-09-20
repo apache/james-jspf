@@ -23,7 +23,6 @@ package org.apache.james.jspf.util;
 import java.util.regex.Matcher;
 
 /**
- * @author Stefano Bagnara
  * 
  * Provides a MatchResult view of a subset of another MatchResult
  */

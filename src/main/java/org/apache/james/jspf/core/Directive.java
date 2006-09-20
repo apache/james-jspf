@@ -24,12 +24,22 @@ import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 
+/**
+ * 
+ */
 public class Directive {
 
     protected String qualifier = "+";
 
     private Mechanism mechanism = null;
 
+    /**
+     * Construct Directive
+     * 
+     * @param qualifier The qualifier to use. Valid qualifier are: +, -, ~, ?
+     * @param mechanism The Mechanism 
+     * @throws PermErrorException Get thrown if a PermError should returned
+     */
     public Directive(String qualifier, Mechanism mechanism)
             throws PermErrorException {
         super();
@@ -42,6 +52,15 @@ public class Directive {
         this.mechanism = mechanism;
     }
 
+    /**
+     * Run the Directive
+     * 
+     * @param spfData The SPF1Data to use
+     * @return The qualifier which was returned
+     * @throws PermErrorException get thrown if a PermError should returned
+     * @throws TempErrorException get thrown if a TempError should returned
+     * @throws NoneException get thrown if a NoneException should returned;
+     */
     public String run(SPF1Data spfData) throws PermErrorException,
             TempErrorException, NoneException {
         if (mechanism.run(spfData)) {
@@ -51,10 +70,20 @@ public class Directive {
         }
     }
 
+    /**
+     * Return the Mechanism which should be run
+     * 
+     * @return the Mechanism
+     */
     public Mechanism getMechanism() {
         return mechanism;
     }
 
+    /**
+     * Return the Qualifier
+     * 
+     * @return the qualifier
+     */
     public String getQualifier() {
         return qualifier;
     }

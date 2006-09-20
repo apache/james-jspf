@@ -23,13 +23,16 @@ package org.apache.james.jspf.core;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.util.ConfigurationMatch;
 
+/**
+ * 
+ */
 public interface Configurable {
 
     /**
      * Configuration
      * 
-     * @param params
-     * @throws PermErrorException
+     * @param params the ConfigurationMatch which should used
+     * @throws PermErrorException get thrown if a PermError should returned
      */
     void config(ConfigurationMatch params) throws PermErrorException;
 

@@ -48,12 +48,12 @@ import org.xbill.DNS.Type;
  * for SPF
  * 
  */
-
 public class DNSServiceXBillImpl implements DNSService {
 
     // Set seconds after which we return and TempError
     private static int timeOut = 20;
 
+    // The logger
     private Logger log;
 
     /**
@@ -93,13 +93,13 @@ public class DNSServiceXBillImpl implements DNSService {
                         returnValue = compare;
                     } else {
                         throw new PermErrorException(
-                                "More than 1 SPF record found");
+                                "More than 1 SPF record found for host: " + hostname);
                     }
                 }
             }
         }
         if (returnValue == null) {
-            throw new NoneException("No SPF record found");
+            throw new NoneException("No SPF record found for host: " + hostname);
         }
         return returnValue;
     }
@@ -137,14 +137,13 @@ public class DNSServiceXBillImpl implements DNSService {
                     for (int i = 0; i < records.length; i++) {
                         TXTRecord txt = (TXTRecord) records[i];
 
-                        log
-                                .debug("Add txt " + txt.rdataToString()
+                        log.debug("Add txt " + txt.rdataToString()
                                         + " to list");
 
                         txtR.add(txt.rdataToString());
                     }
                 } else {
-                    throw new NoneException("No TXTRecord found for: "
+                    throw new NoneException("No TXTRecord found for host: "
                             + hostname);
                 }
             } else {
@@ -153,7 +152,7 @@ public class DNSServiceXBillImpl implements DNSService {
             }
         } catch (TextParseException e) {
             // I think thats the best we could do
-            throw new NoneException("No TXTRecord found for: " + hostname);
+            throw new NoneException("No TXTRecord found for host: " + hostname);
         }
         return txtR;
     }
@@ -197,7 +196,7 @@ public class DNSServiceXBillImpl implements DNSService {
                             listTxtData.add(ip);
                         }
                     } else {
-                        throw new NoneException("No A record found for: "
+                        throw new NoneException("No A record found for host: "
                                 + strServer);
                     }
                 } else {
@@ -206,7 +205,7 @@ public class DNSServiceXBillImpl implements DNSService {
                 }
             } catch (TextParseException e) {
                 // i think this is the best we could do
-                throw new NoneException("No A Record found for: " + strServer);
+                throw new NoneException("No A Record found for host: " + strServer);
             }
         }
         return listTxtData;
@@ -252,7 +251,7 @@ public class DNSServiceXBillImpl implements DNSService {
                             listTxtData.add(ip);
                         }
                     } else {
-                        throw new NoneException("No AAAA record found for: "
+                        throw new NoneException("No AAAA record found for host: "
                                 + strServer);
                     }
                 } else {
@@ -261,7 +260,7 @@ public class DNSServiceXBillImpl implements DNSService {
                 }
             } catch (TextParseException e) {
                 // i think this is the best we could do
-                throw new NoneException("No AAAA Record found for: "
+                throw new NoneException("No AAAA Record found for host: "
                         + strServer);
             }
         }
@@ -279,20 +278,22 @@ public class DNSServiceXBillImpl implements DNSService {
      * @return ArrayList of the conversion
      * @throws PermErrorException
      *             if an PermError should be returned
+     * @throws TempErrorException if the lookup result was "TRY_AGAIN"
      */
     private ArrayList getAList(ArrayList addressList)
-            throws PermErrorException {
+            throws PermErrorException, TempErrorException {
 
         ArrayList listAddresses = new ArrayList();
         String aValue;
 
         for (int i = 0; i < addressList.size(); i++) {
             aValue = addressList.get(i).toString();
+           
             try {
                 listAddresses.addAll(getARecords(aValue));
-            } catch (Exception e) {
-                // Carry on regardless?
-            }
+            } catch (NoneException e) {
+                // ignore
+            } 
         }
         return listAddresses;
     }
@@ -353,7 +354,7 @@ public class DNSServiceXBillImpl implements DNSService {
                                 + " to list");
                     }
                 } else {
-                    throw new NoneException("No PTRRecord found for: "
+                    throw new NoneException("No PTRRecord found for host: "
                             + ipAddress);
                 }
             } else {
@@ -362,7 +363,7 @@ public class DNSServiceXBillImpl implements DNSService {
             }
         } catch (TextParseException e) {
             // i think this is the best we could do
-            throw new NoneException("No PTRRecord found for: " + ipAddress);
+            throw new NoneException("No PTRRecord found for host: " + ipAddress);
         }
 
         return ptrR;
@@ -422,7 +423,7 @@ public class DNSServiceXBillImpl implements DNSService {
 
                     }
                 } else {
-                    throw new NoneException("No MX Record found for: " + host);
+                    throw new NoneException("No MX Record found for host: " + host);
                 }
             } else {
                 throw new TempErrorException("DNS Server returns RCODE: "
@@ -430,7 +431,7 @@ public class DNSServiceXBillImpl implements DNSService {
             }
         } catch (TextParseException e) {
             // i think this is the best we could do
-            throw new NoneException("No MX Record found for: " + host);
+            throw new NoneException("No MX Record found for host: " + host);
         }
         return mxR;
     }

@@ -58,15 +58,18 @@ public class SPF {
     
     /**
      * Uses passed logger and DNSJava based dns resolver
-     * @param logger logger
+     * 
+     * @param logger the logger to use
      */
     public SPF(Logger logger) {
         this(new DNSServiceXBillImpl(logger), logger);
     }
 
     /**
-     * @param dnsProbe
-     *            the dns provider
+     * Uses passed logger and passed dnsServicer
+     * 
+     * @param dnsProbe the dns provider
+     * @param logger the logger to use
      */
     public SPF(DNSService dnsProbe, Logger logger) {
         super();
@@ -84,8 +87,7 @@ public class SPF {
      *            The mailFrom which was provided
      * @param hostName
      *            The hostname which was provided as HELO/EHLO
-     * @return result. Possible results are: pass, neutral, fail,
-     *         softfail, error,temperror, none
+     * @return result The SPFResult
      */
     public SPFResult checkSPF(String ipAddress, String mailFrom, String hostName) {
         SPF1Data spfData = null;
@@ -102,15 +104,15 @@ public class SPF {
             explanation = res.getExplanation();
         } catch (PermErrorException e) {
             log.warn(e.getMessage(),e);
-            result = SPF1Utils.PERM_ERROR;
+            result = SPF1Utils.PERM_ERROR_CONV;
         } catch (NoneException e) {
             log.warn(e.getMessage(),e);
-            result = SPF1Utils.NONE;
+            result = SPF1Utils.NONE_CONV;
         } catch (NeutralException e) {
             result = SPF1Utils.NEUTRAL_CONV;
         } catch (TempErrorException e) {
             log.warn(e.getMessage(),e);
-            result = SPF1Utils.TEMP_ERROR;
+            result = SPF1Utils.TEMP_ERROR_CONV;
         } catch (IllegalStateException e) {
             // this should never happen at all. But anyway we will set the
             // result to neutral. Safety first ..
@@ -131,14 +133,17 @@ public class SPF {
      * Run check for SPF with the given values.
      * 
      * @param spfData
-     *            The SPF1Data which should be used to run the check
+     *             The SPF1Data which should be used to run the check
+     * @return result 
+     *             The SPFInternalResult 
      * @throws PermErrorException
      *             Get thrown if an error was detected
      * @throws NoneException
      *             Get thrown if no Record was found
      * @throws TempErrorException
      *             Get thrown if a DNS problem was detected
-     * @throws NeutralException 
+     * @throws NeutralException  
+     *             Get thrown if the result should be neutral
      */
     public SPFInternalResult checkSPF(SPF1Data spfData) throws PermErrorException,
             NoneException, TempErrorException, NeutralException {
@@ -252,10 +257,7 @@ public class SPF {
      * Set the amount of time (in seconds) before an TermError is returned when
      * the dnsserver not answer. Default is 20 seconds.
      * 
-     * TempError should be returned
-     * 
-     * @param timeOut
-     *            The timout in seconds
+     * @param timeOut The timout in seconds
      */
     public synchronized void setTimeOut(int timeOut) {
         log.debug("TimeOut was set to: " + timeOut);

@@ -211,6 +211,8 @@ public class SPF1Parser {
 
     /**
      * Constructor. Creates all the values needed to run the parsing
+     * 
+     * @param loggerThe logger to use
      */
     public SPF1Parser(Logger logger) {
         log = logger;
@@ -356,7 +358,7 @@ public class SPF1Parser {
      *            classes to analyze
      * @param staticFieldName
      *            static field to concatenate
-     * @return regex
+     * @return regex The regex
      */
     private String createRegex(Collection commandMap) {
         StringBuffer modifierRegex = new StringBuffer();
@@ -377,6 +379,7 @@ public class SPF1Parser {
     }
 
     /**
+     * 
      * @param classes
      *            classes to analyze
      * @param staticFieldName

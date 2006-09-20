@@ -20,16 +20,34 @@
 
 package org.apache.james.jspf.core;
 
+/**
+ * Interface which holds Constants for SPF
+ */
 public interface SPF1Constants {
 
+    /**
+     * Qualifier for PASS
+     */
     public static final String PASS = "+";
 
+    /**
+     * Qualifier for NEUTRAL
+     */
     public static final String NEUTRAL = "?";
 
+    /**
+     * Qualifier for FAIL
+     */
     public static final String FAIL = "-";
 
+    /**
+     * Qualifier for SOFTFAIL
+     */
     public static final String SOFTFAIL = "~";
 
+    /**
+     * The valid SPF_VERSION identifier
+     */
     public static final String SPF_VERSION = "v=spf1";
 
 }

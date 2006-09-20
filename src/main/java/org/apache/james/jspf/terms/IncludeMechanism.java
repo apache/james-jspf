@@ -60,9 +60,9 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled {
      * @throws PermErrorException
      *             if an error is in the redirect modifier
      * @throws TempErrorException 
-     * @throws NoneException 
+     *             if the dns return a temp error
      */
-    public boolean run(SPF1Data spfData) throws PermErrorException, TempErrorException, NoneException {
+    public boolean run(SPF1Data spfData) throws PermErrorException, TempErrorException {
         String host = getHost();
 
         // update currentDepth
@@ -70,7 +70,7 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled {
         
         try {
             host = new MacroExpand(spfData, log).expandDomain(host);
-        } catch (Exception e) {
+        } catch (PermErrorException e) {
             throw new PermErrorException("Error in include modifier: " + host);
         }
             

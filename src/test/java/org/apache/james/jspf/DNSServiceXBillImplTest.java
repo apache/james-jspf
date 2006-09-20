@@ -22,6 +22,7 @@ package org.apache.james.jspf;
 
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Name;
+import org.xbill.DNS.Record;
 import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
 
@@ -51,8 +52,8 @@ public class DNSServiceXBillImplTest extends TestCase {
         System.out.println(InetAddress.getLocalHost().getCanonicalHostName());
         System.out.println(InetAddress.getAllByName(null)[0]
                 .getCanonicalHostName());
-        System.out.println(new Lookup(Name.root, Type.ANY).run()[0]);
-
+        Record[] record = new Lookup(Name.root, Type.ANY).run();
+        if (record !=null) System.out.println(record[0]);
     }
 
 }
