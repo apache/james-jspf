@@ -147,4 +147,16 @@ public interface DNSService {
      *            The timeout in seconds
      */
     public void setTimeOut(int timeOut);
+    
+    /**
+     * @return the current record limit
+     */
+    public int getRecordLimit();
+
+    /**
+     * Sets a new limit for the number of records for MX and PTR lookups.
+     * @param recordLimit the new limit (0 => unlimited)
+     */
+    public void setRecordLimit(int recordLimit);
+
 }

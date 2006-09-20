@@ -32,6 +32,14 @@ import java.util.List;
 
 public class LoggingDNSService implements DNSService {
     
+    public int getRecordLimit() {
+        return dnsService.getRecordLimit();
+    }
+
+    public void setRecordLimit(int recordLimit) {
+        dnsService.setRecordLimit(recordLimit);
+    }
+
     private DNSService dnsService = new DNSServiceXBillImpl(new ConsoleLogger());
 
     public String getSpfRecord(String hostname, String spfVersion)

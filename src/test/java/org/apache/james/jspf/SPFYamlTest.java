@@ -17,12 +17,10 @@
  * under the License.                                           *
  ****************************************************************/
 
-
 package org.apache.james.jspf;
 
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.IPAddr;
-import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
@@ -96,7 +94,7 @@ public class SPFYamlTest extends TestCase {
         
         System.out.println("testing "+next+": "+currentTest.get("description"));
 
-        SPF spf = new SPF(new SPFYamlDNSService((HashMap) data.getZonedata()), new ConsoleLogger());
+        SPF spf = new SPF(getDNSService(), new ConsoleLogger());
         
         String ip = null;
         String sender = null;
@@ -145,6 +143,14 @@ public class SPFYamlTest extends TestCase {
         }
 
     }
+
+    /**
+     * @return
+     */
+    protected DNSService getDNSService() {
+        SPFYamlDNSService yamlDNSService = new SPFYamlDNSService((HashMap) data.getZonedata());
+        return yamlDNSService;
+    }
     
     public static List loadTests(String filename) throws IOException {
         List tests = new ArrayList();
@@ -168,7 +174,6 @@ public class SPFYamlTest extends TestCase {
         int i = 1;
         while(ctor.checkData()) {
             Object o = ctor.getData();
-            //System.err.println("\n[ "+o.getClass().toString()+"] "+o);
             if (o instanceof HashMap) {
               HashMap m = (HashMap) o;
               SPFYamlTestSuite ts = new SPFYamlTestSuite(m, i);
@@ -183,9 +188,11 @@ public class SPFYamlTest extends TestCase {
     private final class SPFYamlDNSService implements DNSService {
 
         private HashMap zonedata;
+        private int recordLimit;
 
         public SPFYamlDNSService(HashMap zonedata) {
             this.zonedata = zonedata;
+            this.recordLimit = 10;
         }
 
         public List getAAAARecords(String strServer) throws NoneException, PermErrorException, TempErrorException {
@@ -228,7 +235,9 @@ public class SPFYamlTest extends TestCase {
         }
 
         public List getLocalDomainNames() {
-            return new ArrayList();
+            List l = new ArrayList();
+            l.add("localdomain.foo.bar");
+            return l; 
         }
 
         public List getMXRecords(String domainName) throws PermErrorException, NoneException, TempErrorException {
@@ -257,7 +266,7 @@ public class SPFYamlTest extends TestCase {
                     }
                 }
                 // check if the maximum lookup count is reached
-                if (res.size() >= SPF1Data.MAX_DEPTH) throw new PermErrorException("Maximum MX lookup count reached");
+                if (recordLimit > 0 && res.size() > recordLimit) throw new PermErrorException("Maximum MX lookup count reached");
 
                 return res.size() > 0 ? res : null;
             }
@@ -265,7 +274,23 @@ public class SPFYamlTest extends TestCase {
         }
 
         public List getPTRRecords(String ipAddress) throws PermErrorException, NoneException, TempErrorException {
-            throw new NoneException("No PTR Record found");
+            ArrayList res = new ArrayList();
+            
+            if (zonedata.get(ipAddress) != null) {
+                List l = (List) zonedata.get(ipAddress);
+                Iterator i = l.iterator();
+                while (i.hasNext()) {
+                    HashMap hm = (HashMap) i.next();
+                    if (hm.get("PTR") != null) {
+                        String a = (String) hm.get("PTR");
+                        res.add(a);
+                        
+                    }
+                }
+            }
+            if (res.size() > 0 ) return res;
+            
+            throw new NoneException("No PTR Record found: "+ipAddress);
         }
 
         public String getSpfRecord(String hostname, String spfVersion) throws PermErrorException, NoneException, TempErrorException {
@@ -362,6 +387,14 @@ public class SPFYamlTest extends TestCase {
                 e.printStackTrace();
                 throw e;
             }
+        }
+
+        public int getRecordLimit() {
+            return recordLimit;
+        }
+
+        public void setRecordLimit(int recordLimit) {
+            this.recordLimit = recordLimit;
         }
     }
 

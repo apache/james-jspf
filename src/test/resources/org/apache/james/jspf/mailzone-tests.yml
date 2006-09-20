@@ -1,0 +1,1085 @@
+---
+description: Mailzone converted tests
+tests:
+  mailzone-#1:
+    description: 192.0.2.1 is neither permitted nor denied by domain of 01.spf1-test.mailzone.com
+    helo: 01.spf1-test.mailzone.com
+    host: 192.0.2.1
+    mailfrom: 01.spf1-test.mailzone.com
+    result: neutral
+  mailzone-#2:
+    description: domain of 02.spf1-test.mailzone.com does not designate 192.0.2.1 as permitted sender
+    helo: 02.spf1-test.mailzone.com
+    host: 192.0.2.1
+    mailfrom: 02.spf1-test.mailzone.com
+    result: fail
+  mailzone-#3:
+    description: transitioning domain of 03.spf1-test.mailzone.com does not designate 192.0.2.1 as permitted sender
+    helo: 03.spf1-test.mailzone.com
+    host: 192.0.2.1
+    mailfrom: 03.spf1-test.mailzone.com
+    result: softfail
+  mailzone-#4:
+    description: 192.0.2.1 is neither permitted nor denied by domain of 06.spf1-test.mailzone.com
+    helo: 06.spf1-test.mailzone.com
+    host: 192.0.2.1
+    mailfrom: 06.spf1-test.mailzone.com
+    result: neutral
+  mailzone-#5:
+    description: 192.0.2.1 is neither permitted nor denied by domain of 07.spf1-test.mailzone.com
+    helo: 07.spf1-test.mailzone.com
+    host: 192.0.2.1
+    mailfrom: 07.spf1-test.mailzone.com
+    result: none
+  mailzone-#6:
+    description: domain of 08.spf1-test.mailzone.com does not designate 192.0.2.1 as permitted sender
+    helo: 08.spf1-test.mailzone.com
+    host: 192.0.2.1
+    mailfrom: 08.spf1-test.mailzone.com
+    result: fail
+  mailzone-#7:
+    description: domain of 10.spf1-test.mailzone.com does not designate 192.0.2.1 as permitted sender
+    helo: 10.spf1-test.mailzone.com
+    host: 192.0.2.1
+    mailfrom: 10.spf1-test.mailzone.com
+    result: fail
+  mailzone-#8:
+    description: domain of 10.spf1-test.mailzone.com designates 192.0.2.10 as permitted sender
+    helo: 10.spf1-test.mailzone.com
+    host: 192.0.2.10
+    mailfrom: 10.spf1-test.mailzone.com
+    result: pass
+  mailzone-#9:
+    description: domain of 10.spf1-test.mailzone.com designates 192.0.2.11 as permitted sender
+    helo: 10.spf1-test.mailzone.com
+    host: 192.0.2.11
+    mailfrom: 10.spf1-test.mailzone.com
+    result: pass
+  mailzone-#10:
+    description: domain of 10.spf1-test.mailzone.com designates 192.0.2.12 as permitted sender
+    helo: 10.spf1-test.mailzone.com
+    host: 192.0.2.12
+    mailfrom: 10.spf1-test.mailzone.com
+    result: pass
+  mailzone-#11:
+    description: domain of 10.spf1-test.mailzone.com designates 192.0.2.13 as permitted sender
+    helo: 10.spf1-test.mailzone.com
+    host: 192.0.2.13
+    mailfrom: 10.spf1-test.mailzone.com
+    result: pass
+  mailzone-#12:
+    description: domain of 10.spf1-test.mailzone.com designates 192.0.2.20 as permitted sender
+    helo: 10.spf1-test.mailzone.com
+    host: 192.0.2.20
+    mailfrom: 10.spf1-test.mailzone.com
+    result: pass
+  mailzone-#13:
+    description: domain of 10.spf1-test.mailzone.com designates 192.0.2.21 as permitted sender
+    helo: 10.spf1-test.mailzone.com
+    host: 192.0.2.21
+    mailfrom: 10.spf1-test.mailzone.com
+    result: pass
+  mailzone-#14:
+    description: domain of 10.spf1-test.mailzone.com designates 192.0.2.22 as permitted sender
+    helo: 10.spf1-test.mailzone.com
+    host: 192.0.2.22
+    mailfrom: 10.spf1-test.mailzone.com
+    result: pass
+  mailzone-#15:
+    description: domain of 10.spf1-test.mailzone.com designates 192.0.2.23 as permitted sender
+    helo: 10.spf1-test.mailzone.com
+    host: 192.0.2.23
+    mailfrom: 10.spf1-test.mailzone.com
+    result: pass
+  mailzone-#16:
+    description: domain of 10.spf1-test.mailzone.com designates 192.0.2.30 as permitted sender
+    helo: 10.spf1-test.mailzone.com
+    host: 192.0.2.30
+    mailfrom: 10.spf1-test.mailzone.com
+    result: pass
+  mailzone-#17:
+    description: domain of 10.spf1-test.mailzone.com designates 192.0.2.31 as permitted sender
+    helo: 10.spf1-test.mailzone.com
+    host: 192.0.2.31
+    mailfrom: 10.spf1-test.mailzone.com
+    result: pass
+  mailzone-#18:
+    description: domain of 10.spf1-test.mailzone.com designates 192.0.2.32 as permitted sender
+    helo: 10.spf1-test.mailzone.com
+    host: 192.0.2.32
+    mailfrom: 10.spf1-test.mailzone.com
+    result: pass
+  mailzone-#19:
+    description: domain of 10.spf1-test.mailzone.com designates 192.0.2.33 as permitted sender
+    helo: 10.spf1-test.mailzone.com
+    host: 192.0.2.33
+    mailfrom: 10.spf1-test.mailzone.com
+    result: pass
+  mailzone-#20:
+    description: domain of 10.spf1-test.mailzone.com does not designate 192.0.2.34 as permitted sender
+    helo: 10.spf1-test.mailzone.com
+    host: 192.0.2.34
+    mailfrom: 10.spf1-test.mailzone.com
+    result: fail
+  mailzone-#21:
+    description: domain of 11.spf1-test.mailzone.com does not designate 192.0.2.1 as permitted sender
+    helo: 11.spf1-test.mailzone.com
+    host: 192.0.2.1
+    mailfrom: 11.spf1-test.mailzone.com
+    result: fail
+  mailzone-#22:
+    description: domain of 11.spf1-test.mailzone.com designates 192.0.2.10 as permitted sender
+    helo: 11.spf1-test.mailzone.com
+    host: 192.0.2.10
+    mailfrom: 11.spf1-test.mailzone.com
+    result: pass
+  mailzone-#23:
+    description: domain of 11.spf1-test.mailzone.com designates 192.0.2.33 as permitted sender
+    helo: 11.spf1-test.mailzone.com
+    host: 192.0.2.33
+    mailfrom: 11.spf1-test.mailzone.com
+    result: pass
+  mailzone-#24:
+    description: domain of 12.spf1-test.mailzone.com does not designate 192.0.2.1 as permitted sender
+    helo: 12.spf1-test.mailzone.com
+    host: 192.0.2.1
+    mailfrom: 12.spf1-test.mailzone.com
+    result: fail
+  mailzone-#25:
+    description: domain of 12.spf1-test.mailzone.com designates 192.0.2.10 as permitted sender
+    helo: 12.spf1-test.mailzone.com
+    host: 192.0.2.10
+    mailfrom: 12.spf1-test.mailzone.com
+    result: pass
+  mailzone-#26:
+    description: domain of 12.spf1-test.mailzone.com designates 192.0.2.33 as permitted sender
+    helo: 12.spf1-test.mailzone.com
+    host: 192.0.2.33
+    mailfrom: 12.spf1-test.mailzone.com
+    result: pass
+  mailzone-#27:
+    description: domain of 12.spf1-test.mailzone.com does not designate 208.210.124.192 as permitted sender
+    helo: 12.spf1-test.mailzone.com
+    host: 208.210.124.192
+    mailfrom: 12.spf1-test.mailzone.com
+    result: fail
+  mailzone-#28:
+    description: domain of 13.spf1-test.mailzone.com does not designate 192.0.2.1 as permitted sender
+    helo: 13.spf1-test.mailzone.com
+    host: 192.0.2.1
+    mailfrom: 13.spf1-test.mailzone.com
+    result: fail
+  mailzone-#29:
+    description: domain of 13.spf1-test.mailzone.com designates 192.0.2.10 as permitted sender
+    helo: 13.spf1-test.mailzone.com
+    host: 192.0.2.10
+    mailfrom: 13.spf1-test.mailzone.com
+    result: pass
+  mailzone-#30:
+    description: domain of 13.spf1-test.mailzone.com designates 192.0.2.33 as permitted sender
+    helo: 13.spf1-test.mailzone.com
+    host: 192.0.2.33
+    mailfrom: 13.spf1-test.mailzone.com
+    result: pass
+  mailzone-#31:
+    description: domain of 13.spf1-test.mailzone.com does not designate 208.210.124.192 as permitted sender
+    helo: 13.spf1-test.mailzone.com
+    host: 208.210.124.192
+    mailfrom: 13.spf1-test.mailzone.com
+    result: fail
+  mailzone-#32:
+    description: domain of 13.spf1-test.mailzone.com designates 192.0.2.40 as permitted sender
+    helo: 13.spf1-test.mailzone.com
+    host: 192.0.2.40
+    mailfrom: 13.spf1-test.mailzone.com
+    result: pass
+  mailzone-#33:
+    description: domain of 14.spf1-test.mailzone.com does not designate 192.0.2.1 as permitted sender
+    helo: 14.spf1-test.mailzone.com
+    host: 192.0.2.1
+    mailfrom: 14.spf1-test.mailzone.com
+    result: fail
+  mailzone-#34:
+    description: domain of 14.spf1-test.mailzone.com designates 192.0.2.10 as permitted sender
+    helo: 14.spf1-test.mailzone.com
+    host: 192.0.2.10
+    mailfrom: 14.spf1-test.mailzone.com
+    result: pass
+  mailzone-#35:
+    description: domain of 14.spf1-test.mailzone.com designates 192.0.2.33 as permitted sender
+    helo: 14.spf1-test.mailzone.com
+    host: 192.0.2.33
+    mailfrom: 14.spf1-test.mailzone.com
+    result: pass
+  mailzone-#36:
+    description: domain of 14.spf1-test.mailzone.com does not designate 208.210.124.192 as permitted sender
+    helo: 14.spf1-test.mailzone.com
+    host: 208.210.124.192
+    mailfrom: 14.spf1-test.mailzone.com
+    result: fail
+  mailzone-#37:
+    description: domain of 14.spf1-test.mailzone.com designates 192.0.2.40 as permitted sender
+    helo: 14.spf1-test.mailzone.com
+    host: 192.0.2.40
+    mailfrom: 14.spf1-test.mailzone.com
+    result: pass
+  mailzone-#38:
+    description: domain of 20.spf1-test.mailzone.com does not designate 192.0.2.1 as permitted sender
+    helo: 20.spf1-test.mailzone.com
+    host: 192.0.2.1
+    mailfrom: 20.spf1-test.mailzone.com
+    result: fail
+  mailzone-#39:
+    description: domain of 20.spf1-test.mailzone.com designates 192.0.2.120 as permitted sender
+    helo: 20.spf1-test.mailzone.com
+    host: 192.0.2.120
+    mailfrom: 20.spf1-test.mailzone.com
+    result: pass
+  mailzone-#40:
+    description: domain of 21.spf1-test.mailzone.com does not designate 192.0.2.1 as permitted sender
+    helo: 21.spf1-test.mailzone.com
+    host: 192.0.2.1
+    mailfrom: 21.spf1-test.mailzone.com
+    result: fail
+  mailzone-#41:
+    description: domain of 21.spf1-test.mailzone.com does not designate 192.0.2.121 as permitted sender
+    helo: 21.spf1-test.mailzone.com
+    host: 192.0.2.121
+    mailfrom: 21.spf1-test.mailzone.com
+    result: fail
+  mailzone-#42:
+    description: domain of 21.spf1-test.mailzone.com designates 192.0.2.200 as permitted sender
+    helo: 21.spf1-test.mailzone.com
+    host: 192.0.2.200
+    mailfrom: 21.spf1-test.mailzone.com
+    result: pass
+  mailzone-#43:
+    description: domain of 22.spf1-test.mailzone.com does not designate 192.0.2.1 as permitted sender
+    helo: 22.spf1-test.mailzone.com
+    host: 192.0.2.1
+    mailfrom: 22.spf1-test.mailzone.com
+    result: fail
+  mailzone-#44:
+    description: domain of 22.spf1-test.mailzone.com designates 192.0.2.122 as permitted sender
+    helo: 22.spf1-test.mailzone.com
+    host: 192.0.2.122
+    mailfrom: 22.spf1-test.mailzone.com
+    result: pass
+  mailzone-#45:
+    description: domain of 22.spf1-test.mailzone.com designates 192.0.2.200 as permitted sender
+    helo: 22.spf1-test.mailzone.com
+    host: 192.0.2.200
+    mailfrom: 22.spf1-test.mailzone.com
+    result: pass
+  mailzone-#46:
+    description: domain of 30.spf1-test.mailzone.com does not designate 64.236.24.4 as permitted sender
+    helo: 30.spf1-test.mailzone.com
+    host: 64.236.24.4
+    mailfrom: 30.spf1-test.mailzone.com
+    result: fail
+  mailzone-#47:
+    description: domain of 30.spf1-test.mailzone.com designates 208.210.124.130 as permitted sender
+    helo: 30.spf1-test.mailzone.com
+    host: 208.210.124.130
+    mailfrom: 30.spf1-test.mailzone.com
+    result: pass
+  mailzone-#48:
+    description: domain of 31.spf1-test.mailzone.com does not designate 64.236.24.4 as permitted sender
+    helo: 31.spf1-test.mailzone.com
+    host: 64.236.24.4
+    mailfrom: 31.spf1-test.mailzone.com
+    result: fail
+  mailzone-#49:
+    description: domain of 31.spf1-test.mailzone.com designates 208.210.124.130 as permitted sender
+    helo: 31.spf1-test.mailzone.com
+    host: 208.210.124.130
+    mailfrom: 31.spf1-test.mailzone.com
+    result: pass
+  mailzone-#50:
+    description: domain of 31.spf1-test.mailzone.com designates 208.210.124.192 as permitted sender
+    helo: 31.spf1-test.mailzone.com
+    host: 208.210.124.192
+    mailfrom: 31.spf1-test.mailzone.com
+    result: pass
+  mailzone-#51:
+    description: domain of 32.spf1-test.mailzone.com does not designate 64.236.24.4 as permitted sender
+    helo: 32.spf1-test.mailzone.com
+    host: 64.236.24.4
+    mailfrom: 32.spf1-test.mailzone.com
+    result: fail
+  mailzone-#52:
+    description: domain of 32.spf1-test.mailzone.com designates 208.210.124.130 as permitted sender
+    helo: 32.spf1-test.mailzone.com
+    host: 208.210.124.130
+    mailfrom: 32.spf1-test.mailzone.com
+    result: pass
+  mailzone-#53:
+    description: domain of 32.spf1-test.mailzone.com designates 208.210.124.131 as permitted sender
+    helo: 32.spf1-test.mailzone.com
+    host: 208.210.124.131
+    mailfrom: 32.spf1-test.mailzone.com
+    result: pass
+  mailzone-#54:
+    description: domain of 32.spf1-test.mailzone.com designates 208.210.124.192 as permitted sender
+    helo: 32.spf1-test.mailzone.com
+    host: 208.210.124.192
+    mailfrom: 32.spf1-test.mailzone.com
+    result: pass
+  mailzone-#55:
+    description: domain of 40.spf1-test.mailzone.com designates 192.0.2.100 as permitted sender
+    helo: 40.spf1-test.mailzone.com
+    host: 192.0.2.100
+    mailfrom: 40.spf1-test.mailzone.com
+    result: pass
+  mailzone-#56:
+    description: domain of 40.spf1-test.mailzone.com designates 192.0.2.101 as permitted sender
+    helo: 40.spf1-test.mailzone.com
+    host: 192.0.2.101
+    mailfrom: 40.spf1-test.mailzone.com
+    result: pass
+  mailzone-#57:
+    description: domain of 40.spf1-test.mailzone.com does not designate 192.0.2.102 as permitted sender
+    helo: 40.spf1-test.mailzone.com
+    host: 192.0.2.102
+    mailfrom: 40.spf1-test.mailzone.com
+    result: fail
+  mailzone-#58:
+    description: domain of 41.spf1-test.mailzone.com does not designate 192.0.2.100 as permitted sender
+    helo: 41.spf1-test.mailzone.com
+    host: 192.0.2.100
+    mailfrom: 41.spf1-test.mailzone.com
+    result: fail
+  mailzone-#59:
+    description: domain of 41.spf1-test.mailzone.com designates 192.0.2.110 as permitted sender
+    helo: 41.spf1-test.mailzone.com
+    host: 192.0.2.110
+    mailfrom: 41.spf1-test.mailzone.com
+    result: pass
+  mailzone-#60:
+    description: domain of 41.spf1-test.mailzone.com designates 192.0.2.111 as permitted sender
+    helo: 41.spf1-test.mailzone.com
+    host: 192.0.2.111
+    mailfrom: 41.spf1-test.mailzone.com
+    result: pass
+  mailzone-#61:
+    description: domain of 42.spf1-test.mailzone.com does not designate 192.0.2.100 as permitted sender
+    helo: 42.spf1-test.mailzone.com
+    host: 192.0.2.100
+    mailfrom: 42.spf1-test.mailzone.com
+    result: fail
+  mailzone-#62:
+    description: domain of 42.spf1-test.mailzone.com designates 192.0.2.110 as permitted sender
+    helo: 42.spf1-test.mailzone.com
+    host: 192.0.2.110
+    mailfrom: 42.spf1-test.mailzone.com
+    result: pass
+  mailzone-#63:
+    description: domain of 42.spf1-test.mailzone.com designates 192.0.2.130 as permitted sender
+    helo: 42.spf1-test.mailzone.com
+    host: 192.0.2.130
+    mailfrom: 42.spf1-test.mailzone.com
+    result: pass
+  mailzone-#64:
+    description: domain of 42.spf1-test.mailzone.com designates 192.0.2.131 as permitted sender
+    helo: 42.spf1-test.mailzone.com
+    host: 192.0.2.131
+    mailfrom: 42.spf1-test.mailzone.com
+    result: pass
+  mailzone-#65:
+    description: domain of 45.spf1-test.mailzone.com does not designate 192.0.2.140 as permitted sender
+    helo: 45.spf1-test.mailzone.com
+    host: 192.0.2.140
+    mailfrom: 45.spf1-test.mailzone.com
+    result: fail
+  mailzone-#66:
+    description: domain of 45.spf1-test.mailzone.com does not designate 192.0.2.145 as permitted sender
+    helo: 45.spf1-test.mailzone.com
+    host: 192.0.2.145
+    mailfrom: 45.spf1-test.mailzone.com
+    result: fail
+  mailzone-#67:
+    description: domain of 45.spf1-test.mailzone.com does not designate 192.0.2.146 as permitted sender
+    helo: 45.spf1-test.mailzone.com
+    host: 192.0.2.146
+    mailfrom: 45.spf1-test.mailzone.com
+    result: fail
+  mailzone-#68:
+    description: domain of 45.spf1-test.mailzone.com does not designate 192.0.2.147 as permitted sender
+    helo: 45.spf1-test.mailzone.com
+    host: 192.0.2.147
+    mailfrom: 45.spf1-test.mailzone.com
+    result: fail
+  mailzone-#69:
+    description: domain of 45.spf1-test.mailzone.com does not designate 192.0.2.148 as permitted sender
+    helo: 45.spf1-test.mailzone.com
+    host: 192.0.2.148
+    mailfrom: 45.spf1-test.mailzone.com
+    result: fail
+  mailzone-#70:
+    description: domain of 45.spf1-test.mailzone.com designates 208.210.124.192 as permitted sender
+    helo: 45.spf1-test.mailzone.com
+    host: 208.210.124.192
+    mailfrom: 45.spf1-test.mailzone.com
+    result: pass
+  mailzone-#71:
+    description: domain of 45.spf1-test.mailzone.com designates 192.0.2.200 as permitted sender
+    helo: 45.spf1-test.mailzone.com
+    host: 192.0.2.200
+    mailfrom: 45.spf1-test.mailzone.com
+    result: pass
+  mailzone-#72:
+    description: domain of 51.spf1-test.mailzone.com does not designate 192.0.2.200 as permitted sender
+    helo: 51.spf1-test.mailzone.com
+    host: 192.0.2.200
+    mailfrom: 51.spf1-test.mailzone.com
+    result: fail
+  mailzone-#73:
+    description: domain of 51.spf1-test.mailzone.com designates 192.0.2.130 as permitted sender
+    helo: 51.spf1-test.mailzone.com
+    host: 192.0.2.130
+    mailfrom: 51.spf1-test.mailzone.com
+    result: pass
+  mailzone-#74:
+    description: domain of 52.spf1-test.mailzone.com does not designate 192.0.2.200 as permitted sender
+    helo: 52.spf1-test.mailzone.com
+    host: 192.0.2.200
+    mailfrom: 52.spf1-test.mailzone.com
+    result: fail
+  mailzone-#75:
+    description: domain of 52.spf1-test.mailzone.com designates 192.0.2.130 as permitted sender
+    helo: 52.spf1-test.mailzone.com
+    host: 192.0.2.130
+    mailfrom: 52.spf1-test.mailzone.com
+    result: pass
+  mailzone-#76:
+    description: 'error in processing during lookup of domain of 55.spf1-test.mailzone.com: Could not find a valid SPF record'
+    helo: 55.spf1-test.mailzone.com
+    host: 192.0.2.200
+    mailfrom: 55.spf1-test.mailzone.com
+    result: error
+  mailzone-#77:
+    description: 'error in processing during lookup of domain of 55.spf1-test.mailzone.com: Could not find a valid SPF record'
+    helo: 55.spf1-test.mailzone.com
+    host: 192.0.2.130
+    mailfrom: 55.spf1-test.mailzone.com
+    result: error
+  mailzone-#78:
+    description: 192.0.2.200 is neither permitted nor denied by domain of 56.spf1-test.mailzone.com
+    helo: 56.spf1-test.mailzone.com
+    host: 192.0.2.200
+    mailfrom: 56.spf1-test.mailzone.com
+    result: none
+  mailzone-#79:
+    description: 'error in processing during lookup of domain of 57.spf1-test.mailzone.com: Could not find a valid SPF record'
+    helo: 57.spf1-test.mailzone.com
+    host: 192.0.2.200
+    mailfrom: 57.spf1-test.mailzone.com
+    result: error
+  mailzone-#80:
+    description: 'error in processing during lookup of domain of 57.spf1-test.mailzone.com: Could not find a valid SPF record'
+    helo: 57.spf1-test.mailzone.com
+    host: 192.0.2.130
+    mailfrom: 57.spf1-test.mailzone.com
+    result: error
+  mailzone-#81:
+    description: 'error in processing during lookup of domain of 58.spf1-test.mailzone.com: Mechanisms used too many DNS lookups'
+    helo: 58.spf1-test.mailzone.com
+    host: 192.0.2.200
+    mailfrom: 58.spf1-test.mailzone.com
+    result: error
+  mailzone-#82:
+    description: 'error in processing during lookup of domain of 59.spf1-test.mailzone.com: Mechanisms used too many DNS lookups'
+    helo: 59.spf1-test.mailzone.com
+    host: 192.0.2.130
+    mailfrom: 59.spf1-test.mailzone.com
+    result: error
+  mailzone-#83:
+    description: domain of 70.spf1-test.mailzone.com does not designate 192.0.2.103 as permitted sender
+    helo: 70.spf1-test.mailzone.com
+    host: 192.0.2.103
+    mailfrom: droid@70.spf1-test.mailzone.com
+    result: fail
+  mailzone-#84:
+    description: domain of 70.spf1-test.mailzone.com designates 192.0.2.103 as permitted sender
+    helo: 70.spf1-test.mailzone.com
+    host: 192.0.2.103
+    mailfrom: bob+1@70.spf1-test.mailzone.com
+    result: pass
+  mailzone-#85:
+    description: domain of 70.spf1-test.mailzone.com designates 192.0.2.103 as permitted sender
+    helo: 70.spf1-test.mailzone.com
+    host: 192.0.2.103
+    mailfrom: bob+2@70.spf1-test.mailzone.com
+    result: pass
+  mailzone-#86:
+    description: domain of 70.spf1-test.mailzone.com designates 192.0.2.103 as permitted sender
+    helo: 70.spf1-test.mailzone.com
+    host: 192.0.2.103
+    mailfrom: bob@70.spf1-test.mailzone.com
+    result: pass
+  mailzone-#87:
+    description: domain of 70.spf1-test.mailzone.com does not designate 192.0.2.103 as permitted sender
+    helo: 70.spf1-test.mailzone.com
+    host: 192.0.2.103
+    mailfrom: joe+1@70.spf1-test.mailzone.com
+    result: fail
+  mailzone-#88:
+    description: domain of 70.spf1-test.mailzone.com does not designate 192.0.2.103 as permitted sender
+    helo: 70.spf1-test.mailzone.com
+    host: 192.0.2.103
+    mailfrom: joe-2@70.spf1-test.mailzone.com
+    result: fail
+  mailzone-#89:
+    description: domain of 70.spf1-test.mailzone.com does not designate 192.0.2.103 as permitted sender
+    helo: 70.spf1-test.mailzone.com
+    host: 192.0.2.103
+    mailfrom: moe-1@70.spf1-test.mailzone.com
+    result: fail
+  mailzone-#90:
+    description: domain of 70.spf1-test.mailzone.com designates 192.0.2.103 as permitted sender
+    helo: 70.spf1-test.mailzone.com
+    host: 192.0.2.103
+    mailfrom: 70.spf1-test.mailzone.com
+    result: pass
+  mailzone-#91:
+    description: domain of 80.spf1-test.mailzone.com does not designate 64.236.24.4 as permitted sender
+    helo: 80.spf1-test.mailzone.com
+    host: 64.236.24.4
+    mailfrom: 80.spf1-test.mailzone.com
+    result: fail
+  mailzone-#92:
+    description: domain of 80.spf1-test.mailzone.com designates 208.210.124.180 as permitted sender
+    helo: 80.spf1-test.mailzone.com
+    host: 208.210.124.180
+    mailfrom: 80.spf1-test.mailzone.com
+    result: pass
+  mailzone-#93:
+    description: domain of 80.spf1-test.mailzone.com designates 192.0.2.80 as permitted sender
+    helo: 80.spf1-test.mailzone.com
+    host: 192.0.2.80
+    mailfrom: 80.spf1-test.mailzone.com
+    result: pass
+  mailzone-#94:
+    description: domain of 90.spf1-test.mailzone.com does not designate 192.0.2.1 as permitted sender
+    helo: 90.spf1-test.mailzone.com
+    host: 192.0.2.1
+    mailfrom: 90.spf1-test.mailzone.com
+    result: fail
+  mailzone-#95:
+    description: domain of 90.spf1-test.mailzone.com does not designate 192.0.2.127 as permitted sender
+    helo: 90.spf1-test.mailzone.com
+    host: 192.0.2.127
+    mailfrom: 90.spf1-test.mailzone.com
+    result: fail
+  mailzone-#96:
+    description: domain of 90.spf1-test.mailzone.com designates 192.0.2.129 as permitted sender
+    helo: 90.spf1-test.mailzone.com
+    host: 192.0.2.129
+    mailfrom: 90.spf1-test.mailzone.com
+    result: pass
+  mailzone-#97:
+    description: domain of 91.spf1-test.mailzone.com does not designate 192.168.1.1 as permitted sender
+    helo: 91.spf1-test.mailzone.com
+    host: 192.168.1.1
+    mailfrom: 91.spf1-test.mailzone.com
+    result: fail
+  mailzone-#98:
+    description: domain of 91.spf1-test.mailzone.com designates 192.0.2.127 as permitted sender
+    helo: 91.spf1-test.mailzone.com
+    host: 192.0.2.127
+    mailfrom: 91.spf1-test.mailzone.com
+    result: pass
+  mailzone-#99:
+    description: domain of 91.spf1-test.mailzone.com does not designate 192.0.2.129 as permitted sender
+    helo: 91.spf1-test.mailzone.com
+    host: 192.0.2.129
+    mailfrom: 91.spf1-test.mailzone.com
+    result: fail
+  mailzone-#100:
+    description: domain of 92.spf1-test.mailzone.com does not designate 192.168.2.1 as permitted sender
+    helo: 92.spf1-test.mailzone.com
+    host: 192.168.2.1
+    mailfrom: 92.spf1-test.mailzone.com
+    result: fail
+  mailzone-#101:
+    description: domain of 92.spf1-test.mailzone.com does not designate 192.0.2.1 as permitted sender
+    helo: 92.spf1-test.mailzone.com
+    host: 192.0.2.1
+    mailfrom: 92.spf1-test.mailzone.com
+    result: fail
+  mailzone-#102:
+    description: domain of 92.spf1-test.mailzone.com designates 192.0.2.129 as permitted sender
+    helo: 92.spf1-test.mailzone.com
+    host: 192.0.2.129
+    mailfrom: 92.spf1-test.mailzone.com
+    result: pass
+  mailzone-#103:
+    description: 192.0.2.193 is neither permitted nor denied by domain of 92.spf1-test.mailzone.com
+    helo: 92.spf1-test.mailzone.com
+    host: 192.0.2.193
+    mailfrom: 92.spf1-test.mailzone.com
+    result: neutral
+  mailzone-#104:
+    description: domain of 95.spf1-test.mailzone.com designates 208.210.124.180 as permitted sender
+    helo: 95.spf1-test.mailzone.com
+    host: 208.210.124.180
+    mailfrom: 95.spf1-test.mailzone.com
+    result: pass
+  mailzone-#105:
+    description: domain of 95.spf1-test.mailzone.com does not designate 208.210.124.1 as permitted sender
+    helo: 95.spf1-test.mailzone.com
+    host: 208.210.124.1
+    mailfrom: 95.spf1-test.mailzone.com
+    result: fail
+  mailzone-#106:
+    description: domain of 96.spf1-test.mailzone.com does not designate 192.0.2.193 as permitted sender
+    helo: 96.spf1-test.mailzone.com
+    host: 192.0.2.193
+    mailfrom: 96.spf1-test.mailzone.com
+    result: fail
+  mailzone-#107:
+    description: domain of 97.spf1-test.mailzone.com designates 208.210.124.180 as permitted sender
+    helo: 97.spf1-test.mailzone.com
+    host: 208.210.124.180
+    mailfrom: 97.spf1-test.mailzone.com
+    result: pass
+  mailzone-#108:
+    description: domain of 98.spf1-test.mailzone.com does not designate 192.0.2.1 as permitted sender
+    helo: 98.spf1-test.mailzone.com
+    host: 192.0.2.1
+    mailfrom: 98.spf1-test.mailzone.com
+    result: fail
+  mailzone-#109:
+    description: domain of 98.spf1-test.mailzone.com designates 192.0.2.98 as permitted sender
+    helo: 98.spf1-test.mailzone.com
+    host: 192.0.2.98
+    mailfrom: 98.spf1-test.mailzone.com
+    result: pass
+  mailzone-#110:
+    description: domain of 98.spf1-test.mailzone.com designates 192.0.2.99 as permitted sender
+    helo: 98.spf1-test.mailzone.com
+    host: 192.0.2.99
+    mailfrom: 98.spf1-test.mailzone.com
+    result: pass
+  mailzone-#111:
+    description: domain of 98.spf1-test.mailzone.com designates 208.210.124.180 as permitted sender
+    helo: 98.spf1-test.mailzone.com
+    host: 208.210.124.180
+    mailfrom: 98.spf1-test.mailzone.com
+    result: pass
+  mailzone-#112:
+    description: domain of 98.spf1-test.mailzone.com does not designate 208.210.124.1 as permitted sender
+    helo: 98.spf1-test.mailzone.com
+    host: 208.210.124.1
+    mailfrom: 98.spf1-test.mailzone.com
+    result: fail
+  mailzone-#113:
+    description: domain of 98.spf1-test.mailzone.com designates 208.210.124.181 as permitted sender
+    helo: 98.spf1-test.mailzone.com
+    host: 208.210.124.181
+    mailfrom: 98.spf1-test.mailzone.com
+    result: pass
+  mailzone-#114:
+    description: domain of 08.spf1-test.mailzone.com does not designate 192.0.2.1 as permitted sender
+    helo: 08.spf1-test.mailzone.com
+    host: 192.0.2.1
+    mailfrom: 08.spf1-test.mailzone.com
+    result: fail
+  mailzone-#115:
+    description: domain of 09.spf1-test.mailzone.com does not designate 192.0.2.1 as permitted sender
+    helo: 09.spf1-test.mailzone.com
+    host: 192.0.2.1
+    mailfrom: 09.spf1-test.mailzone.com
+    result: fail
+  mailzone-#116:
+    description: domain of 99.spf1-test.mailzone.com does not designate 192.0.2.1 as permitted sender
+    helo: 99.spf1-test.mailzone.com
+    host: 192.0.2.1
+    mailfrom: 99.spf1-test.mailzone.com
+    result: error
+  mailzone-#117:
+    description: domain of 100.spf1-test.mailzone.com does not designate 192.0.2.1 as permitted sender
+    helo: 100.spf1-test.mailzone.com
+    host: 192.0.2.1
+    mailfrom: 100.spf1-test.mailzone.com
+    result: fail
+  mailzone-#118:
+    description: domain of 100.spf1-test.mailzone.com designates 192.0.2.98 as permitted sender
+    helo: 100.spf1-test.mailzone.com
+    host: 192.0.2.98
+    mailfrom: 100.spf1-test.mailzone.com
+    result: pass
+  mailzone-#119:
+    description: domain of 101.spf1-test.mailzone.com does not designate 192.0.2.98 as permitted sender
+    helo: 101.spf1-test.mailzone.com
+    host: 192.0.2.98
+    mailfrom: 101.spf1-test.mailzone.com
+    result: fail
+  mailzone-#120:
+    description: 192.0.2.98 is neither permitted nor denied by domain of 102.spf1-test.mailzone.com
+    helo: 102.spf1-test.mailzone.com
+    host: 192.0.2.98
+    mailfrom: 102.spf1-test.mailzone.com
+    result: neutral
+  mailzone-#121:
+    description: domain of 103.spf1-test.mailzone.com designates 192.0.2.98 as permitted sender
+    helo: 103.spf1-test.mailzone.com
+    host: 192.0.2.98
+    mailfrom: 103.spf1-test.mailzone.com
+    result: pass
+  mailzone-#122:
+    description: 'error in processing during lookup of domain of 110.spf1-test.mailzone.com: Unknown mechanism found'
+    helo: 110.spf1-test.mailzone.com
+    host: 192.0.2.98
+    mailfrom: droid@110.spf1-test.mailzone.com
+    result: error
+  mailzone-#123:
+    description: domain of 111.spf1-test.mailzone.com designates 192.0.2.10 as permitted sender
+    helo: 111.spf1-test.mailzone.com
+    host: 192.0.2.10
+    mailfrom: 111.spf1-test.mailzone.com
+    result: error
+  mailzone-#124:
+    description: domain of 111.spf1-test.mailzone.com does not designate 192.0.2.200 as permitted sender
+    helo: 111.spf1-test.mailzone.com
+    host: 192.0.2.200
+    mailfrom: 111.spf1-test.mailzone.com
+    result: error
+  mailzone-#125:
+    description: 'error in processing during lookup of domain of 111.spf1-test.mailzone.com: Unknown mechanism found'
+    helo: 111.spf1-test.mailzone.com
+    host: 1.2.3.4
+    mailfrom: 111.spf1-test.mailzone.com
+    result: error
+  mailzone-#126:
+    description: 'error in processing during lookup of domain of 112.spf1-test.mailzone.com: Invalid character found'
+    helo: 112.spf1-test.mailzone.com
+    host: 1.2.3.4
+    mailfrom: 112.spf1-test.mailzone.com
+    result: error
+  mailzone-#127:
+    description: 'error in processing during lookup of domain of 113.spf1-test.mailzone.com: Invalid character found'
+    helo: 113.spf1-test.mailzone.com
+    host: 1.2.3.4
+    mailfrom: 113.spf1-test.mailzone.com
+    result: error
+  mailzone-#128:
+    description: domain of 114.spf1-test.mailzone.com designates 192.0.2.10 as permitted sender
+    helo: 114.spf1-test.mailzone.com
+    host: 192.0.2.10
+    mailfrom: 114.spf1-test.mailzone.com
+    result: pass
+  mailzone-#129:
+    description: domain of 114.spf1-test.mailzone.com does not designate 192.0.2.200 as permitted sender
+    helo: 114.spf1-test.mailzone.com
+    host: 192.0.2.200
+    mailfrom: 114.spf1-test.mailzone.com
+    result: fail
+  mailzone-#130:
+    description: transitioning domain of 114.spf1-test.mailzone.com does not designate 1.2.3.4 as permitted sender
+    helo: 114.spf1-test.mailzone.com
+    host: 1.2.3.4
+    mailfrom: 114.spf1-test.mailzone.com
+    result: softfail
+  mailzone-#131:
+    description: domain of 116.spf1-test.mailzone.com designates 192.0.2.200 as permitted sender
+    helo: 116.spf1-test.mailzone.com
+    host: 192.0.2.200
+    mailfrom: 116.spf1-test.mailzone.com
+    result: pass
+  mailzone-#132:
+    description: domain of 116.spf1-test.mailzone.com does not designate 1.2.3.4 as permitted sender
+    helo: 116.spf1-test.mailzone.com
+    host: 1.2.3.4
+    mailfrom: 116.spf1-test.mailzone.com
+    result: fail
+  mailzone-#133:
+    description: 192.0.2.200 is neither permitted nor denied by domain of 117.spf1-test.mailzone.com
+    helo: 117.spf1-test.mailzone.com
+    host: 192.0.2.200
+    mailfrom: 117.spf1-test.mailzone.com
+    result: none
+  mailzone-#134:
+    description: domain of 118.spf1-test.mailzone.com does not designate 192.0.2.200 as permitted sender
+    helo: 118.spf1-test.mailzone.com
+    host: 192.0.2.200
+    mailfrom: 118.spf1-test.mailzone.com
+    result: fail
+zonedata:
+  01.spf1-test.mailzone.com:
+    - TXT:  v=spf1                                                             
+  02.spf1-test.mailzone.com:
+    - TXT:  v=spf1                                             -all       
+  03.spf1-test.mailzone.com:
+    - TXT:  v=spf1                                             ~all
+  05.spf1-test.mailzone.com:
+    - TXT:  v=spf1                                             default=deny   
+  06.spf1-test.mailzone.com:
+    - TXT:  v=spf1                                             ?all 
+  08.spf1-test.mailzone.com:
+    - TXT:  v=spf1                       -all      ?all  
+  09.spf1-test.mailzone.com:
+    - TXT:  v=spf1    scope=header-from scope=envelope         -all  
+  10.spf1-test.mailzone.com:
+    - TXT:  v=spf1 mx                                          -all
+    - MX:  [0, 192.0.2.23.addr]
+    - MX:  [0, 192.0.2.20.addr]
+    - MX:  [0, 192.0.2.21.addr]
+    - MX:  [0, 192.0.2.22.addr]
+    - MX:  [0, 192.0.2.30.addr]
+    - MX:  [0, 192.0.2.31.addr]
+    - MX:  [0, 192.0.2.32.addr]
+    - MX:  [0, 192.0.2.33.addr]
+    - MX:  [0, 192.0.2.12.addr]
+    - MX:  [0, 192.0.2.13.addr]
+    - MX:  [0, 192.0.2.10.addr]
+    - MX:  [0, 192.0.2.11.addr]
+  100.spf1-test.mailzone.com:
+    - TXT:  v=spf1      redirect=98.spf1-test.mailzone.com
+  101.spf1-test.mailzone.com:
+    - TXT:  v=spf1 -all redirect=98.spf1-test.mailzone.com
+  102.spf1-test.mailzone.com:
+    - TXT:  v=spf1 ?all redirect=98.spf1-test.mailzone.com
+  103.spf1-test.mailzone.com:
+    - TXT:  v=spf1      redirect=98.%{d3}
+  104.spf1-test.mailzone.com:
+    - TXT:  v=spf1      redirect=105.%{d3}
+  105.spf1-test.mailzone.com:
+    - TXT:  v=spf1      redirect=106.%{d3}
+  106.spf1-test.mailzone.com:
+    - TXT:  'v=spf1      redirect=107.%{d3}org.apache.spf.IncludeException: loop encountered'
+  107.spf1-test.mailzone.com:
+    - TXT:  'v=spf1       include:104.%{d3}'
+  11.spf1-test.mailzone.com:
+    - TXT:  'v=spf1    mx:spf1-test.mailzone.com                          -all'
+  110.spf1-test.mailzone.com:
+    - TXT:  'v=spf1 some:unrecognized=mechanism some=unrecognized:modifier -all'
+  111.spf1-test.mailzone.com:
+    - TXT:  v=spf1 mx -a gpg ~all exp=111txt.spf1-test.mailzone.com
+    - A:  192.0.2.200
+    - MX:  [0, 192.0.2.12.addr]
+    - MX:  [0, 192.0.2.13.addr]
+    - MX:  [0, 192.0.2.10.addr]
+    - MX:  [0, 192.0.2.11.addr]
+  112.spf1-test.mailzone.com:
+    - TXT:  v=spf1 a mp3 ~all
+  113.spf1-test.mailzone.com:
+    - TXT:  'v=spf1 a mp3: ~all'
+  114.spf1-test.mailzone.com:
+    - TXT:  v=spf1 mx -a gpg=test ~all exp=114txt.spf1-test.mailzone.com
+    - A:  192.0.2.200
+    - MX:  [0, 192.0.2.11.addr]
+    - MX:  [0, 192.0.2.12.addr]
+    - MX:  [0, 192.0.2.13.addr]
+    - MX:  [0, 192.0.2.10.addr]
+  115.spf1-test.mailzone.com:
+    - TXT:  v=spf1 a mp3=yes -all
+  116.spf1-test.mailzone.com:
+    - TXT:  v=spf1 redirect=116rdr.spf1-test.mailzone.com a
+    - A:  192.0.2.200
+  116rdr.spf1-test.mailzone.com:
+    - TXT:  v=spf1 -all
+  118.spf1-test.mailzone.com:
+    - TXT:  v=spf1 -all exp=
+  12.spf1-test.mailzone.com:
+    - TXT:  'v=spf1 mx mx:spf1-test.mailzone.com                          -all'
+    - MX:  [0, 192.0.2.23.addr]
+    - MX:  [0, 192.0.2.20.addr]
+    - MX:  [0, 192.0.2.21.addr]
+    - MX:  [0, 192.0.2.22.addr]
+    - MX:  [0, 192.0.2.30.addr]
+    - MX:  [0, 192.0.2.31.addr]
+    - MX:  [0, 192.0.2.32.addr]
+    - MX:  [0, 192.0.2.33.addr]
+    - MX:  [0, 192.0.2.12.addr]
+    - MX:  [0, 192.0.2.13.addr]
+    - MX:  [0, 192.0.2.10.addr]
+    - MX:  [0, 192.0.2.11.addr]
+  13.spf1-test.mailzone.com:
+    - TXT:  'v=spf1    mx:spf1-test.mailzone.com mx:fallback-relay.spf1-test.mailzone.com -all'
+  14.spf1-test.mailzone.com:
+    - TXT:  'v=spf1 mx mx:spf1-test.mailzone.com mx:fallback-relay.spf1-test.mailzone.com -all'
+    - MX:  [0, 192.0.2.23.addr]
+    - MX:  [0, 192.0.2.20.addr]
+    - MX:  [0, 192.0.2.21.addr]
+    - MX:  [0, 192.0.2.22.addr]
+    - MX:  [0, 192.0.2.30.addr]
+    - MX:  [0, 192.0.2.31.addr]
+    - MX:  [0, 192.0.2.32.addr]
+    - MX:  [0, 192.0.2.33.addr]
+    - MX:  [0, 192.0.2.12.addr]
+    - MX:  [0, 192.0.2.13.addr]
+    - MX:  [0, 192.0.2.10.addr]
+    - MX:  [0, 192.0.2.11.addr]
+  20.spf1-test.mailzone.com:
+    - TXT:  v=spf1 a                                           -all
+    - A:  192.0.2.120
+  21.spf1-test.mailzone.com:
+    - TXT:  'v=spf1   a:spf1-test.mailzone.com                            -all'
+  22.spf1-test.mailzone.com:
+    - TXT:  'v=spf1 a a:spf1-test.mailzone.com                            -all'
+    - A:  192.0.2.122
+  30.spf1-test.mailzone.com:
+    - TXT:  v=spf1 ptr                                         -all
+    - A:  208.210.124.130
+  31.spf1-test.mailzone.com:
+    - TXT:  'v=spf1     ptr:spf1-test.mailzone.com                        -all'
+    - A:  208.210.124.131
+  32.spf1-test.mailzone.com:
+    - TXT:  'v=spf1 ptr ptr:spf1-test.mailzone.com                        -all'
+  40.spf1-test.mailzone.com:
+    - TXT:  'v=spf1 exists:%{ir}.%{v}._spf.%{d}                    -all'
+  41.spf1-test.mailzone.com:
+    - TXT:  'v=spf1 exists:%{ir}.%{v}._spf.spf1-test.mailzone.com            -all'
+  42.spf1-test.mailzone.com:
+    - TXT:  'v=spf1 exists:%{ir}.%{v}._spf.%{d} exists:%{ir}.%{v}._spf.%{d3} -all'
+  45.spf1-test.mailzone.com:
+    - TXT:  'v=spf1 -a a:spf1-test.mailzone.com                           -all'
+    - A:  192.0.2.147
+    - A:  192.0.2.145
+    - A:  192.0.2.146
+  50.spf1-test.mailzone.com:
+    - TXT:  v=spf1 include                                     -all
+  51.spf1-test.mailzone.com:
+    - TXT:  'v=spf1 include:42.spf1-test.mailzone.com                  -all'
+  52.spf1-test.mailzone.com:
+    - TXT:  'v=spf1 include:53.spf1-test.mailzone.com                  -all'
+  53.spf1-test.mailzone.com:
+    - TXT:  'v=spf1 include:42.spf1-test.mailzone.com                  -all'
+  55.spf1-test.mailzone.com:
+    - TXT:  'v=spf1 include:56.spf1-test.mailzone.com                  -all'
+  57.spf1-test.mailzone.com:
+    - TXT:  'v=spf1 include:spf1-test.mailzone.com         -all'
+  58.spf1-test.mailzone.com:
+    - TXT:  'v=spf1 include:59.spf1-test.mailzone.com                  -all'
+  59.spf1-test.mailzone.com:
+    - TXT:  'v=spf1 include:58.spf1-test.mailzone.com                  -all'
+  70.spf1-test.mailzone.com:
+    - TXT:  'v=spf1 exists:%{lr+=}.lp._spf.spf1-test.mailzone.com -all'
+  80.spf1-test.mailzone.com:
+    - TXT:  'v=spf1 a mx exists:%{ir}.%{v}._spf.80.spf1-test.mailzone.com ptr -all'
+    - A:  208.210.124.180
+  80.spf1-test.mailzone.com.whitelist.spf1-test.mailzone.com:
+    - A:  127.0.0.2
+  90.spf1-test.mailzone.com:
+    - TXT:  'v=spf1  ip4:192.0.2.128/25 -all'
+  91.spf1-test.mailzone.com:
+    - TXT:  'v=spf1 -ip4:192.0.2.128/25 ip4:192.0.2.0/24 -all'
+  92.spf1-test.mailzone.com:
+    - TXT:  'v=spf1 ?ip4:192.0.2.192/26 ip4:192.0.2.128/25 -ip4:192.0.2.0/24 -all'
+  95.spf1-test.mailzone.com:
+    - TXT:  'v=spf1 exists:%{p}.whitelist.spf1-test.mailzone.com -all'
+  96.spf1-test.mailzone.com:
+    - TXT:  'v=spf1 -exists:%{d}.blacklist.spf1-test.mailzone.com -all'
+  96.spf1-test.mailzone.com.blacklist.spf1-test.mailzone.com:
+    - A:  127.0.0.2
+  97.spf1-test.mailzone.com:
+    - TXT:  'v=spf1 exists:%{p}.whitelist.spf1-test.mailzone.com -exists:%{d}.blacklist.spf1-test.mailzone.com -all'
+  97.spf1-test.mailzone.com.blacklist.spf1-test.mailzone.com:
+    - A:  127.0.0.2
+  98.spf1-test.mailzone.com:
+    - TXT:  v=spf1 a/26 mx/26 -all
+    - A:  192.0.2.98
+    - MX:  [0, 208.210.124.180.addr]
+  99.spf1-test.mailzone.com:
+    - TXT:  v=spf1 -all exp=99txt.spf1-test.mailzone.com moo
+  1.bob.lp._spf.spf1-test.mailzone.com:
+    - A:  127.0.0.2
+  100.2.0.192.in-addr._spf.40.spf1-test.mailzone.com:
+    - A:  127.0.0.2
+  101.2.0.192.in-addr._spf.40.spf1-test.mailzone.com:
+    - A:  127.0.0.2
+  110.2.0.192.in-addr._spf.spf1-test.mailzone.com:
+    - A:  127.0.0.2
+  111.2.0.192.in-addr._spf.spf1-test.mailzone.com:
+    - A:  127.0.0.2
+  112.spf1-test.mailzone.com:
+    - A:  192.0.2.200
+  113.spf1-test.mailzone.com:
+    - A:  192.0.2.200
+  114txt.spf1-test.mailzone.com:
+    - TXT:  explanation text
+  115.spf1-test.mailzone.com:
+    - A:  192.0.2.200
+  130.2.0.192.in-addr._spf.42.spf1-test.mailzone.com:
+    - A:  127.0.0.2
+  131.2.0.192.in-addr._spf.42.spf1-test.mailzone.com:
+    - A:  127.0.0.2
+  2.bob.lp._spf.spf1-test.mailzone.com:
+    - A:  127.0.0.2
+  80.2.0.192.in-addr._spf.80.spf1-test.mailzone.com:
+    - A:  127.0.0.2
+  bob.lp._spf.spf1-test.mailzone.com:
+    - A:  127.0.0.2
+  postmaster.lp._spf.spf1-test.mailzone.com:
+    - A:  127.0.0.2
+  spf1-test.mailzone.com:
+    - A:  208.210.124.192
+    - A:  192.0.2.200
+    - MX:  [0, 192.0.2.23.addr]
+    - MX:  [0, 192.0.2.20.addr]
+    - MX:  [0, 192.0.2.21.addr]
+    - MX:  [0, 192.0.2.22.addr]
+    - MX:  [0, 192.0.2.30.addr]
+    - MX:  [0, 192.0.2.31.addr]
+    - MX:  [0, 192.0.2.32.addr]
+    - MX:  [0, 192.0.2.33.addr]
+    - MX:  [0, 192.0.2.12.addr]
+    - MX:  [0, 192.0.2.13.addr]
+    - MX:  [0, 192.0.2.10.addr]
+    - MX:  [0, 192.0.2.11.addr]
+  www1.cnn.com:
+    - A:  64.236.24.4
+  208.210.124.1:
+    - PTR:  pobox-gw.icgroup.com
+  208.210.124.130:
+    - PTR:  30.spf1-test.mailzone.com
+  208.210.124.131:
+    - PTR:  31.spf1-test.mailzone.com
+  208.210.124.180:
+    - PTR:  80.spf1-test.mailzone.com
+  208.210.124.192:
+    - PTR:  spf1-test.mailzone.com
+  64.236.24.4:
+    - PTR:  www1.cnn.com
+  fallback-relay.spf1-test.mailzone.com:
+    - MX:  [0, 192.0.2.40.addr]
+    - MX:  [0, 192.0.2.41.addr]
+    - MX:  [0, 192.0.2.42.addr]
+    - MX:  [0, 192.0.2.43.addr]
+# Added for MX conversions
+  192.0.2.23.addr:
+    - A:  192.0.2.23
+  192.0.2.20.addr:
+    - A:  192.0.2.20
+  192.0.2.21.addr:
+    - A:  192.0.2.21
+  192.0.2.22.addr:
+    - A:  192.0.2.22
+  192.0.2.30.addr:
+    - A:  192.0.2.30
+  192.0.2.31.addr:
+    - A:  192.0.2.31
+  192.0.2.32.addr:
+    - A:  192.0.2.32
+  192.0.2.33.addr:
+    - A:  192.0.2.33
+  192.0.2.12.addr:
+    - A:  192.0.2.12
+  192.0.2.13.addr:
+    - A:  192.0.2.13
+  192.0.2.10.addr:
+    - A:  192.0.2.10
+  192.0.2.11.addr:
+    - A:  192.0.2.11
+  192.0.2.40.addr:
+    - A:  192.0.2.40
+  192.0.2.41.addr:
+    - A:  192.0.2.41
+  192.0.2.42.addr:
+    - A:  192.0.2.42
+  192.0.2.43.addr:
+    - A:  192.0.2.43
+  208.210.124.180.addr:
+    - A:  208.210.124.180
+    

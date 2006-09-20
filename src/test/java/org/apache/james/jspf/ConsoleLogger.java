@@ -17,7 +17,6 @@
  * under the License.                                           *
  ****************************************************************/
 
-
 package org.apache.james.jspf;
 
 import org.apache.james.jspf.core.Logger;

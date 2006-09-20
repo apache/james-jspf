@@ -28,10 +28,6 @@ public class TempErrorException extends Exception {
 
     private static final long serialVersionUID = 1L;
 
-    public TempErrorException() {
-        super();
-    }
-
     public TempErrorException(String strErrorMessage) {
         super(strErrorMessage);
     }

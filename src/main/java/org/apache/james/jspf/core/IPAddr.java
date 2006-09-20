@@ -17,11 +17,9 @@
  * under the License.                                           *
  ****************************************************************/
 
-
 package org.apache.james.jspf.core;
 
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.util.Inet6Util;
@@ -50,29 +48,6 @@ public class IPAddr {
     // Allow factory creates only
     private IPAddr() {
 
-    }
-
-    /**
-     * Get ArrayList with ipAddresses for the given host and netmask
-     * 
-     * @param host
-     *            The hostname or ip we want to retrieve the ipaddresses for
-     * @param mask
-     *            The netmask
-     * @return ipAddresses An Arraylist which contains all ipAddresses
-     * @throws PermErrorException
-     *             on error
-     */
-    public static ArrayList getAddresses(String host, int mask)
-            throws PermErrorException {
-
-        ArrayList addressList = new ArrayList();
-
-        if (host != null) {
-            addressList.add(getAddress(host, mask));
-        }
-
-        return addressList;
     }
 
     /**
@@ -286,19 +261,6 @@ public class IPAddr {
         return getIPAddress(maskedAddress(address, mask));
     }
 
-    /**
-     * Get the maskAddress
-     * 
-     * @return The maskAddress
-     */
-    public String getMaskAddress() {
-        if (ipLength == 4) {
-            return getIPAddress(get8BitAddress(mask));
-        } else {
-            return getIPAddress(mask);
-        }
-    }
-    
     /**
      * Return the NibbleFormat of the IPAddr
      * 

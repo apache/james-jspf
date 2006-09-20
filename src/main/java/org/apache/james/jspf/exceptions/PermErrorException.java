@@ -28,10 +28,6 @@ public class PermErrorException extends Exception {
 
     private static final long serialVersionUID = 1L;
 
-    public PermErrorException() {
-        super();
-    }
-
     public PermErrorException(String strErrorMessage) {
         super(strErrorMessage);
     }

@@ -28,10 +28,6 @@ public class NeutralException extends Exception {
 
     private static final long serialVersionUID = 1L;
 
-    public NeutralException() {
-        super();
-    }
-
     public NeutralException(String strErrorMessage) {
         super(strErrorMessage);
     }

@@ -33,11 +33,10 @@ import java.util.List;
  * values get stored here and get retrieved from here.
  * 
  */
+
 public class SPF1Data implements MacroData {
 
     private DNSService dnsProbe = null;
-
-    protected String spfVersion = "v=spf1";
 
     private String ipAddress = ""; // also used for (i)<sending-host>
 
@@ -65,11 +64,6 @@ public class SPF1Data implements MacroData {
      * The maximum mechanismn which are allowed to use
      */
     public static final int MAX_DEPTH = 10;
-
-    /**
-     * The maximum MX or PTR Records to lookup
-     */
-    public static final int MAX_DEPTH_DNS = 10;
 
     private String explanation = null;
 
@@ -321,15 +315,6 @@ public class SPF1Data implements MacroData {
      */
     public DNSService getDnsProbe() {
         return dnsProbe;
-    }
-
-    /**
-     * Set the DNSService which will be used
-     * 
-     * @param dnsProbe The DNSService
-     */
-    public void setDnsProbe(DNSService dnsProbe) {
-        this.dnsProbe = dnsProbe;
     }
 
     /**

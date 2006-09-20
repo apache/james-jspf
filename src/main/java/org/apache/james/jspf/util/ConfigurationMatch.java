@@ -17,7 +17,6 @@
  * under the License.                                           *
  ****************************************************************/
 
-
 package org.apache.james.jspf.util;
 
 import java.util.regex.Matcher;
@@ -51,27 +50,6 @@ public class ConfigurationMatch {
     }
 
     /**
-     * @see java.util.regex.MatchResult#end()
-     */
-    public int end() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @see java.util.regex.MatchResult#end(int)
-     */
-    public int end(int arg0) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @see java.util.regex.MatchResult#group()
-     */
-    public String group() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
      * @see java.util.regex.MatchResult#group(int)
      */
     public String group(int arg0) {
@@ -83,20 +61,6 @@ public class ConfigurationMatch {
      */
     public int groupCount() {
         return count;
-    }
-
-    /**
-     * @see java.util.regex.MatchResult#start()
-     */
-    public int start() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @see java.util.regex.MatchResult#start(int)
-     */
-    public int start(int arg0) {
-        throw new UnsupportedOperationException();
     }
 
 }

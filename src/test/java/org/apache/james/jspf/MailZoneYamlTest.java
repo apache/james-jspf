@@ -19,6 +19,8 @@
 
 package org.apache.james.jspf;
 
+import org.apache.james.jspf.core.DNSService;
+
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
@@ -26,19 +28,19 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-public class RFC4408YamlTest extends SPFYamlTest {
+public class MailZoneYamlTest extends SPFYamlTest {
 
-    private static final String YAMLFILE2 = "rfc4408-tests.yml";
+    private static final String YAMLFILE2 = "mailzone-tests.yml";
 
     /**
      * @param name
      * @throws IOException
      */
-    public RFC4408YamlTest(String name) throws IOException {
+    public MailZoneYamlTest(String name) throws IOException {
         super(name);
     }
 
-    protected RFC4408YamlTest(SPFYamlTestSuite def, String test) {
+    protected MailZoneYamlTest(SPFYamlTestSuite def, String test) {
         super(def, test);
     }
 
@@ -47,16 +49,23 @@ public class RFC4408YamlTest extends SPFYamlTest {
     }
 
     public static Test suite() throws IOException {
-        return new RFC4408Suite();
+        return new MailZoneSuite();
     }
 
     protected List internalLoadTests(String filename) throws IOException {
         return loadTests(filename);
     }
 
-    static class RFC4408Suite extends TestSuite {
+    protected DNSService getDNSService() {
+        DNSService dns = super.getDNSService();
+        // Remove record limits for this test
+        dns.setRecordLimit(0);
+        return dns;
+    }
 
-        public RFC4408Suite() throws IOException {
+    static class MailZoneSuite extends TestSuite {
+
+        public MailZoneSuite() throws IOException {
             super();
             List tests = loadTests(YAMLFILE2);
             Iterator i = tests.iterator();
@@ -64,7 +73,7 @@ public class RFC4408YamlTest extends SPFYamlTest {
                 SPFYamlTestSuite o = (SPFYamlTestSuite) i.next();
                 Iterator ttt = o.getTests().keySet().iterator();
                 while (ttt.hasNext()) {
-                    addTest(new RFC4408YamlTest(o,(String) ttt.next()));
+                    addTest(new MailZoneYamlTest(o,(String) ttt.next()));
                 }
             }
         }

@@ -29,7 +29,6 @@ import java.util.List;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.Logger;
-import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
@@ -48,6 +47,7 @@ import org.xbill.DNS.Type;
  * for SPF
  * 
  */
+
 public class DNSServiceXBillImpl implements DNSService {
 
     // Set seconds after which we return and TempError
@@ -55,12 +55,17 @@ public class DNSServiceXBillImpl implements DNSService {
 
     // The logger
     private Logger log;
+    
+    // The record limit for lookups
+    private int recordLimit;
 
     /**
      * Default Constructor
      */
     public DNSServiceXBillImpl(Logger logger) {
         this.log = logger;
+        // Default record limit is 10
+        this.recordLimit = 10;
     }
 
     /**
@@ -288,12 +293,11 @@ public class DNSServiceXBillImpl implements DNSService {
 
         for (int i = 0; i < addressList.size(); i++) {
             aValue = addressList.get(i).toString();
-           
             try {
                 listAddresses.addAll(getARecords(aValue));
             } catch (NoneException e) {
                 // ignore
-            } 
+            }
         }
         return listAddresses;
     }
@@ -344,7 +348,7 @@ public class DNSServiceXBillImpl implements DNSService {
                     log.debug("Found " + records.length + " PTR-Records");
 
                     // check if the maximum lookup count is reached
-                    if (records.length >= SPF1Data.MAX_DEPTH_DNS) throw new PermErrorException("Maximum PTR lookup count reached");
+                    if (recordLimit > 0 && records.length > recordLimit) throw new PermErrorException("Maximum PTR lookup count reached");
               
                     for (int i = 0; i < records.length; i++) {
                         PTRRecord ptr = (PTRRecord) records[i];
@@ -412,7 +416,7 @@ public class DNSServiceXBillImpl implements DNSService {
                     log.debug("Found " + records.length + " MX-Records");
 
                     // check if the maximum lookup count is reached
-                    if (records.length >= SPF1Data.MAX_DEPTH_DNS) throw new PermErrorException("Maximum MX lookup count reached");
+                    if (recordLimit > 0 && records.length > recordLimit) throw new PermErrorException("Maximum MX lookup count reached");
               
                     for (int i = 0; i < records.length; i++) {
                         MXRecord mx = (MXRecord) records[i];
@@ -465,5 +469,20 @@ public class DNSServiceXBillImpl implements DNSService {
         }
         return names;
 
+    }
+
+    /**
+     * @return the current record limit
+     */
+    public int getRecordLimit() {
+        return recordLimit;
+    }
+
+    /**
+     * Set a new limit for the number of records for MX and PTR lookups.
+     * @param recordLimit
+     */
+    public void setRecordLimit(int recordLimit) {
+        this.recordLimit = recordLimit;
     }
 }
