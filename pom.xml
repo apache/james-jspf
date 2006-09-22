@@ -24,7 +24,7 @@
   <parent>
     <groupId>org.apache.james</groupId>
     <artifactId>james-project</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.1-SNAPSHOT</version>
   </parent>
   <name>Apache JAMES jSPF</name>
   <version>0.9-SNAPSHOT</version>
@@ -91,25 +91,38 @@
   <!-- temporary to support simpler deploy -->
   <repositories>
     <repository>
-      <!--
       <id>local-jspf-3rd-party-m1</id>
       <name>Local jSPF third party repository</name>
       <url>file://${basedir}/repos/third-party-m1</url>
-      -->
-      <id>bago-dist-m1</id>
-      <name>Temporary Repository</name>
-      <url>http://people.apache.org/~bago/maven/dist-m1</url>
       <layout>legacy</layout>
-      <!--
       <releases>
         <enabled>true</enabled>
         <checksumPolicy>ignore</checksumPolicy>
       </releases>
-      -->
       <snapshots>
         <enabled>true</enabled>
         <checksumPolicy>ignore</checksumPolicy>
       </snapshots>
+    </repository>
+    
+    <repository>
+      <id>central</id>
+      <name>Apache Snapshot Repository</name>
+      <url>http://people.apache.org/repo/m2-ibiblio-rsync-repository</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>apache.snapshots</id>
+      <name>Apache Snapshot Repository</name>
+      <url>http://people.apache.org/repo/m2-snapshot-repository</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
     </repository>
   </repositories>
 
