@@ -48,6 +48,8 @@ public class SPF {
     private SPF1Parser parser;
 
     private Logger log;
+    
+    private String defaultExplanation = null;
 
     /**
      * Uses default Log4JLogger and DNSJava based dns resolver
@@ -242,12 +244,24 @@ public class SPF {
         
         if (result.equals(SPF1Constants.FAIL)) {  
             if (spfData.getExplanation()==null || spfData.getExplanation().equals("")) {
-                try {
-                    spfData.setExplanation(new MacroExpand(spfData, log)
-                            .expandExplanation(SPF1Utils.DEFAULT_EXPLANATION));
-                } catch (PermErrorException e) {}
+                if(defaultExplanation == null) {
+                    try {
+                        spfData.setExplanation(new MacroExpand(spfData, log)
+                                .expandExplanation(SPF1Utils.DEFAULT_EXPLANATION));
+                    } catch (PermErrorException e) {
+                        // Should never happen !
+                        log.debug("Invalid defaulfExplanation: " + SPF1Utils.DEFAULT_EXPLANATION);
+                    }
+                } else {
+                    try {
+                        spfData.setExplanation(new MacroExpand(spfData, log)
+                                .expandExplanation(defaultExplanation));
+                    } catch (PermErrorException e) {
+                        log.error("Invalid defaultExplanation: " + defaultExplanation);
+                    }
+                }
+                explanation = spfData.getExplanation();
             }
-            explanation = spfData.getExplanation();
         }
         
         return new SPFInternalResult(result, explanation);
@@ -262,5 +276,14 @@ public class SPF {
     public synchronized void setTimeOut(int timeOut) {
         log.debug("TimeOut was set to: " + timeOut);
         dnsProbe.setTimeOut(timeOut);
+    }
+    
+    /**
+     * Set the default explanation which will be used if no explanation is found in the SPF Record
+     *  
+     * @param defaultExplanation The explanation to use if no explanation is found in the SPF Record
+     */
+    public synchronized void setDefaultExplanation(String defaultExplanation) {
+        this.defaultExplanation = defaultExplanation;      
     }
 }
