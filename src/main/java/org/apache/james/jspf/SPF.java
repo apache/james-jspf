@@ -260,8 +260,8 @@ public class SPF {
                         log.error("Invalid defaultExplanation: " + defaultExplanation);
                     }
                 }
-                explanation = spfData.getExplanation();
             }
+            explanation = spfData.getExplanation();
         }
         
         return new SPFInternalResult(result, explanation);
