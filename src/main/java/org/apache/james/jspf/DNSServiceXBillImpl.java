@@ -273,36 +273,6 @@ public class DNSServiceXBillImpl implements DNSService {
     }
 
     /**
-     * Convert list of DNS names to masked IPAddr
-     * 
-     * @param addressList
-     *            ArrayList of DNS names which should be converted to masked
-     *            IPAddresses
-     * @param maskLength
-     *            the networkmask
-     * @return ArrayList of the conversion
-     * @throws PermErrorException
-     *             if an PermError should be returned
-     * @throws TempErrorException if the lookup result was "TRY_AGAIN"
-     */
-    private ArrayList getAList(ArrayList addressList)
-            throws PermErrorException, TempErrorException {
-
-        ArrayList listAddresses = new ArrayList();
-        String aValue;
-
-        for (int i = 0; i < addressList.size(); i++) {
-            aValue = addressList.get(i).toString();
-            try {
-                listAddresses.addAll(getARecords(aValue));
-            } catch (NoneException e) {
-                // ignore
-            }
-        }
-        return listAddresses;
-    }
-
-    /**
      * @see org.apache.james.jspf.core.DNSService#getTxtCatType(java.lang.String)
      */
     public String getTxtCatType(String strServer) throws NoneException,
@@ -380,33 +350,14 @@ public class DNSServiceXBillImpl implements DNSService {
     public List getMXRecords(String domainName)
             throws PermErrorException, NoneException, TempErrorException {
 
-        ArrayList mxAddresses = getAList(getMXNames(domainName));
-        return mxAddresses;
-
-    }
-
-    /**
-     * Get all MX Records for a domain
-     * 
-     * @param host
-     *            The hostname we want to retrieve the MXRecords for
-     * @return MX-Records for the given hostname
-     * @throws NoneException
-     *             if no MX-Records was found
-     * @throws TempErrorException
-     *             if the lookup result was "TRY_AGAIN"
-     * @throws PermErrorException 
-     */
-    private ArrayList getMXNames(String host) throws NoneException,
-            TempErrorException, PermErrorException {
         ArrayList mxR = new ArrayList();
         Record[] records;
         try {
 
-            log.debug("Start MX-Record lookup for : " + host);
+            log.debug("Start MX-Record lookup for : " + domainName);
 
             Lookup.getDefaultResolver().setTimeout(timeOut);
-            Lookup query = new Lookup(host, Type.MX);
+            Lookup query = new Lookup(domainName, Type.MX);
 
             records = query.run();
             int queryResult = query.getResult();
@@ -423,11 +374,14 @@ public class DNSServiceXBillImpl implements DNSService {
                         log.debug("Add MX-Record " + mx.getTarget()
                                 + " to list");
 
-                        mxR.add(mx.getTarget());
-
+                        try {
+                            mxR.addAll(getARecords(mx.getTarget().toString()));
+                        } catch (NoneException e) {
+                            // ignore
+                        }
                     }
                 } else {
-                    throw new NoneException("No MX Record found for host: " + host);
+                    throw new NoneException("No MX Record found for host: " + domainName);
                 }
             } else {
                 throw new TempErrorException("DNS Server returns RCODE: "
@@ -435,8 +389,9 @@ public class DNSServiceXBillImpl implements DNSService {
             }
         } catch (TextParseException e) {
             // i think this is the best we could do
-            throw new NoneException("No MX Record found for host: " + host);
+            throw new NoneException("No MX Record found for host: " + domainName);
         }
+
         return mxR;
     }
 
