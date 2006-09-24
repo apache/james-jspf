@@ -125,39 +125,14 @@ public class DNSServiceXBillImpl implements DNSService {
     private ArrayList getTXTRecords(String hostname)
             throws NoneException, TempErrorException {
         ArrayList txtR = new ArrayList();
-        Record[] records;
-        try {
+        Record[] records = getRecords(hostname, Type.TXT, "TXT", null);
+        for (int i = 0; i < records.length; i++) {
+            TXTRecord txt = (TXTRecord) records[i];
 
-            log.debug("Start TXT-Record lookup for : " + hostname);
+            log.debug("Add txt " + txt.rdataToString()
+                            + " to list");
 
-            Lookup.getDefaultResolver().setTimeout(timeOut);
-            Lookup query = new Lookup(hostname, Type.TXT);
-            records = query.run();
-            int queryResult = query.getResult();
-            if ((queryResult != Lookup.TRY_AGAIN)) {
-                if (records != null) {
-
-                    log.debug("Found " + records.length + " TXT-Records");
-
-                    for (int i = 0; i < records.length; i++) {
-                        TXTRecord txt = (TXTRecord) records[i];
-
-                        log.debug("Add txt " + txt.rdataToString()
-                                        + " to list");
-
-                        txtR.add(txt.rdataToString());
-                    }
-                } else {
-                    throw new NoneException("No TXTRecord found for host: "
-                            + hostname);
-                }
-            } else {
-                throw new TempErrorException("DNS Server returns RCODE: "
-                        + queryResult);
-            }
-        } catch (TextParseException e) {
-            // I think thats the best we could do
-            throw new NoneException("No TXTRecord found for host: " + hostname);
+            txtR.add(txt.rdataToString());
         }
         return txtR;
     }
@@ -177,40 +152,14 @@ public class DNSServiceXBillImpl implements DNSService {
             listTxtData.add(ipTest);
         } else {
 
-            Record[] records;
-            try {
+            Record[] records = getRecords(strServer, Type.A, "A", null);
+            for (int i = 0; i < records.length; i++) {
+                ARecord a = (ARecord) records[i];
+                
+                IPAddr ip = IPAddr.getAddress(a.getAddress().getHostAddress());
 
-                log.debug("Start A-Record lookup for : " + strServer);
-
-                Lookup.getDefaultResolver().setTimeout(timeOut);
-                Lookup query = new Lookup(strServer, Type.A);
-                records = query.run();
-                int queryResult = query.getResult();
-
-                if ((queryResult != Lookup.TRY_AGAIN)) {
-                    if (records != null) {
-
-                        log.debug("Found " + records.length + " A-Records");
-
-                        for (int i = 0; i < records.length; i++) {
-                            ARecord a = (ARecord) records[i];
-                            
-                            IPAddr ip = IPAddr.getAddress(a.getAddress().getHostAddress());
-
-                            log.debug("Add ipAddress " + ip + " to list");
-                            listTxtData.add(ip);
-                        }
-                    } else {
-                        throw new NoneException("No A record found for host: "
-                                + strServer);
-                    }
-                } else {
-                    throw new TempErrorException("DNS Server returns RCODE: "
-                            + queryResult);
-                }
-            } catch (TextParseException e) {
-                // i think this is the best we could do
-                throw new NoneException("No A Record found for host: " + strServer);
+                log.debug("Add ipAddress " + ip + " to list");
+                listTxtData.add(ip);
             }
         }
         return listTxtData;
@@ -230,43 +179,16 @@ public class DNSServiceXBillImpl implements DNSService {
             // Address is already an IP address, so add it to list
             listTxtData.add(ipTest);
         } else {
+            Record[] records = getRecords(strServer, Type.AAAA, "AAAA", null);
 
-            Record[] records;
-            try {
+            for (int i = 0; i < records.length; i++) {
+                AAAARecord a = (AAAARecord) records[i];
 
-                log.debug("Start AAAA-Record lookup for : " + strServer);
+                IPAddr ip = IPAddr.getAddress(a.getAddress()
+                        .getHostAddress());
 
-                Lookup.getDefaultResolver().setTimeout(timeOut);
-                Lookup query = new Lookup(strServer, Type.AAAA);
-                records = query.run();
-                int queryResult = query.getResult();
-
-                if ((queryResult != Lookup.TRY_AGAIN)) {
-                    if (records != null) {
-
-                        log.debug("Found " + records.length + " AAAA-Records");
-
-                        for (int i = 0; i < records.length; i++) {
-                            AAAARecord a = (AAAARecord) records[i];
-
-                            IPAddr ip = IPAddr.getAddress(a.getAddress()
-                                    .getHostAddress());
-
-                            log.debug("Add ipAddress " + ip + " to list");
-                            listTxtData.add(ip);
-                        }
-                    } else {
-                        throw new NoneException("No AAAA record found for host: "
-                                + strServer);
-                    }
-                } else {
-                    throw new TempErrorException("DNS Server returns RCODE: "
-                            + queryResult);
-                }
-            } catch (TextParseException e) {
-                // i think this is the best we could do
-                throw new NoneException("No AAAA Record found for host: "
-                        + strServer);
+                log.debug("Add ipAddress " + ip + " to list");
+                listTxtData.add(ip);
             }
         }
         return listTxtData;
@@ -294,50 +216,22 @@ public class DNSServiceXBillImpl implements DNSService {
      */
     public List getPTRRecords(String ipAddress) throws NoneException,
             PermErrorException, TempErrorException {
-
         ArrayList ptrR = new ArrayList();
-        Record[] records;
 
         // do DNS lookup for TXT
-        IPAddr ip;
+        IPAddr ip = IPAddr.getAddress(ipAddress);
 
-        ip = IPAddr.getAddress(ipAddress);
+        Record[] records = getRecords(ip.getReverseIP() + ".in-addr.arpa", Type.PTR, "PTR", ipAddress);
 
-        try {
-
-            log.debug("Start PTR-Record lookup for : " + ipAddress);
-
-            Lookup.getDefaultResolver().setTimeout(timeOut);
-            Lookup query = new Lookup(ip.getReverseIP() + ".in-addr.arpa",
-                    Type.PTR);
-            records = query.run();
-            int queryResult = query.getResult();
-
-            if ((queryResult != Lookup.TRY_AGAIN)) {
-                if (records != null) {
-                    log.debug("Found " + records.length + " PTR-Records");
-
-                    // check if the maximum lookup count is reached
-                    if (recordLimit > 0 && records.length > recordLimit) throw new PermErrorException("Maximum PTR lookup count reached");
-              
-                    for (int i = 0; i < records.length; i++) {
-                        PTRRecord ptr = (PTRRecord) records[i];
-                        ptrR.add(IPAddr.stripDot(ptr.getTarget().toString()));
-                        log.debug("Add ipAddress "
-                                + IPAddr.stripDot(ptr.getTarget().toString())
-                                + " to list");
-                    }
-                } else {
-                    throw new NoneException("No PTRRecord found for host: "
-                            + ipAddress);
-                }
-            } else {
-                throw new TempErrorException("DNS Server returns RCODE: "
-                        + queryResult);
-            }
-        } catch (TextParseException e) {
-            // i think this is the best we could do
-            throw new NoneException("No PTRRecord found for host: " + ipAddress);
+        // check if the maximum lookup count is reached
+        if (recordLimit > 0 && records.length > recordLimit) throw new PermErrorException("Maximum PTR lookup count reached");
+  
+        for (int i = 0; i < records.length; i++) {
+            PTRRecord ptr = (PTRRecord) records[i];
+            ptrR.add(IPAddr.stripDot(ptr.getTarget().toString()));
+            log.debug("Add ipAddress "
+                    + IPAddr.stripDot(ptr.getTarget().toString())
+                    + " to list");
         }
 
         return ptrR;
@@ -351,45 +245,21 @@ public class DNSServiceXBillImpl implements DNSService {
             throws PermErrorException, NoneException, TempErrorException {
 
         ArrayList mxR = new ArrayList();
-        Record[] records;
-        try {
+        Record[] records = getRecords(domainName, Type.MX, "MX", null);
 
-            log.debug("Start MX-Record lookup for : " + domainName);
+        // check if the maximum lookup count is reached
+        if (recordLimit > 0 && records.length > recordLimit) throw new PermErrorException("Maximum MX lookup count reached");
+  
+        for (int i = 0; i < records.length; i++) {
+            MXRecord mx = (MXRecord) records[i];
+            log.debug("Add MX-Record " + mx.getTarget()
+                    + " to list");
 
-            Lookup.getDefaultResolver().setTimeout(timeOut);
-            Lookup query = new Lookup(domainName, Type.MX);
-
-            records = query.run();
-            int queryResult = query.getResult();
-
-            if ((queryResult != Lookup.TRY_AGAIN)) {
-                if (records != null) {
-                    log.debug("Found " + records.length + " MX-Records");
-
-                    // check if the maximum lookup count is reached
-                    if (recordLimit > 0 && records.length > recordLimit) throw new PermErrorException("Maximum MX lookup count reached");
-              
-                    for (int i = 0; i < records.length; i++) {
-                        MXRecord mx = (MXRecord) records[i];
-                        log.debug("Add MX-Record " + mx.getTarget()
-                                + " to list");
-
-                        try {
-                            mxR.addAll(getARecords(mx.getTarget().toString()));
-                        } catch (NoneException e) {
-                            // ignore
-                        }
-                    }
-                } else {
-                    throw new NoneException("No MX Record found for host: " + domainName);
-                }
-            } else {
-                throw new TempErrorException("DNS Server returns RCODE: "
-                        + queryResult);
+            try {
+                mxR.addAll(getARecords(mx.getTarget().toString()));
+            } catch (NoneException e) {
+                // ignore
             }
-        } catch (TextParseException e) {
-            // i think this is the best we could do
-            throw new NoneException("No MX Record found for host: " + domainName);
         }
 
         return mxR;
@@ -440,4 +310,48 @@ public class DNSServiceXBillImpl implements DNSService {
     public void setRecordLimit(int recordLimit) {
         this.recordLimit = recordLimit;
     }
+    
+    
+
+    /**
+     * Retrieve dns records for the given host
+     * 
+     * @param hostname host to be queried
+     * @param recordType the record type: Type.MX, Type.A, Type.AAAA, Type.PTR 
+     * @param recordTypeDescription the description to be used in logs.
+     * @return an array of Record
+     * @throws NoneException when no record is found or a textparse exception happen
+     * @throws TempErrorException on timeout.
+     */
+    private Record[] getRecords(String hostname, int recordType, String recordTypeDescription, String logHost)
+            throws NoneException, TempErrorException {
+        Record[] records;
+        String logname = logHost != null ? logHost : hostname;
+        try {
+
+            log.debug("Start "+recordTypeDescription+"-Record lookup for : " + logname);
+
+            Lookup.getDefaultResolver().setTimeout(timeOut);
+            Lookup query = new Lookup(hostname, recordType);
+
+            records = query.run();
+            int queryResult = query.getResult();
+
+            if (queryResult == Lookup.TRY_AGAIN) {
+                throw new TempErrorException("DNS Server returns RCODE: "
+                        + queryResult);
+            }
+            
+            if (records == null) {
+                throw new NoneException("No "+recordTypeDescription+" Record found for host: " + logname);
+            }
+                
+            log.debug("Found " + records.length + " "+recordTypeDescription+"-Records");
+        } catch (TextParseException e) {
+            // i think this is the best we could do
+            throw new NoneException("No "+recordTypeDescription+" Record found for host: " + logname);
+        }
+        return records;
+    }
+
 }
