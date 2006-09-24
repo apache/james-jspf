@@ -138,16 +138,12 @@ public abstract class AbstractYamlTest extends TestCase {
         String resultSPF = res.getResult();
         
         if (currentTest.get("result") instanceof String) {
-            if ("permerror".equals(currentTest.get("result"))) {
-                assertEquals("Test "+next+" ("+currentTest.get("description")+") failed. Returned: "+res.getResult()+" Expected: "+currentTest.get("result")+" [["+res.getResultChar()+"||"+res.getHeaderText()+"]]", "error", res.getResult());
-            } else {
-                assertEquals("Test "+next+" ("+currentTest.get("description")+") failed. Returned: "+res.getResult()+" Expected: "+currentTest.get("result")+" [["+res.getResultChar()+"||"+res.getHeaderText()+"]]", currentTest.get("result"), res.getResult());
-            }
+            assertEquals("Test "+next+" ("+currentTest.get("description")+") failed. Returned: "+res.getResult()+" Expected: "+currentTest.get("result")+" [["+res.getResultChar()+"||"+res.getHeaderText()+"]]", currentTest.get("result"), res.getResult());
         } else {
             ArrayList results = (ArrayList) currentTest.get("result");
             boolean match = false;
             for (int i = 0; i < results.size(); i++) {
-                if (results.get(i).equals(resultSPF) || (results.get(i).equals("permerror") && resultSPF.equals("error"))) match = true;
+                if (results.get(i).equals(resultSPF)) match = true;
                 System.err.println("checking "+results.get(i)+" => "+resultSPF);
             }
             assertTrue(match);

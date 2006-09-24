@@ -456,13 +456,13 @@ tests:
     helo: 55.spf1-test.mailzone.com
     host: 192.0.2.200
     mailfrom: 55.spf1-test.mailzone.com
-    result: error
+    result: permerror
   mailzone-#77:
     description: 'error in processing during lookup of domain of 55.spf1-test.mailzone.com: Could not find a valid SPF record'
     helo: 55.spf1-test.mailzone.com
     host: 192.0.2.130
     mailfrom: 55.spf1-test.mailzone.com
-    result: error
+    result: permerror
   mailzone-#78:
     description: 192.0.2.200 is neither permitted nor denied by domain of 56.spf1-test.mailzone.com
     helo: 56.spf1-test.mailzone.com
@@ -474,25 +474,25 @@ tests:
     helo: 57.spf1-test.mailzone.com
     host: 192.0.2.200
     mailfrom: 57.spf1-test.mailzone.com
-    result: error
+    result: permerror
   mailzone-#80:
     description: 'error in processing during lookup of domain of 57.spf1-test.mailzone.com: Could not find a valid SPF record'
     helo: 57.spf1-test.mailzone.com
     host: 192.0.2.130
     mailfrom: 57.spf1-test.mailzone.com
-    result: error
+    result: permerror
   mailzone-#81:
     description: 'error in processing during lookup of domain of 58.spf1-test.mailzone.com: Mechanisms used too many DNS lookups'
     helo: 58.spf1-test.mailzone.com
     host: 192.0.2.200
     mailfrom: 58.spf1-test.mailzone.com
-    result: error
+    result: permerror
   mailzone-#82:
     description: 'error in processing during lookup of domain of 59.spf1-test.mailzone.com: Mechanisms used too many DNS lookups'
     helo: 59.spf1-test.mailzone.com
     host: 192.0.2.130
     mailfrom: 59.spf1-test.mailzone.com
-    result: error
+    result: permerror
   mailzone-#83:
     description: domain of 70.spf1-test.mailzone.com does not designate 192.0.2.103 as permitted sender
     helo: 70.spf1-test.mailzone.com
@@ -696,7 +696,7 @@ tests:
     helo: 99.spf1-test.mailzone.com
     host: 192.0.2.1
     mailfrom: 99.spf1-test.mailzone.com
-    result: error
+    result: permerror
   mailzone-#117:
     description: domain of 100.spf1-test.mailzone.com does not designate 192.0.2.1 as permitted sender
     helo: 100.spf1-test.mailzone.com
@@ -732,37 +732,37 @@ tests:
     helo: 110.spf1-test.mailzone.com
     host: 192.0.2.98
     mailfrom: droid@110.spf1-test.mailzone.com
-    result: error
+    result: permerror
   mailzone-#123:
     description: domain of 111.spf1-test.mailzone.com designates 192.0.2.10 as permitted sender
     helo: 111.spf1-test.mailzone.com
     host: 192.0.2.10
     mailfrom: 111.spf1-test.mailzone.com
-    result: error
+    result: permerror
   mailzone-#124:
     description: domain of 111.spf1-test.mailzone.com does not designate 192.0.2.200 as permitted sender
     helo: 111.spf1-test.mailzone.com
     host: 192.0.2.200
     mailfrom: 111.spf1-test.mailzone.com
-    result: error
+    result: permerror
   mailzone-#125:
     description: 'error in processing during lookup of domain of 111.spf1-test.mailzone.com: Unknown mechanism found'
     helo: 111.spf1-test.mailzone.com
     host: 1.2.3.4
     mailfrom: 111.spf1-test.mailzone.com
-    result: error
+    result: permerror
   mailzone-#126:
     description: 'error in processing during lookup of domain of 112.spf1-test.mailzone.com: Invalid character found'
     helo: 112.spf1-test.mailzone.com
     host: 1.2.3.4
     mailfrom: 112.spf1-test.mailzone.com
-    result: error
+    result: permerror
   mailzone-#127:
     description: 'error in processing during lookup of domain of 113.spf1-test.mailzone.com: Invalid character found'
     helo: 113.spf1-test.mailzone.com
     host: 1.2.3.4
     mailfrom: 113.spf1-test.mailzone.com
-    result: error
+    result: permerror
   mailzone-#128:
     description: domain of 114.spf1-test.mailzone.com designates 192.0.2.10 as permitted sender
     helo: 114.spf1-test.mailzone.com

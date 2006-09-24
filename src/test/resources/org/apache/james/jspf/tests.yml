@@ -23,7 +23,7 @@ tests:
     helo: spf5-test.foo.bar
     host: 192.0.2.200
     mailfrom: spf5-test.foo.bar
-    result: error
+    result: permerror
     explanation: 
   test-#5:
     helo: spf7-test.foo.bar

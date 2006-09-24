@@ -31,7 +31,7 @@ import org.apache.james.jspf.core.SPF1Constants;
 
 public class SPF1Utils {
 
-    public static final String PERM_ERROR_CONV = "error";
+    public static final String PERM_ERROR_CONV = "permerror";
 
     public static final String NONE_CONV = "none";
 
