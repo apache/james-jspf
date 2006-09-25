@@ -52,6 +52,8 @@ public class SPF {
     
     private String defaultExplanation = null;
 
+    private boolean useBestGuess = false;
+    
     /**
      * Uses default Log4JLogger and DNSJava based dns resolver
      */
@@ -167,8 +169,14 @@ public class SPF {
         String spfDnsEntry = getSpfRecord(dnsProbe,spfData.getCurrentDomain(),
                 SPF1Constants.SPF_VERSION);
 
+        // No SPF-Record found
         if (spfDnsEntry == null) {
-            throw new NoneException("No SPF record found for host: " + spfData.getCurrentDomain());
+            // We should use bestguess
+            if (useBestGuess == true) {
+                spfDnsEntry = SPF1Utils.BEST_GUESS_RECORD;
+            } else {
+                throw new NoneException("No SPF record found for host: " + spfData.getCurrentDomain());
+            }
         }
 
         // logging
@@ -302,8 +310,17 @@ public class SPF {
         this.defaultExplanation = defaultExplanation;      
     }
     
+    /**
+     * Set to true for using best guess. Best guess will set the SPF-Record to "a/24 mx/24 ptr ~all" 
+     * if no SPF-Record was found for the doamin. When this was happen only pass or netural will be returned.
+     * Default is false.
+     * 
+     * @param useBestGuess true to enable best guess
+     */
+    public synchronized void setUseBestGuess(boolean useBestGuess) {
+        this.useBestGuess  = useBestGuess;
+    }
     
-
 
     /**
      * Get the SPF-Record for a server given it's version
