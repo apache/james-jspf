@@ -209,8 +209,6 @@ public class DNSServiceXBillImpl implements DNSService {
      * @see org.apache.james.jspf.core.DNSService#getPTRRecords(java.lang.String)
      */
     public List getPTRRecords(String ipAddress) throws PermErrorException, TempErrorException {
-        ArrayList ptrR = new ArrayList();
-
         // do DNS lookup for TXT
         IPAddr ip = IPAddr.getAddress(ipAddress);
 
@@ -219,13 +217,7 @@ public class DNSServiceXBillImpl implements DNSService {
         // check if the maximum lookup count is reached
         if (recordLimit > 0 && records.size() > recordLimit) throw new PermErrorException("Maximum PTR lookup count reached");
   
-        for (int i = 0; i < records.size(); i++) {
-            String ptr = (String) records.get(i);
-            ptrR.add(ptr);
-            log.debug("Add ipAddress " + ptr + " to list");
-        }
-
-        return ptrR;
+        return records;
     }
 
     /**
@@ -235,7 +227,7 @@ public class DNSServiceXBillImpl implements DNSService {
     public List getMXRecords(String domainName)
             throws PermErrorException, TempErrorException {
 
-        ArrayList mxR = null;
+        List mxR = null;
         List records = getRecords(domainName, MX);
 
         // check if the maximum lookup count is reached
