@@ -139,7 +139,7 @@ public class DNSServiceXBillImpl implements DNSService {
                 throw new TimeoutException();
             }
             
-            if (rr.length > 0) {
+            if (rr != null && rr.length > 0) {
                 records = new ArrayList();
                 for (int i = 0; i < rr.length; i++) {
                     String res;
