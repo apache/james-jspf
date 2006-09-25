@@ -46,7 +46,19 @@ public class SPFQuery {
     private final static int NONE_RCODE = 6;
     
     private final static int UNKNOWN_RCODE = 255;
+    
+    private final static String CMD_IP = "-ip";
+    
+    private final static String CMD_SENDER = "-sender";
+    
+    private final static String CMD_HELO = "-helo";
+    
+    private final static String CMD_DEBUG = "-debug";
+    
+    private final static String CMD_VERBOSE = "-verbose";
 
+    private final static String CMD_DEFAULT_EXP =  "-default-explanation";
+    
     private static Logger logger = Logger.getRootLogger();
 
     /**
@@ -58,6 +70,7 @@ public class SPFQuery {
         String ip = null;
         String sender = null;
         String helo = null;
+        String defaultExplanation = null;
 
         SimpleLayout layout = new SimpleLayout();
         ConsoleAppender consoleAppender = new ConsoleAppender(layout);
@@ -72,16 +85,20 @@ public class SPFQuery {
             for (int i = 0; i < args.length; i++) {
                 String[] arguments = args[i].split("=");
 
-                if (arguments[0].equals("-ip")) {
+                if (arguments == null || arguments.length != 2) usage();
+                
+                if (arguments[0].equals(CMD_IP)) {
                     ip = arguments[1];
-                } else if (arguments[0].equals("-sender")) {
+                } else if (arguments[0].equals(CMD_SENDER)) {
                     sender = arguments[1];
-                } else if (arguments[0].equals("-helo")) {
+                } else if (arguments[0].equals(CMD_HELO)) {
                     helo = arguments[1];
-                } else if (arguments[0].equals("-debug")) {
+                } else if (arguments[0].equals(CMD_DEBUG)) {
                     logger.setLevel(Level.DEBUG);
-                } else if (arguments[0].equals("-verbose")) {
+                } else if (arguments[0].equals(CMD_VERBOSE)) {
                     logger.setLevel(Level.TRACE);
+                } else if (arguments[0].equals(CMD_DEFAULT_EXP)) {
+                    defaultExplanation = arguments[1];
                 } else {
                     usage();
                 }
@@ -90,11 +107,19 @@ public class SPFQuery {
 
             // check if all needed values was set
             if (ip != null && sender != null && helo != null) {
+                
                 SPF spf = new SPF(new Log4JLogger(logger));
+                
+                // Check if we should set a costum default explanation
+                if (defaultExplanation != null) {
+                    spf.setDefaultExplanation(defaultExplanation);
+                }
+                
                 SPFResult result = spf.checkSPF(ip, sender, helo);
                 System.out.println(result.getResult());
                 System.out.println(result.getHeader());
                 System.exit(getReturnCode(result.getResult()));
+                
             } else {
                 usage();
             }
@@ -105,8 +130,8 @@ public class SPFQuery {
      * Print out the usage
      */
     private static void usage() {
-        System.out
-                .println("Usage: java -jar jspf-x.jar -ip=192.168.100.1 -sender=postmaster@foo.bar -helo=foo.bar [-debug] [-verbose]");
+        System.out.println("Usage: java -jar jspf-x.jar " + CMD_IP + "=192.168.100.1 " + CMD_SENDER + "=postmaster@foo.bar "
+                        + CMD_HELO + "=foo.bar [" + CMD_DEBUG + "] [" + CMD_VERBOSE+ "]");
         System.exit(UNKNOWN_RCODE);
     }
     
@@ -118,6 +143,7 @@ public class SPFQuery {
      * @return returnCode
      */
     public static int getReturnCode(String result) {
+        
         if (result.equals(SPF1Utils.PASS_CONV)) {
             return PASS_RCODE;
         } else if (result.equals(SPF1Utils.FAIL_CONV)) {
@@ -133,6 +159,7 @@ public class SPFQuery {
         } else if (result.equals(SPF1Utils.NONE_CONV)) {
             return NONE_RCODE;
         } 
+        
         return UNKNOWN_RCODE;
     }
 
