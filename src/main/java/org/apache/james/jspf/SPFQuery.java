@@ -59,6 +59,8 @@ public class SPFQuery {
 
     private final static String CMD_DEFAULT_EXP =  "-default-explanation";
     
+    private final static String CMD_BEST_GUESS =  "-use-best-guess";
+    
     private static Logger logger = Logger.getRootLogger();
 
     /**
@@ -71,6 +73,7 @@ public class SPFQuery {
         String sender = null;
         String helo = null;
         String defaultExplanation = null;
+        boolean useBestGuess = false;
 
         SimpleLayout layout = new SimpleLayout();
         ConsoleAppender consoleAppender = new ConsoleAppender(layout);
@@ -85,7 +88,7 @@ public class SPFQuery {
             for (int i = 0; i < args.length; i++) {
                 String[] arguments = args[i].split("=");
 
-                if (arguments == null || arguments.length != 2) usage();
+                if (arguments == null || (arguments.length > 2 && (arguments[0] != CMD_DEBUG) && arguments[0] != CMD_VERBOSE)) usage();
                 
                 if (arguments[0].equals(CMD_IP)) {
                     ip = arguments[1];
@@ -99,6 +102,8 @@ public class SPFQuery {
                     logger.setLevel(Level.TRACE);
                 } else if (arguments[0].equals(CMD_DEFAULT_EXP)) {
                     defaultExplanation = arguments[1];
+                } else if (arguments[0].equals(CMD_BEST_GUESS)) {
+                    useBestGuess = Boolean.valueOf(arguments[1]).booleanValue();
                 } else {
                     usage();
                 }
@@ -113,6 +118,11 @@ public class SPFQuery {
                 // Check if we should set a costum default explanation
                 if (defaultExplanation != null) {
                     spf.setDefaultExplanation(defaultExplanation);
+                }
+                
+                // Check if we should use best guess
+                if (useBestGuess == true) {
+                    spf.setUseBestGuess(true);
                 }
                 
                 SPFResult result = spf.checkSPF(ip, sender, helo);
@@ -131,7 +141,7 @@ public class SPFQuery {
      */
     private static void usage() {
         System.out.println("Usage: java -jar jspf-x.jar " + CMD_IP + "=192.168.100.1 " + CMD_SENDER + "=postmaster@foo.bar "
-                        + CMD_HELO + "=foo.bar [" + CMD_DEBUG + "] [" + CMD_VERBOSE+ "]");
+                        + CMD_HELO + "=foo.bar ["  + CMD_DEFAULT_EXP+ "=\"explanation String\"] [" +CMD_BEST_GUESS+ "=true|false] "+ CMD_DEBUG + "] [" + CMD_VERBOSE+ "]");
         System.exit(UNKNOWN_RCODE);
     }
     
