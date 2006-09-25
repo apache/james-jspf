@@ -30,6 +30,14 @@ import java.util.List;
  *  
  */
 public interface DNSService {
+    
+    /** The record types for the lookups */
+    public int A = 1;
+    public int AAAA = 2;
+    public int MX = 3;
+    public int PTR = 4;
+    public int TXT = 5;
+    public int SPF = 6;
 
     /**
      * Get the SPF-Record for a server given it's version

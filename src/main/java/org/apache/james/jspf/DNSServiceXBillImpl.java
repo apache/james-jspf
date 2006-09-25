@@ -17,7 +17,6 @@
  * under the License.                                           *
  ****************************************************************/
 
-
 package org.apache.james.jspf;
 
 import java.net.InetAddress;
@@ -45,9 +44,7 @@ import org.xbill.DNS.Type;
 /**
  * This class contains helper to get all neccassary DNS infos that are needed
  * for SPF
- * 
  */
-
 public class DNSServiceXBillImpl implements DNSService {
 
     // Set seconds after which we return and TempError
@@ -58,7 +55,7 @@ public class DNSServiceXBillImpl implements DNSService {
     
     // The record limit for lookups
     private int recordLimit;
-
+    
     /**
      * Default Constructor
      */
@@ -122,14 +119,13 @@ public class DNSServiceXBillImpl implements DNSService {
     private ArrayList getTXTRecords(String hostname)
             throws TempErrorException {
         ArrayList txtR = new ArrayList();
-        Record[] records = getRecords(hostname, Type.TXT, "TXT", null);
-        for (int i = 0; i < records.length; i++) {
-            TXTRecord txt = (TXTRecord) records[i];
+        List records = getRecords(hostname, TXT);
+        for (int i = 0; i < records.size(); i++) {
+            String txt = (String) records.get(i);
 
-            log.debug("Add txt " + txt.rdataToString()
-                            + " to list");
+            log.debug("Add txt " + txt + " to list");
 
-            txtR.add(txt.rdataToString());
+            txtR.add(txt);
         }
         return txtR;
     }
@@ -148,15 +144,15 @@ public class DNSServiceXBillImpl implements DNSService {
             listTxtData.add(ipTest);
         } else {
 
-            Record[] records = getRecords(strServer, Type.A, "A", null);
+            List records = getRecords(strServer, A);
             
             // check if the maximum lookup count is reached
-            if (recordLimit > 0 && records.length > recordLimit) throw new PermErrorException("Maximum A lookup count reached");
+            if (recordLimit > 0 && records.size() > recordLimit) throw new PermErrorException("Maximum A lookup count reached");
             
-            for (int i = 0; i < records.length; i++) {
-                ARecord a = (ARecord) records[i];
+            for (int i = 0; i < records.size(); i++) {
+                String a = (String) records.get(i);
                 
-                IPAddr ip = IPAddr.getAddress(a.getAddress().getHostAddress());
+                IPAddr ip = IPAddr.getAddress(a);
 
                 log.debug("Add ipAddress " + ip + " to list");
                 listTxtData.add(ip);
@@ -179,13 +175,12 @@ public class DNSServiceXBillImpl implements DNSService {
             // Address is already an IP address, so add it to list
             listTxtData.add(ipTest);
         } else {
-            Record[] records = getRecords(strServer, Type.AAAA, "AAAA", null);
+            List records = getRecords(strServer, AAAA);
 
-            for (int i = 0; i < records.length; i++) {
-                AAAARecord a = (AAAARecord) records[i];
+            for (int i = 0; i < records.size(); i++) {
+                String a = (String) records.get(i);
 
-                IPAddr ip = IPAddr.getAddress(a.getAddress()
-                        .getHostAddress());
+                IPAddr ip = IPAddr.getAddress(a);
 
                 log.debug("Add ipAddress " + ip + " to list");
                 listTxtData.add(ip);
@@ -219,17 +214,15 @@ public class DNSServiceXBillImpl implements DNSService {
         // do DNS lookup for TXT
         IPAddr ip = IPAddr.getAddress(ipAddress);
 
-        Record[] records = getRecords(ip.getReverseIP() + ".in-addr.arpa", Type.PTR, "PTR", ipAddress);
+        List records = getRecords(ip.getReverseIP() + ".in-addr.arpa", PTR);
 
         // check if the maximum lookup count is reached
-        if (recordLimit > 0 && records.length > recordLimit) throw new PermErrorException("Maximum PTR lookup count reached");
+        if (recordLimit > 0 && records.size() > recordLimit) throw new PermErrorException("Maximum PTR lookup count reached");
   
-        for (int i = 0; i < records.length; i++) {
-            PTRRecord ptr = (PTRRecord) records[i];
-            ptrR.add(IPAddr.stripDot(ptr.getTarget().toString()));
-            log.debug("Add ipAddress "
-                    + IPAddr.stripDot(ptr.getTarget().toString())
-                    + " to list");
+        for (int i = 0; i < records.size(); i++) {
+            String ptr = (String) records.get(i);
+            ptrR.add(ptr);
+            log.debug("Add ipAddress " + ptr + " to list");
         }
 
         return ptrR;
@@ -243,17 +236,16 @@ public class DNSServiceXBillImpl implements DNSService {
             throws PermErrorException, TempErrorException {
 
         ArrayList mxR = null;
-        Record[] records = getRecords(domainName, Type.MX, "MX", null);
+        List records = getRecords(domainName, MX);
 
         // check if the maximum lookup count is reached
-        if (recordLimit > 0 && records.length > recordLimit) throw new PermErrorException("Maximum MX lookup count reached");
+        if (recordLimit > 0 && records.size() > recordLimit) throw new PermErrorException("Maximum MX lookup count reached");
   
-        for (int i = 0; i < records.length; i++) {
-            MXRecord mx = (MXRecord) records[i];
-            log.debug("Add MX-Record " + mx.getTarget()
-                    + " to list");
+        for (int i = 0; i < records.size(); i++) {
+            String mx = (String) records.get(i);
+            log.debug("Add MX-Record " + mx + " to list");
 
-            List res = getARecords(mx.getTarget().toString());
+            List res = getARecords(mx);
             if (res != null) {
                 if (mxR == null) {
                     mxR = new ArrayList();
@@ -317,24 +309,34 @@ public class DNSServiceXBillImpl implements DNSService {
      * Retrieve dns records for the given host
      * 
      * @param hostname host to be queried
-     * @param recordType the record type: Type.MX, Type.A, Type.AAAA, Type.PTR 
-     * @param recordTypeDescription the description to be used in logs.
-     * @return an array of Record
+     * @param recordType the record type: MX, A, AAAA, PTR, TXT, SPF 
+     * @return an array of Strings representing the records
      * @throws NoneException when no record is found or a textparse exception happen
      * @throws TempErrorException on timeout.
      */
-    private Record[] getRecords(String hostname, int recordType, String recordTypeDescription, String logHost)
+    private List getRecords(String hostname, int recordType)
             throws TempErrorException {
-        Record[] records;
-        String logname = logHost != null ? logHost : hostname;
+        String recordTypeDescription;
+        int dnsJavaType;
+        switch (recordType) {
+            case A: recordTypeDescription = "A"; dnsJavaType = Type.A; break;
+            case AAAA: recordTypeDescription = "AAAA"; dnsJavaType = Type.AAAA; break;
+            case MX: recordTypeDescription = "MX"; dnsJavaType = Type.MX; break;
+            case PTR: recordTypeDescription = "PTR"; dnsJavaType = Type.PTR; break;
+            case TXT: recordTypeDescription = "TXT"; dnsJavaType = Type.TXT; break;
+            // case SPF: recordTypeDescString = "SPF"; dnsJavaType = Type.SPF; break;
+            default: // TODO fail!
+                return null;
+        }
+        List records;
         try {
 
-            log.debug("Start "+recordTypeDescription+"-Record lookup for : " + logname);
+            log.debug("Start "+recordTypeDescription+"-Record lookup for : " + hostname);
 
             Lookup.getDefaultResolver().setTimeout(timeOut);
-            Lookup query = new Lookup(hostname, recordType);
+            Lookup query = new Lookup(hostname, dnsJavaType);
 
-            records = query.run();
+            Record[] rr = query.run();
             int queryResult = query.getResult();
 
             if (queryResult == Lookup.TRY_AGAIN) {
@@ -342,10 +344,44 @@ public class DNSServiceXBillImpl implements DNSService {
                         + queryResult);
             }
             
-            log.debug("Found " + records.length + " "+recordTypeDescription+"-Records");
+            if (rr.length > 0) {
+                records = new ArrayList();
+                for (int i = 0; i < rr.length; i++) {
+                    String res;
+                    switch (recordType) {
+                        case A:
+                            ARecord a = (ARecord) rr[i];
+                            res = a.getAddress().getHostAddress();
+                            break;
+                        case AAAA:
+                            AAAARecord aaaa = (AAAARecord) rr[i];
+                            res = aaaa.getAddress().getHostAddress();
+                            break;
+                        case MX:
+                            MXRecord mx = (MXRecord) rr[i];
+                            res = mx.getTarget().toString();
+                            break;
+                        case PTR:
+                            PTRRecord ptr = (PTRRecord) rr[i];
+                            res = IPAddr.stripDot(ptr.getTarget().toString());
+                            break;
+                        case TXT:
+                            TXTRecord txt = (TXTRecord) rr[i];
+                            res = txt.rdataToString();
+                            break;
+                        default:
+                            return null;
+                    }
+                    records.add(res);
+                }
+            } else {
+                records = null;
+            }
+            
+            log.debug("Found " + rr.length + " "+recordTypeDescription+"-Records");
         } catch (TextParseException e) {
             // i think this is the best we could do
-            log.debug("No "+recordTypeDescription+" Record found for host: " + logname);
+            log.debug("No "+recordTypeDescription+" Record found for host: " + hostname);
             records = null;
         }
         return records;
