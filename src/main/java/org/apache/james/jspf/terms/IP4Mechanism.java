@@ -104,4 +104,14 @@ public class IP4Mechanism extends GenericMechanism {
         return ip;
     }
 
+    /**
+     * @see java.lang.Object#toString()
+     */
+    public String toString() {
+        if (getIp().getMaskLength() == getMaxCidr()) {
+            return "ip4:"+getIp().getIPAddress();
+        } else {
+            return "ip4:"+getIp().getIPAddress()+"/"+getIp().getMaskLength();
+        }
+    }
 }

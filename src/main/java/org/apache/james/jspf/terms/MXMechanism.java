@@ -20,6 +20,7 @@
 
 package org.apache.james.jspf.terms;
 
+import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.exceptions.NoneException;
@@ -27,6 +28,7 @@ import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.parser.SPF1Parser;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -60,7 +62,7 @@ public class MXMechanism extends AMechanism {
         // get the ipAddress
         checkAddress = IPAddr.getAddress(spfData.getIpAddress(), getIp4cidr());
         
-        List mxRecords = spfData.getDnsProbe().getMXRecords(host);
+        List mxRecords = getMXRecords(spfData.getDnsProbe(), host);
 
         // no mx record found
         if (mxRecords == null) return false;
@@ -71,6 +73,55 @@ public class MXMechanism extends AMechanism {
 
         // No match found
         return false;
+    }
+
+
+    /**
+     * @see org.apache.james.jspf.core.DNSService#getMXRecords(java.lang.String,
+     *      int)
+     */
+    public List getMXRecords(DNSService dnsProbe, String domainName)
+            throws PermErrorException, TempErrorException {
+        try {
+            List mxR = null;
+            List records = dnsProbe.getRecords(domainName, DNSService.MX);
+    
+            if (records == null) {
+                return null;
+            }
+            
+            // check if the maximum lookup count is reached
+            if (dnsProbe.getRecordLimit() > 0 && records.size() > dnsProbe.getRecordLimit()) {
+                throw new PermErrorException("Maximum MX lookup count reached");
+            }
+      
+            for (int i = 0; i < records.size(); i++) {
+                String mx = (String) records.get(i);
+                
+                if (mx != null && mx.length() > 0) {
+                    log.debug("Add MX-Record " + mx + " to list");
+        
+                    List res = dnsProbe.getRecords(mx, DNSService.A);
+                    if (res != null) {
+                        if (mxR == null) {
+                            mxR = new ArrayList();
+                        }
+                        mxR.addAll(res);
+                    }
+                }
+            }
+            
+            return mxR != null && mxR.size() > 0 ? mxR : null;
+        } catch (DNSService.TimeoutException e) {
+            throw new TempErrorException("Timeout querying the dns server");
+        }
+    }
+    
+    /**
+     * @see org.apache.james.jspf.terms.AMechanism#toString()
+     */
+    public String toString() {
+        return super.toString("mx");
     }
 
 }

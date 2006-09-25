@@ -20,9 +20,6 @@
 package org.apache.james.jspf;
 
 import org.apache.james.jspf.core.DNSService;
-import org.apache.james.jspf.core.IPAddr;
-import org.apache.james.jspf.exceptions.PermErrorException;
-import org.apache.james.jspf.exceptions.TempErrorException;
 import org.jvyaml.Constructor;
 import org.jvyaml.DefaultYAMLFactory;
 import org.jvyaml.YAMLFactory;
@@ -115,7 +112,7 @@ public abstract class AbstractYamlTest extends TestCase {
         
         System.out.println("testing "+next+": "+currentTest.get("description"));
     
-        SPF spf = new SPF(getDNSService(), new ConsoleLogger());
+        SPF spf = new SPF(new LoggingDNSService(getDNSService()), new ConsoleLogger());
         
         String ip = null;
         String sender = null;
@@ -183,197 +180,10 @@ public abstract class AbstractYamlTest extends TestCase {
             this.recordLimit = 10;
         }
 
-        public List getAAAARecords(String strServer) throws PermErrorException, TempErrorException {
-            ArrayList res = new ArrayList();
-            if (zonedata.get(strServer) != null) {
-                List l = (List) zonedata.get(strServer);
-                Iterator i = l.iterator();
-
-                while (i.hasNext()) {
-                    HashMap hm = (HashMap) i.next();
-                    if (hm.get("AAAA") != null) {
-                        String a = (String) hm.get("AAAA");
-                        res.add(IPAddr.getAddress(a));
-                    }
-                }
-            }
-            if (res.size() > 0 ) return res;
-            
-            return null;
-        }
-
-        public List getARecords(String strServer) throws PermErrorException, TempErrorException {
-            ArrayList res = new ArrayList();
-       
-            if (zonedata.get(strServer) != null) {
-                List l = (List) zonedata.get(strServer);
-                Iterator i = l.iterator();
-                while (i.hasNext()) {
-                    HashMap hm = (HashMap) i.next();
-                    if (hm.get("A") != null) {
-                        String a = (String) hm.get("A");
-                        res.add(IPAddr.getAddress(a));
-                        
-                    }
-                }
-            }
-            if (res.size() > 0 ) return res;
-            
-            return null;
-        }
-
         public List getLocalDomainNames() {
             List l = new ArrayList();
             l.add("localdomain.foo.bar");
             return l; 
-        }
-
-        public List getMXRecords(String domainName) throws PermErrorException, TempErrorException {
-            if (zonedata.get(domainName) != null) {
-                List l = (List) zonedata.get(domainName);
-                Iterator i = l.iterator();
-                ArrayList res = new ArrayList();
-                while (i.hasNext()) {
-                    HashMap hm = (HashMap) i.next();
-                    if (hm.get("MX") != null) {
-                        List mxList = (List) hm.get("MX");
-                         
-                        Iterator mxs = mxList.iterator();
-                
-                        while (mxs.hasNext()) {
-                            // skip the MX priority
-                            mxs.next();
-                            String mx = (String) mxs.next();
-                           
-                            // resolv the record
-                            List records = getARecords(mx);
-                            
-                            // TODO: this is a direct result of the NoneException removal
-                            // we should check wether is correct to return null or we simply
-                            // should skip this record.
-                            if (records == null) {
-                                return null;
-                            }
-                            
-                            for (int i2 = 0; i2 < records.size();i2++ ) {
-                                res.add(records.get(i2));
-                            }
-                        }
-                    }
-                }
-                // check if the maximum lookup count is reached
-                if (recordLimit > 0 && res.size() > recordLimit) throw new PermErrorException("Maximum MX lookup count reached");
-
-                return res.size() > 0 ? res : null;
-            }
-            return null;
-        }
-
-        public List getPTRRecords(String ipAddress) throws PermErrorException, TempErrorException {
-            ArrayList res = new ArrayList();
-            
-            if (zonedata.get(ipAddress) != null) {
-                List l = (List) zonedata.get(ipAddress);
-                Iterator i = l.iterator();
-                while (i.hasNext()) {
-                    HashMap hm = (HashMap) i.next();
-                    if (hm.get("PTR") != null) {
-                        String a = (String) hm.get("PTR");
-                        res.add(a);
-                        
-                    }
-                }
-            }
-            if (res.size() > 0 ) return res;
-            
-            return null;
-        }
-
-        public String getSpfRecord(String hostname, String spfVersion) throws PermErrorException, TempErrorException {
-            if (hostname.endsWith(".")) hostname = hostname.substring(0, hostname.length()-1);
-            if (zonedata.get(hostname) != null) {
-                List l = (List) zonedata.get(hostname);
-                Iterator i = l.iterator();
-                String res = null;
-                boolean SPFexists = false;
-                while (i.hasNext()) {
-                    Object o = i.next();
-                    if (o instanceof HashMap) {
-                        HashMap hm = (HashMap) o;
-                        if (hm.get("SPF") != null) {
-                            SPFexists = true;
-                            String spfrecord = (String) hm.get("SPF");
-                            if (spfrecord.startsWith(spfVersion+" ") || spfrecord.equals(spfVersion)) {
-                                if (res != null) {
-                                    throw new PermErrorException("Multiple SPF records!");
-                                } else {
-                                    res = spfrecord;
-                                }
-                            } else {
-                                System.err.println("#####1 unmatched: "+spfrecord);
-                            }
-                        }
-                    } else {
-                        System.err.println("[[[[[[[[[[[[[[[[[[[[1 "+o.getClass().toString()+" ! "+o);
-                    }
-                }
-                if (!SPFexists) {
-                    i = l.iterator();
-                    while (i.hasNext()) {
-                        Object o = i.next();
-                        if (o instanceof HashMap) {
-                            HashMap hm = (HashMap) o;
-                            if (hm.get("TXT") != null) {
-                                String spfrecord = (String) hm.get("TXT");
-                                if (spfrecord.startsWith(spfVersion+" ") || spfrecord.equals(spfVersion)) {
-                                    if (res != null) {
-                                        throw new PermErrorException("Multiple TXT records!");
-                                    } else {
-                                        res = spfrecord;
-                                    }
-                                } else {
-                                    System.err.println("#####2 unmatched: "+spfrecord);
-                                }
-                            }
-                        } else if (o.toString().equals("TIMEOUT")) {
-                            throw new TempErrorException("Timeout");
-                        } else {
-                            System.err.println("[[[[[[[[[[[[[[[[[[[[2 "+o.getClass().toString()+" ! "+o);
-                        }
-                    }
-                }
-                if (res != null) return res;
-            }
-            int p = hostname.indexOf(".");
-            if (p > 0) {
-                hostname = hostname.substring(p+1);
-                if (zonedata.get(hostname) != null) {
-                    if (((List) zonedata.get(hostname)).iterator().next().equals("TIMEOUT")) {
-                        throw new TempErrorException("TIMEOUT");
-                    }
-                }
-            }
-            return null;
-        }
-
-        public String getTxtCatType(String strServer) throws PermErrorException, TempErrorException {
-            String res = null;
-            if (strServer.endsWith(".")) strServer = strServer.substring(0, strServer.length()-1);
-            if (zonedata.get(strServer) != null) {
-                List l = (List) zonedata.get(strServer);
-                Iterator i = l.iterator();
-
-                while (i.hasNext()) {
-                    HashMap hm = (HashMap) i.next();
-                    if (hm.get("TXT") != null) {
-                        String spfrecord = (String) hm.get("TXT");
-                        if (res != null) res+=" "; else res = "";
-                        res += spfrecord;
-                    }
-                }
-
-            }
-            return res;
         }
 
         public void setTimeOut(int timeOut) {
@@ -392,8 +202,70 @@ public abstract class AbstractYamlTest extends TestCase {
         public void setRecordLimit(int recordLimit) {
             this.recordLimit = recordLimit;
         }
+
+        public List getRecords(String hostname, int recordType) throws TimeoutException {
+            String type = getRecordTypeDescription(recordType);
+
+            List res;
+            
+            // remove trailing dot before running the search.
+            if (hostname.endsWith(".")) hostname = hostname.substring(0, hostname.length()-1);
+            
+            if (zonedata.get(hostname) != null) {
+                List l = (List) zonedata.get(hostname);
+                Iterator i = l.iterator();
+                res = new ArrayList();
+                while (i.hasNext()) {
+                    Object o = i.next();
+                    if (o instanceof HashMap) {
+                        HashMap hm = (HashMap) o;
+                        if (hm.get(type) != null) {
+                            if (recordType == DNSService.MX) {
+                                List mxList = (List) hm.get(type);
+    
+                                // For MX records we overwrite the result ignoring the priority.
+                                Iterator mxs = mxList.iterator();
+                                while (mxs.hasNext()) {
+                                    // skip the MX priority
+                                    mxs.next();
+                                    String cname = (String) mxs.next();
+                                    res.add(cname);
+                                }
+                            } else {
+                                res.add((String) hm.get(type));
+                            }
+                        }
+                    } else if ("TIMEOUT".equals(o)) {
+                        throw new TimeoutException();
+                    } else {
+                        throw new IllegalStateException("getRecord found an unexpected data");
+                    }
+                }
+                return res.size() > 0 ? res : null;
+            }
+            return null;
+        }
+
     }
 
+    
+    /**
+     * Return a string representation of a DNSService record type.
+     * 
+     * @param recordType the DNSService.CONSTANT type to convert
+     * @return a string representation of the given record type
+     */
+    public static String getRecordTypeDescription(int recordType) {
+        switch (recordType) {
+            case DNSService.A: return "A";
+            case DNSService.AAAA: return "AAAA";
+            case DNSService.MX: return "MX";
+            case DNSService.PTR: return "PTR";
+            case DNSService.TXT: return "TXT";
+            case DNSService.SPF: return "SPF";
+            default: return null;
+        }
+    }
 
     protected static class SPFYamlTestSuite {
         public String comment;

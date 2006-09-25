@@ -20,6 +20,7 @@
 
 package org.apache.james.jspf.terms;
 
+import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.LogEnabled;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPF1Constants;
@@ -28,6 +29,8 @@ import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.parser.SPF1Parser;
+
+import java.util.List;
 
 /**
  * This class represent the exp modifier
@@ -67,7 +70,7 @@ public class ExpModifier extends GenericModifier implements LogEnabled {
         try {
             host = new MacroExpand(spfData, log).expandDomain(host);
             try {
-                exp = spfData.getDnsProbe().getTxtCatType(host);
+                exp = getTxtCatType(spfData.getDnsProbe(), host);
             } catch (TempErrorException e) {
                 // Nothing todo here.. just return null
                 return null;
@@ -96,6 +99,46 @@ public class ExpModifier extends GenericModifier implements LogEnabled {
      */
     public void enableLogging(Logger logger) {
         this.log = logger;
+    }
+
+
+    /**
+     * Get TXT records as a string
+     * 
+     * @param dns The DNSService to query
+     * @param strServer
+     *            The hostname for which we want to retrieve the TXT-Record
+     * @return String which reflect the TXT-Record
+     * @throws PermErrorException
+     *             if the hostname is not resolvable
+     * @throws TempErrorException
+     *             if the lookup result was "TRY_AGAIN"
+     */
+    public String getTxtCatType(DNSService dns, String strServer) throws TempErrorException {
+        try {
+            List records = dns.getRecords(strServer, DNSService.TXT);
+        
+            if (records == null) {
+                return null;
+            }
+    
+            log.debug("Concatenating " + records.size() + " TXT-Records to one String");
+    
+            StringBuffer txtData = new StringBuffer();
+            for (int i = 0; i < records.size(); i++) {
+                txtData.append(records.get(i));
+            }
+            return txtData.toString();
+        } catch (DNSService.TimeoutException e) {
+            throw new TempErrorException("Timeout querying dns server");
+        }
+    }
+    
+    /**
+     * @see java.lang.Object#toString()
+     */
+    public String toString() {
+       return "exp="+getHost();
     }
 
 }

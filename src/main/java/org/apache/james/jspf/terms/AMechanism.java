@@ -20,6 +20,7 @@
 
 package org.apache.james.jspf.terms;
 
+import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.exceptions.PermErrorException;
@@ -28,6 +29,7 @@ import org.apache.james.jspf.parser.SPF1Parser;
 import org.apache.james.jspf.util.Inet6Util;
 import org.apache.james.jspf.util.ConfigurationMatch;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -66,7 +68,7 @@ public class AMechanism extends GenericMechanism {
                 IPAddr checkAddress = IPAddr.getAddress(spfData.getIpAddress(),
                         getIp4cidr());
 
-                List aRecords =spfData.getDnsProbe().getARecords(host);
+                List aRecords = getARecords(spfData.getDnsProbe(),host);
      
                 // no a records just return null
                 if (aRecords == null) {
@@ -80,7 +82,7 @@ public class AMechanism extends GenericMechanism {
                 IPAddr checkAddress = IPAddr.getAddress(spfData.getIpAddress(),
                         getIp6cidr());
 
-                List aaaaRecords =spfData.getDnsProbe().getAAAARecords(host);
+                List aaaaRecords = getAAAARecords(spfData.getDnsProbe(), host);
                 
                 // no aaaa records just return false
                 if (aaaaRecords == null) {
@@ -93,6 +95,7 @@ public class AMechanism extends GenericMechanism {
 
             }
         } catch (Exception e) {
+            e.printStackTrace();
             throw new PermErrorException("No valid ipAddress: "
                     + spfData.getIpAddress());
         }
@@ -136,15 +139,15 @@ public class AMechanism extends GenericMechanism {
     public boolean checkAddressList(IPAddr checkAddress, List addressList, int cidr) throws PermErrorException {
 
         for (int i = 0; i < addressList.size(); i++) {
-            IPAddr ip = (IPAddr) addressList.get(i);
+            String ip = (String) addressList.get(i);
 
             // Check for empty record
             if (ip != null) {
                 // set the mask in the address.
                 // TODO should we use cidr from the parameters or the input checkAddress cidr?
-                ip.setMask(checkAddress.getMaskLength());
+                IPAddr ipAddr = IPAddr.getAddress(ip, checkAddress.getMaskLength());
                 if (checkAddress.getMaskedIPAddress().equals(
-                        ip.getMaskedIPAddress())) {
+                        ipAddr.getMaskedIPAddress())) {
                     return true;
                 }
             }
@@ -164,6 +167,83 @@ public class AMechanism extends GenericMechanism {
      */
     protected synchronized int getIp6cidr() {
         return ip6cidr;
+    }
+
+    /**
+     * @see java.lang.Object#toString()
+     */
+    public String toString() {
+        return toString("a");
+    }
+
+    /**
+     * @see java.lang.Object#toString()
+     */
+    protected String toString(String mechKey) {
+        StringBuffer res = new StringBuffer();
+        res.append(mechKey);
+        if (getDomain() != null) {
+            res.append(":"+getDomain());
+        }
+        if (getIp4cidr() != 32) {
+            res.append("/"+getIp4cidr());
+        }
+        if (getIp6cidr() != 128) {
+            res.append("//"+getIp4cidr());
+        }
+        return res.toString();
+    }
+    
+    
+    /**
+     * Retrieve a list of AAAA records
+     */
+    public List getAAAARecords(DNSService dns, String strServer)
+            throws PermErrorException, TempErrorException {
+        List listAAAAData;
+        if (IPAddr.isIPAddr(strServer)) {
+            IPAddr ipTest = IPAddr.getAddress(strServer);
+            // Address is already an IP address, so add it to list
+            listAAAAData = new ArrayList();
+            listAAAAData.add(ipTest);
+        } else {
+            try {
+                listAAAAData = dns.getRecords(strServer, DNSService.AAAA);
+            } catch (DNSService.TimeoutException e) {
+                throw new TempErrorException("Timeout querying dns server");
+            }
+        }
+        return listAAAAData;
+    }
+
+
+    /**
+     * Get a list of IPAddr's for a server
+     * 
+     * @params dns the DNSService to query
+     * @param strServer
+     *            The hostname or ipAddress whe should get the A-Records for
+     * @return The ipAddresses
+     * @throws PermErrorException
+     *             if an PermError should be returned
+     * @throws TempErrorException
+     *             if the lookup result was "TRY_AGAIN"
+     */
+    public List getARecords(DNSService dns, String strServer) throws PermErrorException, TempErrorException {
+        List listAData;
+        if (IPAddr.isIPAddr(strServer)) {
+            IPAddr ipTest = IPAddr.getAddress(strServer);
+            // Address is already an IP address, so add it to list
+            listAData = new ArrayList();
+            listAData.add(ipTest);
+        } else {
+            try {
+                listAData = dns.getRecords(strServer, DNSService.A);
+            } catch (DNSService.TimeoutException e) {
+                throw new TempErrorException("Timeout querying dns server");
+            }
+        }
+        return listAData;
     }
 
 }

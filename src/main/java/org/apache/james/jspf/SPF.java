@@ -35,6 +35,7 @@ import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.parser.SPF1Parser;
 
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * This class is used to generate a SPF-Test and provided all intressting data.
@@ -163,7 +164,7 @@ public class SPF {
         }
 
         // Get the raw dns txt entry which contains a spf entry
-        String spfDnsEntry = dnsProbe.getSpfRecord(spfData.getCurrentDomain(),
+        String spfDnsEntry = getSpfRecord(dnsProbe,spfData.getCurrentDomain(),
                 SPF1Constants.SPF_VERSION);
 
         if (spfDnsEntry == null) {
@@ -300,4 +301,68 @@ public class SPF {
     public synchronized void setDefaultExplanation(String defaultExplanation) {
         this.defaultExplanation = defaultExplanation;      
     }
+    
+    
+
+
+    /**
+     * Get the SPF-Record for a server given it's version
+     * 
+     * TODO: support SPF Records too. This will be done if dnsjava support it!
+     * 
+     * @param dns
+     *            The dns service to query
+     * @param hostname
+     *            The hostname for which we want to retrieve the SPF-Record
+     * @param spfVersion
+     *            The SPF-Version which should used.
+     * @return The SPF-Record if one is found.
+     * @throws PermErrorException
+     *             if more then one SPF-Record was found.
+     * @throws TempErrorException
+     *             if the lookup result was "TRY_AGAIN"
+     */
+    public String getSpfRecord(DNSService dns, String hostname, String spfVersion)
+            throws PermErrorException, TempErrorException {
+
+        String returnValue = null;
+        try {
+            List spfR = dns.getRecords(hostname, DNSService.SPF);
+            if (spfR == null || spfR.isEmpty()) {
+                // do DNS lookup for TXT
+                spfR = dns.getRecords(hostname, DNSService.TXT);
+            }
+    
+            // process returned records
+            if (spfR != null && !spfR.isEmpty()) {
+    
+                Iterator all = spfR.iterator();
+    
+                while (all.hasNext()) {
+                    String compare = all.next().toString().trim();
+    
+                    // TODO is this correct? we remove the first and last char if the
+                    // result has an initial " 
+                    // remove '"'
+                    if (compare.charAt(0)=='"') {
+                        compare = compare.toLowerCase().substring(1,
+                                compare.length() - 1);
+                    }
+    
+                    if (compare.startsWith(spfVersion + " ") || compare.equals(spfVersion)) {
+                        if (returnValue == null) {
+                            returnValue = compare;
+                        } else {
+                            throw new PermErrorException(
+                                    "More than 1 SPF record found for host: " + hostname);
+                        }
+                    }
+                }
+            }
+            return returnValue;
+        } catch (DNSService.TimeoutException e) {
+            throw new TempErrorException("Timeout querying dns");
+        }
+    }
+
 }

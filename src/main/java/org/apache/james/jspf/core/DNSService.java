@@ -17,11 +17,7 @@
  * under the License.                                           *
  ****************************************************************/
 
-
 package org.apache.james.jspf.core;
-
-import org.apache.james.jspf.exceptions.PermErrorException;
-import org.apache.james.jspf.exceptions.TempErrorException;
 
 import java.util.List;
 
@@ -30,6 +26,13 @@ import java.util.List;
  *  
  */
 public interface DNSService {
+    
+    /**
+     * The exception thrown on timeout.
+     */
+    public class TimeoutException extends Exception {
+        
+    }
     
     /** The record types for the lookups */
     public int A = 1;
@@ -40,91 +43,15 @@ public interface DNSService {
     public int SPF = 6;
 
     /**
-     * Get the SPF-Record for a server given it's version
+     * Retrieve dns records for the given host
      * 
-     * TODO: support SPF Records too. This will be done if dnsjava support it!
-     * 
-     * @param hostname
-     *            The hostname for which we want to retrieve the SPF-Record
-     * @param spfVersion
-     *            The SPF-Version which should used.
-     * @return The SPF-Record if one is found.
-     * @throws PermErrorException
-     *             if more then one SPF-Record was found.
-     * @throws TempErrorException
-     *             if the lookup result was "TRY_AGAIN"
+     * @param hostname host to be queried
+     * @param recordType the record type: MX, A, AAAA, PTR, TXT, SPF 
+     * @return an array of Strings representing the records
+     * @throws NoneException when no record is found or a textparse exception happen
+     * @throws TempErrorException on timeout.
      */
-    public String getSpfRecord(String hostname, String spfVersion)
-            throws PermErrorException, TempErrorException;
-
-    /**
-     * Get a list of IPAddr's for a server
-     * 
-     * @param strServer
-     *            The hostname or ipAddress whe should get the A-Records for
-     * @return The ipAddresses
-     * @throws PermErrorException
-     *             if an PermError should be returned
-     * @throws TempErrorException
-     *             if the lookup result was "TRY_AGAIN"
-     */
-    public List getARecords(String strServer) throws PermErrorException, TempErrorException;
-
-    /**
-     * Get a list of IPAddr's for a server
-     * 
-     * @param strServer
-     *            The hostname or ipAddress whe should get the AAAA-Records for
-     * @return The ipAddresses
-     * @throws PermErrorException
-     *             if an PermError should be returned
-     * @throws TempErrorException
-     *             if the lookup result was "TRY_AGAIN"
-     */
-    public List getAAAARecords(String strServer)
-            throws PermErrorException, TempErrorException;
-
-    /**
-     * Get TXT records as a string
-     * 
-     * @param strServer
-     *            The hostname for which we want to retrieve the TXT-Record
-     * @return String which reflect the TXT-Record
-     * @throws PermErrorException
-     *             if the hostname is not resolvable
-     * @throws TempErrorException
-     *             if the lookup result was "TRY_AGAIN"
-     */
-    public String getTxtCatType(String strServer) throws PermErrorException, TempErrorException;
-
-    /**
-     * Get reverse DNS records
-     * 
-     * @param ipAddress
-     *            The ipAddress for which we want to get the PTR-Record
-     * @return the PTR-Records
-     * @throws PermErrorException
-     *             if an PermError should be returned
-     * @throws TempErrorException
-     *             if the lookup result was "TRY_AGAIN"
-     */
-
-    public List getPTRRecords(String ipAddress) throws PermErrorException,
-            TempErrorException;
-
-    /**
-     * Get a list of masked IPAddr MX-Records
-     * 
-     * @param domainName
-     *            The domainName or ipaddress we want to get the ips for
-     * @return IPAddresses of the MX-Records
-     * @throws PermErrorException
-     *             if an PermError should be returned
-     * @throws TempErrorException
-     *             if the lookup result was "TRY_AGAIN"
-     */
-    public List getMXRecords(String domainName)
-            throws PermErrorException, TempErrorException;
+    public List getRecords(String hostname, int recordType) throws TimeoutException;
 
     /**
      * Try to get all domain names for the running host

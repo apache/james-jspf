@@ -116,4 +116,10 @@ public class RedirectModifier extends GenericModifier implements LogEnabled {
         this.log = logger;
     }
 
+    /**
+     * @see java.lang.Object#toString()
+     */
+    public String toString() {
+        return "redirect="+getHost();
+    }
 }

@@ -128,4 +128,10 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled {
         this.log = logger;
     }
 
+    /**
+     * @see java.lang.Object#toString()
+     */
+    public String toString() {
+        return "include:"+getHost();
+    }
 }

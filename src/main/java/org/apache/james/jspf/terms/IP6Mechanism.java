@@ -47,4 +47,17 @@ public class IP6Mechanism extends IP4Mechanism {
     protected int getMaxCidr() {
         return 128;
     }
+    
+
+    /**
+     * @see java.lang.Object#toString()
+     */
+    public String toString() {
+        if (getIp().getMaskLength() == getMaxCidr()) {
+            return "ip6:"+getIp().getIPAddress();
+        } else {
+            return "ip6:"+getIp().getIPAddress()+"/"+getIp().getMaskLength();
+        }
+    }
+
 }

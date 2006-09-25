@@ -22,15 +22,11 @@ package org.apache.james.jspf;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.Logger;
-import org.apache.james.jspf.exceptions.NoneException;
-import org.apache.james.jspf.exceptions.PermErrorException;
-import org.apache.james.jspf.exceptions.TempErrorException;
 import org.xbill.DNS.AAAARecord;
 import org.xbill.DNS.ARecord;
 import org.xbill.DNS.Lookup;
@@ -63,161 +59,6 @@ public class DNSServiceXBillImpl implements DNSService {
         this.log = logger;
         // Default record limit is 10
         this.recordLimit = 10;
-    }
-
-    /**
-     * @see org.apache.james.jspf.core.DNSService#getSpfRecord(java.lang.String,
-     *      java.lang.String)
-     */
-    public String getSpfRecord(String hostname, String spfVersion)
-            throws PermErrorException, TempErrorException {
-
-        String returnValue = null;
-        // do DNS lookup for TXT
-        List txtR = getRecords(hostname, TXT);
-
-        // process returned records
-        if (txtR != null && !txtR.isEmpty()) {
-
-            Iterator all = txtR.iterator();
-
-            while (all.hasNext()) {
-                String compare = all.next().toString().trim();
-
-                // remove '"'
-                compare = compare.toLowerCase().substring(1,
-                        compare.length() - 1);
-
-                if (compare.startsWith(spfVersion + " ")) {
-                    if (returnValue == null) {
-                        returnValue = compare;
-                    } else {
-                        throw new PermErrorException(
-                                "More than 1 SPF record found for host: " + hostname);
-                    }
-                }
-            }
-        }
-        return returnValue;
-    }
-
-    /**
-     * @see org.apache.james.jspf.core.DNSService#getARecords(java.lang.String,
-     *      int)
-     */
-    public List getARecords(String strServer) throws PermErrorException, TempErrorException {
-
-        ArrayList listTxtData = new ArrayList();
-
-        if (IPAddr.isIPAddr(strServer)) {
-            IPAddr ipTest = IPAddr.getAddress(strServer);
-            // Address is already an IP address, so add it to list
-            listTxtData.add(ipTest);
-        } else {
-
-            List records = getRecords(strServer, A);
-            
-            // check if the maximum lookup count is reached
-            if (recordLimit > 0 && records.size() > recordLimit) throw new PermErrorException("Maximum A lookup count reached");
-            
-            for (int i = 0; i < records.size(); i++) {
-                String a = (String) records.get(i);
-                
-                IPAddr ip = IPAddr.getAddress(a);
-
-                log.debug("Add ipAddress " + ip + " to list");
-                listTxtData.add(ip);
-            }
-        }
-        return listTxtData;
-    }
-
-    /**
-     * @see org.apache.james.jspf.core.DNSService#getAAAARecords(java.lang.String,
-     *      int)
-     */
-    public List getAAAARecords(String strServer)
-            throws PermErrorException, TempErrorException {
-
-        ArrayList listTxtData = new ArrayList();
-
-        if (IPAddr.isIPAddr(strServer)) {
-            IPAddr ipTest = IPAddr.getAddress(strServer);
-            // Address is already an IP address, so add it to list
-            listTxtData.add(ipTest);
-        } else {
-            List records = getRecords(strServer, AAAA);
-
-            for (int i = 0; i < records.size(); i++) {
-                String a = (String) records.get(i);
-
-                IPAddr ip = IPAddr.getAddress(a);
-
-                log.debug("Add ipAddress " + ip + " to list");
-                listTxtData.add(ip);
-            }
-        }
-        return listTxtData;
-    }
-
-    /**
-     * @see org.apache.james.jspf.core.DNSService#getTxtCatType(java.lang.String)
-     */
-    public String getTxtCatType(String strServer) throws TempErrorException {
-
-        StringBuffer txtData = new StringBuffer();
-        List records = getRecords(strServer, TXT);
-
-        log.debug("Convert " + records.size() + " TXT-Records to one String");
-
-        for (int i = 0; i < records.size(); i++) {
-            txtData.append(records.get(i));
-        }
-        return txtData.toString();
-    }
-
-    /**
-     * @see org.apache.james.jspf.core.DNSService#getPTRRecords(java.lang.String)
-     */
-    public List getPTRRecords(String ipAddress) throws PermErrorException, TempErrorException {
-        // do DNS lookup for TXT
-        IPAddr ip = IPAddr.getAddress(ipAddress);
-
-        List records = getRecords(ip.getReverseIP() + ".in-addr.arpa", PTR);
-
-        // check if the maximum lookup count is reached
-        if (recordLimit > 0 && records.size() > recordLimit) throw new PermErrorException("Maximum PTR lookup count reached");
-  
-        return records;
-    }
-
-    /**
-     * @see org.apache.james.jspf.core.DNSService#getMXRecords(java.lang.String,
-     *      int)
-     */
-    public List getMXRecords(String domainName)
-            throws PermErrorException, TempErrorException {
-
-        List mxR = null;
-        List records = getRecords(domainName, MX);
-
-        // check if the maximum lookup count is reached
-        if (recordLimit > 0 && records.size() > recordLimit) throw new PermErrorException("Maximum MX lookup count reached");
-  
-        for (int i = 0; i < records.size(); i++) {
-            String mx = (String) records.get(i);
-            log.debug("Add MX-Record " + mx + " to list");
-
-            List res = getARecords(mx);
-            if (res != null) {
-                if (mxR == null) {
-                    mxR = new ArrayList();
-                }
-                mxR.addAll(res);
-            }
-        }
-        
-        return mxR;
     }
 
     /**
@@ -266,19 +107,11 @@ public class DNSServiceXBillImpl implements DNSService {
         this.recordLimit = recordLimit;
     }
     
-    
-
     /**
-     * Retrieve dns records for the given host
-     * 
-     * @param hostname host to be queried
-     * @param recordType the record type: MX, A, AAAA, PTR, TXT, SPF 
-     * @return an array of Strings representing the records
-     * @throws NoneException when no record is found or a textparse exception happen
-     * @throws TempErrorException on timeout.
+     * @see org.apache.james.jspf.core.DNSService#getRecords(java.lang.String, int)
      */
-    private List getRecords(String hostname, int recordType)
-            throws TempErrorException {
+    public List getRecords(String hostname, int recordType)
+            throws TimeoutException {
         String recordTypeDescription;
         int dnsJavaType;
         switch (recordType) {
@@ -303,8 +136,7 @@ public class DNSServiceXBillImpl implements DNSService {
             int queryResult = query.getResult();
 
             if (queryResult == Lookup.TRY_AGAIN) {
-                throw new TempErrorException("DNS Server returns RCODE: "
-                        + queryResult);
+                throw new TimeoutException();
             }
             
             if (rr.length > 0) {

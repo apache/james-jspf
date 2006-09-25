@@ -20,6 +20,7 @@
 
 package org.apache.james.jspf.terms;
 
+import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.exceptions.PermErrorException;
@@ -47,7 +48,6 @@ public class PTRMechanism extends GenericMechanism {
     public boolean run(SPF1Data spfData) throws PermErrorException,
             TempErrorException {
         String compareDomain;
-        IPAddr compareIP;
         ArrayList validatedHosts = new ArrayList();
 
         // update currentDepth
@@ -56,44 +56,55 @@ public class PTRMechanism extends GenericMechanism {
         // Get the right host.
         String host = expandHost(spfData);
 
+        try {
+            // Get PTR Records for the ipAddress which is provided by SPF1Data
+            IPAddr ip = IPAddr.getAddress(spfData.getIpAddress());
+            List domainList = spfData.getDnsProbe().getRecords(ip.getReverseIP() + ".in-addr.arpa", DNSService.PTR);
     
-        // Get PTR Records for the ipAddress which is provided by SPF1Data
-        List domainList = spfData.getDnsProbe().getPTRRecords(
-                spfData.getIpAddress());
-        
-        // No PTR records found
-        if (domainList == null) return false;
-       
-        for (int i = 0; i < domainList.size(); i++) {
-
-            // Get a record for this
-            List aList = spfData.getDnsProbe().getARecords(
-                    (String) domainList.get(i));
-            
-            // TODO check this: this is a direct result of the NoneException
-            // removal, and I'm not sure this is correct: maybe we should continue
-            if (aList == null) {
-                return false;
+            // No PTR records found
+            if (domainList == null) return false;
+    
+            // check if the maximum lookup count is reached
+            if (spfData.getDnsProbe().getRecordLimit() > 0 && domainList.size() > spfData.getDnsProbe().getRecordLimit()) {
+                // Truncate the PTR list to getRecordLimit.
+                // See #ptr-limit rfc4408 test
+                domainList = domainList.subList(0, spfData.getDnsProbe().getRecordLimit()-1);
+                // throw new PermErrorException("Maximum PTR lookup count reached");
             }
-            
-            for (int j = 0; j < aList.size(); j++) {
-                compareIP = (IPAddr) aList.get(j);
-                if (compareIP.toString().equals(spfData.getIpAddress())) {
-                    validatedHosts.add(domainList.get(i));
+    
+           
+            for (int i = 0; i < domainList.size(); i++) {
+    
+                // Get a record for this
+                List aList = spfData.getDnsProbe().getRecords(
+                        (String) domainList.get(i), DNSService.A);
+                
+                // TODO check this: this is a direct result of the NoneException
+                // removal, and I'm not sure this is correct: maybe we should continue
+                if (aList == null) {
+                    return false;
+                }
+                
+                for (int j = 0; j < aList.size(); j++) {
+                    if (aList.get(j).equals(spfData.getIpAddress())) {
+                        validatedHosts.add(domainList.get(i));
+                    }
                 }
             }
-        }
-
-        // Check if we match one of this ptr!
-        for (int j = 0; j < validatedHosts.size(); j++) {
-            compareDomain = (String) validatedHosts.get(j);
-            if (compareDomain.equals(host)
-                    || compareDomain.endsWith("." + host)) {
-                return true;
+    
+            // Check if we match one of this ptr!
+            for (int j = 0; j < validatedHosts.size(); j++) {
+                compareDomain = (String) validatedHosts.get(j);
+                if (compareDomain.equals(host)
+                        || compareDomain.endsWith("." + host)) {
+                    return true;
+                }
             }
+            
+            return false;
+        } catch (DNSService.TimeoutException e) {
+            throw new TempErrorException("Timeout querying the dns server");
         }
-        
-        return false;
 
     }
 

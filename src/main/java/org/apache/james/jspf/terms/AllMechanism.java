@@ -48,5 +48,12 @@ public class AllMechanism implements Mechanism, Configurable {
         // no checks needed
         // the regex only passes with no parameters
     }
+    
+    /**
+     * @see java.lang.Object#toString()
+     */
+    public String toString() {
+        return "all";
+    }
 
 }

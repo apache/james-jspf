@@ -8,7 +8,8 @@
 #   Craig Whitmore
 #   Frank Ellermann
 #
-# 17/07/2006 from http://www.openspf.org/svn/project/test-suite/rfc4408-tests.yml
+# 25/07/2006 from http://www.openspf.org/svn/project/test-suite/rfc4408-tests.yml
+# Changed the first test to add 10 more chars to the label (54 => 64 in length)
 ---
 description: Initial processing
 tests:
@@ -286,6 +287,68 @@ zonedata:
     - SPF: v=spf1 ip4:1.2.3.4
   t8.example.com:
     - SPF: v=spf1 ip4:1.2.3.4 redirect:t2.example.com
+
+---
+description: >-
+  ALL mechanism syntax
+tests:
+  all-dot:
+    description: |
+      all              = "all"
+    comment: |-
+      At least one implementation got this wrong
+    spec: 5.1/1
+    helo: mail.example.com
+    host: 1.2.3.4
+    mailfrom: foo@e1.example.com
+    result: permerror
+  all-arg:
+    description: |
+      all              = "all"
+    comment: |-
+      At least one implementation got this wrong
+    spec: 5.1/1
+    helo: mail.example.com
+    host: 1.2.3.4
+    mailfrom: foo@e2.example.com
+    result: permerror
+  all-cidr:
+    description: |
+      all              = "all"
+    spec: 5.1/1
+    helo: mail.example.com
+    host: 1.2.3.4
+    mailfrom: foo@e3.example.com
+    result: permerror
+  all-neutral:
+    description: |
+      all              = "all"
+    spec: 5.1/1
+    helo: mail.example.com
+    host: 1.2.3.4
+    mailfrom: foo@e4.example.com
+    result: neutral
+  all-double:
+    description: |
+      all              = "all"
+    spec: 5.1/1
+    helo: mail.example.com
+    host: 1.2.3.4
+    mailfrom: foo@e5.example.com
+    result: pass
+zonedata:
+  mail.example.com:
+    - A: 1.2.3.4
+  e1.example.com:
+    - SPF: v=spf1 -all.
+  e2.example.com:
+    - SPF: v=spf1 -all:foobar
+  e3.example.com:
+    - SPF: v=spf1 -all/8
+  e4.example.com:
+    - SPF: v=spf1 ?all
+  e5.example.com:
+    - SPF: v=spf1 all -all
 
 ---
 description: >-
@@ -691,6 +754,15 @@ tests:
     mailfrom: foo@e1.example.com
     result: fail
     explanation: DEFAULT
+  include-ignores-exp:
+    description: >-
+      when executing "incde", exp= from the target domain MUST NOT be used.
+    spec: 6.2/13
+    helo: mail.example.com
+    host: 1.2.3.4
+    mailfrom: foo@e7.example.com
+    result: fail
+    explanation: Correct!
   redirect-cancels-prior-exp:
     description: >-
       when executing "redirect", exp= from the original domain MUST NOT be used.
@@ -736,14 +808,18 @@ zonedata:
     - TXT: No-see-um
   exp2.example.com:
     - TXT: See me.
+  exp3.example.com:
+    - TXT: Correct!
   e5.example.com:
     - SPF: v=spf1 1up=foo
   e6.example.com:
     - SPF: v=spf1 =all
+  e7.example.com:
+    - SPF: v=spf1 include:e3.example.com -all exp=exp3.example.com
 
 ---
 description: |
-  check trailing dot with redirect and exp
+  check macro expansion rules
 tests:
   trailing-dot-domain:
     spec: 8.1/16
@@ -766,6 +842,45 @@ tests:
     mailfrom: test@exp.example.com
     result: fail
     explanation: This is a test.
+  invalid-macro-char:
+    spec: 8.1/19
+    description: >-
+      A '%' character not followed by a '{', '%', '-', or '_' character
+      is a syntax error.
+    helo: msgbas2x.cos.example.com
+    host: 192.168.218.40
+    mailfrom: test@e1.example.com
+    result: permerror
+  exp-only-macro-char:
+    spec: 8.1/16
+    description: >-
+      The following macro letters are allowed only in "exp" text: c, r, t
+    helo: msgbas2x.cos.example.com
+    host: 192.168.218.40
+    mailfrom: test@e2.example.com
+    result: permerror
+  exp-txt-macro-char:
+    spec: 8.1/31
+    description: >-
+      For IPv4 addresses, both the "i" and "c" macros expand
+      to the standard dotted-quad format.
+    helo: msgbas2x.cos.example.com
+    host: 192.168.218.40
+    mailfrom: test@e3.example.com
+    result: fail
+    explanation: Connections from 192.168.218.40 not authorized.
+  domain-name-truncation:
+    spec: 8.1/36
+    description: >-
+      When the result of macro expansion is used in a domain name query, if the
+      expanded domain name exceeds 253 characters, the left side is truncated
+      to fit, by removing successive domain labels until the total length does
+      not exceed 253 characters.
+    helo: msgbas2x.cos.example.com
+    host: 192.168.218.40
+    mailfrom: test@somewhat.long.exp.example.com
+    result: fail
+    explanation: Congratulations!  That was tricky.
 zonedata:
   example.com.d.spf.example.com:
     - SPF: v=spf1 redirect=a.spf.example.com
@@ -773,8 +888,8 @@ zonedata:
     - SPF: v=spf1 include:o.spf.example.com. ~all
   o.spf.example.com:
     - SPF: v=spf1 ip4:192.168.218.40
-  msgbas1x.cos.example.com:
-    - A: 192.168.240.36
+  msgbas2x.cos.example.com:
+    - A: 192.168.218.40
   example.com:
     - A: 192.168.90.76
     - SPF: v=spf1 redirect=%{d}.d.spf.example.com.
@@ -782,6 +897,18 @@ zonedata:
     - SPF: v=spf1 exp=msg.example.com. -all
   msg.example.com:
     - TXT: This is a test.
+  e1.example.com:
+    - SPF: v=spf1 -exists:%(ir).sbl.example.com ?all
+  e2.example.com:
+    - SPF: v=spf1 -all exp=%{r}.example.com
+  e3.example.com:
+    - SPF: v=spf1 -all exp=%{ir}.example.com
+  40.218.168.192.example.com:
+    - TXT: Connections from %{c} not authorized.
+  somewhat.long.exp.example.com:
+    - SPF: v=spf1 -all exp=foobar.%{o}.%{o}.%{o}.%{o}.%{o}.%{o}.%{o}.%{o}.example.com
+  somewhat.long.exp.example.com.somewhat.long.exp.example.com.somewhat.long.exp.example.com.somewhat.long.exp.example.com.somewhat.long.exp.example.com.somewhat.long.exp.example.com.somewhat.long.exp.example.com.somewhat.long.exp.example.com.example.com:
+    - TXT: Congratulations!  That was tricky.
 
 ---
 description: >-
@@ -809,16 +936,36 @@ tests:
     description: >-
       there MUST be a limit of no more than 10 MX looked up and checked.
     comment: >-
-      While the MX and PTR limits immediately follow a paragraph mandating
-      a permerror for exeeding limits, some of the SPF community feel that
-      more than 10 MX records should simply be ignored.  However, ignoring
-      the excess MX records can cause SPF results that are different for
-      each query.  A permerror is the right response.
+      The required result for this test was the subject of much
+      controversy.  Many felt that the RFC *should* have specified
+      permerror, but the concensus was that it failed to actually do so.
+      The preferred result reflects evaluating the 10 allowed MX records in the
+      order returned by the test data - or sorted via priority.
+      If testing with live DNS, the MX order may be random, and a pass
+      result would still be compliant.  The SPF result is effectively
+      random.
     spec: 10.1/7
     helo: mail.example.com
     host: 1.2.3.5
     mailfrom: foo@e4.example.com
-    result: permerror
+    result: [neutral, pass]
+  ptr-limit:
+    description: >-
+      there MUST be a limit of no more than 10 PTR looked up and checked.
+    comment: >-
+      The result of this test cannot be permerror not only because the
+      RFC doesn't specify it, but because the sender has no control over
+      the PTR records of spammers.
+      The preferred result reflects evaluating the 10 allowed PTR records in
+      the order returned by the test data.
+      If testing with live DNS, the PTR order may be random, and a pass
+      result would still be compliant.  The SPF result is effectively
+      randomized.
+    spec: 10.1/7
+    helo: mail.example.com
+    host: 1.2.3.5
+    mailfrom: foo@e5.example.com
+    result: [neutral, pass]
 zonedata:
   mail.example.com:
     - A: 1.2.3.4
@@ -842,3 +989,18 @@ zonedata:
     - MX: [9, mail.example.com]
     - MX: [10, e4.example.com]
     - A: 1.2.3.5
+  e5.example.com:
+    - SPF: v=spf1 ptr
+    - A: 1.2.3.5
+  5.3.2.1.in-addr.arpa:
+    - PTR: e1.example.com.
+    - PTR: e2.example.com.
+    - PTR: e3.example.com.
+    - PTR: e4.example.com.
+    - PTR: example.com.
+    - PTR: e6.example.com.
+    - PTR: e7.example.com.
+    - PTR: e8.example.com.
+    - PTR: e9.example.com.
+    - PTR: e10.example.com.
+    - PTR: e5.example.com.

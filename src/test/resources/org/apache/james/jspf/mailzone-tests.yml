@@ -1030,17 +1030,17 @@ zonedata:
     - MX:  [0, 192.0.2.11.addr]
   www1.cnn.com:
     - A:  64.236.24.4
-  208.210.124.1:
+  1.124.210.208.in-addr.arpa:
     - PTR:  pobox-gw.icgroup.com
-  208.210.124.130:
+  130.124.210.208.in-addr.arpa:
     - PTR:  30.spf1-test.mailzone.com
-  208.210.124.131:
+  131.124.210.208.in-addr.arpa:
     - PTR:  31.spf1-test.mailzone.com
-  208.210.124.180:
+  180.124.210.208.in-addr.arpa:
     - PTR:  80.spf1-test.mailzone.com
-  208.210.124.192:
+  192.124.210.208.in-addr.arpa:
     - PTR:  spf1-test.mailzone.com
-  64.236.24.4:
+  4.24.236.64.in-addr.arpa:
     - PTR:  www1.cnn.com
   fallback-relay.spf1-test.mailzone.com:
     - MX:  [0, 192.0.2.40.addr]

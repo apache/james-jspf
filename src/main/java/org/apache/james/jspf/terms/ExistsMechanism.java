@@ -20,6 +20,7 @@
 
 package org.apache.james.jspf.terms;
 
+import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
@@ -59,7 +60,7 @@ public class ExistsMechanism extends GenericMechanism {
         }
 
         try {
-            aRecords = spfData.getDnsProbe().getARecords(host);
+            aRecords = spfData.getDnsProbe().getRecords(host,DNSService.A);
         } catch (Exception e) {
             e.printStackTrace();
             return false;
