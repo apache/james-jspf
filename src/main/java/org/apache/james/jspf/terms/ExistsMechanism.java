@@ -65,13 +65,8 @@ public class ExistsMechanism extends GenericMechanism {
             return false;
         }
        
-        if (aRecords != null) {
-            // check for maximum lookup limit       
-            if (aRecords.size() > spfData.getMaxDepth()) {
-                throw new PermErrorException("Maximum Records checked");
-            } else if (aRecords.size() > 0) {
-                return true;
-            }
+        if (aRecords != null && aRecords.size() > 0) {
+            return true;
         }
 
         // No match found

@@ -149,6 +149,10 @@ public class DNSServiceXBillImpl implements DNSService {
         } else {
 
             Record[] records = getRecords(strServer, Type.A, "A", null);
+            
+            // check if the maximum lookup count is reached
+            if (recordLimit > 0 && records.length > recordLimit) throw new PermErrorException("Maximum A lookup count reached");
+            
             for (int i = 0; i < records.length; i++) {
                 ARecord a = (ARecord) records[i];
                 
