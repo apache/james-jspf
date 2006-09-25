@@ -91,7 +91,12 @@ public class SPF1Parser {
 
     public static final String ALPHA_PATTERN = "[a-zA-Z]";
 
-    private static final String MACRO_LETTER_PATTERN = "[lsoditpvhcrLSODITPVHCR]";
+    // Changed this because C, T and R MACRO_LETTERS are not available 
+    // in record parsing and must return a PermError.
+   
+    // private static final String MACRO_LETTER_PATTERN = "[lsodipvhcrtLSODIPVHCRT]";
+
+    private static final String MACRO_LETTER_PATTERN = "[lsodipvhLSODIPVH]";
 
     private static final String TRANSFORMERS_REGEX = "\\d*[r]?";
 
