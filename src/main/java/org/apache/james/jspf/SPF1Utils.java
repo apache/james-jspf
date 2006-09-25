@@ -47,7 +47,7 @@ public class SPF1Utils {
     
     public static final String DEFAULT_EXPLANATION = "http://www.openspf.org/why.html?sender=%{S}&ip=%{I}";
     
-    public static final String BEST_GUESS_RECORD = "a/24 mx/24 ptr ~all";
+    public static final String BEST_GUESS_RECORD = "a/24 mx/24 ptr";
 
     /**
      * Convert raw SPF results to SPF names
