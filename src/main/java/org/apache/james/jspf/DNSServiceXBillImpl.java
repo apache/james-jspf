@@ -73,13 +73,11 @@ public class DNSServiceXBillImpl implements DNSService {
             throws PermErrorException, TempErrorException {
 
         String returnValue = null;
-        ArrayList txtR = new ArrayList();
-
         // do DNS lookup for TXT
-        txtR = getTXTRecords(hostname);
+        List txtR = getRecords(hostname, TXT);
 
         // process returned records
-        if (!txtR.isEmpty()) {
+        if (txtR != null && !txtR.isEmpty()) {
 
             Iterator all = txtR.iterator();
 
@@ -101,33 +99,6 @@ public class DNSServiceXBillImpl implements DNSService {
             }
         }
         return returnValue;
-    }
-
-    /**
-     * Get an ArrayList of all TXT Records for a partical domain.
-     * 
-     * @param hostname
-     *            The hostname for which the TXT-Records should be retrieved
-     * @return TXT Records-which were found.
-     * @throws NoneException
-     *             if none TXT-Records were found.
-     * @throws TempErrorException
-     *             if the lookup result was "TRY_AGAIN"
-     * @throws PermErrorException
-     *             if an PermError should be returned
-     */
-    private ArrayList getTXTRecords(String hostname)
-            throws TempErrorException {
-        ArrayList txtR = new ArrayList();
-        List records = getRecords(hostname, TXT);
-        for (int i = 0; i < records.size(); i++) {
-            String txt = (String) records.get(i);
-
-            log.debug("Add txt " + txt + " to list");
-
-            txtR.add(txt);
-        }
-        return txtR;
     }
 
     /**
@@ -195,7 +166,7 @@ public class DNSServiceXBillImpl implements DNSService {
     public String getTxtCatType(String strServer) throws TempErrorException {
 
         StringBuffer txtData = new StringBuffer();
-        ArrayList records = getTXTRecords(strServer);
+        List records = getRecords(strServer, TXT);
 
         log.debug("Convert " + records.size() + " TXT-Records to one String");
 
