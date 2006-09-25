@@ -60,19 +60,13 @@ public class MXMechanism extends AMechanism {
         // get the ipAddress
         checkAddress = IPAddr.getAddress(spfData.getIpAddress(), getIp4cidr());
         
-        try {
-            List mxRecords = spfData.getDnsProbe().getMXRecords(host);
+        List mxRecords = spfData.getDnsProbe().getMXRecords(host);
 
-            // should never happen. 
-            if (mxRecords == null) return false;
-              
-            if (checkAddressList(checkAddress, mxRecords, getIp4cidr())) {
-                return true;
-            }
-
-        } catch (NoneException e ) {
-            // no mx record found
-            return false;
+        // no mx record found
+        if (mxRecords == null) return false;
+          
+        if (checkAddressList(checkAddress, mxRecords, getIp4cidr())) {
+            return true;
         }
 
         // No match found

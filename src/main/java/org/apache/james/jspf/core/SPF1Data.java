@@ -187,7 +187,7 @@ public class SPF1Data implements MacroData {
             List domains;
             try {
                 domains = dnsProbe.getPTRRecords(ipAddress);
-                if (domains.size() > 0) {
+                if (domains != null && domains.size() > 0) {
                     clientDomain = (String) domains.get(0);
                 } else {
                     clientDomain = ipAddress;

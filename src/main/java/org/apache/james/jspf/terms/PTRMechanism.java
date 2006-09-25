@@ -22,7 +22,6 @@ package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.SPF1Data;
-import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.parser.SPF1Parser;
@@ -51,45 +50,47 @@ public class PTRMechanism extends GenericMechanism {
         IPAddr compareIP;
         ArrayList validatedHosts = new ArrayList();
 
-        try { 
-            // update currentDepth
-            spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);
+        // update currentDepth
+        spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);
 
-            // Get the right host.
-            String host = expandHost(spfData);
+        // Get the right host.
+        String host = expandHost(spfData);
 
+    
+        // Get PTR Records for the ipAddress which is provided by SPF1Data
+        List domainList = spfData.getDnsProbe().getPTRRecords(
+                spfData.getIpAddress());
         
-            // Get PTR Records for the ipAddress which is provided by SPF1Data
-            List domainList = spfData.getDnsProbe().getPTRRecords(
-                    spfData.getIpAddress());
+        // No PTR records found
+        if (domainList == null) return false;
+       
+        for (int i = 0; i < domainList.size(); i++) {
+
+            // Get a record for this
+            List aList = spfData.getDnsProbe().getARecords(
+                    (String) domainList.get(i));
             
-            // Should never happen
-            if (domainList == null) return false;
-           
-            for (int i = 0; i < domainList.size(); i++) {
-
-                // Get a record for this
-                List aList = spfData.getDnsProbe().getARecords(
-                        (String) domainList.get(i));
-                for (int j = 0; j < aList.size(); j++) {
-                    compareIP = (IPAddr) aList.get(j);
-                    if (compareIP.toString().equals(spfData.getIpAddress())) {
-                        validatedHosts.add(domainList.get(i));
-                    }
+            // TODO check this: this is a direct result of the NoneException
+            // removal, and I'm not sure this is correct: maybe we should continue
+            if (aList == null) {
+                return false;
+            }
+            
+            for (int j = 0; j < aList.size(); j++) {
+                compareIP = (IPAddr) aList.get(j);
+                if (compareIP.toString().equals(spfData.getIpAddress())) {
+                    validatedHosts.add(domainList.get(i));
                 }
             }
+        }
 
-            // Check if we match one of this ptr!
-            for (int j = 0; j < validatedHosts.size(); j++) {
-                compareDomain = (String) validatedHosts.get(j);
-                if (compareDomain.equals(host)
-                        || compareDomain.endsWith("." + host)) {
-                    return true;
-                }
+        // Check if we match one of this ptr!
+        for (int j = 0; j < validatedHosts.size(); j++) {
+            compareDomain = (String) validatedHosts.get(j);
+            if (compareDomain.equals(host)
+                    || compareDomain.endsWith("." + host)) {
+                return true;
             }
-        } catch (NoneException e) {
-            // No PTR record found    
-            return false;    
         }
         
         return false;

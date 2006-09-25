@@ -22,7 +22,6 @@ package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.SPF1Data;
-import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.parser.SPF1Parser;
@@ -67,38 +66,29 @@ public class AMechanism extends GenericMechanism {
                 IPAddr checkAddress = IPAddr.getAddress(spfData.getIpAddress(),
                         getIp4cidr());
 
-                try {
-                    List aRecords =spfData.getDnsProbe().getARecords(host);
-         
-                    if (aRecords == null) {
-                        return false;
-                    }
-
-                    if (checkAddressList(checkAddress, aRecords, getIp4cidr())) {
-                        return true;
-                    }
-                } catch (NoneException e) {
-                    e.printStackTrace();
-                    // no a records just return null
+                List aRecords =spfData.getDnsProbe().getARecords(host);
+     
+                // no a records just return null
+                if (aRecords == null) {
                     return false;
+                }
+
+                if (checkAddressList(checkAddress, aRecords, getIp4cidr())) {
+                    return true;
                 }
             } else {
                 IPAddr checkAddress = IPAddr.getAddress(spfData.getIpAddress(),
                         getIp6cidr());
 
-                try {
-                    List aaaaRecords =spfData.getDnsProbe().getAAAARecords(host);
-                    
-                    if (aaaaRecords == null) {
-                        return false;
-                    }
-                    
-                    if (checkAddressList(checkAddress, aaaaRecords, getIp6cidr())) {
-                        return true;
-                    }
-                } catch (NoneException e) {
-                    // no aaaa records just return null
+                List aaaaRecords =spfData.getDnsProbe().getAAAARecords(host);
+                
+                // no aaaa records just return false
+                if (aaaaRecords == null) {
                     return false;
+                }
+                
+                if (checkAddressList(checkAddress, aaaaRecords, getIp6cidr())) {
+                    return true;
                 }
 
             }

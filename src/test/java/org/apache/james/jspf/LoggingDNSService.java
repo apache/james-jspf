@@ -22,7 +22,6 @@ package org.apache.james.jspf;
 
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.IPAddr;
-import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 
@@ -43,7 +42,7 @@ public class LoggingDNSService implements DNSService {
     private DNSService dnsService = new DNSServiceXBillImpl(new ConsoleLogger());
 
     public String getSpfRecord(String hostname, String spfVersion)
-            throws PermErrorException, NoneException, TempErrorException {
+            throws PermErrorException, TempErrorException {
         try {
             String res = dnsService.getSpfRecord(hostname, spfVersion);
 
@@ -57,10 +56,6 @@ public class LoggingDNSService implements DNSService {
         } catch (PermErrorException e) {
             System.out.println("getSpfRecord(" + hostname + "," + spfVersion
                     + ") = PermErrorException[" + e.getMessage() + "]");
-            throw e;
-        } catch (NoneException e) {
-            System.out.println("getSpfRecord(" + hostname + "," + spfVersion
-                    + ") = NoneException[" + e.getMessage() + "]");
             throw e;
         }
     }
@@ -85,7 +80,7 @@ public class LoggingDNSService implements DNSService {
     }
 
     public List getAAAARecords(String strServer)
-            throws NoneException, PermErrorException, TempErrorException {
+            throws PermErrorException, TempErrorException {
 
         try {
             List res = dnsService.getAAAARecords(strServer);
@@ -110,14 +105,10 @@ public class LoggingDNSService implements DNSService {
         } catch (PermErrorException e) {
             System.out.println("getAAAARecords(" + strServer + ") = PermErrorException[" + e.getMessage() + "]");
             throw e;
-        } catch (NoneException e) {
-            System.out.println("getAAAARecords(" + strServer + ") = NoneException[" + e.getMessage() + "]");
-            throw e;
         }
     }
 
-    public List getARecords(String strServer) throws NoneException,
-            PermErrorException, TempErrorException {
+    public List getARecords(String strServer) throws PermErrorException, TempErrorException {
         try {
             List res = dnsService.getARecords(strServer);
             System.out.print("getARecords(" + strServer + ") = ");
@@ -141,15 +132,11 @@ public class LoggingDNSService implements DNSService {
         } catch (PermErrorException e) {
             System.out.println("getARecords(" + strServer + ") = PermErrorException[" + e.getMessage() + "]");
             throw e;
-        } catch (NoneException e) {
-            System.out.println("getARecords(" + strServer + ") = NoneException[" + e.getMessage() + "]");
-            throw e;
         }
 
     }
 
-    public String getTxtCatType(String strServer) throws NoneException,
-            PermErrorException, TempErrorException {
+    public String getTxtCatType(String strServer) throws PermErrorException, TempErrorException {
         try {
             String res = dnsService.getTxtCatType(strServer);
             System.out.println("getTxtCatType(" + strServer + ") = " + res);
@@ -162,16 +149,11 @@ public class LoggingDNSService implements DNSService {
             System.out.println("getTxtCatType(" + strServer
                     + ") = PermErrorException[" + e.getMessage() + "]");
             throw e;
-        } catch (NoneException e) {
-            System.out.println("getTxtCatType(" + strServer
-                    + ") = NoneException[" + e.getMessage() + "]");
-            throw e;
         }
 
     }
 
-    public List getPTRRecords(String ipAddress) throws PermErrorException,
-            NoneException, TempErrorException {
+    public List getPTRRecords(String ipAddress) throws PermErrorException, TempErrorException {
         try {
             List res = dnsService.getPTRRecords(ipAddress);
             System.out.print("getPTRRecords(" + ipAddress + ") = ");
@@ -196,10 +178,6 @@ public class LoggingDNSService implements DNSService {
             System.out.println("getPTRRecords(" + ipAddress
                     + ") = PermErrorException[" + e.getMessage() + "]");
             throw e;
-        } catch (NoneException e) {
-            System.out.println("getPTRRecords(" + ipAddress
-                    + ") = NoneException[" + e.getMessage() + "]");
-            throw e;
         }
 
     }
@@ -217,7 +195,7 @@ public class LoggingDNSService implements DNSService {
     }
 
     public List getMXRecords(String domainName)
-            throws PermErrorException, NoneException, TempErrorException {
+            throws PermErrorException, TempErrorException {
         try {
             List res = dnsService.getMXRecords(domainName);
             System.out
@@ -240,9 +218,6 @@ public class LoggingDNSService implements DNSService {
             throw e;
         } catch (PermErrorException e) {
             System.out.println("getMXRecords(" + domainName + ") = ErrorException[" + e.getMessage() + "]");
-            throw e;
-        } catch (NoneException e) {
-            System.out.println("getMXRecords(" + domainName + ") = NoneException[" + e.getMessage() + "]");
             throw e;
         }
 

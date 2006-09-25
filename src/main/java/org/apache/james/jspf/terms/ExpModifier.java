@@ -24,7 +24,6 @@ import org.apache.james.jspf.core.LogEnabled;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPF1Data;
-import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
@@ -69,9 +68,6 @@ public class ExpModifier extends GenericModifier implements LogEnabled {
             host = new MacroExpand(spfData, log).expandDomain(host);
             try {
                 exp = spfData.getDnsProbe().getTxtCatType(host);
-            } catch (NoneException e) {
-                // Nothing todo here.. just return null
-                return null;
             } catch (TempErrorException e) {
                 // Nothing todo here.. just return null
                 return null;

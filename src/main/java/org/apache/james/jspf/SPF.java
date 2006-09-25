@@ -151,10 +151,24 @@ public class SPF {
             NoneException, TempErrorException, NeutralException {
         String result = SPF1Constants.NEUTRAL;
         String explanation = null;
+        
+        // Initial checks (spec 4.3)
+        if (spfData.getCurrentDomain() != null) {
+            String[] labels = spfData.getCurrentDomain().split("\\.");
+            for (int i = 0; i < labels.length; i++) {
+                if (labels[i] != null && labels[i].length() > 63) {
+                    throw new NoneException("Domain "+spfData.getCurrentDomain()+" is malformed (label longer than 63 characters)");
+                }
+            }
+        }
 
         // Get the raw dns txt entry which contains a spf entry
         String spfDnsEntry = dnsProbe.getSpfRecord(spfData.getCurrentDomain(),
                 SPF1Constants.SPF_VERSION);
+
+        if (spfDnsEntry == null) {
+            throw new NoneException("No SPF record found for host: " + spfData.getCurrentDomain());
+        }
 
         // logging
         log.debug("Start parsing SPF-Record:" + spfDnsEntry);

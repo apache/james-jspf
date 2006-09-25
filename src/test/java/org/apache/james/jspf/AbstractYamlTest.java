@@ -21,7 +21,6 @@ package org.apache.james.jspf;
 
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.IPAddr;
-import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.jvyaml.Constructor;
@@ -184,7 +183,7 @@ public abstract class AbstractYamlTest extends TestCase {
             this.recordLimit = 10;
         }
 
-        public List getAAAARecords(String strServer) throws NoneException, PermErrorException, TempErrorException {
+        public List getAAAARecords(String strServer) throws PermErrorException, TempErrorException {
             ArrayList res = new ArrayList();
             if (zonedata.get(strServer) != null) {
                 List l = (List) zonedata.get(strServer);
@@ -200,10 +199,10 @@ public abstract class AbstractYamlTest extends TestCase {
             }
             if (res.size() > 0 ) return res;
             
-            throw new NoneException("No AAAA Record found");
+            return null;
         }
 
-        public List getARecords(String strServer) throws NoneException, PermErrorException, TempErrorException {
+        public List getARecords(String strServer) throws PermErrorException, TempErrorException {
             ArrayList res = new ArrayList();
        
             if (zonedata.get(strServer) != null) {
@@ -220,7 +219,7 @@ public abstract class AbstractYamlTest extends TestCase {
             }
             if (res.size() > 0 ) return res;
             
-            throw new NoneException("No A Record found for: " + strServer);
+            return null;
         }
 
         public List getLocalDomainNames() {
@@ -229,7 +228,7 @@ public abstract class AbstractYamlTest extends TestCase {
             return l; 
         }
 
-        public List getMXRecords(String domainName) throws PermErrorException, NoneException, TempErrorException {
+        public List getMXRecords(String domainName) throws PermErrorException, TempErrorException {
             if (zonedata.get(domainName) != null) {
                 List l = (List) zonedata.get(domainName);
                 Iterator i = l.iterator();
@@ -248,6 +247,14 @@ public abstract class AbstractYamlTest extends TestCase {
                            
                             // resolv the record
                             List records = getARecords(mx);
+                            
+                            // TODO: this is a direct result of the NoneException removal
+                            // we should check wether is correct to return null or we simply
+                            // should skip this record.
+                            if (records == null) {
+                                return null;
+                            }
+                            
                             for (int i2 = 0; i2 < records.size();i2++ ) {
                                 res.add(records.get(i2));
                             }
@@ -259,10 +266,10 @@ public abstract class AbstractYamlTest extends TestCase {
 
                 return res.size() > 0 ? res : null;
             }
-            throw new NoneException("No MX Record found");
+            return null;
         }
 
-        public List getPTRRecords(String ipAddress) throws PermErrorException, NoneException, TempErrorException {
+        public List getPTRRecords(String ipAddress) throws PermErrorException, TempErrorException {
             ArrayList res = new ArrayList();
             
             if (zonedata.get(ipAddress) != null) {
@@ -279,10 +286,10 @@ public abstract class AbstractYamlTest extends TestCase {
             }
             if (res.size() > 0 ) return res;
             
-            throw new NoneException("No PTR Record found: "+ipAddress);
+            return null;
         }
 
-        public String getSpfRecord(String hostname, String spfVersion) throws PermErrorException, NoneException, TempErrorException {
+        public String getSpfRecord(String hostname, String spfVersion) throws PermErrorException, TempErrorException {
             if (hostname.endsWith(".")) hostname = hostname.substring(0, hostname.length()-1);
             if (zonedata.get(hostname) != null) {
                 List l = (List) zonedata.get(hostname);
@@ -342,14 +349,14 @@ public abstract class AbstractYamlTest extends TestCase {
                 hostname = hostname.substring(p+1);
                 if (zonedata.get(hostname) != null) {
                     if (((List) zonedata.get(hostname)).iterator().next().equals("TIMEOUT")) {
-                        throw new NoneException("TIMEOUT");
+                        throw new TempErrorException("TIMEOUT");
                     }
                 }
             }
-            throw new NoneException("No SPF Record for : " + hostname);
+            return null;
         }
 
-        public String getTxtCatType(String strServer) throws NoneException, PermErrorException, TempErrorException {
+        public String getTxtCatType(String strServer) throws PermErrorException, TempErrorException {
             String res = null;
             if (strServer.endsWith(".")) strServer = strServer.substring(0, strServer.length()-1);
             if (zonedata.get(strServer) != null) {

@@ -73,7 +73,7 @@ public class DNSServiceXBillImpl implements DNSService {
      *      java.lang.String)
      */
     public String getSpfRecord(String hostname, String spfVersion)
-            throws PermErrorException, NoneException, TempErrorException {
+            throws PermErrorException, TempErrorException {
 
         String returnValue = null;
         ArrayList txtR = new ArrayList();
@@ -103,9 +103,6 @@ public class DNSServiceXBillImpl implements DNSService {
                 }
             }
         }
-        if (returnValue == null) {
-            throw new NoneException("No SPF record found for host: " + hostname);
-        }
         return returnValue;
     }
 
@@ -123,7 +120,7 @@ public class DNSServiceXBillImpl implements DNSService {
      *             if an PermError should be returned
      */
     private ArrayList getTXTRecords(String hostname)
-            throws NoneException, TempErrorException {
+            throws TempErrorException {
         ArrayList txtR = new ArrayList();
         Record[] records = getRecords(hostname, Type.TXT, "TXT", null);
         for (int i = 0; i < records.length; i++) {
@@ -141,8 +138,7 @@ public class DNSServiceXBillImpl implements DNSService {
      * @see org.apache.james.jspf.core.DNSService#getARecords(java.lang.String,
      *      int)
      */
-    public List getARecords(String strServer) throws NoneException,
-            PermErrorException, TempErrorException {
+    public List getARecords(String strServer) throws PermErrorException, TempErrorException {
 
         ArrayList listTxtData = new ArrayList();
 
@@ -170,7 +166,7 @@ public class DNSServiceXBillImpl implements DNSService {
      *      int)
      */
     public List getAAAARecords(String strServer)
-            throws NoneException, PermErrorException, TempErrorException {
+            throws PermErrorException, TempErrorException {
 
         ArrayList listTxtData = new ArrayList();
 
@@ -197,8 +193,7 @@ public class DNSServiceXBillImpl implements DNSService {
     /**
      * @see org.apache.james.jspf.core.DNSService#getTxtCatType(java.lang.String)
      */
-    public String getTxtCatType(String strServer) throws NoneException,
-            TempErrorException {
+    public String getTxtCatType(String strServer) throws TempErrorException {
 
         StringBuffer txtData = new StringBuffer();
         ArrayList records = getTXTRecords(strServer);
@@ -214,8 +209,7 @@ public class DNSServiceXBillImpl implements DNSService {
     /**
      * @see org.apache.james.jspf.core.DNSService#getPTRRecords(java.lang.String)
      */
-    public List getPTRRecords(String ipAddress) throws NoneException,
-            PermErrorException, TempErrorException {
+    public List getPTRRecords(String ipAddress) throws PermErrorException, TempErrorException {
         ArrayList ptrR = new ArrayList();
 
         // do DNS lookup for TXT
@@ -242,9 +236,9 @@ public class DNSServiceXBillImpl implements DNSService {
      *      int)
      */
     public List getMXRecords(String domainName)
-            throws PermErrorException, NoneException, TempErrorException {
+            throws PermErrorException, TempErrorException {
 
-        ArrayList mxR = new ArrayList();
+        ArrayList mxR = null;
         Record[] records = getRecords(domainName, Type.MX, "MX", null);
 
         // check if the maximum lookup count is reached
@@ -255,13 +249,15 @@ public class DNSServiceXBillImpl implements DNSService {
             log.debug("Add MX-Record " + mx.getTarget()
                     + " to list");
 
-            try {
-                mxR.addAll(getARecords(mx.getTarget().toString()));
-            } catch (NoneException e) {
-                // ignore
+            List res = getARecords(mx.getTarget().toString());
+            if (res != null) {
+                if (mxR == null) {
+                    mxR = new ArrayList();
+                }
+                mxR.addAll(res);
             }
         }
-
+        
         return mxR;
     }
 
@@ -324,7 +320,7 @@ public class DNSServiceXBillImpl implements DNSService {
      * @throws TempErrorException on timeout.
      */
     private Record[] getRecords(String hostname, int recordType, String recordTypeDescription, String logHost)
-            throws NoneException, TempErrorException {
+            throws TempErrorException {
         Record[] records;
         String logname = logHost != null ? logHost : hostname;
         try {
@@ -342,14 +338,11 @@ public class DNSServiceXBillImpl implements DNSService {
                         + queryResult);
             }
             
-            if (records == null) {
-                throw new NoneException("No "+recordTypeDescription+" Record found for host: " + logname);
-            }
-                
             log.debug("Found " + records.length + " "+recordTypeDescription+"-Records");
         } catch (TextParseException e) {
             // i think this is the best we could do
-            throw new NoneException("No "+recordTypeDescription+" Record found for host: " + logname);
+            log.debug("No "+recordTypeDescription+" Record found for host: " + logname);
+            records = null;
         }
         return records;
     }
