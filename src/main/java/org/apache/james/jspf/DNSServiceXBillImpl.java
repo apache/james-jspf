@@ -114,6 +114,7 @@ public class DNSServiceXBillImpl implements DNSService {
             throws TimeoutException {
         String recordTypeDescription;
         int dnsJavaType;
+        int recordCount = 0;
         switch (recordType) {
             case A: recordTypeDescription = "A"; dnsJavaType = Type.A; break;
             case AAAA: recordTypeDescription = "AAAA"; dnsJavaType = Type.AAAA; break;
@@ -169,11 +170,12 @@ public class DNSServiceXBillImpl implements DNSService {
                     }
                     records.add(res);
                 }
+                recordCount = rr.length;
             } else {
                 records = null;
             }
             
-            log.debug("Found " + rr.length + " "+recordTypeDescription+"-Records");
+            log.debug("Found " + recordCount + " "+recordTypeDescription+"-Records");
         } catch (TextParseException e) {
             // i think this is the best we could do
             log.debug("No "+recordTypeDescription+" Record found for host: " + hostname);
