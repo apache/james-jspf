@@ -339,7 +339,8 @@ public class SPF {
                 Iterator all = spfR.iterator();
     
                 while (all.hasNext()) {
-                    String compare = all.next().toString().trim();
+                    // DO NOT trim the result!
+                    String compare = all.next().toString();
     
                     // TODO is this correct? we remove the first and last char if the
                     // result has an initial " 
@@ -349,7 +350,8 @@ public class SPF {
                                 compare.length() - 1);
                     }
     
-                    if (compare.startsWith(spfVersion + " ") || compare.equals(spfVersion)) {
+                    // We trim the compare value only for the comparison
+                    if (compare.trim().startsWith(spfVersion + " ") || compare.trim().equals(spfVersion)) {
                         if (returnValue == null) {
                             returnValue = compare;
                         } else {

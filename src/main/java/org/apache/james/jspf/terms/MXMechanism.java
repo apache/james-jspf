@@ -90,11 +90,6 @@ public class MXMechanism extends AMechanism {
                 return null;
             }
             
-            // check if the maximum lookup count is reached
-            if (dnsProbe.getRecordLimit() > 0 && records.size() > dnsProbe.getRecordLimit()) {
-                throw new PermErrorException("Maximum MX lookup count reached");
-            }
-      
             for (int i = 0; i < records.size(); i++) {
                 String mx = (String) records.get(i);
                 
