@@ -22,6 +22,7 @@ package org.apache.james.jspf;
 
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.Directive;
+import org.apache.james.jspf.core.FallBack;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.Modifier;
 import org.apache.james.jspf.core.SPF1Constants;
@@ -53,6 +54,8 @@ public class SPF {
     private String defaultExplanation = null;
 
     private boolean useBestGuess = false;
+
+    private FallBack fallBack;
     
     /**
      * Uses default Log4JLogger and DNSJava based dns resolver
@@ -81,6 +84,7 @@ public class SPF {
         this.dnsProbe = dnsProbe;
         this.parser = new SPF1Parser(logger);
         this.log = logger;
+        this.fallBack =  new FallBack(logger);
     }
 
     /**
@@ -152,6 +156,7 @@ public class SPF {
      */
     public SPFInternalResult checkSPF(SPF1Data spfData) throws PermErrorException,
             NoneException, TempErrorException, NeutralException {
+        SPF1Record spfRecord = null;
         String result = SPF1Constants.NEUTRAL;
         String explanation = null;
         
@@ -171,18 +176,26 @@ public class SPF {
 
         // No SPF-Record found
         if (spfDnsEntry == null) {
-            // We should use bestguess
             if (useBestGuess == true) {
+                // We should use bestguess
                 spfDnsEntry = SPF1Utils.BEST_GUESS_RECORD;
+                
+            } else if (fallBack.getFallBackEntry(spfData.getCurrentDomain()) != null){
+                // We should use fallback
+                spfRecord = fallBack.getFallBackEntry(spfData.getCurrentDomain());
+                log.debug("Set FallBack SPF-Record:" +spfRecord.toString());
             } else {
                 throw new NoneException("No SPF record found for host: " + spfData.getCurrentDomain());
             }
         }
 
-        // logging
-        log.debug("Start parsing SPF-Record:" + spfDnsEntry);
+        // check if the spfRecord was set before
+        if (spfRecord == null) {
+            // logging
+            log.debug("Start parsing SPF-Record:" + spfDnsEntry);
 
-        SPF1Record spfRecord = parser.parse(spfDnsEntry);
+            spfRecord = parser.parse(spfDnsEntry);
+        }
 
         String qualifier = null;
         boolean hasCommand = false;
@@ -383,5 +396,14 @@ public class SPF {
             throw new TempErrorException("Timeout querying dns");
         }
     }
-
+    
+    /**
+     * Return the FallBack object which can be used to 
+     * provide default spfRecords for hosts which have no records
+     * 
+     * @return the FallBack object
+     */
+    public FallBack getFallBack() {
+        return fallBack;
+    }
 }
