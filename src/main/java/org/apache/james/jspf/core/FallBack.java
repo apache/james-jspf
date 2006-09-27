@@ -49,9 +49,12 @@ public class FallBack {
     /**
      * Add a fallback entry.
      * 
-     * @param rawHost the host or ipaddress for which the entry should be added. 
-     * @param rawSpfRecord the spfRecord to add
-     * @throws IllegalArgumentException get thrown on invalid spfRecord
+     * @param rawHost
+     *            the host or ipaddress for which the entry should be added.
+     * @param rawSpfRecord
+     *            the spfRecord to add
+     * @throws IllegalArgumentException
+     *             get thrown on invalid spfRecord
      */
     public void addFallBackEntry(String rawHost, String rawSpfRecord)
             throws IllegalArgumentException {
@@ -88,7 +91,7 @@ public class FallBack {
 
     /**
      * Clear all fallBack entries
-     *
+     * 
      */
     public void clearFallBackEntrys() {
         log.debug("Clear all fallback entries");
@@ -100,7 +103,8 @@ public class FallBack {
     /**
      * Remove fallBack entry
      * 
-     * @param host The host
+     * @param host
+     *            The host
      */
     public void removeFallBackEntrys(String host) {
         log.debug("Remove fallback entry for host: " + host);
@@ -112,8 +116,10 @@ public class FallBack {
     /**
      * Return the SPF1Record for the given host
      * 
-     * @param host the hostname or ipaddress
-     * @return the SPF1Record of null if no SPF1Record was found in fallback for the given host
+     * @param host
+     *            the hostname or ipaddress
+     * @return the SPF1Record of null if no SPF1Record was found in fallback for
+     *         the given host
      */
     public SPF1Record getFallBackEntry(String host) {
         Object fallBack = null;
@@ -130,10 +136,12 @@ public class FallBack {
     }
 
     /**
-     * Return the Object stored in the map which match the given host.
-     * Keep in mind that this method should only called in a synchronized method or block
+     * Return the Object stored in the map which match the given host. Keep in
+     * mind that this method should only called in a synchronized method or
+     * block
      * 
-     * @param host the host
+     * @param host
+     *            the host
      * @return the stored object for the given host or null
      */
     private Object getRawFallBackEntry(String host) {
