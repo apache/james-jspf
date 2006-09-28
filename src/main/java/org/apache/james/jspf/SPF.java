@@ -22,7 +22,7 @@ package org.apache.james.jspf;
 
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.Directive;
-import org.apache.james.jspf.core.FallBack;
+import org.apache.james.jspf.core.FallbackPolicy;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.Modifier;
 import org.apache.james.jspf.core.SPF1Constants;
@@ -55,7 +55,7 @@ public class SPF {
 
     private boolean useBestGuess = false;
 
-    private FallBack fallBack;
+    private FallbackPolicy fallBack;
     
     /**
      * Uses default Log4JLogger and DNSJava based dns resolver
@@ -84,7 +84,7 @@ public class SPF {
         this.dnsProbe = dnsProbe;
         this.parser = new SPF1Parser(logger);
         this.log = logger;
-        this.fallBack =  new FallBack(logger);
+        this.fallBack =  new FallbackPolicy(logger);
     }
 
     /**
@@ -398,12 +398,12 @@ public class SPF {
     }
     
     /**
-     * Return the FallBack object which can be used to 
+     * Return the FallbackPolicy object which can be used to 
      * provide default spfRecords for hosts which have no records
      * 
-     * @return the FallBack object
+     * @return the FallbackPolicy object
      */
-    public FallBack getFallBack() {
+    public FallbackPolicy getFallbackPolicy() {
         return fallBack;
     }
 }
