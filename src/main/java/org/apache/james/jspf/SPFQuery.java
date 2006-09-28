@@ -17,7 +17,6 @@
  * under the License.                                           *
  ****************************************************************/
 
-
 package org.apache.james.jspf;
 
 import org.apache.commons.cli.CommandLine;
@@ -38,37 +37,36 @@ import org.apache.log4j.SimpleLayout;
 public class SPFQuery {
 
     private final static int PASS_RCODE = 0;
-    
-    private final static int FAIL_RCODE =  1;
-    
+
+    private final static int FAIL_RCODE = 1;
+
     private final static int SOFTFAIL_RCODE = 2;
-    
+
     private final static int NEUTRAL_RCODE = 3;
-    
+
     private final static int TEMP_ERROR_RCODE = 4;
-    
+
     private final static int PERM_ERROR_RCODE = 5;
-    
+
     private final static int NONE_RCODE = 6;
-    
+
     private final static int UNKNOWN_RCODE = 255;
-    
+
     private final static String CMD_IP = "ip";
-    
+
     private final static String CMD_SENDER = "sender";
-    
+
     private final static String CMD_HELO = "helo";
-    
+
     private final static String CMD_DEBUG = "debug";
-    
+
     private final static String CMD_VERBOSE = "verbose";
 
-    private final static String CMD_DEFAULT_EXP =  "defaultexplanation";
-    
-    private final static String CMD_BEST_GUESS =  "usebestguess";
-      
-    private static Logger logger = Logger.getRootLogger();
+    private final static String CMD_DEFAULT_EXP = "defaultexplanation";
 
+    private final static String CMD_BEST_GUESS = "usebestguess";
+
+    private static Logger logger = Logger.getRootLogger();
 
     /**
      * @param args
@@ -93,7 +91,7 @@ public class SPFQuery {
 
         try {
             CommandLine line = parser.parse(options, args);
-            
+
             ip = line.getOptionValue(CMD_IP);
             sender = line.getOptionValue(CMD_SENDER);
             helo = line.getOptionValue(CMD_HELO);
@@ -132,7 +130,7 @@ public class SPFQuery {
             usage();
         }
     }
-    
+
     /**
      * Return the generated Options
      * 
@@ -140,10 +138,14 @@ public class SPFQuery {
      */
     private static Options generateOptions() {
         Options options = new Options();
-        options.addOption(OptionBuilder.withLongOpt(CMD_IP).withValueSeparator('=').hasArg().create());
-        options.addOption(OptionBuilder.withLongOpt(CMD_SENDER).withValueSeparator('=').hasArg().create());
-        options.addOption(OptionBuilder.withLongOpt(CMD_HELO).withValueSeparator('=').hasArg().create());
-        options.addOption(OptionBuilder.withLongOpt(CMD_DEFAULT_EXP).withValueSeparator('=').hasArg().create());
+        options.addOption(OptionBuilder.withLongOpt(CMD_IP).withValueSeparator(
+                '=').hasArg().create());
+        options.addOption(OptionBuilder.withLongOpt(CMD_SENDER)
+                .withValueSeparator('=').hasArg().create());
+        options.addOption(OptionBuilder.withLongOpt(CMD_HELO)
+                .withValueSeparator('=').hasArg().create());
+        options.addOption(OptionBuilder.withLongOpt(CMD_DEFAULT_EXP)
+                .withValueSeparator('=').hasArg().create());
         options.addOption(OptionBuilder.withLongOpt(CMD_BEST_GUESS).create());
         options.addOption(OptionBuilder.withLongOpt(CMD_DEBUG).create());
         options.addOption(OptionBuilder.withLongOpt(CMD_VERBOSE).create());
@@ -153,22 +155,25 @@ public class SPFQuery {
     /**
      * Print out the usage
      */
-    private static void usage() {      
-        //TODO: Use HelpFormatter for printing usage
-        System.out.println("Usage: java -jar jspf-x.jar --" + CMD_IP + "=192.168.100.1 --" + CMD_SENDER + "=postmaster@foo.bar --"
-                        + CMD_HELO + "=foo.bar [--"  + CMD_DEFAULT_EXP+ "=\"explanation String\"] [--" +CMD_BEST_GUESS+ "] "+ CMD_DEBUG + "] [--" + CMD_VERBOSE+ "]");
+    private static void usage() {
+        // TODO: Use HelpFormatter for printing usage
+        System.out.println("Usage: java -jar jspf-x.jar --" + CMD_IP
+                + "=192.168.100.1 --" + CMD_SENDER + "=postmaster@foo.bar --"
+                + CMD_HELO + "=foo.bar [--" + CMD_DEFAULT_EXP
+                + "=\"explanation String\"] [--" + CMD_BEST_GUESS + "] "
+                + CMD_DEBUG + "] [--" + CMD_VERBOSE + "]");
         System.exit(UNKNOWN_RCODE);
     }
-    
-    
+
     /**
      * Return the return code for the result
      * 
-     * @param result The result 
+     * @param result
+     *            The result
      * @return returnCode
      */
     private static int getReturnCode(String result) {
-        
+
         if (result.equals(SPF1Utils.PASS_CONV)) {
             return PASS_RCODE;
         } else if (result.equals(SPF1Utils.FAIL_CONV)) {
@@ -183,8 +188,8 @@ public class SPFQuery {
             return PERM_ERROR_RCODE;
         } else if (result.equals(SPF1Utils.NONE_CONV)) {
             return NONE_RCODE;
-        } 
-        
+        }
+
         return UNKNOWN_RCODE;
     }
 
