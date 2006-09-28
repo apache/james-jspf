@@ -20,6 +20,12 @@
 
 package org.apache.james.jspf;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.PosixParser;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -47,21 +53,22 @@ public class SPFQuery {
     
     private final static int UNKNOWN_RCODE = 255;
     
-    private final static String CMD_IP = "-ip";
+    private final static String CMD_IP = "ip";
     
-    private final static String CMD_SENDER = "-sender";
+    private final static String CMD_SENDER = "sender";
     
-    private final static String CMD_HELO = "-helo";
+    private final static String CMD_HELO = "helo";
     
-    private final static String CMD_DEBUG = "-debug";
+    private final static String CMD_DEBUG = "debug";
     
-    private final static String CMD_VERBOSE = "-verbose";
+    private final static String CMD_VERBOSE = "verbose";
 
-    private final static String CMD_DEFAULT_EXP =  "-default-explanation";
+    private final static String CMD_DEFAULT_EXP =  "defaultexplanation";
     
-    private final static String CMD_BEST_GUESS =  "-use-best-guess";
-    
+    private final static String CMD_BEST_GUESS =  "usebestguess";
+      
     private static Logger logger = Logger.getRootLogger();
+
 
     /**
      * @param args
@@ -81,67 +88,75 @@ public class SPFQuery {
 
         logger.setLevel(Level.ERROR);
 
-        // Parse the command line arguments
-        if (args.length < 3 || args.length > 4) {
-            usage();
-        } else {
-            for (int i = 0; i < args.length; i++) {
-                String[] arguments = args[i].split("=");
+        Options options = generateOptions();
+        CommandLineParser parser = new PosixParser();
 
-                if (arguments == null || (arguments.length > 2 && (arguments[0] != CMD_DEBUG) && arguments[0] != CMD_VERBOSE)) usage();
-                
-                if (arguments[0].equals(CMD_IP)) {
-                    ip = arguments[1];
-                } else if (arguments[0].equals(CMD_SENDER)) {
-                    sender = arguments[1];
-                } else if (arguments[0].equals(CMD_HELO)) {
-                    helo = arguments[1];
-                } else if (arguments[0].equals(CMD_DEBUG)) {
-                    logger.setLevel(Level.DEBUG);
-                } else if (arguments[0].equals(CMD_VERBOSE)) {
-                    logger.setLevel(Level.TRACE);
-                } else if (arguments[0].equals(CMD_DEFAULT_EXP)) {
-                    defaultExplanation = arguments[1];
-                } else if (arguments[0].equals(CMD_BEST_GUESS)) {
-                    useBestGuess = Boolean.valueOf(arguments[1]).booleanValue();
-                } else {
-                    usage();
-                }
-
-            }
+        try {
+            CommandLine line = parser.parse(options, args);
+            
+            ip = line.getOptionValue(CMD_IP);
+            sender = line.getOptionValue(CMD_SENDER);
+            helo = line.getOptionValue(CMD_HELO);
+            defaultExplanation = line.getOptionValue(CMD_DEFAULT_EXP);
+            useBestGuess = line.hasOption(CMD_BEST_GUESS);
 
             // check if all needed values was set
             if (ip != null && sender != null && helo != null) {
-                
+
+                if (line.hasOption(CMD_DEBUG))
+                    logger.setLevel(Level.DEBUG);
+                if (line.hasOption(CMD_VERBOSE))
+                    logger.setLevel(Level.TRACE);
+
                 SPF spf = new SPF(new Log4JLogger(logger));
-                
+
                 // Check if we should set a costum default explanation
                 if (defaultExplanation != null) {
                     spf.setDefaultExplanation(defaultExplanation);
                 }
-                
+
                 // Check if we should use best guess
                 if (useBestGuess == true) {
                     spf.setUseBestGuess(true);
                 }
-                
+
                 SPFResult result = spf.checkSPF(ip, sender, helo);
                 System.out.println(result.getResult());
                 System.out.println(result.getHeader());
                 System.exit(getReturnCode(result.getResult()));
-                
+
             } else {
                 usage();
             }
+        } catch (ParseException e) {
+            usage();
         }
+    }
+    
+    /**
+     * Return the generated Options
+     * 
+     * @return options
+     */
+    private static Options generateOptions() {
+        Options options = new Options();
+        options.addOption(OptionBuilder.withLongOpt(CMD_IP).withValueSeparator('=').hasArg().create());
+        options.addOption(OptionBuilder.withLongOpt(CMD_SENDER).withValueSeparator('=').hasArg().create());
+        options.addOption(OptionBuilder.withLongOpt(CMD_HELO).withValueSeparator('=').hasArg().create());
+        options.addOption(OptionBuilder.withLongOpt(CMD_DEFAULT_EXP).withValueSeparator('=').hasArg().create());
+        options.addOption(OptionBuilder.withLongOpt(CMD_BEST_GUESS).create());
+        options.addOption(OptionBuilder.withLongOpt(CMD_DEBUG).create());
+        options.addOption(OptionBuilder.withLongOpt(CMD_VERBOSE).create());
+        return options;
     }
 
     /**
      * Print out the usage
      */
-    private static void usage() {
-        System.out.println("Usage: java -jar jspf-x.jar " + CMD_IP + "=192.168.100.1 " + CMD_SENDER + "=postmaster@foo.bar "
-                        + CMD_HELO + "=foo.bar ["  + CMD_DEFAULT_EXP+ "=\"explanation String\"] [" +CMD_BEST_GUESS+ "=true|false] "+ CMD_DEBUG + "] [" + CMD_VERBOSE+ "]");
+    private static void usage() {      
+        //TODO: Use HelpFormatter for printing usage
+        System.out.println("Usage: java -jar jspf-x.jar --" + CMD_IP + "=192.168.100.1 --" + CMD_SENDER + "=postmaster@foo.bar --"
+                        + CMD_HELO + "=foo.bar [--"  + CMD_DEFAULT_EXP+ "=\"explanation String\"] [--" +CMD_BEST_GUESS+ "] "+ CMD_DEBUG + "] [--" + CMD_VERBOSE+ "]");
         System.exit(UNKNOWN_RCODE);
     }
     
@@ -152,7 +167,7 @@ public class SPFQuery {
      * @param result The result 
      * @return returnCode
      */
-    public static int getReturnCode(String result) {
+    private static int getReturnCode(String result) {
         
         if (result.equals(SPF1Utils.PASS_CONV)) {
             return PASS_RCODE;
