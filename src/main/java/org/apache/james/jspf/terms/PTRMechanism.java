@@ -71,23 +71,18 @@ public class PTRMechanism extends GenericMechanism {
                 domainList = domainList.subList(0, spfData.getDnsProbe().getRecordLimit()-1);
                 // throw new PermErrorException("Maximum PTR lookup count reached");
             }
-    
-           
+              
             for (int i = 0; i < domainList.size(); i++) {
     
                 // Get a record for this
                 List aList = spfData.getDnsProbe().getRecords(
                         (String) domainList.get(i), DNSService.A);
                 
-                // TODO check this: this is a direct result of the NoneException
-                // removal, and I'm not sure this is correct: maybe we should continue
-                if (aList == null) {
-                    return false;
-                }
-                
-                for (int j = 0; j < aList.size(); j++) {
-                    if (aList.get(j).equals(spfData.getIpAddress())) {
-                        validatedHosts.add(domainList.get(i));
+                if (aList != null) {
+                    for (int j = 0; j < aList.size(); j++) {
+                        if (aList.get(j).equals(spfData.getIpAddress())) {
+                            validatedHosts.add(domainList.get(i));
+                        }
                     }
                 }
             }
@@ -95,6 +90,7 @@ public class PTRMechanism extends GenericMechanism {
             // Check if we match one of this ptr!
             for (int j = 0; j < validatedHosts.size(); j++) {
                 compareDomain = (String) validatedHosts.get(j);
+                
                 if (compareDomain.equals(host)
                         || compareDomain.endsWith("." + host)) {
                     return true;
