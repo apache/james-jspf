@@ -21,10 +21,12 @@
 package org.apache.james.jspf.core;
 
 import org.apache.james.jspf.SPF1Utils;
+import org.apache.james.jspf.core.DNSService.TimeoutException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.macro.MacroData;
 
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -184,20 +186,33 @@ public class SPF1Data implements MacroData {
      */
     public String getClientDomain() {
         if (clientDomain == null) {
+            clientDomain = "unknown";
             try {
                 List records = null;
-                if (IPAddr.isIPV6(ipAddress)) {
+                boolean ip6 = IPAddr.isIPV6(ipAddress);
+                if (ip6) {
                     records = dnsProbe.getRecords(IPAddr.getAddress(ipAddress).getReverseIP() + ".ip6.arpa", DNSService.PTR);
                 } else {
                     records = dnsProbe.getRecords(IPAddr.getAddress(ipAddress).getReverseIP() + ".in-addr.arpa", DNSService.PTR);
                 }
                 if (records != null && records.size() > 0) {
-                    clientDomain = (String) records.get(0);
-                } else {
-                    clientDomain = ipAddress;
+                    String record = (String) records.get(0);
+                    records = dnsProbe.getRecords(record, ip6 ? DNSService.AAAA : DNSService.A);
+                    if (records != null && records.size() > 0) {
+                        Iterator i = records.iterator();
+                        while (i.hasNext()) {
+                            String next = (String) i.next();
+                            if (IPAddr.getAddress(ipAddress).toString().equals(IPAddr.getAddress(next).toString())) {
+                                clientDomain = record;
+                                break;
+                            }
+                        }
+                    }
                 }
-            } catch (Exception e) {
-                clientDomain = ipAddress;
+            } catch (TimeoutException e) {
+                // just return the default "unknown".
+            } catch (PermErrorException e) {
+                // just return the default "unknown".
             }
         }
         return clientDomain;

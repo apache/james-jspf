@@ -169,6 +169,8 @@ zonedata:
     - TXT:  Explanation %{r} - %{p} (%{o})
   24.0.0.10.in-addr.arpa:
     - PTR:  my.host.domain.foo.bar
+  my.host.domain.foo.bar:
+    - A:  10.0.0.24
   spf25-test.foo.bar:
     - TXT:  v=spf1 -all exp=exp-spf25-test.foo.bar
   exp-spf25-test.foo.bar:
