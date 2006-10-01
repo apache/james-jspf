@@ -185,7 +185,12 @@ public class SPF1Data implements MacroData {
     public String getClientDomain() {
         if (clientDomain == null) {
             try {
-                List records = dnsProbe.getRecords(IPAddr.getAddress(ipAddress).getReverseIP() + ".in-addr.arpa", DNSService.PTR);
+                List records = null;
+                if (IPAddr.isIPV6(ipAddress)) {
+                    records = dnsProbe.getRecords(IPAddr.getAddress(ipAddress).getReverseIP() + ".ip6.arpa", DNSService.PTR);
+                } else {
+                    records = dnsProbe.getRecords(IPAddr.getAddress(ipAddress).getReverseIP() + ".in-addr.arpa", DNSService.PTR);
+                }
                 if (records != null && records.size() > 0) {
                     clientDomain = (String) records.get(0);
                 } else {

@@ -267,6 +267,10 @@ public class IPAddr {
      * @return ipAddress The ipAddress in nibbleFormat 
      */
     public String getNibbleFormat() {
+        return getNibbleFormat(address);
+    }
+    
+    private String getNibbleFormat(int[] address) {
         StringBuffer sb = new StringBuffer();
         int[] ip = address;
         for (int i = 0; i < ip.length; i++) {
@@ -287,6 +291,10 @@ public class IPAddr {
      * @return reverse ipAddress
      */
     public String getReverseIP() {
+        if(isIPV6(getIPAddress())) {
+            StringBuffer ip6 = new StringBuffer(getNibbleFormat());
+            return ip6.reverse().toString();     
+        }
         return getIPAddress(reverseIP(address));
     }
 
