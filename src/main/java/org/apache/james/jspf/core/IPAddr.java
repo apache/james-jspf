@@ -44,6 +44,8 @@ public class IPAddr {
     private int ipRun = 4;
 
     private String ipJoiner = ".";
+    
+    private static String ipv4MappedRegex = "::FFFF:[1-9][0-9]{0,2}\\.[1-9][0-9]{0,2}\\.[1-9][0-9]{0,2}\\.[1-9][0-9]{0,2}";
 
     // Allow factory creates only
     private IPAddr() {
@@ -428,11 +430,56 @@ public class IPAddr {
         // Convert the ip if its an ipv6 ip. For ipv4 no conversion is needed
         if (Inet6Util.isValidIP6Address(ip)) {
             try {
-                return Address.getByName(ip).getHostAddress();
+                return getConvertedIP(ip);
             } catch (UnknownHostException e) {
                 // ignore this
             }
         }
         return ip;
     }
+    
+    private static String getConvertedIP(String ip) throws UnknownHostException {
+        // Convert the ip if its an ipv6 ip. For ipv4 no conversion is needed
+        return Address.getByName(ip).getHostAddress();
+    }
+    
+    /**
+     * This method convert the given ip to the proper format. Convertion will only done if the given ipAddress is ipv6 and ipv4-mapped
+     * 
+     * This must be done to correct handle IPv4-mapped-addresses. 
+     * See: http://java.sun.com/j2se/1.4.2/docs/api/java/net/Inet6Address.html
+     *
+     * Special IPv6 address:
+     *  IPv4-mapped address:     
+     *      Of the form::ffff:w.x.y.z, this IPv6 address is used to represent an IPv4 address. It allows 
+     *      the native program to use the same address data structure and also the same socket when 
+     *      communicating with both IPv4 and IPv6 nodes. In InetAddress and Inet6Address, it is used 
+     *      for internal representation; it has no functional role. Java will never return an IPv4-mapped address. 
+     *      These classes can take an IPv4-mapped address as input, both in byte array and text representation. 
+     *       However, it will be converted into an IPv4 address.
+     * @param ip the ipAddress to convert
+     * @return return converted ip
+     * @throws PermErrorException if the given ipAddress is invalid
+     */
+    public static String getProperIpAddress(String ip) throws PermErrorException {
+        if (isIPV6(ip) && isIPV4MappedIP(ip)) {
+            try {
+                return getConvertedIP(ip);
+            } catch (UnknownHostException e) {
+                throw new PermErrorException("Invalid ipAddress: " + ip);
+            }
+        }
+        return ip;
+        
+    }
+    
+    /**
+     * Return true if the given ipAddress is a ipv4-mapped-address
+     * @param ip
+     * @return
+     */
+    private static boolean isIPV4MappedIP(String ip) {
+        return ip.toUpperCase().matches(ipv4MappedRegex);
+    }
+
 }

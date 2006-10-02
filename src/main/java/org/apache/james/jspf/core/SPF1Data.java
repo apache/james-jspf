@@ -94,15 +94,14 @@ public class SPF1Data implements MacroData {
     public SPF1Data(String mailFrom, String heloDomain, String clientIP,
             DNSService dnsProbe) throws PermErrorException, NoneException {
         super();
-
         this.mailFrom = mailFrom.trim();
         this.hostName = heloDomain.trim();
-        this.ipAddress = clientIP.trim();
+        this.ipAddress = IPAddr.getProperIpAddress(clientIP.trim());
         this.dnsProbe = dnsProbe;
 
         try {
             // get the in Address
-            inAddress = IPAddr.getInAddress(clientIP);
+            this.inAddress = IPAddr.getInAddress(clientIP);
         } catch (PermErrorException e) {
             // throw an exception cause the ip was not rfc conform
             throw new PermErrorException(e.getMessage());
@@ -263,7 +262,7 @@ public class SPF1Data implements MacroData {
      */
     public String getReadableIP() {
         if (readableIP == null) {
-            readableIP = IPAddr.getReadableIP(getIpAddress());
+            readableIP = IPAddr.getReadableIP(ipAddress);
         }
         return readableIP;
     }
