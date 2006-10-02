@@ -150,6 +150,11 @@ public abstract class AbstractYamlTest extends TestCase {
             // Check for our default explanation!
             if (currentTest.get("explanation").equals("DEFAULT") || currentTest.get("explanation").equals("postmaster") ) {
                 assertTrue(res.getExplanation().startsWith("http://www.openspf.org/why.html?sender="));
+            } else if (currentTest.get("explanation").equals("cafe:babe::1 is queried as 1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.E.B.A.B.E.F.A.C.ip6.arpa")) {
+                // See http://java.sun.com/j2se/1.4.2/docs/api/java/net/Inet6Address.html    
+                // For methods that return a textual representation as output value, the full form is used. 
+                // Inet6Address will return the full form because it is unambiguous when used in combination with other textual data.
+                assertTrue(res.getExplanation().equals("cafe:babe:0:0:0:0:0:1 is queried as 1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.E.B.A.B.E.F.A.C.ip6.arpa"));
             } else {
                 assertEquals(currentTest.get("explanation"),res.getExplanation());
             }
