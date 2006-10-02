@@ -1,33 +1,17 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
-<!--
-  Licensed to the Apache Software Foundation (ASF) under one
-  or more contributor license agreements.  See the NOTICE file
-  distributed with this work for additional information
-  regarding copyright ownership.  The ASF licenses this file
-  to you under the Apache License, Version 2.0 (the
-  "License"); you may not use this file except in compliance
-  with the License.  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing,
-  software distributed under the License is distributed on an
-  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-  KIND, either express or implied.  See the License for the
-  specific language governing permissions and limitations
-  under the License.    
--->
 <project name="jspf" default="jar" basedir=".">
   <property file="${user.home}/.m2/maven.properties"/>
   <property name="maven.build.output" value="target/classes"/>
   <property name="maven.build.directory" value="target"/>
-  <property name="maven.build.final.name" value="jspf-0.9"/>
+  <property name="maven.build.final.name" value="jspf-0.9-SNAPSHOT"/>
   <property name="maven.test.reports" value="${maven.build.directory}/test-reports"/>
   <property name="maven.test.output" value="target/test-classes"/>
   <property name="maven.repo.local" value="${user.home}/.m2/repository"/>
   <path id="build.classpath">
     <fileset dir="${maven.repo.local}">
+      <include name="commons-lang/commons-lang/1.0/commons-lang-1.0.jar"/>
+      <include name="commons-logging/commons-logging/1.0/commons-logging-1.0.jar"/>
       <include name="dnsjava/dnsjava/2.0.1/dnsjava-2.0.1.jar"/>
+      <include name="commons-cli/commons-cli/1.0/commons-cli-1.0.jar"/>
       <include name="log4j/log4j/1.2.13/log4j-1.2.13.jar"/>
     </fileset>
   </path>
@@ -98,7 +82,25 @@
   </target>
   <target name="get-deps" depends="test-offline" description="Download all dependencies" unless="maven.mode.offline">
     <mkdir dir="${maven.repo.local}"/>
-    <get src="http://repo1.maven.org/maven2/dnsjava/dnsjava/2.0.1/dnsjava-2.0.1.jar" dest="${maven.repo.local}/dnsjava/dnsjava/2.0.1/dnsjava-2.0.1.jar" usetimestamp="true" ignoreerrors="true"/>
-    <get src="http://repo1.maven.org/maven2/log4j/log4j/1.2.13/log4j-1.2.13.jar" dest="${maven.repo.local}/log4j/log4j/1.2.13/log4j-1.2.13.jar" usetimestamp="true" ignoreerrors="true"/>
+    <get src="file://H:\stuff\work\workspace\jspf/repos/third-party-m1/commons-lang/commons-lang/1.0/commons-lang-1.0.jar" dest="${maven.repo.local}/commons-lang/commons-lang/1.0/commons-lang-1.0.jar" usetimestamp="true" ignoreerrors="true"/>
+    <get src="http://people.apache.org/repo/m2-ibiblio-rsync-repository/commons-lang/commons-lang/1.0/commons-lang-1.0.jar" dest="${maven.repo.local}/commons-lang/commons-lang/1.0/commons-lang-1.0.jar" usetimestamp="true" ignoreerrors="true"/>
+    <get src="http://people.apache.org/repo/m2-snapshot-repository/commons-lang/commons-lang/1.0/commons-lang-1.0.jar" dest="${maven.repo.local}/commons-lang/commons-lang/1.0/commons-lang-1.0.jar" usetimestamp="true" ignoreerrors="true"/>
+    <get src="http://people.apache.org/repo/m1-ibiblio-rsync-repository/commons-lang/commons-lang/1.0/commons-lang-1.0.jar" dest="${maven.repo.local}/commons-lang/commons-lang/1.0/commons-lang-1.0.jar" usetimestamp="true" ignoreerrors="true"/>
+    <get src="file://H:\stuff\work\workspace\jspf/repos/third-party-m1/commons-logging/commons-logging/1.0/commons-logging-1.0.jar" dest="${maven.repo.local}/commons-logging/commons-logging/1.0/commons-logging-1.0.jar" usetimestamp="true" ignoreerrors="true"/>
+    <get src="http://people.apache.org/repo/m2-ibiblio-rsync-repository/commons-logging/commons-logging/1.0/commons-logging-1.0.jar" dest="${maven.repo.local}/commons-logging/commons-logging/1.0/commons-logging-1.0.jar" usetimestamp="true" ignoreerrors="true"/>
+    <get src="http://people.apache.org/repo/m2-snapshot-repository/commons-logging/commons-logging/1.0/commons-logging-1.0.jar" dest="${maven.repo.local}/commons-logging/commons-logging/1.0/commons-logging-1.0.jar" usetimestamp="true" ignoreerrors="true"/>
+    <get src="http://people.apache.org/repo/m1-ibiblio-rsync-repository/commons-logging/commons-logging/1.0/commons-logging-1.0.jar" dest="${maven.repo.local}/commons-logging/commons-logging/1.0/commons-logging-1.0.jar" usetimestamp="true" ignoreerrors="true"/>
+    <get src="file://H:\stuff\work\workspace\jspf/repos/third-party-m1/dnsjava/dnsjava/2.0.1/dnsjava-2.0.1.jar" dest="${maven.repo.local}/dnsjava/dnsjava/2.0.1/dnsjava-2.0.1.jar" usetimestamp="true" ignoreerrors="true"/>
+    <get src="http://people.apache.org/repo/m2-ibiblio-rsync-repository/dnsjava/dnsjava/2.0.1/dnsjava-2.0.1.jar" dest="${maven.repo.local}/dnsjava/dnsjava/2.0.1/dnsjava-2.0.1.jar" usetimestamp="true" ignoreerrors="true"/>
+    <get src="http://people.apache.org/repo/m2-snapshot-repository/dnsjava/dnsjava/2.0.1/dnsjava-2.0.1.jar" dest="${maven.repo.local}/dnsjava/dnsjava/2.0.1/dnsjava-2.0.1.jar" usetimestamp="true" ignoreerrors="true"/>
+    <get src="http://people.apache.org/repo/m1-ibiblio-rsync-repository/dnsjava/dnsjava/2.0.1/dnsjava-2.0.1.jar" dest="${maven.repo.local}/dnsjava/dnsjava/2.0.1/dnsjava-2.0.1.jar" usetimestamp="true" ignoreerrors="true"/>
+    <get src="file://H:\stuff\work\workspace\jspf/repos/third-party-m1/commons-cli/commons-cli/1.0/commons-cli-1.0.jar" dest="${maven.repo.local}/commons-cli/commons-cli/1.0/commons-cli-1.0.jar" usetimestamp="true" ignoreerrors="true"/>
+    <get src="http://people.apache.org/repo/m2-ibiblio-rsync-repository/commons-cli/commons-cli/1.0/commons-cli-1.0.jar" dest="${maven.repo.local}/commons-cli/commons-cli/1.0/commons-cli-1.0.jar" usetimestamp="true" ignoreerrors="true"/>
+    <get src="http://people.apache.org/repo/m2-snapshot-repository/commons-cli/commons-cli/1.0/commons-cli-1.0.jar" dest="${maven.repo.local}/commons-cli/commons-cli/1.0/commons-cli-1.0.jar" usetimestamp="true" ignoreerrors="true"/>
+    <get src="http://people.apache.org/repo/m1-ibiblio-rsync-repository/commons-cli/commons-cli/1.0/commons-cli-1.0.jar" dest="${maven.repo.local}/commons-cli/commons-cli/1.0/commons-cli-1.0.jar" usetimestamp="true" ignoreerrors="true"/>
+    <get src="file://H:\stuff\work\workspace\jspf/repos/third-party-m1/log4j/log4j/1.2.13/log4j-1.2.13.jar" dest="${maven.repo.local}/log4j/log4j/1.2.13/log4j-1.2.13.jar" usetimestamp="true" ignoreerrors="true"/>
+    <get src="http://people.apache.org/repo/m2-ibiblio-rsync-repository/log4j/log4j/1.2.13/log4j-1.2.13.jar" dest="${maven.repo.local}/log4j/log4j/1.2.13/log4j-1.2.13.jar" usetimestamp="true" ignoreerrors="true"/>
+    <get src="http://people.apache.org/repo/m2-snapshot-repository/log4j/log4j/1.2.13/log4j-1.2.13.jar" dest="${maven.repo.local}/log4j/log4j/1.2.13/log4j-1.2.13.jar" usetimestamp="true" ignoreerrors="true"/>
+    <get src="http://people.apache.org/repo/m1-ibiblio-rsync-repository/log4j/log4j/1.2.13/log4j-1.2.13.jar" dest="${maven.repo.local}/log4j/log4j/1.2.13/log4j-1.2.13.jar" usetimestamp="true" ignoreerrors="true"/>
   </target>
 </project>
