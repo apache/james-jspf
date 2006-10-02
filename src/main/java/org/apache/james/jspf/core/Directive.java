@@ -87,5 +87,9 @@ public class Directive {
     public String getQualifier() {
         return qualifier;
     }
+    
+    public String toString() {
+        return qualifier + mechanism;
+    }
 
 }

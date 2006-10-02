@@ -47,9 +47,9 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled {
     public static final String REGEX = "[iI][nN][cC][lL][uU][dD][eE]" + "\\:"
             + SPF1Parser.DOMAIN_SPEC_REGEX;
 
-    private String host;
+    protected String host;
     
-    private Logger log;
+    protected Logger log;
 
     /**
      * Set the host which should be used for include

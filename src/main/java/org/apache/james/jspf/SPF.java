@@ -22,7 +22,6 @@ package org.apache.james.jspf;
 
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.Directive;
-import org.apache.james.jspf.core.FallbackPolicy;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.Modifier;
 import org.apache.james.jspf.core.SPF1Constants;
@@ -32,6 +31,8 @@ import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
+import org.apache.james.jspf.localpolicy.FallbackPolicy;
+import org.apache.james.jspf.localpolicy.TrustedForwarderPolicy;
 import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.parser.SPF1Parser;
 
@@ -56,6 +57,8 @@ public class SPF {
     private boolean useBestGuess = false;
 
     private FallbackPolicy fallBack;
+
+    private boolean useTrustedForwarder = false;
     
     /**
      * Uses default Log4JLogger and DNSJava based dns resolver
@@ -199,9 +202,15 @@ public class SPF {
 
         String qualifier = null;
         boolean hasCommand = false;
-
-        // get all commands
-        Iterator com = spfRecord.getDirectives().iterator();
+        Iterator com = null;
+        
+        // trustedForwarder support is enabled
+        if (useTrustedForwarder) {
+            com = new TrustedForwarderPolicy(spfRecord.getDirectives(),log).getUpdatedDirectives().iterator();
+        } else {
+            // get all commands
+            com = spfRecord.getDirectives().iterator();
+        }
         while (com.hasNext()) {
 
             // if we reach maximum calls we must throw a PermErrorException. See
@@ -405,5 +414,17 @@ public class SPF {
      */
     public FallbackPolicy getFallbackPolicy() {
         return fallBack;
+    }
+    
+    /**
+     * Set to true to enable trusted-forwarder.org whitelist. The whitelist will only be queried if
+     * the last Mechanism is -all or ?all. 
+     * See http://trusted-forwarder.org for more informations
+     * Default is false.
+     * 
+     * @param useTrustedForwarder true or false
+     */
+    public synchronized void useTrustedForwarder(boolean useTrustedForwarder) {
+        this.useTrustedForwarder = useTrustedForwarder;
     }
 }

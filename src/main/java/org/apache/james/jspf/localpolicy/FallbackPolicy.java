@@ -17,13 +17,15 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.core;
+package org.apache.james.jspf.localpolicy;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.james.jspf.core.Logger;
+import org.apache.james.jspf.core.SPF1Record;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
@@ -40,7 +42,7 @@ public class FallbackPolicy {
 
     private Logger log;
 
-    public FallbackPolicy(Logger log) {
+    public FallbackPolicy(Logger log){
         this.log = log;
         fallBackMap = Collections.synchronizedMap(new HashMap());
         parser = new SPF1Parser(log);
