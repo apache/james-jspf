@@ -293,9 +293,9 @@ public class IPAddr {
     public String getReverseIP() {
         if(isIPV6(getIPAddress())) {
             StringBuffer ip6 = new StringBuffer(getNibbleFormat());
-            return ip6.reverse().toString();     
+            return ip6.reverse().append(".ip6.arpa").toString();     
         }
-        return getIPAddress(reverseIP(address));
+        return (getIPAddress(reverseIP(address)) + ".in-addr.arpa");
     }
 
     /**

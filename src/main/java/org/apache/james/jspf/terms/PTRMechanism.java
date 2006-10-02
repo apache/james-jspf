@@ -59,7 +59,7 @@ public class PTRMechanism extends GenericMechanism {
         try {
             // Get PTR Records for the ipAddress which is provided by SPF1Data
             IPAddr ip = IPAddr.getAddress(spfData.getIpAddress());
-            List domainList = spfData.getDnsProbe().getRecords(ip.getReverseIP() + ".in-addr.arpa", DNSService.PTR);
+            List domainList = spfData.getDnsProbe().getRecords(ip.getReverseIP(), DNSService.PTR);
     
             // No PTR records found
             if (domainList == null) return false;
@@ -73,11 +73,18 @@ public class PTRMechanism extends GenericMechanism {
             }
               
             for (int i = 0; i < domainList.size(); i++) {
-    
-                // Get a record for this
-                List aList = spfData.getDnsProbe().getRecords(
-                        (String) domainList.get(i), DNSService.A);
+                List aList = null;
                 
+                // check if the connecting ip is ip6. If so lookup AAAA record
+                if (IPAddr.isIPV6(spfData.getIpAddress())) {
+                    // Get aaaa record for this
+                    aList = spfData.getDnsProbe().getRecords(
+                            (String) domainList.get(i), DNSService.AAAA);
+                } else {
+                    // Get a record for this
+                    aList = spfData.getDnsProbe().getRecords(
+                            (String) domainList.get(i), DNSService.A);
+                }
                 if (aList != null) {
                     for (int j = 0; j < aList.size(); j++) {
                         if (aList.get(j).equals(spfData.getIpAddress())) {
