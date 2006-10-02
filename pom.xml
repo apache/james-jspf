@@ -37,7 +37,7 @@
   <distributionManagement>
     <site>
       <id>jspf-website</id>
-      <url>scp://minotaur.apache.org/www/james.apache.org/jspf/</url>
+      <url>scp://people.apache.org/www/james.apache.org/jspf/</url>
     </site>
   </distributionManagement>
 
@@ -129,19 +129,7 @@
         <enabled>false</enabled>
       </releases>
     </repository>
-    
-     <repository>
-      <id>central-m1</id>
-      <name>Apache Snapshot Repository</name>
-      <url>http://people.apache.org/repo/m1-ibiblio-rsync-repository</url>
-      <layout>legacy</layout>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-    </repository>
   </repositories>
-  
-  
 
   <mailingLists>
     <mailingList>
