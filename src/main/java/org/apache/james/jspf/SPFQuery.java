@@ -65,6 +65,8 @@ public class SPFQuery {
     private final static String CMD_DEFAULT_EXP = "defaultexplanation";
 
     private final static String CMD_BEST_GUESS = "usebestguess";
+    
+    private final static String CMD_TRUSTED_FORWARDER = "usetrusted";
 
     private static Logger logger = Logger.getRootLogger();
 
@@ -79,6 +81,7 @@ public class SPFQuery {
         String helo = null;
         String defaultExplanation = null;
         boolean useBestGuess = false;
+        boolean useTrustedForwarder = false;
 
         SimpleLayout layout = new SimpleLayout();
         ConsoleAppender consoleAppender = new ConsoleAppender(layout);
@@ -97,7 +100,7 @@ public class SPFQuery {
             helo = line.getOptionValue(CMD_HELO);
             defaultExplanation = line.getOptionValue(CMD_DEFAULT_EXP);
             useBestGuess = line.hasOption(CMD_BEST_GUESS);
-
+            useTrustedForwarder = line.hasOption(CMD_TRUSTED_FORWARDER);
             // check if all needed values was set
             if (ip != null && sender != null && helo != null) {
 
@@ -116,6 +119,10 @@ public class SPFQuery {
                 // Check if we should use best guess
                 if (useBestGuess == true) {
                     spf.setUseBestGuess(true);
+                }
+                
+                if (useTrustedForwarder == true) {
+                    spf.setUseTrustedForwarder(true);
                 }
 
                 SPFResult result = spf.checkSPF(ip, sender, helo);
@@ -147,6 +154,7 @@ public class SPFQuery {
         options.addOption(OptionBuilder.withLongOpt(CMD_DEFAULT_EXP)
                 .withValueSeparator('=').hasArg().create());
         options.addOption(OptionBuilder.withLongOpt(CMD_BEST_GUESS).create());
+        options.addOption(OptionBuilder.withLongOpt(CMD_TRUSTED_FORWARDER).create());
         options.addOption(OptionBuilder.withLongOpt(CMD_DEBUG).create());
         options.addOption(OptionBuilder.withLongOpt(CMD_VERBOSE).create());
         return options;
@@ -160,7 +168,7 @@ public class SPFQuery {
         System.out.println("Usage: java -jar jspf-x.jar --" + CMD_IP
                 + "=192.168.100.1 --" + CMD_SENDER + "=postmaster@foo.bar --"
                 + CMD_HELO + "=foo.bar [--" + CMD_DEFAULT_EXP
-                + "=\"explanation String\"] [--" + CMD_BEST_GUESS + "] "
+                + "=\"explanation String\"] [--" + CMD_BEST_GUESS + "] [--"+ CMD_TRUSTED_FORWARDER +"]"
                 + CMD_DEBUG + "] [--" + CMD_VERBOSE + "]");
         System.exit(UNKNOWN_RCODE);
     }

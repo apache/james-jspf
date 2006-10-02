@@ -424,7 +424,7 @@ public class SPF {
      * 
      * @param useTrustedForwarder true or false
      */
-    public synchronized void useTrustedForwarder(boolean useTrustedForwarder) {
+    public synchronized void setUseTrustedForwarder(boolean useTrustedForwarder) {
         this.useTrustedForwarder = useTrustedForwarder;
     }
 }
