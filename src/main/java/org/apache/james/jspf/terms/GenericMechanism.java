@@ -67,12 +67,8 @@ public abstract class GenericMechanism implements Mechanism, Configurable, LogEn
         if (host == null) {
             host = spfData.getCurrentDomain();
         } else {
-            try {
-                host = new MacroExpand(spfData, log).expandDomain(host);
-
-            } catch (Exception e) {
-                throw new PermErrorException(e.getMessage());
-            }
+            // throws a PermErrorException that we cat pass through
+            host = new MacroExpand(spfData, log).expandDomain(host);
         }
         return host;
     }

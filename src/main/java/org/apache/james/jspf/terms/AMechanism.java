@@ -94,8 +94,9 @@ public class AMechanism extends GenericMechanism {
                 }
 
             }
+        // PermError / TempError
         } catch (Exception e) {
-            e.printStackTrace();
+            log.debug("No valid ipAddress: ",e);
             throw new PermErrorException("No valid ipAddress: "
                     + spfData.getIpAddress());
         }

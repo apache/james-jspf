@@ -19,19 +19,35 @@
 
 package org.apache.james.jspf.core;
 
+import org.apache.james.jspf.SPFInternalResult;
+import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
+import org.apache.james.jspf.exceptions.TempErrorException;
 
-import junit.framework.TestCase;
+/**
+ * Interface for the SPFChecker service.
+ */
+public interface SPFChecker {
 
-public class SPF1DataTest extends TestCase {
-
-    /*
-     * Test method for 'org.apache.james.jspf.core.SPF1Data.getMacroIpAddress()'
+    /**
+     * Run check for SPF with the given values.
+     * 
+     * @param spfData
+     *             The SPF1Data which should be used to run the check
+     * @return result 
+     *             The SPFInternalResult 
+     * @throws PermErrorException
+     *             Get thrown if an error was detected
+     * @throws NoneException
+     *             Get thrown if no Record was found
+     * @throws TempErrorException
+     *             Get thrown if a DNS problem was detected
+     * @throws NeutralException  
+     *             Get thrown if the result should be neutral
      */
-    public void testGetMacroIpAddress() throws PermErrorException, NoneException {
-        SPF1Data d = new SPF1Data("mailfrom@fromdomain.com","helodomain.com","2001:DB8::CB01", null, null);
-        assertEquals("2.0.0.1.0.D.B.8.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.C.B.0.1",d.getMacroIpAddress());
-    }
+    public SPFInternalResult checkSPF(SPF1Data spfData)
+            throws PermErrorException, NoneException, TempErrorException,
+            NeutralException;
 
 }

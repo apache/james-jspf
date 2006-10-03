@@ -95,7 +95,7 @@ public class IPAddr {
             try {
                 getAddress((String) data);
                 return true;
-            } catch (Exception e) {
+            } catch (PermErrorException e) {
                 return false;
             }
         } else {
@@ -186,19 +186,23 @@ public class IPAddr {
     private void stringToInternal(String netAddress) throws PermErrorException {
         netAddress = stripDot(netAddress);
 
-        byte[] bytes = Inet6Util.createByteArrayFromIPAddressString(netAddress);
-
-        if (bytes.length == 4) {
-            for (int i = 0; i < bytes.length; i++) {
-                address[i] = bytes[i];
+        try {
+            byte[] bytes = Inet6Util.createByteArrayFromIPAddressString(netAddress);
+    
+            if (bytes.length == 4) {
+                for (int i = 0; i < bytes.length; i++) {
+                    address[i] = bytes[i];
+                }
+            } else if (bytes.length == 16) {
+                setIP6Defaults();
+                for (int i = 0; i < bytes.length / 2; i++) {
+                    address[i] = unsigned(bytes[i * 2]) * 256
+                            + unsigned(bytes[i * 2 + 1]);
+                }
+            } else {
+                throw new PermErrorException("Not a valid address: " + netAddress);
             }
-        } else if (bytes.length == 16) {
-            setIP6Defaults();
-            for (int i = 0; i < bytes.length / 2; i++) {
-                address[i] = unsigned(bytes[i * 2]) * 256
-                        + unsigned(bytes[i * 2 + 1]);
-            }
-        } else {
+        } catch (NumberFormatException e) {
             throw new PermErrorException("Not a valid address: " + netAddress);
         }
     }

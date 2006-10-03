@@ -53,16 +53,13 @@ public class ExistsMechanism extends GenericMechanism {
         spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);
 
         String host = expandHost(spfData);
-        try {
-            host = new MacroExpand(spfData, log).expandDomain(host);
-        } catch (Exception e) {
-            throw new PermErrorException(e.getMessage());
-        }
+
+        // throws a PermErrorException that we can pass through
+        host = new MacroExpand(spfData, log).expandDomain(host);
 
         try {
             aRecords = spfData.getDnsProbe().getRecords(host,DNSService.A);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (DNSService.TimeoutException e) {
             return false;
         }
        
@@ -72,6 +69,13 @@ public class ExistsMechanism extends GenericMechanism {
 
         // No match found
         return false;
+    }
+    
+    /**
+     * @see java.lang.Object#toString()
+     */
+    public String toString() {
+        return "exists:"+getDomain();
     }
 
 }

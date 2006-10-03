@@ -20,7 +20,6 @@
 
 package org.apache.james.jspf.terms;
 
-import org.apache.james.jspf.SPF;
 import org.apache.james.jspf.core.LogEnabled;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPF1Data;
@@ -67,20 +66,14 @@ public class RedirectModifier extends GenericModifier implements LogEnabled {
             // update currentDepth
             spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);
 
-            try {
-                host = new MacroExpand(spfData, log).expandDomain(host);
-            } catch (Exception e) {
-                throw new PermErrorException("Error in redirect modifier: "
-                        + host);
-            }
+            // throws a PermErrorException that we can pass through
+            host = new MacroExpand(spfData, log).expandDomain(host);
 
             spfData.setCurrentDomain(host);
 
             String res = null;
             try {
-                res = new SPF(spfData.getDnsProbe(),log).checkSPF(spfData).getResultChar();
-                
-
+                res = spfData.getSpfProbe().checkSPF(spfData).getResultChar();
             } catch (NoneException e) {
                 // no spf record assigned to the redirect domain
                 throw new PermErrorException(

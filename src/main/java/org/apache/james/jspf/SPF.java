@@ -27,6 +27,7 @@ import org.apache.james.jspf.core.Modifier;
 import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.core.SPF1Record;
+import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
@@ -44,7 +45,7 @@ import java.util.List;
  * 
  */
 
-public class SPF {
+public class SPF implements SPFChecker {
 
     private DNSService dnsProbe;
 
@@ -57,7 +58,7 @@ public class SPF {
     private boolean useBestGuess = false;
 
     private FallbackPolicy fallBack;
-
+    
     private boolean useTrustedForwarder = false;
     
     /**
@@ -83,11 +84,22 @@ public class SPF {
      * @param logger the logger to use
      */
     public SPF(DNSService dnsProbe, Logger logger) {
+        this(dnsProbe, new SPF1Parser(logger), logger);
+    }
+    
+    
+    /**
+     * Uses passed services
+     * 
+     * @param dnsProbe the dns provider
+     * @param parser the parser to use
+     * @param logger the logger to use
+     */
+    public SPF(DNSService dnsProbe, SPF1Parser parser, Logger logger) {
         super();
         this.dnsProbe = dnsProbe;
-        this.parser = new SPF1Parser(logger);
+        this.parser = parser;
         this.log = logger;
-        this.fallBack =  new FallbackPolicy(logger);
     }
 
     /**
@@ -109,7 +121,7 @@ public class SPF {
 
         try {
             // Setup the data
-            spfData = new SPF1Data(mailFrom, hostName, ipAddress, dnsProbe);
+            spfData = new SPF1Data(mailFrom, hostName, ipAddress, dnsProbe, this);
             SPFInternalResult res = checkSPF(spfData);
             resultChar = res.getResultChar();
             result = SPF1Utils.resultToName(resultChar);
@@ -142,26 +154,12 @@ public class SPF {
     }
 
     /**
-     * Run check for SPF with the given values.
-     * 
-     * @param spfData
-     *             The SPF1Data which should be used to run the check
-     * @return result 
-     *             The SPFInternalResult 
-     * @throws PermErrorException
-     *             Get thrown if an error was detected
-     * @throws NoneException
-     *             Get thrown if no Record was found
-     * @throws TempErrorException
-     *             Get thrown if a DNS problem was detected
-     * @throws NeutralException  
-     *             Get thrown if the result should be neutral
+     * @see org.apache.james.jspf.SPFChecker#checkSPF(org.apache.james.jspf.core.SPF1Data)
      */
     public SPFInternalResult checkSPF(SPF1Data spfData) throws PermErrorException,
             NoneException, TempErrorException, NeutralException {
         SPF1Record spfRecord = null;
-        String result = SPF1Constants.NEUTRAL;
-        String explanation = null;
+        spfData.setCurrentResult(SPF1Constants.NEUTRAL);
         
         // Initial checks (spec 4.3)
         if (spfData.getCurrentDomain() != null) {
@@ -174,7 +172,7 @@ public class SPF {
         }
 
         // Get the raw dns txt entry which contains a spf entry
-        String spfDnsEntry = getSpfRecord(dnsProbe,spfData.getCurrentDomain(),
+        String spfDnsEntry = getSpfRecord(spfData.getDnsProbe(),spfData.getCurrentDomain(),
                 SPF1Constants.SPF_VERSION);
 
         // No SPF-Record found
@@ -183,7 +181,7 @@ public class SPF {
                 // We should use bestguess
                 spfDnsEntry = SPF1Utils.BEST_GUESS_RECORD;
                 
-            } else if (fallBack.getFallBackEntry(spfData.getCurrentDomain()) != null){
+            } else if (fallBack != null && fallBack.getFallBackEntry(spfData.getCurrentDomain()) != null){
                 // We should use fallback
                 spfRecord = fallBack.getFallBackEntry(spfData.getCurrentDomain());
                 log.debug("Set FallBack SPF-Record:" +spfRecord.toString());
@@ -194,21 +192,18 @@ public class SPF {
 
         // check if the spfRecord was set before
         if (spfRecord == null) {
-            // logging
-            log.debug("Start parsing SPF-Record:" + spfDnsEntry);
-
             spfRecord = parser.parse(spfDnsEntry);
         }
 
         String qualifier = null;
         boolean hasCommand = false;
         Iterator com = null;
-        
+
         // trustedForwarder support is enabled
         if (useTrustedForwarder) {
             com = new TrustedForwarderPolicy(spfRecord.getDirectives(),log).getUpdatedDirectives().iterator();
         } else {
-            // get all commands
+        // get all commands
             com = spfRecord.getDirectives().iterator();
         }
         while (com.hasNext()) {
@@ -236,12 +231,11 @@ public class SPF {
 
             if (qualifier != null) {
                 if (qualifier.equals("")) {
-                    result = SPF1Constants.PASS;
+                    spfData.setCurrentResult(SPF1Constants.PASS);
                 } else {
-                    result = qualifier;
+                    spfData.setCurrentResult(qualifier);
                 }
 
-                spfData.setCurrentResult(result);
                 spfData.setMatch(true);
 
                 // If we have a match we should break the while loop
@@ -275,19 +269,17 @@ public class SPF {
             }
 
             if (qualifier != null) {
-                result = qualifier;
-
-                spfData.setCurrentResult(result);
+                spfData.setCurrentResult(qualifier);
                 spfData.setMatch(true);
             }
         }
 
         // If no match was found set the result to neutral
         if (!spfData.isMatch() && (hasCommand == true)) {
-            result = SPF1Constants.NEUTRAL;
+            spfData.setCurrentResult(SPF1Constants.NEUTRAL);
         } 
         
-        if (result.equals(SPF1Constants.FAIL)) {  
+        if (SPF1Constants.FAIL.equals(spfData.getCurrentResult())) {  
             if (spfData.getExplanation()==null || spfData.getExplanation().equals("")) {
                 if(defaultExplanation == null) {
                     try {
@@ -306,10 +298,9 @@ public class SPF {
                     }
                 }
             }
-            explanation = spfData.getExplanation();
         }
         
-        return new SPFInternalResult(result, explanation);
+        return new SPFInternalResult(spfData.getCurrentResult(), spfData.getExplanation());
     }
 
     /**
@@ -414,6 +405,14 @@ public class SPF {
      */
     public FallbackPolicy getFallbackPolicy() {
         return fallBack;
+    }
+    
+    
+    /**
+     * Initialize fallback policy and enable its usage.
+     */
+    public void initializeFallbackPolicy() {
+        this.fallBack =  new FallbackPolicy(this.log);
     }
     
     /**

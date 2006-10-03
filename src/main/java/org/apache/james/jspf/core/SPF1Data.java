@@ -38,7 +38,9 @@ import java.util.List;
 
 public class SPF1Data implements MacroData {
 
-    private DNSService dnsProbe = null;
+    private DNSService dnsProbe;
+
+    private SPFChecker spfProbe;
 
     private String ipAddress = ""; // also used for (i)<sending-host>
 
@@ -92,12 +94,13 @@ public class SPF1Data implements MacroData {
      *             Get thrown if no valid emailaddress get passed
      */
     public SPF1Data(String mailFrom, String heloDomain, String clientIP,
-            DNSService dnsProbe) throws PermErrorException, NoneException {
+            DNSService dnsProbe, SPFChecker spfProbe) throws PermErrorException, NoneException {
         super();
         this.mailFrom = mailFrom.trim();
         this.hostName = heloDomain.trim();
         this.ipAddress = IPAddr.getProperIpAddress(clientIP.trim());
         this.dnsProbe = dnsProbe;
+        this.spfProbe = spfProbe;
 
         try {
             // get the in Address
@@ -408,6 +411,15 @@ public class SPF1Data implements MacroData {
      */
     public boolean ignoreExplanation() {
         return ignoreExplanation;
+    }
+
+    /**
+     * Return the SPF checker to be used in recursive lookups
+     * 
+     * @return the spf checker
+     */
+    public SPFChecker getSpfProbe() {
+        return spfProbe;
     }
 
 }

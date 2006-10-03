@@ -339,14 +339,14 @@ public class SPF1Parser {
         if (log.isDebugEnabled()) {
             log.debug("Parsing catch group positions: Modifiers["
                     + TERM_STEP_REGEX_MODIFIER_POS + "] Qualifier["
-                    + TERM_STEP_REGEX_QUALIFIER_POS + " Mechanism["
+                    + TERM_STEP_REGEX_QUALIFIER_POS + "] Mechanism["
                     + TERM_STEP_REGEX_MECHANISM_POS + "]");
             for (int k = 0; k < matchResultPositions.size(); k++) {
                 log
                         .debug(k
                                 + ") "
                                 + (matchResultPositions.get(k) != null ? ((TermDef) matchResultPositions
-                                        .get(k)).getPattern()
+                                        .get(k)).getPattern().pattern()
                                         : null));
             }
         }

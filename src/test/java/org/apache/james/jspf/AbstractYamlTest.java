@@ -20,6 +20,7 @@
 package org.apache.james.jspf;
 
 import org.apache.james.jspf.core.DNSService;
+import org.apache.james.jspf.parser.SPF1Parser;
 import org.jvyaml.Constructor;
 import org.jvyaml.DefaultYAMLFactory;
 import org.jvyaml.YAMLFactory;
@@ -40,6 +41,8 @@ public abstract class AbstractYamlTest extends TestCase {
 
     SPFYamlTestSuite data;
     String test;
+    protected SPF spf;
+    protected static SPF1Parser parser;
 
     protected AbstractYamlTest(SPFYamlTestSuite def, String test) {
         super(def.getComment()+" #"+test);
@@ -112,8 +115,12 @@ public abstract class AbstractYamlTest extends TestCase {
         
         System.out.println("testing "+next+": "+currentTest.get("description"));
     
-        SPF spf = new SPF(new LoggingDNSService(getDNSService()), new ConsoleLogger());
-        
+        if (parser == null) {
+            parser = new SPF1Parser(new ConsoleLogger());
+            System.err.println("--------------------------------------------");
+        }
+        spf = new SPF(new LoggingDNSService(getDNSService()), parser, new ConsoleLogger());
+
         String ip = null;
         String sender = null;
         String helo = null;
