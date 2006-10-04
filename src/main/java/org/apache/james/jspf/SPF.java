@@ -28,6 +28,7 @@ import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.core.SPF1Record;
 import org.apache.james.jspf.core.SPFChecker;
+import org.apache.james.jspf.core.SPFRecordParser;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
@@ -35,7 +36,7 @@ import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.localpolicy.FallbackPolicy;
 import org.apache.james.jspf.localpolicy.TrustedForwarderPolicy;
 import org.apache.james.jspf.macro.MacroExpand;
-import org.apache.james.jspf.parser.SPF1Parser;
+import org.apache.james.jspf.parser.DefaultSPF1Parser;
 
 import java.util.Iterator;
 import java.util.List;
@@ -49,7 +50,7 @@ public class SPF implements SPFChecker {
 
     private DNSService dnsProbe;
 
-    private SPF1Parser parser;
+    private SPFRecordParser parser;
 
     private Logger log;
     
@@ -84,7 +85,7 @@ public class SPF implements SPFChecker {
      * @param logger the logger to use
      */
     public SPF(DNSService dnsProbe, Logger logger) {
-        this(dnsProbe, new SPF1Parser(logger), logger);
+        this(dnsProbe, new DefaultSPF1Parser(logger), logger);
     }
     
     
@@ -95,7 +96,7 @@ public class SPF implements SPFChecker {
      * @param parser the parser to use
      * @param logger the logger to use
      */
-    public SPF(DNSService dnsProbe, SPF1Parser parser, Logger logger) {
+    public SPF(DNSService dnsProbe, SPFRecordParser parser, Logger logger) {
         super();
         this.dnsProbe = dnsProbe;
         this.parser = parser;
@@ -412,7 +413,7 @@ public class SPF implements SPFChecker {
      * Initialize fallback policy and enable its usage.
      */
     public void initializeFallbackPolicy() {
-        this.fallBack =  new FallbackPolicy(this.log);
+        this.fallBack =  new FallbackPolicy(this.log, parser);
     }
     
     /**

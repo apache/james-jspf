@@ -21,6 +21,7 @@
 package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.Configurable;
+import org.apache.james.jspf.core.Configuration;
 import org.apache.james.jspf.core.LogEnabled;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.Mechanism;
@@ -31,8 +32,7 @@ import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
-import org.apache.james.jspf.parser.SPF1Parser;
-import org.apache.james.jspf.util.ConfigurationMatch;
+import org.apache.james.jspf.util.SPFTermsRegexps;
 
 /**
  * This class represent the incude mechanism
@@ -44,7 +44,7 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled {
      * ABNF: include = "include" ":" domain-spec
      */
     public static final String REGEX = "[iI][nN][cC][lL][uU][dD][eE]" + "\\:"
-            + SPF1Parser.DOMAIN_SPEC_REGEX;
+            + SPFTermsRegexps.DOMAIN_SPEC_REGEX;
 
     protected String host;
     
@@ -112,9 +112,9 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled {
     }
 
     /**
-     * @see org.apache.james.jspf.core.Configurable#config(ConfigurationMatch)
+     * @see org.apache.james.jspf.core.Configurable#config(Configuration)
      */
-    public synchronized void config(ConfigurationMatch params) throws PermErrorException {
+    public synchronized void config(Configuration params) throws PermErrorException {
         if (params.groupCount() == 0) {
             throw new PermErrorException("Include mechanism without an host");
         }

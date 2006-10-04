@@ -26,10 +26,10 @@ import java.util.Map;
 
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPF1Record;
+import org.apache.james.jspf.core.SPFRecordParser;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
-import org.apache.james.jspf.parser.SPF1Parser;
 
 /**
  * Class to support Fallback feature
@@ -38,14 +38,14 @@ public class FallbackPolicy {
 
     private Map fallBackMap;
 
-    private SPF1Parser parser;
+    private SPFRecordParser parser;
 
     private Logger log;
 
-    public FallbackPolicy(Logger log){
+    public FallbackPolicy(Logger log, SPFRecordParser parser){
         this.log = log;
         fallBackMap = Collections.synchronizedMap(new HashMap());
-        parser = new SPF1Parser(log);
+        this.parser = parser;
     }
 
     /**

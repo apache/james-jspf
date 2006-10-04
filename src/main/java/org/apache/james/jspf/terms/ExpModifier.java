@@ -28,7 +28,7 @@ import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
-import org.apache.james.jspf.parser.SPF1Parser;
+import org.apache.james.jspf.util.SPFTermsRegexps;
 
 import java.util.List;
 
@@ -42,7 +42,7 @@ public class ExpModifier extends GenericModifier implements LogEnabled {
      * ABNF: explanation = "exp" "=" domain-spec
      */
     public static final String REGEX = "[eE][xX][pP]" + "\\="
-            + SPF1Parser.DOMAIN_SPEC_REGEX;
+            + SPFTermsRegexps.DOMAIN_SPEC_REGEX;
 
     private Logger log;
 

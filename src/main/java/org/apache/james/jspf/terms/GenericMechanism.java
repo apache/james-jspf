@@ -21,13 +21,13 @@
 package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.Configurable;
+import org.apache.james.jspf.core.Configuration;
 import org.apache.james.jspf.core.LogEnabled;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.Mechanism;
 import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
-import org.apache.james.jspf.util.ConfigurationMatch;
 
 /**
  * This abstract class represent a gerneric mechanism
@@ -74,9 +74,9 @@ public abstract class GenericMechanism implements Mechanism, Configurable, LogEn
     }
 
     /**
-     * @see org.apache.james.jspf.core.Configurable#config(ConfigurationMatch)
+     * @see org.apache.james.jspf.core.Configurable#config(Configuration)
      */
-    public synchronized void config(ConfigurationMatch params) throws PermErrorException {
+    public synchronized void config(Configuration params) throws PermErrorException {
         if (params.groupCount() >= 1 && params.group(1) != null) {
             domain = params.group(1);
         } else {

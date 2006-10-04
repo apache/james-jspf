@@ -25,7 +25,7 @@ import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
-import org.apache.james.jspf.parser.SPF1Parser;
+import org.apache.james.jspf.util.SPFTermsRegexps;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +40,7 @@ public class PTRMechanism extends GenericMechanism {
      * ABNF: PTR = "ptr" [ ":" domain-spec ]
      */
     public static final String REGEX = "[pP][tT][rR]" + "(?:\\:"
-            + SPF1Parser.DOMAIN_SPEC_REGEX + ")?";
+            + SPFTermsRegexps.DOMAIN_SPEC_REGEX + ")?";
 
     /**
      * @see org.apache.james.jspf.core.Mechanism#run(org.apache.james.jspf.core.SPF1Data)

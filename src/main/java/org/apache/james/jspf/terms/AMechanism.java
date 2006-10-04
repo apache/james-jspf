@@ -20,14 +20,14 @@
 
 package org.apache.james.jspf.terms;
 
+import org.apache.james.jspf.core.Configuration;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
-import org.apache.james.jspf.parser.SPF1Parser;
 import org.apache.james.jspf.util.Inet6Util;
-import org.apache.james.jspf.util.ConfigurationMatch;
+import org.apache.james.jspf.util.SPFTermsRegexps;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +42,7 @@ public class AMechanism extends GenericMechanism {
      * ABNF: A = "a" [ ":" domain-spec ] [ dual-cidr-length ]
      */
     public static final String REGEX = "[aA]" + "(?:\\:"
-            + SPF1Parser.DOMAIN_SPEC_REGEX + ")?" + "(?:"
+            + SPFTermsRegexps.DOMAIN_SPEC_REGEX + ")?" + "(?:"
             + DUAL_CIDR_LENGTH_REGEX + ")?";
 
     private int ip4cidr;
@@ -105,9 +105,9 @@ public class AMechanism extends GenericMechanism {
     }
 
     /**
-     * @see org.apache.james.jspf.terms.GenericMechanism#config(ConfigurationMatch)
+     * @see org.apache.james.jspf.terms.GenericMechanism#config(Configuration)
      */
-    public synchronized void config(ConfigurationMatch params) throws PermErrorException {
+    public synchronized void config(Configuration params) throws PermErrorException {
         super.config(params);
         if (params.groupCount() >= 2 && params.group(2) != null) {
             ip4cidr = Integer.parseInt(params.group(2).toString());

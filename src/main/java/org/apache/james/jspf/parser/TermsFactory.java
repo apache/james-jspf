@@ -17,50 +17,43 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.util;
+package org.apache.james.jspf.parser;
 
-import java.util.regex.Matcher;
+import org.apache.james.jspf.core.Configuration;
+import org.apache.james.jspf.exceptions.PermErrorException;
+
+import java.util.Collection;
 
 /**
- * 
- * Provides a MatchResult view of a subset of another MatchResult
+ * A TermsFactory define the list of known TermDefinition and create new Terms
+ * based on its own Definition and a Configuration
  */
-public class ConfigurationMatch {
-
-    private Matcher wrapped;
-
-    private int start;
-
-    private int count;
+public interface TermsFactory {
 
     /**
-     * @param w
-     *            Original MatchResult
-     * @param zero
-     *            The original index returned when group(0) is requested
-     * @param start
-     *            the position where the subresult start
-     * @param count
-     *            number of groups part of the subresult
+     * Create a new term starting from the TermDefinition created by this factory
+     * 
+     * @param termDef the TermDefinition (returned by this factory)
+     * @param subres (the configuration)
+     * @return the generated object
+     * @throws PermErrorException if something goes wrong
+     * @throws InstantiationException 
      */
-    public ConfigurationMatch(Matcher w, int start, int count) {
-        this.wrapped = w;
-        this.count = count;
-        this.start = start;
-    }
+    public Object createTerm(TermDefinition termDef, Configuration subres)
+            throws PermErrorException, InstantiationException;
 
     /**
-     * @see java.util.regex.MatchResult#group(int)
+     * Return the collection of known Mechanisms
+     * 
+     * @return a Collection of TermDefinition 
      */
-    public String group(int arg0) {
-        return wrapped.group(arg0 + start);
-    }
+    public Collection getMechanismsCollection();
 
     /**
-     * @see java.util.regex.MatchResult#groupCount()
+     * Return the collection of known Modifiers
+     * 
+     * @return a Collection of TermDefinition 
      */
-    public int groupCount() {
-        return count;
-    }
+    public Collection getModifiersCollection();
 
 }

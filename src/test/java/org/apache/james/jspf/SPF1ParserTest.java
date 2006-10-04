@@ -28,9 +28,10 @@ import java.util.List;
 import java.util.Iterator;
 import java.util.regex.Pattern;
 
+import org.apache.james.jspf.core.SPFRecordParser;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
-import org.apache.james.jspf.parser.SPF1Parser;
+import org.apache.james.jspf.parser.DefaultSPF1Parser;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -50,7 +51,7 @@ public class SPF1ParserTest extends TestCase {
             }
         }
         assertNotNull(data);
-        parser = new SPF1Parser(new ConsoleLogger());
+        parser = new DefaultSPF1Parser(new ConsoleLogger());
     }
 
     public static Test suite() throws IOException {
@@ -59,9 +60,9 @@ public class SPF1ParserTest extends TestCase {
 
     private SPF1RecordTestDef data;
 
-    private SPF1Parser parser;
+    private SPFRecordParser parser;
 
-    public SPF1ParserTest(SPF1RecordTestDef def, SPF1Parser parser) {
+    public SPF1ParserTest(SPF1RecordTestDef def, SPFRecordParser parser) {
         super(def.recIn);
         this.data = def;
         this.parser = parser;
@@ -176,7 +177,7 @@ public class SPF1ParserTest extends TestCase {
             super();
             List tests = loadTests();
             Iterator i = tests.iterator();
-            SPF1Parser parser = new SPF1Parser(new ConsoleLogger());
+            SPFRecordParser parser = new DefaultSPF1Parser(new ConsoleLogger());
             while (i.hasNext()) {
                 addTest(new SPF1ParserTest((SPF1RecordTestDef) i.next(), parser));
             }

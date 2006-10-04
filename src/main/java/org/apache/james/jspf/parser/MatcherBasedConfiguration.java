@@ -17,49 +17,52 @@
  * under the License.                                           *
  ****************************************************************/
 
+package org.apache.james.jspf.parser;
 
-package org.apache.james.jspf.terms;
-
-import org.apache.james.jspf.core.Configurable;
 import org.apache.james.jspf.core.Configuration;
-import org.apache.james.jspf.core.Modifier;
-import org.apache.james.jspf.core.SPF1Data;
-import org.apache.james.jspf.exceptions.PermErrorException;
-import org.apache.james.jspf.util.SPFTermsRegexps;
+
+import java.util.regex.Matcher;
 
 /**
- * This Class represent an Unknown Modifier
  * 
+ * Provides a MatchResult view of a subset of another MatchResult
  */
-public class UnknownModifier implements Modifier, Configurable {
+public class MatcherBasedConfiguration implements Configuration {
+
+    private Matcher wrapped;
+
+    private int start;
+
+    private int count;
 
     /**
-     * ABNF: name = ALPHA *( ALPHA / DIGIT / "-" / "_" / "." ) ABNF:
-     * unknown-modifier = name "=" macro-string
+     * @param w
+     *            Original MatchResult
+     * @param zero
+     *            The original index returned when group(0) is requested
+     * @param start
+     *            the position where the subresult start
+     * @param count
+     *            number of groups part of the subresult
      */
-    public static final String REGEX = "(" + SPFTermsRegexps.ALPHA_PATTERN + "{1}"
-            + "[A-Za-z0-9\\-\\_\\.]*" + ")" + "\\=("
-            + SPFTermsRegexps.MACRO_STRING_REGEX + ")";
-
-    /**
-     * @see org.apache.james.jspf.core.Modifier#run(org.apache.james.jspf.core.SPF1Data)
-     */
-    public String run(SPF1Data spfData) throws PermErrorException {
-        return null;
+    public MatcherBasedConfiguration(Matcher w, int start, int count) {
+        this.wrapped = w;
+        this.count = count;
+        this.start = start;
     }
 
-    /**
-     * @see org.apache.james.jspf.core.Modifier#enforceSingleInstance()
+    /* (non-Javadoc)
+     * @see org.apache.james.jspf.core.Configuration#group(int)
      */
-    public boolean enforceSingleInstance() {
-        return false;
+    public String group(int arg0) {
+        return wrapped.group(arg0 + start);
     }
 
-    /**
-     * @see org.apache.james.jspf.core.Configurable#config(Configuration)
+    /* (non-Javadoc)
+     * @see org.apache.james.jspf.core.Configuration#groupCount()
      */
-    public synchronized void config(Configuration params) throws PermErrorException {
-        // Nothing to do
+    public int groupCount() {
+        return count;
     }
 
 }

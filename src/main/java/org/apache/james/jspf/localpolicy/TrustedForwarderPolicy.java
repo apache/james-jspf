@@ -25,8 +25,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.apache.james.jspf.core.Directive;
+import org.apache.james.jspf.core.Mechanism;
 import org.apache.james.jspf.exceptions.PermErrorException;
-import org.apache.james.jspf.localpolicy.terms.TrustedForwarderMechanism;
+import org.apache.james.jspf.terms.IncludeMechanism;
 import org.apache.james.jspf.core.Logger;
 
 /**
@@ -74,8 +75,17 @@ public class TrustedForwarderPolicy {
         if (mechanism.equals("-all") || mechanism.equals("?all")) {
             log.debug("Add TrustedForwarderPolicy = include:"+TRUSTED_FORWARDER_HOST);
             try {
-                TrustedForwarderMechanism trusted = new TrustedForwarderMechanism();
-                trusted.setHost(TRUSTED_FORWARDER_HOST);
+                Mechanism trusted = new IncludeMechanism() {
+                    /**
+                     * Set the host to use 
+                     * 
+                     * @param host the host to include
+                     */
+                    public synchronized Mechanism setHost(String host) {
+                        this.host = host;
+                        return this;
+                    }
+                }.setHost(TRUSTED_FORWARDER_HOST);
                 aCom.add(aCom.size()-1, new Directive(null,trusted));
             } catch (PermErrorException e) {
                 // will never happen

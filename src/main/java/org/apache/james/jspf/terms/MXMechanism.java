@@ -26,7 +26,7 @@ import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
-import org.apache.james.jspf.parser.SPF1Parser;
+import org.apache.james.jspf.util.SPFTermsRegexps;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +41,7 @@ public class MXMechanism extends AMechanism {
      * ABNF: MX = "mx" [ ":" domain-spec ] [ dual-cidr-length ]
      */
     public static final String REGEX = "[mM][xX]" + "(?:\\:"
-            + SPF1Parser.DOMAIN_SPEC_REGEX + ")?" + "(?:"
+            + SPFTermsRegexps.DOMAIN_SPEC_REGEX + ")?" + "(?:"
             + DUAL_CIDR_LENGTH_REGEX + ")?";
 
     /**

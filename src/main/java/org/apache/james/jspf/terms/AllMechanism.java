@@ -21,10 +21,10 @@
 package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.Configurable;
+import org.apache.james.jspf.core.Configuration;
 import org.apache.james.jspf.core.Mechanism;
 import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.exceptions.PermErrorException;
-import org.apache.james.jspf.util.ConfigurationMatch;
 
 /**
  * This class represent the all mechanism
@@ -42,9 +42,9 @@ public class AllMechanism implements Mechanism, Configurable {
     }
 
     /**
-     * @see org.apache.james.jspf.core.Configurable#config(ConfigurationMatch)
+     * @see org.apache.james.jspf.core.Configurable#config(Configuration)
      */
-    public void config(ConfigurationMatch params) throws PermErrorException {
+    public void config(Configuration params) throws PermErrorException {
         // no checks needed
         // the regex only passes with no parameters
     }

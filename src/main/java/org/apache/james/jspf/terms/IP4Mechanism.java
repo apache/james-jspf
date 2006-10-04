@@ -20,11 +20,11 @@
 
 package org.apache.james.jspf.terms;
 
+import org.apache.james.jspf.core.Configuration;
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.util.Inet6Util;
-import org.apache.james.jspf.util.ConfigurationMatch;
 
 /**
  * This class represent the ip4 mechanism
@@ -59,9 +59,9 @@ public class IP4Mechanism extends GenericMechanism {
     }
 
     /**
-     * @see org.apache.james.jspf.terms.GenericMechanism#config(ConfigurationMatch)
+     * @see org.apache.james.jspf.terms.GenericMechanism#config(Configuration)
      */
-    public synchronized void config(ConfigurationMatch params) throws PermErrorException {
+    public synchronized void config(Configuration params) throws PermErrorException {
         if (params.groupCount() == 0) {
             throw new PermErrorException("Missing ip");
         }

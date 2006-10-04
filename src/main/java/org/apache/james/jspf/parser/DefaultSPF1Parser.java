@@ -20,27 +20,23 @@
 
 package org.apache.james.jspf.parser;
 
-import org.apache.james.jspf.core.Configurable;
+import org.apache.james.jspf.core.Configuration;
 import org.apache.james.jspf.core.Directive;
-import org.apache.james.jspf.core.LogEnabled;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.Mechanism;
 import org.apache.james.jspf.core.Modifier;
 import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPF1Record;
+import org.apache.james.jspf.core.SPFRecordParser;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
-import org.apache.james.jspf.util.ConfigurationMatch;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -80,39 +76,17 @@ import java.util.regex.Pattern;
  * @see org.apache.james.jspf.core.SPF1Record
  * 
  */
-public class SPF1Parser {
+public class DefaultSPF1Parser implements SPFRecordParser {
 
     /**
      * Regex based on http://www.ietf.org/rfc/rfc4408.txt.
      * This will be the next official SPF-Spec
      */
 
-    public static final String ALPHA_DIGIT_PATTERN = "[a-zA-Z0-9]";
-
-    public static final String ALPHA_PATTERN = "[a-zA-Z]";
-
     // Changed this because C, T and R MACRO_LETTERS are not available 
     // in record parsing and must return a PermError.
    
     // private static final String MACRO_LETTER_PATTERN = "[lsodipvhcrtLSODIPVHCRT]";
-
-    private static final String MACRO_LETTER_PATTERN = "[lsodipvhLSODIPVH]";
-
-    private static final String TRANSFORMERS_REGEX = "\\d*[r]?";
-
-    private static final String DELEMITER_REGEX = "[\\.\\-\\+,/_\\=]";
-
-    public static final String MACRO_EXPAND_REGEX = "\\%(?:\\{"
-            + MACRO_LETTER_PATTERN + TRANSFORMERS_REGEX + DELEMITER_REGEX + "*"
-            + "\\}|\\%|\\_|\\-)";
-
-    private static final String MACRO_LITERAL_REGEX = "[\\x21-\\x24\\x26-\\x7e]";
-
-    /**
-     * ABNF: macro-string = *( macro-expand / macro-literal )
-     */
-    public static final String MACRO_STRING_REGEX = "(?:" + MACRO_EXPAND_REGEX
-            + "|" + MACRO_LITERAL_REGEX + "{1})*";
 
     /**
      * ABNF: qualifier = "+" / "-" / "?" / "~"
@@ -120,30 +94,6 @@ public class SPF1Parser {
     private static final String QUALIFIER_PATTERN = "[" + "\\"
             + SPF1Constants.PASS + "\\" + SPF1Constants.FAIL + "\\"
             + SPF1Constants.NEUTRAL + "\\" + SPF1Constants.SOFTFAIL + "]";
-
-    /**
-     * ABNF: toplabel = ( *alphanum ALPHA *alphanum ) / ( 1*alphanum "-" *(
-     * alphanum / "-" ) alphanum ) ; LDH rule plus additional TLD restrictions ;
-     * (see [RFC3696], Section 2)
-     */
-    private static final String TOP_LABEL_REGEX = "(?:"
-            + SPF1Parser.ALPHA_DIGIT_PATTERN + "*" + SPF1Parser.ALPHA_PATTERN
-            + "{1}" + SPF1Parser.ALPHA_DIGIT_PATTERN + "*|(?:"
-            + SPF1Parser.ALPHA_DIGIT_PATTERN + "+" + "\\-" + "(?:"
-            + SPF1Parser.ALPHA_DIGIT_PATTERN + "|\\-)*"
-            + SPF1Parser.ALPHA_DIGIT_PATTERN + "))";
-
-    /**
-     * ABNF: domain-end = ( "." toplabel [ "." ] ) / macro-expand
-     */
-    private static final String DOMAIN_END_REGEX = "(?:\\." + TOP_LABEL_REGEX
-            + "\\.?" + "|" + SPF1Parser.MACRO_EXPAND_REGEX + ")";
-
-    /**
-     * ABNF: domain-spec = macro-string domain-end
-     */
-    public static final String DOMAIN_SPEC_REGEX = "("
-            + SPF1Parser.MACRO_STRING_REGEX + DOMAIN_END_REGEX + ")";
 
     private Pattern termsSeparatorPattern = null;
 
@@ -155,116 +105,29 @@ public class SPF1Parser {
 
     private int TERM_STEP_REGEX_MODIFIER_POS;
 
-    private Collection mechanismsCollection;
-
-    private Collection modifiersCollection;
-
     private List matchResultPositions;
 
     private Logger log;
 
-    private String termFile = "org/apache/james/jspf/parser/jspf.default.terms";
-
-    private class TermDef {
-        private Pattern pattern;
-
-        private Class termDef;
-
-        private int matchSize = 0;
-
-        public TermDef(Class tClass) throws IllegalArgumentException,
-                SecurityException, IllegalAccessException, NoSuchFieldException {
-            String pString = (String) tClass.getField("REGEX").get(null);
-            pattern = Pattern.compile(pString);
-            termDef = tClass;
-            calcGroups(pString);
-        }
-
-        /**
-         * This method should be done differently. We currently don't hanlde the
-         * escaping at all.
-         * 
-         * @param pString
-         */
-        private void calcGroups(String pString) {
-            int i = 0;
-            int c = 0;
-            while (true) {
-                int p1 = pString.indexOf("(", i);
-                int p2 = pString.indexOf("(?:", i);
-                if (p1 < 0)
-                    break;
-                if (p1 != p2)
-                    c++;
-                i = p1 + 1;
-            }
-            matchSize = c;
-        }
-
-        public Pattern getPattern() {
-            return pattern;
-        }
-
-        public Class getTermDef() {
-            return termDef;
-        }
-
-        public int getMatchSize() {
-            return matchSize;
-        }
-    }
+    private TermsFactory termsFactory;
 
     /**
      * Constructor. Creates all the values needed to run the parsing
      * 
      * @param loggerThe logger to use
      */
-    public SPF1Parser(Logger logger) {
+    public DefaultSPF1Parser(Logger logger) {
         log = logger;
-        try {
-            InputStream is = Thread.currentThread().getContextClassLoader()
-                    .getResourceAsStream(termFile);
-            Properties p = new Properties();
-            p.load(is);
-            String mechs = p.getProperty("mechanisms");
-            String mods = p.getProperty("modifiers");
-            String[] classes;
-            classes = mechs.split(",");
-            Class[] knownMechanisms = new Class[classes.length];
-            for (int i = 0; i < classes.length; i++) {
-                log.debug("Add following class as known mechanismn: "
-                        + classes[i]);
-                knownMechanisms[i] = Thread.currentThread()
-                        .getContextClassLoader().loadClass(classes[i]);
-            }
-            mechanismsCollection = createTermCollection(knownMechanisms);
-            classes = mods.split(",");
-            Class[] knownModifiers = new Class[classes.length];
-            for (int i = 0; i < classes.length; i++) {
-                log.debug("Add following class as known modifier: "
-                        + classes[i]);
-                knownModifiers[i] = Thread.currentThread()
-                        .getContextClassLoader().loadClass(classes[i]);
-            }
-            modifiersCollection = createTermCollection(knownModifiers);
-
-        } catch (IOException e) {
-            throw new IllegalStateException(
-                    "Term configuration cannot be found");
-        } catch (ClassNotFoundException e) {
-            throw new IllegalStateException(
-                    "One configured class cannot be found");
-        }
-
+        termsFactory = new DefaultTermsFactory(logger);
         /**
          * ABNF: mechanism = ( all / include / A / MX / PTR / IP4 / IP6 / exists )
          */
-        String MECHANISM_REGEX = createRegex(mechanismsCollection);
+        String MECHANISM_REGEX = createRegex(termsFactory.getMechanismsCollection());
 
         /**
          * ABNF: modifier = redirect / explanation / unknown-modifier
          */
-        String MODIFIER_REGEX = "(" + createRegex(modifiersCollection) + ")";
+        String MODIFIER_REGEX = "(" + createRegex(termsFactory.getModifiersCollection()) + ")";
 
         /**
          * ABNF: directive = [ qualifier ] mechanism
@@ -307,9 +170,9 @@ public class SPF1Parser {
         TERM_STEP_REGEX_MODIFIER_POS = ++posIndex;
         matchResultPositions.ensureCapacity(posIndex + 1);
         matchResultPositions.add(TERM_STEP_REGEX_MODIFIER_POS, null);
-        i = modifiersCollection.iterator();
+        i = termsFactory.getModifiersCollection().iterator();
         while (i.hasNext()) {
-            TermDef td = (TermDef) i.next();
+            TermDefinition td = (TermDefinition) i.next();
             int size = td.getMatchSize() + 1;
             for (int k = 0; k < size; k++) {
                 posIndex++;
@@ -325,9 +188,9 @@ public class SPF1Parser {
         TERM_STEP_REGEX_MECHANISM_POS = ++posIndex;
         matchResultPositions.ensureCapacity(posIndex + 1);
         matchResultPositions.add(TERM_STEP_REGEX_MECHANISM_POS, null);
-        i = mechanismsCollection.iterator();
+        i = termsFactory.getMechanismsCollection().iterator();
         while (i.hasNext()) {
-            TermDef td = (TermDef) i.next();
+            TermDefinition td = (TermDefinition) i.next();
             int size = td.getMatchSize() + 1;
             for (int k = 0; k < size; k++) {
                 posIndex++;
@@ -345,7 +208,7 @@ public class SPF1Parser {
                 log
                         .debug(k
                                 + ") "
-                                + (matchResultPositions.get(k) != null ? ((TermDef) matchResultPositions
+                                + (matchResultPositions.get(k) != null ? ((TermDefinition) matchResultPositions
                                         .get(k)).getPattern().pattern()
                                         : null));
             }
@@ -376,49 +239,15 @@ public class SPF1Parser {
             } else {
                 modifierRegex.append(")|(");
             }
-            Pattern pattern = ((TermDef) i.next()).getPattern();
+            Pattern pattern = ((TermDefinition) i.next()).getPattern();
             modifierRegex.append(pattern.pattern());
         }
         modifierRegex.append("))");
         return modifierRegex.toString();
     }
 
-    /**
-     * 
-     * @param classes
-     *            classes to analyze
-     * @param staticFieldName
-     *            static field to concatenate
-     * @return map <Class,Pattern>
-     */
-    private Collection createTermCollection(Class[] classes) {
-        Collection l = new ArrayList();
-        for (int j = 0; j < classes.length; j++) {
-            Class mechClass = classes[j];
-            try {
-                l.add(new TermDef(mechClass));
-            } catch (Exception e) {
-                log.debug("Unable to create the term collection", e);
-                throw new IllegalStateException(
-                        "Unable to create the term collection");
-            }
-        }
-        return Collections.synchronizedCollection(l);
-    }
-
-    /**
-     * This Method parse the given spf record and checks for syntax
-     * 
-     * parse can be called by multiple concurrent threads.
-     * 
-     * @param spfRecord
-     *            The String which represent the spf record in dns
-     * @return result The SPF1Record
-     * @throws PermErrorException
-     *             Get thrown if an syntax error was detected
-     * @throws NoneException
-     *             Get thrown if no spf record could be found
-     * @throws NeutralException Get thrown if an empty spf record was found 
+    /* (non-Javadoc)
+     * @see org.apache.james.jspf.parser.SPFRecordParser#parse(java.lang.String)
      */
     public SPF1Record parse(String spfRecord) throws PermErrorException,
             NoneException, NeutralException {
@@ -502,28 +331,14 @@ public class SPF1Parser {
             throws PermErrorException {
         for (int k = start + 1; k < res.groupCount(); k++) {
             if (res.group(k) != null && k != TERM_STEP_REGEX_QUALIFIER_POS) {
-                TermDef c = (TermDef) matchResultPositions.get(k);
-                ConfigurationMatch subres = new ConfigurationMatch(res, k, c
+                TermDefinition c = (TermDefinition) matchResultPositions.get(k);
+                Configuration subres = new MatcherBasedConfiguration(res, k, c
                         .getMatchSize());
                 try {
-                    Object term = c.getTermDef().newInstance();
-                    if (term instanceof LogEnabled) {
-                        ((LogEnabled) term).enableLogging(log);
-                    }
-                    if (term instanceof Configurable) {
-                        if (subres == null || subres.groupCount() == 0) {
-                            ((Configurable) term).config(null);
-                        } else {
-                            ((Configurable) term).config(subres);
-                        }
-                    }
-                    return term;
-                } catch (IllegalAccessException e) {
-                    throw new IllegalStateException(
-                            "Unexpected error creating term: " + e.getMessage());
+                    return termsFactory.createTerm(c, subres);
                 } catch (InstantiationException e) {
-                    throw new IllegalStateException(
-                            "Unexpected error creating term: " + e.getMessage());
+                    // TODO is it ok to use a Runtime for this? Or should we use a PermError here?
+                    throw new IllegalStateException("Unexpected error creating term: " + e.getMessage());
                 }
 
             }

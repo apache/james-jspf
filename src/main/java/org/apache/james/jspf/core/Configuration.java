@@ -17,45 +17,18 @@
  * under the License.                                           *
  ****************************************************************/
 
+package org.apache.james.jspf.core;
 
-package org.apache.james.jspf.terms;
-
-import org.apache.james.jspf.core.Configurable;
-import org.apache.james.jspf.core.Configuration;
-import org.apache.james.jspf.core.Modifier;
-import org.apache.james.jspf.core.SPF1Data;
-import org.apache.james.jspf.exceptions.PermErrorException;
-import org.apache.james.jspf.exceptions.TempErrorException;
-
-/**
- * This abstract class represent a gerneric modifier
- * 
- */
-public abstract class GenericModifier implements Modifier, Configurable {
-
-    private String host;
+public interface Configuration {
 
     /**
-     * @see org.apache.james.jspf.core.Modifier#run(SPF1Data)
-     * 
+     * @see java.util.regex.MatchResult#group(int)
      */
-    public abstract String run(SPF1Data spfData) throws PermErrorException,
-            TempErrorException;
+    public String group(int arg0);
 
     /**
-     * @see org.apache.james.jspf.core.Configurable#config(Configuration)
+     * @see java.util.regex.MatchResult#groupCount()
      */
-    public synchronized void config(Configuration params) throws PermErrorException {
-        if (params.groupCount() > 0) {
-            this.host = params.group(1);
-        }
-    }
-
-    /**
-     * @return Returns the host.
-     */
-    protected synchronized String getHost() {
-        return host;
-    }
+    public int groupCount();
 
 }

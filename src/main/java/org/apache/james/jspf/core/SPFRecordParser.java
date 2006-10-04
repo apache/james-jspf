@@ -17,24 +17,29 @@
  * under the License.                                           *
  ****************************************************************/
 
+package org.apache.james.jspf.core;
 
-package org.apache.james.jspf.localpolicy.terms;
+import org.apache.james.jspf.exceptions.NeutralException;
+import org.apache.james.jspf.exceptions.NoneException;
+import org.apache.james.jspf.exceptions.PermErrorException;
 
-import org.apache.james.jspf.terms.IncludeMechanism;
+public interface SPFRecordParser {
 
-/**
- * Costum mechanism to support whitelist trusted-forwarder.org
- *
- */
-public class TrustedForwarderMechanism extends IncludeMechanism {
-    
     /**
-     * Set the host to use 
+     * This Method parse the given spf record and checks for syntax
      * 
-     * @param host the host to include
+     * parse can be called by multiple concurrent threads.
+     * 
+     * @param spfRecord
+     *            The String which represent the spf record in dns
+     * @return result The SPF1Record
+     * @throws PermErrorException
+     *             Get thrown if an syntax error was detected
+     * @throws NoneException
+     *             Get thrown if no spf record could be found
+     * @throws NeutralException Get thrown if an empty spf record was found 
      */
-    public synchronized void setHost(String host) {
-        this.host = host;
-    }
+    public SPF1Record parse(String spfRecord) throws PermErrorException,
+            NoneException, NeutralException;
 
 }

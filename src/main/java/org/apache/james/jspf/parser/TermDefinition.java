@@ -17,45 +17,36 @@
  * under the License.                                           *
  ****************************************************************/
 
+package org.apache.james.jspf.parser;
 
-package org.apache.james.jspf.terms;
-
-import org.apache.james.jspf.core.Configurable;
-import org.apache.james.jspf.core.Configuration;
-import org.apache.james.jspf.core.Modifier;
-import org.apache.james.jspf.core.SPF1Data;
-import org.apache.james.jspf.exceptions.PermErrorException;
-import org.apache.james.jspf.exceptions.TempErrorException;
+import java.util.regex.Pattern;
 
 /**
- * This abstract class represent a gerneric modifier
- * 
+ * A term definition contains everything needed to match and create
+ * new Terms implementations.
  */
-public abstract class GenericModifier implements Modifier, Configurable {
-
-    private String host;
+public interface TermDefinition {
 
     /**
-     * @see org.apache.james.jspf.core.Modifier#run(SPF1Data)
+     * Retrieve the pattern to be used to match a string against this record type.
      * 
+     * @return the pattern for this term
      */
-    public abstract String run(SPF1Data spfData) throws PermErrorException,
-            TempErrorException;
+    public Pattern getPattern();
 
     /**
-     * @see org.apache.james.jspf.core.Configurable#config(Configuration)
+     * The class implementing this Term type.
+     * 
+     * @return the class object.
      */
-    public synchronized void config(Configuration params) throws PermErrorException {
-        if (params.groupCount() > 0) {
-            this.host = params.group(1);
-        }
-    }
+    public Class getTermDef();
 
     /**
-     * @return Returns the host.
+     * Return the number of groups to be expected from the pattern of this
+     * Term.
+     * 
+     * @return the number of groups
      */
-    protected synchronized String getHost() {
-        return host;
-    }
+    public int getMatchSize();
 
 }
