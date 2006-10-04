@@ -25,7 +25,7 @@ import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 
 /**
- * 
+ * A Directive is a mechanism with a resulting qualifier.
  */
 public class Directive {
 

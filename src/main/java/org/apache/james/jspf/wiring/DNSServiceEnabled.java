@@ -17,21 +17,20 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.core;
+package org.apache.james.jspf.wiring;
 
-import org.apache.james.jspf.exceptions.NoneException;
-import org.apache.james.jspf.exceptions.PermErrorException;
+import org.apache.james.jspf.core.DNSService;
 
-import junit.framework.TestCase;
-
-public class SPF1DataTest extends TestCase {
-
-    /*
-     * Test method for 'org.apache.james.jspf.core.SPF1Data.getMacroIpAddress()'
+/**
+ * Components that need to log can implement this interface so that
+ * the container will provide the DNSService
+ */
+public interface DNSServiceEnabled {
+    /**
+     * Provide component with a DNSService.
+     * 
+     * @param service
+     *            the dns service. Must not be <code>null</code>.
      */
-    public void testGetMacroIpAddress() throws PermErrorException, NoneException {
-        SPF1Data d = new SPF1Data("mailfrom@fromdomain.com","helodomain.com","2001:DB8::CB01");
-        assertEquals("2.0.0.1.0.D.B.8.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.C.B.0.1",d.getMacroIpAddress());
-    }
-
+    void enableDNSService(DNSService service);
 }

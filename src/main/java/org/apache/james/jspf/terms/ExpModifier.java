@@ -21,7 +21,6 @@
 package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.DNSService;
-import org.apache.james.jspf.core.LogEnabled;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPF1Data;
@@ -29,6 +28,8 @@ import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.util.SPFTermsRegexps;
+import org.apache.james.jspf.wiring.DNSServiceEnabled;
+import org.apache.james.jspf.wiring.LogEnabled;
 
 import java.util.List;
 
@@ -36,7 +37,7 @@ import java.util.List;
  * This class represent the exp modifier
  * 
  */
-public class ExpModifier extends GenericModifier implements LogEnabled {
+public class ExpModifier extends GenericModifier implements LogEnabled, DNSServiceEnabled {
 
     /**
      * ABNF: explanation = "exp" "=" domain-spec
@@ -45,6 +46,8 @@ public class ExpModifier extends GenericModifier implements LogEnabled {
             + SPFTermsRegexps.DOMAIN_SPEC_REGEX;
 
     private Logger log;
+
+    private DNSService dnsService;
 
     /**
      * Generate the explanation and set it in SPF1Data so it can be accessed
@@ -70,7 +73,7 @@ public class ExpModifier extends GenericModifier implements LogEnabled {
         try {
             host = new MacroExpand(spfData, log).expandDomain(host);
             try {
-                exp = getTxtCatType(spfData.getDnsProbe(), host);
+                exp = getTxtCatType(dnsService, host);
             } catch (TempErrorException e) {
                 // Nothing todo here.. just return null
                 return null;
@@ -95,7 +98,7 @@ public class ExpModifier extends GenericModifier implements LogEnabled {
     }
 
     /**
-     * @see org.apache.james.jspf.core.LogEnabled#enableLogging(org.apache.james.jspf.core.Logger)
+     * @see org.apache.james.jspf.wiring.LogEnabled#enableLogging(org.apache.james.jspf.core.Logger)
      */
     public void enableLogging(Logger logger) {
         this.log = logger;
@@ -139,6 +142,13 @@ public class ExpModifier extends GenericModifier implements LogEnabled {
      */
     public String toString() {
        return "exp="+getHost();
+    }
+
+    /**
+     * @see org.apache.james.jspf.wiring.DNSServiceEnabled#enableDNSService(org.apache.james.jspf.core.DNSService)
+     */
+    public void enableDNSService(DNSService service) {
+        this.dnsService = service;
     }
 
 }

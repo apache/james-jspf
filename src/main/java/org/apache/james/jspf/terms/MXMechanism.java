@@ -62,7 +62,7 @@ public class MXMechanism extends AMechanism {
         // get the ipAddress
         checkAddress = IPAddr.getAddress(spfData.getIpAddress(), getIp4cidr());
         
-        List mxRecords = getMXRecords(spfData.getDnsProbe(), host);
+        List mxRecords = getMXRecords(dnsService, host);
 
         // no mx record found
         if (mxRecords == null) return false;

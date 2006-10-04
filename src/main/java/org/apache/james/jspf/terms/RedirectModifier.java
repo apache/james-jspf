@@ -20,21 +20,23 @@
 
 package org.apache.james.jspf.terms;
 
-import org.apache.james.jspf.core.LogEnabled;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPF1Data;
+import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.util.SPFTermsRegexps;
+import org.apache.james.jspf.wiring.LogEnabled;
+import org.apache.james.jspf.wiring.SPFCheckEnabled;
 
 /**
  * This class represent the redirect modifier
  * 
  */
-public class RedirectModifier extends GenericModifier implements LogEnabled {
+public class RedirectModifier extends GenericModifier implements LogEnabled, SPFCheckEnabled {
 
     /**
      * ABNF: redirect = "redirect" "=" domain-spec
@@ -43,6 +45,8 @@ public class RedirectModifier extends GenericModifier implements LogEnabled {
             + "\\=" + SPFTermsRegexps.DOMAIN_SPEC_REGEX;
     
     private Logger log;
+
+    private SPFChecker spfChecker;
 
     /**
      * Set the host which should be used for redirection and set it in SPF1Data
@@ -73,7 +77,7 @@ public class RedirectModifier extends GenericModifier implements LogEnabled {
 
             String res = null;
             try {
-                res = spfData.getSpfProbe().checkSPF(spfData).getResultChar();
+                res = spfChecker.checkSPF(spfData).getResultChar();
             } catch (NoneException e) {
                 // no spf record assigned to the redirect domain
                 throw new PermErrorException(
@@ -103,7 +107,7 @@ public class RedirectModifier extends GenericModifier implements LogEnabled {
 
 
     /**
-     * @see org.apache.james.jspf.core.LogEnabled#enableLogging(org.apache.james.jspf.core.Logger)
+     * @see org.apache.james.jspf.wiring.LogEnabled#enableLogging(org.apache.james.jspf.core.Logger)
      */
     public void enableLogging(Logger logger) {
         this.log = logger;
@@ -115,4 +119,12 @@ public class RedirectModifier extends GenericModifier implements LogEnabled {
     public String toString() {
         return "redirect="+getHost();
     }
+    
+    /**
+     * @see org.apache.james.jspf.wiring.SPFCheckEnabled#enableSPFChecking(org.apache.james.jspf.core.SPFChecker)
+     */
+    public void enableSPFChecking(SPFChecker checker) {
+        this.spfChecker = checker;
+    }
+
 }

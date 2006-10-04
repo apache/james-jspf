@@ -21,9 +21,11 @@ package org.apache.james.jspf.parser;
 
 import org.apache.james.jspf.core.Configurable;
 import org.apache.james.jspf.core.Configuration;
-import org.apache.james.jspf.core.LogEnabled;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.exceptions.PermErrorException;
+import org.apache.james.jspf.wiring.LogEnabled;
+import org.apache.james.jspf.wiring.WiringService;
+import org.apache.james.jspf.wiring.WiringServiceTable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,9 +46,26 @@ public class DefaultTermsFactory implements TermsFactory {
     private Collection modifiersCollection;
 
     private Logger log;
+    
+    private WiringService wiringService;
 
     public DefaultTermsFactory(Logger log) {
         this.log = log;
+        this.wiringService = new WiringServiceTable();
+        ((WiringServiceTable) this.wiringService).put(LogEnabled.class, log);
+        init();
+    }
+
+    public DefaultTermsFactory(Logger log, WiringService wiringService) {
+        this.log = log;
+        this.wiringService = wiringService;
+        init();
+    }
+
+    /**
+     * Initialize the factory and the services
+     */
+    private void init() {
         try {
             InputStream is = Thread.currentThread().getContextClassLoader()
                     .getResourceAsStream(termFile);
@@ -114,9 +133,14 @@ public class DefaultTermsFactory implements TermsFactory {
     public Object createTerm(TermDefinition termDef, Configuration subres) throws PermErrorException, InstantiationException {
         try {
             Object term = termDef.getTermDef().newInstance();
-            if (term instanceof LogEnabled) {
-                ((LogEnabled) term).enableLogging(log);
+            
+            try {
+                wiringService.wire(term);
+            } catch (WiringService.WiringServiceException e) {
+                throw new InstantiationException(
+                        "Unexpected error adding dependencies to term: " + e.getMessage());
             }
+
             if (term instanceof Configurable) {
                 if (subres == null || subres.groupCount() == 0) {
                     ((Configurable) term).config(null);

@@ -25,6 +25,7 @@ import org.apache.james.jspf.core.DNSService.TimeoutException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.macro.MacroData;
+import org.apache.james.jspf.wiring.DNSServiceEnabled;
 
 import java.util.Iterator;
 import java.util.List;
@@ -36,11 +37,7 @@ import java.util.List;
  * 
  */
 
-public class SPF1Data implements MacroData {
-
-    private DNSService dnsProbe;
-
-    private SPFChecker spfProbe;
+public class SPF1Data implements MacroData, DNSServiceEnabled {
 
     private String ipAddress = ""; // also used for (i)<sending-host>
 
@@ -77,6 +74,8 @@ public class SPF1Data implements MacroData {
     
     private boolean ignoreExplanation = false;
 
+    private DNSService dnsProbe;
+
     /**
      * Build the SPF1Data from the given parameters
      * 
@@ -93,14 +92,11 @@ public class SPF1Data implements MacroData {
      * @throws NoneException
      *             Get thrown if no valid emailaddress get passed
      */
-    public SPF1Data(String mailFrom, String heloDomain, String clientIP,
-            DNSService dnsProbe, SPFChecker spfProbe) throws PermErrorException, NoneException {
+    public SPF1Data(String mailFrom, String heloDomain, String clientIP) throws PermErrorException, NoneException {
         super();
         this.mailFrom = mailFrom.trim();
         this.hostName = heloDomain.trim();
         this.ipAddress = IPAddr.getProperIpAddress(clientIP.trim());
-        this.dnsProbe = dnsProbe;
-        this.spfProbe = spfProbe;
 
         try {
             // get the in Address
@@ -330,15 +326,6 @@ public class SPF1Data implements MacroData {
     }
 
     /**
-     * Get the used DNSService
-     * 
-     * @return dnsProbe The DNSService
-     */
-    public DNSService getDnsProbe() {
-        return dnsProbe;
-    }
-
-    /**
      * Set the explanation which will returned when a fail match
      * 
      * @param explanation
@@ -414,12 +401,10 @@ public class SPF1Data implements MacroData {
     }
 
     /**
-     * Return the SPF checker to be used in recursive lookups
-     * 
-     * @return the spf checker
+     * @see org.apache.james.jspf.wiring.DNSServiceEnabled#enableDNSService(org.apache.james.jspf.core.DNSService)
      */
-    public SPFChecker getSpfProbe() {
-        return spfProbe;
+    public void enableDNSService(DNSService service) {
+        this.dnsProbe = service;
     }
-
+    
 }

@@ -26,6 +26,7 @@ import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.util.SPFTermsRegexps;
+import org.apache.james.jspf.wiring.DNSServiceEnabled;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,13 +35,15 @@ import java.util.List;
  * This class represent the ptr mechanism
  * 
  */
-public class PTRMechanism extends GenericMechanism {
+public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled {
 
     /**
      * ABNF: PTR = "ptr" [ ":" domain-spec ]
      */
     public static final String REGEX = "[pP][tT][rR]" + "(?:\\:"
             + SPFTermsRegexps.DOMAIN_SPEC_REGEX + ")?";
+    
+    private DNSService dnsService;
 
     /**
      * @see org.apache.james.jspf.core.Mechanism#run(org.apache.james.jspf.core.SPF1Data)
@@ -59,16 +62,16 @@ public class PTRMechanism extends GenericMechanism {
         try {
             // Get PTR Records for the ipAddress which is provided by SPF1Data
             IPAddr ip = IPAddr.getAddress(spfData.getIpAddress());
-            List domainList = spfData.getDnsProbe().getRecords(ip.getReverseIP(), DNSService.PTR);
+            List domainList = dnsService.getRecords(ip.getReverseIP(), DNSService.PTR);
     
             // No PTR records found
             if (domainList == null) return false;
     
             // check if the maximum lookup count is reached
-            if (spfData.getDnsProbe().getRecordLimit() > 0 && domainList.size() > spfData.getDnsProbe().getRecordLimit()) {
+            if (dnsService.getRecordLimit() > 0 && domainList.size() > dnsService.getRecordLimit()) {
                 // Truncate the PTR list to getRecordLimit.
                 // See #ptr-limit rfc4408 test
-                domainList = domainList.subList(0, spfData.getDnsProbe().getRecordLimit()-1);
+                domainList = domainList.subList(0, dnsService.getRecordLimit()-1);
                 // throw new PermErrorException("Maximum PTR lookup count reached");
             }
               
@@ -78,11 +81,11 @@ public class PTRMechanism extends GenericMechanism {
                 // check if the connecting ip is ip6. If so lookup AAAA record
                 if (IPAddr.isIPV6(spfData.getIpAddress())) {
                     // Get aaaa record for this
-                    aList = spfData.getDnsProbe().getRecords(
+                    aList = dnsService.getRecords(
                             (String) domainList.get(i), DNSService.AAAA);
                 } else {
                     // Get a record for this
-                    aList = spfData.getDnsProbe().getRecords(
+                    aList = dnsService.getRecords(
                             (String) domainList.get(i), DNSService.A);
                 }
                 if (aList != null) {
@@ -110,5 +113,13 @@ public class PTRMechanism extends GenericMechanism {
         }
 
     }
+
+    /**
+     * @see org.apache.james.jspf.wiring.DNSServiceEnabled#enableDNSService(org.apache.james.jspf.core.DNSService)
+     */
+    public void enableDNSService(DNSService service) {
+        this.dnsService = service;
+    }
+
 
 }

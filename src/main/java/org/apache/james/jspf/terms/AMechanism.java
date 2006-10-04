@@ -28,6 +28,7 @@ import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.util.Inet6Util;
 import org.apache.james.jspf.util.SPFTermsRegexps;
+import org.apache.james.jspf.wiring.DNSServiceEnabled;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +37,7 @@ import java.util.List;
  * This class represent the a mechanism
  * 
  */
-public class AMechanism extends GenericMechanism {
+public class AMechanism extends GenericMechanism implements DNSServiceEnabled {
 
     /**
      * ABNF: A = "a" [ ":" domain-spec ] [ dual-cidr-length ]
@@ -48,6 +49,8 @@ public class AMechanism extends GenericMechanism {
     private int ip4cidr;
 
     private int ip6cidr;
+
+    protected DNSService dnsService;
 
     /**
      * 
@@ -68,7 +71,7 @@ public class AMechanism extends GenericMechanism {
                 IPAddr checkAddress = IPAddr.getAddress(spfData.getIpAddress(),
                         getIp4cidr());
 
-                List aRecords = getARecords(spfData.getDnsProbe(),host);
+                List aRecords = getARecords(dnsService,host);
      
                 // no a records just return null
                 if (aRecords == null) {
@@ -82,7 +85,7 @@ public class AMechanism extends GenericMechanism {
                 IPAddr checkAddress = IPAddr.getAddress(spfData.getIpAddress(),
                         getIp6cidr());
 
-                List aaaaRecords = getAAAARecords(spfData.getDnsProbe(), host);
+                List aaaaRecords = getAAAARecords(dnsService, host);
                 
                 // no aaaa records just return false
                 if (aaaaRecords == null) {
@@ -245,6 +248,13 @@ public class AMechanism extends GenericMechanism {
             }
         }
         return listAData;
+    }
+
+    /**
+     * @see org.apache.james.jspf.wiring.DNSServiceEnabled#enableDNSService(org.apache.james.jspf.core.DNSService)
+     */
+    public void enableDNSService(DNSService service) {
+        this.dnsService = service;
     }
 
 }

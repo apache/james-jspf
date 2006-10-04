@@ -30,7 +30,7 @@ public interface DNSService {
     /**
      * The exception thrown on timeout.
      */
-    public class TimeoutException extends Exception {
+    public static class TimeoutException extends Exception {
         
     }
     

@@ -116,9 +116,10 @@ public class DefaultSPF1Parser implements SPFRecordParser {
      * 
      * @param loggerThe logger to use
      */
-    public DefaultSPF1Parser(Logger logger) {
-        log = logger;
-        termsFactory = new DefaultTermsFactory(logger);
+    public DefaultSPF1Parser(Logger logger, TermsFactory termsFactory) {
+        this.log = logger;
+        this.termsFactory = termsFactory;
+        
         /**
          * ABNF: mechanism = ( all / include / A / MX / PTR / IP4 / IP6 / exists )
          */
@@ -337,6 +338,7 @@ public class DefaultSPF1Parser implements SPFRecordParser {
                 try {
                     return termsFactory.createTerm(c, subres);
                 } catch (InstantiationException e) {
+                    e.printStackTrace();
                     // TODO is it ok to use a Runtime for this? Or should we use a PermError here?
                     throw new IllegalStateException("Unexpected error creating term: " + e.getMessage());
                 }

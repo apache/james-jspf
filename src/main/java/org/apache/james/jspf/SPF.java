@@ -37,15 +37,18 @@ import org.apache.james.jspf.localpolicy.FallbackPolicy;
 import org.apache.james.jspf.localpolicy.TrustedForwarderPolicy;
 import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.parser.DefaultSPF1Parser;
+import org.apache.james.jspf.parser.DefaultTermsFactory;
+import org.apache.james.jspf.wiring.DNSServiceEnabled;
+import org.apache.james.jspf.wiring.LogEnabled;
+import org.apache.james.jspf.wiring.SPFCheckEnabled;
+import org.apache.james.jspf.wiring.WiringServiceTable;
 
 import java.util.Iterator;
 import java.util.List;
 
 /**
  * This class is used to generate a SPF-Test and provided all intressting data.
- * 
  */
-
 public class SPF implements SPFChecker {
 
     private DNSService dnsProbe;
@@ -85,7 +88,15 @@ public class SPF implements SPFChecker {
      * @param logger the logger to use
      */
     public SPF(DNSService dnsProbe, Logger logger) {
-        this(dnsProbe, new DefaultSPF1Parser(logger), logger);
+        super();
+        this.dnsProbe = dnsProbe;
+        this.log = logger;
+        WiringServiceTable wiringService = new WiringServiceTable();
+        wiringService.put(LogEnabled.class, this.log);
+        wiringService.put(DNSServiceEnabled.class, this.dnsProbe);
+        this.parser = new DefaultSPF1Parser(logger, new DefaultTermsFactory(this.log, wiringService));
+        // We add this after the parser creation because services cannot be null
+        wiringService.put(SPFCheckEnabled.class, this.parser);
     }
     
     
@@ -122,7 +133,8 @@ public class SPF implements SPFChecker {
 
         try {
             // Setup the data
-            spfData = new SPF1Data(mailFrom, hostName, ipAddress, dnsProbe, this);
+            spfData = new SPF1Data(mailFrom, hostName, ipAddress);
+            spfData.enableDNSService(dnsProbe);
             SPFInternalResult res = checkSPF(spfData);
             resultChar = res.getResultChar();
             result = SPF1Utils.resultToName(resultChar);
@@ -173,7 +185,7 @@ public class SPF implements SPFChecker {
         }
 
         // Get the raw dns txt entry which contains a spf entry
-        String spfDnsEntry = getSpfRecord(spfData.getDnsProbe(),spfData.getCurrentDomain(),
+        String spfDnsEntry = getSpfRecord(dnsProbe,spfData.getCurrentDomain(),
                 SPF1Constants.SPF_VERSION);
 
         // No SPF-Record found

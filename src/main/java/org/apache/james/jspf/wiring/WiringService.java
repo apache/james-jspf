@@ -17,18 +17,28 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.core;
+
+package org.apache.james.jspf.wiring;
 
 /**
- * Components that need to log can implement this interface to be provided
- * Loggers.
+ * This is a service used to wire a component with its dependencies.
  */
-public interface LogEnabled {
+public interface WiringService {
+    
+    public static class WiringServiceException extends Exception {
+
+        public WiringServiceException(String string) {
+            super(string);
+        }
+
+    }
+
     /**
-     * Provide component with a logger.
+     * Called to wire a component
      * 
-     * @param logger
-     *            the logger. Must not be <code>null</code>.
+     * @param component the component to be wired
+     * @throws WiringServiceException if an error occours
      */
-    void enableLogging(Logger logger);
+    void wire(Object component) throws WiringServiceException;
+
 }

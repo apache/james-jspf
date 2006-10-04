@@ -22,23 +22,25 @@ package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.Configurable;
 import org.apache.james.jspf.core.Configuration;
-import org.apache.james.jspf.core.LogEnabled;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.Mechanism;
 import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPF1Data;
+import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.util.SPFTermsRegexps;
+import org.apache.james.jspf.wiring.LogEnabled;
+import org.apache.james.jspf.wiring.SPFCheckEnabled;
 
 /**
  * This class represent the incude mechanism
  * 
  */
-public class IncludeMechanism implements Mechanism, Configurable, LogEnabled {
+public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SPFCheckEnabled {
 
     /**
      * ABNF: include = "include" ":" domain-spec
@@ -49,6 +51,8 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled {
     protected String host;
     
     protected Logger log;
+
+    private SPFChecker spfChecker;
 
     /**
      * Set the host which should be used for include
@@ -84,7 +88,7 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled {
             
             String res = null;
             try {
-                 res = spfData.getSpfProbe().checkSPF(spfData).getResultChar();
+                 res = spfChecker.checkSPF(spfData).getResultChar();
               
             } catch (NoneException e) {
                 throw new PermErrorException("included checkSPF returned NoneException");
@@ -129,7 +133,7 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled {
     }
 
     /**
-     * @see org.apache.james.jspf.core.LogEnabled#enableLogging(org.apache.james.jspf.core.Logger)
+     * @see org.apache.james.jspf.wiring.LogEnabled#enableLogging(org.apache.james.jspf.core.Logger)
      */
     public void enableLogging(Logger logger) {
         this.log = logger;
@@ -140,5 +144,12 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled {
      */
     public String toString() {
         return "include:"+getHost();
+    }
+
+    /**
+     * @see org.apache.james.jspf.wiring.SPFCheckEnabled#enableSPFChecking(org.apache.james.jspf.core.SPFChecker)
+     */
+    public void enableSPFChecking(SPFChecker checker) {
+        this.spfChecker = checker;
     }
 }

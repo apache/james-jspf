@@ -20,8 +20,14 @@
 package org.apache.james.jspf;
 
 import org.apache.james.jspf.core.DNSService;
+import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPFRecordParser;
 import org.apache.james.jspf.parser.DefaultSPF1Parser;
+import org.apache.james.jspf.parser.DefaultTermsFactory;
+import org.apache.james.jspf.wiring.DNSServiceEnabled;
+import org.apache.james.jspf.wiring.LogEnabled;
+import org.apache.james.jspf.wiring.SPFCheckEnabled;
+import org.apache.james.jspf.wiring.WiringService;
 import org.jvyaml.Constructor;
 import org.jvyaml.DefaultYAMLFactory;
 import org.jvyaml.YAMLFactory;
@@ -42,8 +48,9 @@ public abstract class AbstractYamlTest extends TestCase {
 
     SPFYamlTestSuite data;
     String test;
-    protected SPF spf;
+    protected static SPF spf;
     protected static SPFRecordParser parser;
+    private static DNSService dns;
 
     protected AbstractYamlTest(SPFYamlTestSuite def, String test) {
         super(def.getComment()+" #"+test);
@@ -117,10 +124,36 @@ public abstract class AbstractYamlTest extends TestCase {
         System.out.println("testing "+next+": "+currentTest.get("description"));
     
         if (parser == null) {
-            parser = new DefaultSPF1Parser(new ConsoleLogger());
-            System.err.println("--------------------------------------------");
+            Logger log = new ConsoleLogger();
+            /* PREVIOUS SLOW WAY 
+            enabledServices = new WiringServiceTable();
+            enabledServices.put(LogEnabled.class, log);
+            */
+            parser = new DefaultSPF1Parser(log, new DefaultTermsFactory(log, new WiringService() {
+
+                public void wire(Object component) throws WiringServiceException {
+                    if (component instanceof LogEnabled) {
+                        ((LogEnabled) component).enableLogging(new ConsoleLogger());
+                    }
+                    if (component instanceof DNSServiceEnabled) {
+                        ((DNSServiceEnabled) component).enableDNSService(dns);
+                    }
+                    if (component instanceof SPFCheckEnabled) {
+                        ((SPFCheckEnabled) component).enableSPFChecking(spf);
+                    }
+                }
+                
+            }));
         }
-        spf = new SPF(new LoggingDNSService(getDNSService()), parser, new ConsoleLogger());
+        dns = new LoggingDNSService(getDNSService());
+        spf = new SPF(dns, parser, new ConsoleLogger());
+        /* PREVIOUS SLOW WAY 
+        // we add this after the creation because it is a loop reference
+        enabledServices.remove(DNSServiceEnabled.class);
+        enabledServices.put(DNSServiceEnabled.class, getDNSService());
+        enabledServices.remove(SPFCheckEnabled.class);
+        enabledServices.put(SPFCheckEnabled.class, spf);
+        */
 
         String ip = null;
         String sender = null;

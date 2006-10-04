@@ -26,6 +26,7 @@ import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.util.SPFTermsRegexps;
+import org.apache.james.jspf.wiring.DNSServiceEnabled;
 
 import java.util.List;
 
@@ -33,13 +34,15 @@ import java.util.List;
  * This class represent the exists mechanism
  * 
  */
-public class ExistsMechanism extends GenericMechanism {
+public class ExistsMechanism extends GenericMechanism implements DNSServiceEnabled {
 
     /**
      * ABNF: exists = "exists" ":" domain-spec
      */
     public static final String REGEX = "[eE][xX][iI][sS][tT][sS]" + "\\:"
             + SPFTermsRegexps.DOMAIN_SPEC_REGEX;
+    
+    private DNSService dnsService;
 
     /**
      * 
@@ -58,7 +61,7 @@ public class ExistsMechanism extends GenericMechanism {
         host = new MacroExpand(spfData, log).expandDomain(host);
 
         try {
-            aRecords = spfData.getDnsProbe().getRecords(host,DNSService.A);
+            aRecords = dnsService.getRecords(host,DNSService.A);
         } catch (DNSService.TimeoutException e) {
             return false;
         }
@@ -77,5 +80,13 @@ public class ExistsMechanism extends GenericMechanism {
     public String toString() {
         return "exists:"+getDomain();
     }
+
+    /**
+     * @see org.apache.james.jspf.wiring.DNSServiceEnabled#enableDNSService(org.apache.james.jspf.core.DNSService)
+     */
+    public void enableDNSService(DNSService service) {
+        this.dnsService = service;
+    }
+
 
 }
