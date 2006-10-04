@@ -71,7 +71,7 @@ public class TrustedForwarderPolicy {
      * @return aCom a Collection which holds the directives
      */
     public Collection getUpdatedDirectives() {
-        String mechanism = ((Directive) aCom.get(aCom.size())).toString();
+        String mechanism = ((Directive) aCom.get(aCom.size())).toString().toLowerCase();
         if (mechanism.equals("-all") || mechanism.equals("?all")) {
             log.debug("Add TrustedForwarderPolicy = include:"+TRUSTED_FORWARDER_HOST);
             try {
@@ -81,7 +81,7 @@ public class TrustedForwarderPolicy {
                      * 
                      * @param host the host to include
                      */
-                    public synchronized Mechanism setHost(String host) {
+                    public Mechanism setHost(String host) {
                         this.host = host;
                         return this;
                     }
