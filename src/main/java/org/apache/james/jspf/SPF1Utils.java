@@ -65,42 +65,8 @@ public class SPF1Utils {
             return NEUTRAL_CONV;
         } else if (result.equals(SPF1Constants.SOFTFAIL)) {
             return SOFTFAIL_CONV;
-        } else if (result.equals(PERM_ERROR_CONV)) {
-            return PERM_ERROR_CONV;
-        } else if (result.equals(TEMP_ERROR_CONV)) {
-            return TEMP_ERROR_CONV;
-        } else if (result.equals(NONE_CONV)) {
-            return NONE_CONV;
         } else {
             return NEUTRAL_CONV;
-        }
-
-    }
-
-    /**
-     * Covert SPF names to raw SPF results
-     * 
-     * @param result The result which should converted
-     * @return coverted result
-     */
-    protected static String nameToResult(String result) {
-
-        if (result.equals(PASS_CONV)) {
-            return SPF1Constants.PASS;
-        } else if (result.equals(FAIL_CONV)) {
-            return SPF1Constants.FAIL;
-        } else if (result.equals(NEUTRAL_CONV)) {
-            return SPF1Constants.NEUTRAL;
-        } else if (result.equals(SOFTFAIL_CONV)) {
-            return SPF1Constants.SOFTFAIL;
-        } else if (result.equals(PERM_ERROR_CONV)) {
-            return PERM_ERROR_CONV;
-        } else if (result.equals(TEMP_ERROR_CONV)) {
-            return TEMP_ERROR_CONV;
-        } else if (result.equals(NONE_CONV)) {
-            return NONE_CONV;
-        } else {
-            return SPF1Constants.NEUTRAL;
         }
 
     }

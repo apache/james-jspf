@@ -223,7 +223,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>org.apache.james.jspf.SPFQuery</mainClass>
+              <mainClass>org.apache.james.jspf.impl.SPFQuery</mainClass>
               <packageName>org.apache.james.jspf</packageName>
               <addClasspath>true</addClasspath>
             </manifest>

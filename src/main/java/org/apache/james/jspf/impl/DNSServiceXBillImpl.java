@@ -17,7 +17,7 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf;
+package org.apache.james.jspf.impl;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;

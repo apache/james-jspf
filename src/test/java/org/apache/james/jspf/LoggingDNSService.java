@@ -20,6 +20,7 @@
 package org.apache.james.jspf;
 
 import org.apache.james.jspf.core.DNSService;
+import org.apache.james.jspf.impl.DNSServiceXBillImpl;
 
 import java.util.List;
 

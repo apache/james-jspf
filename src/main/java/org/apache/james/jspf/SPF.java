@@ -77,22 +77,6 @@ public class SPF implements SPFChecker {
     private FallbackPolicy fallBack;
     
     private boolean useTrustedForwarder = false;
-    
-    /**
-     * Uses default Log4JLogger and DNSJava based dns resolver
-     */
-    public SPF() {
-        this(new Log4JLogger(org.apache.log4j.Logger.getLogger(SPF.class)));
-    }
-    
-    /**
-     * Uses passed logger and DNSJava based dns resolver
-     * 
-     * @param logger the logger to use
-     */
-    public SPF(Logger logger) {
-        this(new DNSServiceXBillImpl(logger), logger);
-    }
 
     /**
      * Uses passed logger and passed dnsServicer

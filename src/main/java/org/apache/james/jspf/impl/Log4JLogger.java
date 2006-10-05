@@ -17,7 +17,7 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf;
+package org.apache.james.jspf.impl;
 
 import org.apache.james.jspf.core.Logger;
 import org.apache.log4j.Level;
@@ -29,7 +29,7 @@ import org.apache.log4j.Level;
 public class Log4JLogger implements Logger {
     private org.apache.log4j.Logger m_Logger;
 
-    Log4JLogger(org.apache.log4j.Logger log4jLogger) {
+    public Log4JLogger(org.apache.log4j.Logger log4jLogger) {
         m_Logger = log4jLogger;
     }
 

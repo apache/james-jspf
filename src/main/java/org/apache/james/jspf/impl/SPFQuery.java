@@ -17,7 +17,7 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf;
+package org.apache.james.jspf.impl;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -25,6 +25,9 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import org.apache.james.jspf.SPF;
+import org.apache.james.jspf.SPF1Utils;
+import org.apache.james.jspf.SPFResult;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -109,7 +112,7 @@ public class SPFQuery {
                 if (line.hasOption(CMD_VERBOSE))
                     logger.setLevel(Level.TRACE);
 
-                SPF spf = new SPF(new Log4JLogger(logger));
+                SPF spf = new DefaultSPF(new Log4JLogger(logger));
 
                 // Check if we should set a costum default explanation
                 if (defaultExplanation != null) {
