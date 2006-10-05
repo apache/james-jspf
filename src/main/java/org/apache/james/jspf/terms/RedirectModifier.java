@@ -20,7 +20,6 @@
 
 package org.apache.james.jspf.terms;
 
-import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.exceptions.NeutralException;
@@ -29,14 +28,13 @@ import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.util.SPFTermsRegexps;
-import org.apache.james.jspf.wiring.LogEnabled;
 import org.apache.james.jspf.wiring.SPFCheckEnabled;
 
 /**
  * This class represent the redirect modifier
  * 
  */
-public class RedirectModifier extends GenericModifier implements LogEnabled, SPFCheckEnabled {
+public class RedirectModifier extends GenericModifier implements SPFCheckEnabled {
 
     /**
      * ABNF: redirect = "redirect" "=" domain-spec
@@ -44,8 +42,6 @@ public class RedirectModifier extends GenericModifier implements LogEnabled, SPF
     public static final String REGEX = "[rR][eE][dD][iI][rR][eE][cC][tT]"
             + "\\=" + SPFTermsRegexps.DOMAIN_SPEC_REGEX;
     
-    private Logger log;
-
     private SPFChecker spfChecker;
 
     /**
@@ -54,30 +50,29 @@ public class RedirectModifier extends GenericModifier implements LogEnabled, SPF
      * 
      * @param spfData
      *            The SPF1Data which should used
-     * @return host The host to which we shuld redirect
+     * @return the result of this processing
      * @throws PermErrorException
      *             if an error is in the redirect modifier
      * @throws TempErrorException
      *             if an DNS problem accurred
      */
-    public String run(SPF1Data spfData) throws PermErrorException,
+    protected void checkSPFLogged(SPF1Data spfData) throws PermErrorException,
             TempErrorException {
         // the redirect modifier is used only when we had no previous matches
-        if (!spfData.isMatch()) {
+        if (spfData.getCurrentResult() == null) {
 
             String host = getHost();
 
             // update currentDepth
-            spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);
+            spfData.increaseCurrentDepth();
 
             // throws a PermErrorException that we can pass through
             host = new MacroExpand(spfData, log).expandDomain(host);
 
             spfData.setCurrentDomain(host);
 
-            String res = null;
             try {
-                res = spfChecker.checkSPF(spfData).getResultChar();
+                spfChecker.checkSPF(spfData);
             } catch (NoneException e) {
                 // no spf record assigned to the redirect domain
                 throw new PermErrorException(
@@ -90,27 +85,7 @@ public class RedirectModifier extends GenericModifier implements LogEnabled, SPF
                 spfData.setIgnoreExplanation(true);
             }
 
-            return res;
-
-        } else {
-            // return null if we should not use the redirect at all
-            return null;
         }
-    }
-
-    /**
-     * @see org.apache.james.jspf.core.Modifier#enforceSingleInstance()
-     */
-    public boolean enforceSingleInstance() {
-        return true;
-    }
-
-
-    /**
-     * @see org.apache.james.jspf.wiring.LogEnabled#enableLogging(org.apache.james.jspf.core.Logger)
-     */
-    public void enableLogging(Logger logger) {
-        this.log = logger;
     }
 
     /**

@@ -22,25 +22,45 @@ package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.Configurable;
 import org.apache.james.jspf.core.Configuration;
+import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.Modifier;
 import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
+import org.apache.james.jspf.wiring.LogEnabled;
 
 /**
  * This abstract class represent a gerneric modifier
  * 
  */
-public abstract class GenericModifier implements Modifier, Configurable {
+public abstract class GenericModifier implements Modifier, Configurable, LogEnabled {
 
     private String host;
+
+    protected Logger log;
 
     /**
      * @see org.apache.james.jspf.core.Modifier#run(SPF1Data)
      * 
      */
-    public abstract String run(SPF1Data spfData) throws PermErrorException,
-            TempErrorException;
+    public void checkSPF(SPF1Data spfData) throws PermErrorException,
+            TempErrorException {
+        log.debug("Processing modifier: " + this);
+        checkSPFLogged(spfData);
+        log.debug("Processed modifier: " + this + " resulted in "
+                + spfData.getCurrentResult());
+    }
+    
+    protected abstract void checkSPFLogged(SPF1Data spfData) throws PermErrorException,
+        TempErrorException;
+
+
+    /**
+     * @see org.apache.james.jspf.core.Modifier#enforceSingleInstance()
+     */
+    public boolean enforceSingleInstance() {
+        return true;
+    }
 
     /**
      * @see org.apache.james.jspf.core.Configurable#config(Configuration)
@@ -57,5 +77,14 @@ public abstract class GenericModifier implements Modifier, Configurable {
     protected synchronized String getHost() {
         return host;
     }
+    
+
+    /**
+     * @see org.apache.james.jspf.wiring.LogEnabled#enableLogging(org.apache.james.jspf.core.Logger)
+     */
+    public void enableLogging(Logger logger) {
+        this.log = logger;
+    }
+
 
 }

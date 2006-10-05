@@ -17,34 +17,32 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.core;
+package org.apache.james.jspf.policies;
 
+
+import org.apache.james.jspf.core.SPF1Record;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 
 /**
- * Interface for the SPFChecker service.
+ * Return an spf record from a given domain. 
  */
-public interface SPFChecker {
+public interface Policy {
 
     /**
-     * Run check for SPF with the given values.
+     * Get a record for the given domain
      * 
-     * @param spfData
-     *             The SPF1Data which should be used to run the check
-     * @throws PermErrorException
-     *             Get thrown if an error was detected
-     * @throws NoneException
-     *             Get thrown if no Record was found
-     * @throws TempErrorException
-     *             Get thrown if a DNS problem was detected
-     * @throws NeutralException  
-     *             Get thrown if the result should be neutral
+     * @param currentDomain the domain to retrieve the SPFRecord for
+     * @return the SPFRecord found
+     * @throws PermErrorException exception
+     * @throws TempErrorException exception
+     * @throws NoneException exception
+     * @throws NeutralException exception
      */
-    public void checkSPF(SPF1Data spfData)
-            throws PermErrorException, NoneException, TempErrorException,
+    public SPF1Record getSPFRecord(String currentDomain)
+            throws PermErrorException, TempErrorException, NoneException,
             NeutralException;
 
 }

@@ -54,7 +54,7 @@ public class MXMechanism extends AMechanism {
         IPAddr checkAddress;
 
         // update currentDepth
-        spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);
+        spfData.increaseCurrentDepth();
 
         // Get the right host.
         String host = expandHost(spfData);

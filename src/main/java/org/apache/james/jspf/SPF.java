@@ -21,9 +21,7 @@
 package org.apache.james.jspf;
 
 import org.apache.james.jspf.core.DNSService;
-import org.apache.james.jspf.core.Directive;
 import org.apache.james.jspf.core.Logger;
-import org.apache.james.jspf.core.Modifier;
 import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.core.SPF1Record;
@@ -33,33 +31,46 @@ import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
-import org.apache.james.jspf.localpolicy.FallbackPolicy;
-import org.apache.james.jspf.localpolicy.TrustedForwarderPolicy;
-import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.parser.DefaultSPF1Parser;
 import org.apache.james.jspf.parser.DefaultTermsFactory;
+import org.apache.james.jspf.policies.ChainPolicy;
+import org.apache.james.jspf.policies.InitialChecksPolicy;
+import org.apache.james.jspf.policies.NeutralIfNotMatchPolicy;
+import org.apache.james.jspf.policies.NoSPFRecordFoundPolicy;
+import org.apache.james.jspf.policies.Policy;
+import org.apache.james.jspf.policies.ParseRecordPolicy;
+import org.apache.james.jspf.policies.SPFRetriever;
+import org.apache.james.jspf.policies.local.BestGuessPolicy;
+import org.apache.james.jspf.policies.local.FallbackPolicy;
+import org.apache.james.jspf.policies.local.TrustedForwarderPolicy;
 import org.apache.james.jspf.wiring.DNSServiceEnabled;
 import org.apache.james.jspf.wiring.LogEnabled;
 import org.apache.james.jspf.wiring.SPFCheckEnabled;
 import org.apache.james.jspf.wiring.WiringServiceTable;
 
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * This class is used to generate a SPF-Test and provided all intressting data.
  */
-public class SPF implements SPFChecker {
+public class SPF implements SPFChecker, Policy {
 
-    private DNSService dnsProbe;
+    DNSService dnsProbe;
 
-    private SPFRecordParser parser;
+    public SPFRecordParser parser;
 
-    private Logger log;
+    Logger log;
     
-    private String defaultExplanation = null;
+    String defaultExplanation = null;
+    
+    /**
+     * The hostname to include
+     */
+    public static final String TRUSTED_FORWARDER_HOST = "spf.trusted-forwarder.org";
 
-    private boolean useBestGuess = false;
+
+    public boolean useBestGuess = false;
 
     private FallbackPolicy fallBack;
     
@@ -135,7 +146,8 @@ public class SPF implements SPFChecker {
             // Setup the data
             spfData = new SPF1Data(mailFrom, hostName, ipAddress);
             spfData.enableDNSService(dnsProbe);
-            SPFInternalResult res = checkSPF(spfData);
+            checkSPF(spfData);
+            SPFInternalResult res = new SPFInternalResult(spfData.getCurrentResult(), spfData.getExplanation());
             resultChar = res.getResultChar();
             result = SPF1Utils.resultToName(resultChar);
             explanation = res.getExplanation();
@@ -165,157 +177,61 @@ public class SPF implements SPFChecker {
         return ret;
 
     }
-
+    
     /**
      * @see org.apache.james.jspf.SPFChecker#checkSPF(org.apache.james.jspf.core.SPF1Data)
      */
-    public SPFInternalResult checkSPF(SPF1Data spfData) throws PermErrorException,
+    public void checkSPF(SPF1Data spfData) throws PermErrorException,
             NoneException, TempErrorException, NeutralException {
-        SPF1Record spfRecord = null;
-        spfData.setCurrentResult(SPF1Constants.NEUTRAL);
+
+        SPF1Record spfRecord = getSPFRecord(spfData.getCurrentDomain());
         
-        // Initial checks (spec 4.3)
-        if (spfData.getCurrentDomain() != null) {
-            String[] labels = spfData.getCurrentDomain().split("\\.");
-            for (int i = 0; i < labels.length; i++) {
-                if (labels[i] != null && labels[i].length() > 63) {
-                    throw new NoneException("Domain "+spfData.getCurrentDomain()+" is malformed (label longer than 63 characters)");
-                }
-            }
+        Iterator i = spfRecord.iterator();
+        while (i.hasNext()) {
+            SPFChecker m = (SPFChecker) i.next();
+
+            m.checkSPF(spfData);
+
         }
 
-        // Get the raw dns txt entry which contains a spf entry
-        String spfDnsEntry = getSpfRecord(dnsProbe,spfData.getCurrentDomain(),
-                SPF1Constants.SPF_VERSION);
-
-        // No SPF-Record found
-        if (spfDnsEntry == null) {
-            if (useBestGuess == true) {
-                // We should use bestguess
-                spfDnsEntry = SPF1Utils.BEST_GUESS_RECORD;
-                
-            } else if (fallBack != null && fallBack.getFallBackEntry(spfData.getCurrentDomain()) != null){
-                // We should use fallback
-                spfRecord = fallBack.getFallBackEntry(spfData.getCurrentDomain());
-                log.debug("Set FallBack SPF-Record:" +spfRecord.toString());
-            } else {
-                throw new NoneException("No SPF record found for host: " + spfData.getCurrentDomain());
-            }
-        }
-
-        // check if the spfRecord was set before
-        if (spfRecord == null) {
-            spfRecord = parser.parse(spfDnsEntry);
-        }
-
-        String qualifier = null;
-        boolean hasCommand = false;
-        Iterator com = null;
-
-        // trustedForwarder support is enabled
-        if (useTrustedForwarder) {
-            com = new TrustedForwarderPolicy(spfRecord.getDirectives(),log).getUpdatedDirectives().iterator();
-        } else {
-        // get all commands
-            com = spfRecord.getDirectives().iterator();
-        }
-        while (com.hasNext()) {
-
-            // if we reach maximum calls we must throw a PermErrorException. See
-            // SPF-RFC Section 10.1. Processing Limits
-            if (spfData.getCurrentDepth() > spfData.getMaxDepth()) {
-                throw new PermErrorException(
-                        "Maximum mechanism/modifier calls done: "
-                                + spfData.getCurrentDepth());
-            }
-
-            hasCommand = true;
-            Directive d = (Directive) com.next();
-
-            // logging
-            log.debug("Processing directive: " + d.getQualifier()
-                    + d.getMechanism().toString());
-
-            qualifier = d.run(spfData);
-
-            // logging
-            log.debug("Processed directive: " + d.getQualifier()
-                    + d.getMechanism().toString() + " returned " + qualifier);
-
-            if (qualifier != null) {
-                if (qualifier.equals("")) {
-                    spfData.setCurrentResult(SPF1Constants.PASS);
-                } else {
-                    spfData.setCurrentResult(qualifier);
-                }
-
-                spfData.setMatch(true);
-
-                // If we have a match we should break the while loop
-                break;
-            }
-        }
-
-        Iterator mod = spfRecord.getModifiers().iterator();
-        while (mod.hasNext()) {
-            spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);
-
-            // if we reach maximum calls we must throw a PermErrorException. See
-            // SPF-RFC Section 10.1. Processing Limits
-            if (spfData.getCurrentDepth() > spfData.getMaxDepth()) {
-                throw new PermErrorException(
-                        "Maximum mechanism/modifiers calls done: "
-                                + spfData.getCurrentDepth());
-            }
-
-            Modifier m = (Modifier) mod.next();
-
-            log.debug("Processing modifier: " + m.toString());
-
-            String q = m.run(spfData);
-
-            log.debug("Processed modifier: " + m.toString() + " resulted in "
-                    + q);
-
-            if (q != null) {
-                qualifier = q;
-            }
-
-            if (qualifier != null) {
-                spfData.setCurrentResult(qualifier);
-                spfData.setMatch(true);
-            }
-        }
-
-        // If no match was found set the result to neutral
-        if (!spfData.isMatch() && (hasCommand == true)) {
-            spfData.setCurrentResult(SPF1Constants.NEUTRAL);
-        } 
         
-        if (SPF1Constants.FAIL.equals(spfData.getCurrentResult())) {  
-            if (spfData.getExplanation()==null || spfData.getExplanation().equals("")) {
-                if(defaultExplanation == null) {
-                    try {
-                        spfData.setExplanation(new MacroExpand(spfData, log)
-                                .expandExplanation(SPF1Utils.DEFAULT_EXPLANATION));
-                    } catch (PermErrorException e) {
-                        // Should never happen !
-                        log.debug("Invalid defaulfExplanation: " + SPF1Utils.DEFAULT_EXPLANATION);
-                    }
-                } else {
-                    try {
-                        spfData.setExplanation(new MacroExpand(spfData, log)
-                                .expandExplanation(defaultExplanation));
-                    } catch (PermErrorException e) {
-                        log.error("Invalid defaultExplanation: " + defaultExplanation);
-                    }
-                }
-            }
-        }
-        
-        return new SPFInternalResult(spfData.getCurrentResult(), spfData.getExplanation());
     }
 
+    /**
+     * @see org.apache.james.jspf.policies.Policy#getSPFRecord(java.lang.String)
+     */
+    public SPF1Record getSPFRecord(String currentDomain) throws PermErrorException, TempErrorException, NoneException, NeutralException {
+
+        ArrayList policies = new ArrayList();
+        
+        policies.add(new SPFRetriever(dnsProbe));
+        
+        if (useBestGuess) {
+            policies.add(new BestGuessPolicy());
+        }
+        
+        policies.add(new ParseRecordPolicy(parser));
+        
+        if (fallBack != null) {
+            policies.add(fallBack);
+        }
+
+        policies.add(new NoSPFRecordFoundPolicy());
+        
+        // trustedForwarder support is enabled
+        if (useTrustedForwarder) {
+            policies.add(new TrustedForwarderPolicy(log));
+        }
+
+        policies.add(new NeutralIfNotMatchPolicy());
+
+        policies.add(new DefaultExplanationPolicy(log, defaultExplanation));
+        
+        policies.add(new InitialChecksPolicy());
+        
+        return new ChainPolicy(policies).getSPFRecord(currentDomain);
+    }
+    
     /**
      * Set the amount of time (in seconds) before an TermError is returned when
      * the dnsserver not answer. Default is 20 seconds.
@@ -347,68 +263,6 @@ public class SPF implements SPFChecker {
         this.useBestGuess  = useBestGuess;
     }
     
-
-    /**
-     * Get the SPF-Record for a server given it's version
-     * 
-     * TODO: support SPF Records too. This will be done if dnsjava support it!
-     * 
-     * @param dns
-     *            The dns service to query
-     * @param hostname
-     *            The hostname for which we want to retrieve the SPF-Record
-     * @param spfVersion
-     *            The SPF-Version which should used.
-     * @return The SPF-Record if one is found.
-     * @throws PermErrorException
-     *             if more then one SPF-Record was found.
-     * @throws TempErrorException
-     *             if the lookup result was "TRY_AGAIN"
-     */
-    public String getSpfRecord(DNSService dns, String hostname, String spfVersion)
-            throws PermErrorException, TempErrorException {
-
-        String returnValue = null;
-        try {
-            List spfR = dns.getRecords(hostname, DNSService.SPF);
-            if (spfR == null || spfR.isEmpty()) {
-                // do DNS lookup for TXT
-                spfR = dns.getRecords(hostname, DNSService.TXT);
-            }
-    
-            // process returned records
-            if (spfR != null && !spfR.isEmpty()) {
-    
-                Iterator all = spfR.iterator();
-    
-                while (all.hasNext()) {
-                    // DO NOT trim the result!
-                    String compare = all.next().toString();
-    
-                    // TODO is this correct? we remove the first and last char if the
-                    // result has an initial " 
-                    // remove '"'
-                    if (compare.charAt(0)=='"') {
-                        compare = compare.toLowerCase().substring(1,
-                                compare.length() - 1);
-                    }
-    
-                    // We trim the compare value only for the comparison
-                    if (compare.trim().startsWith(spfVersion + " ") || compare.trim().equals(spfVersion)) {
-                        if (returnValue == null) {
-                            returnValue = compare;
-                        } else {
-                            throw new PermErrorException(
-                                    "More than 1 SPF record found for host: " + hostname);
-                        }
-                    }
-                }
-            }
-            return returnValue;
-        } catch (DNSService.TimeoutException e) {
-            throw new TempErrorException("Timeout querying dns");
-        }
-    }
     
     /**
      * Return the FallbackPolicy object which can be used to 

@@ -59,7 +59,7 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled {
     public boolean run(SPF1Data spfData) throws PermErrorException,
             TempErrorException {
         // update currentDepth
-        spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);
+        spfData.increaseCurrentDepth();
 
         // Get the right host.
         String host = expandHost(spfData);

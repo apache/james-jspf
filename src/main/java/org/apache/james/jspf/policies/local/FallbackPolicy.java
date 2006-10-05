@@ -17,7 +17,7 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.localpolicy;
+package org.apache.james.jspf.policies.local;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,11 +30,12 @@ import org.apache.james.jspf.core.SPFRecordParser;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
+import org.apache.james.jspf.policies.AbstractNestedPolicy;
 
 /**
  * Class to support Fallback feature
  */
-public class FallbackPolicy {
+public class FallbackPolicy extends AbstractNestedPolicy {
 
     private Map fallBackMap;
 
@@ -42,7 +43,7 @@ public class FallbackPolicy {
 
     private Logger log;
 
-    public FallbackPolicy(Logger log, SPFRecordParser parser){
+    public FallbackPolicy(Logger log, SPFRecordParser parser) {
         this.log = log;
         fallBackMap = Collections.synchronizedMap(new HashMap());
         this.parser = parser;
@@ -116,6 +117,13 @@ public class FallbackPolicy {
     }
 
     /**
+     * @see org.apache.james.jspf.policies.AbstractNestedPolicy#getSPFRecordFallback(java.lang.String)
+     */
+    public SPF1Record getSPFRecordFallback(String host) {
+        return getMySPFRecord(host);
+    }
+    
+    /**
      * Return the SPF1Record for the given host
      * 
      * @param host
@@ -123,7 +131,7 @@ public class FallbackPolicy {
      * @return the SPF1Record of null if no SPF1Record was found in fallback for
      *         the given host
      */
-    public SPF1Record getFallBackEntry(String host) {
+    protected SPF1Record getMySPFRecord(String host) {
         Object fallBack = null;
 
         synchronized (fallBackMap) {
@@ -159,4 +167,5 @@ public class FallbackPolicy {
         }
         return null;
     }
+
 }

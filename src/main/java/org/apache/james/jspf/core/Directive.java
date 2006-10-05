@@ -27,11 +27,13 @@ import org.apache.james.jspf.exceptions.TempErrorException;
 /**
  * A Directive is a mechanism with a resulting qualifier.
  */
-public class Directive {
+public class Directive implements SPFChecker {
 
     protected String qualifier = "+";
 
     private Mechanism mechanism = null;
+
+    private Logger log;
 
     /**
      * Construct Directive
@@ -40,9 +42,10 @@ public class Directive {
      * @param mechanism The Mechanism 
      * @throws PermErrorException Get thrown if a PermError should returned
      */
-    public Directive(String qualifier, Mechanism mechanism)
+    public Directive(String qualifier, Mechanism mechanism, Logger logger)
             throws PermErrorException {
         super();
+        this.log = logger;
         if (qualifier != null && qualifier.length() > 0) {
             this.qualifier = qualifier;
         }
@@ -61,12 +64,24 @@ public class Directive {
      * @throws TempErrorException get thrown if a TempError should returned
      * @throws NoneException get thrown if a NoneException should returned;
      */
-    public String run(SPF1Data spfData) throws PermErrorException,
+    public void checkSPF(SPF1Data spfData) throws PermErrorException,
             TempErrorException, NoneException {
-        if (mechanism.run(spfData)) {
-            return qualifier;
-        } else {
-            return null;
+        // if already have a current result we don't run this
+        if (spfData.getCurrentResult() == null) {
+            log.debug("Processing directive: " + this);
+
+            if (mechanism.run(spfData)) {
+                if (qualifier != null) {
+                    if (qualifier.equals("")) {
+                        spfData.setCurrentResult(SPF1Constants.PASS);
+                    } else {
+                        spfData.setCurrentResult(qualifier);
+                    }
+                }
+                
+                log.debug("Processed directive matched: " + this + " returned " + spfData.getCurrentResult());
+            }
+
         }
     }
 

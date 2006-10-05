@@ -54,7 +54,7 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled 
         ArrayList validatedHosts = new ArrayList();
 
         // update currentDepth
-        spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);
+        spfData.increaseCurrentDepth();
 
         // Get the right host.
         String host = expandHost(spfData);

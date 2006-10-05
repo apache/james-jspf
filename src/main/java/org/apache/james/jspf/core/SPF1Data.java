@@ -70,8 +70,6 @@ public class SPF1Data implements MacroData, DNSServiceEnabled {
 
     private String currentResult = null;
 
-    private boolean match = false;
-    
     private boolean ignoreExplanation = false;
 
     private DNSService dnsProbe;
@@ -285,35 +283,19 @@ public class SPF1Data implements MacroData, DNSServiceEnabled {
         }
         return receivingDomain;
     }
-
+    
     /**
-     * Get currentDepth 
+     * Increase the current depth:
      * 
-     * @return currentDepth The currentDeph
+     * if we reach maximum calls we must throw a PermErrorException. See
+     * SPF-RFC Section 10.1. Processing Limits
      */
-    public int getCurrentDepth() {
-        return currentDepth;
-    }
-
-    /**
-     * Set currentDepth which is just processed. This will called from
-     * modifiers/mechanismn
-     * 
-     * @param currentDepth
-     *            The currentDepth
-     */
-    public void setCurrentDepth(int currentDepth) {
-        this.currentDepth = currentDepth;
-    }
-
-    /**
-     * Get the maxDepth
-     * 
-     * @return maxDepth The maximum mechanismn/modifier which are allowed to
-     *         proccessed
-     */
-    public int getMaxDepth() {
-        return MAX_DEPTH;
+    public void increaseCurrentDepth() throws PermErrorException {
+        this.currentDepth++;
+        if (currentDepth > MAX_DEPTH)
+            throw new PermErrorException(
+                    "Maximum mechanism/modifiers calls done: "
+                        + currentDepth);
     }
 
     /**
@@ -361,25 +343,6 @@ public class SPF1Data implements MacroData, DNSServiceEnabled {
      */
     public String getCurrentResult() {
         return currentResult;
-    }
-
-    /**
-     * Get set if an mechanismn or modifier match
-     * 
-     * @param match
-     *            true or flase
-     */
-    public void setMatch(boolean match) {
-        this.match = match;
-    }
-
-    /**
-     * Return true if a mechanismn or modifier matched
-     * 
-     * @return true or false
-     */
-    public boolean isMatch() {
-        return match;
     }
     
     /**

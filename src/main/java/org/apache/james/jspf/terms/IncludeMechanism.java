@@ -69,7 +69,7 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
         String host = getHost();
 
         // update currentDepth
-        spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);      
+        spfData.increaseCurrentDepth();      
         
         // throws a PermErrorException that we can pass through
         host = new MacroExpand(spfData, log).expandDomain(host);
@@ -83,12 +83,11 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
             
             // On includes we should not use the explanation of the included domain
             spfData.setIgnoreExplanation(true);
+            // set a null current result
+            spfData.setCurrentResult(null);
             
-    
-            
-            String res = null;
             try {
-                 res = spfChecker.checkSPF(spfData).getResultChar();
+                 spfChecker.checkSPF(spfData);
               
             } catch (NoneException e) {
                 throw new PermErrorException("included checkSPF returned NoneException");
@@ -96,19 +95,18 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
                 throw new PermErrorException("included checkSPF returned NeutralException");
             }
             
-            // Reset the ignore
-            spfData.setIgnoreExplanation(false);
-            
-            if (res == null) {
+            if (spfData.getCurrentResult() == null) {
                 throw new TempErrorException("included checkSPF returned null");
-            } else if (res.equals(SPF1Constants.PASS)) {
+            } else if (spfData.getCurrentResult().equals(SPF1Constants.PASS)) {
                 return true;
-            } else if (res.equals(SPF1Constants.FAIL) || res.equals(SPF1Constants.SOFTFAIL) || res.equals(SPF1Constants.NEUTRAL)) {
+            } else if (spfData.getCurrentResult().equals(SPF1Constants.FAIL) || spfData.getCurrentResult().equals(SPF1Constants.SOFTFAIL) || spfData.getCurrentResult().equals(SPF1Constants.NEUTRAL)) {
                 return false;
             } else {
                 throw new TempErrorException("included checkSPF returned an Illegal result");
             }
         } finally {
+            // Reset the ignore
+            spfData.setIgnoreExplanation(false);
             spfData.setCurrentDomain(prevHost);
             spfData.setCurrentResult(prevRes);
         }

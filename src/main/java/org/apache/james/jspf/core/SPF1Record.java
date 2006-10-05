@@ -21,7 +21,8 @@
 package org.apache.james.jspf.core;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * The Class represent the SPF1 Record and provide methods to get all directives
@@ -29,10 +30,20 @@ import java.util.Collection;
  * 
  */
 public class SPF1Record {
+    
+    private String record;
 
-    private Collection directives = new ArrayList();
+    public SPF1Record() {
+        this.record = null;
+    }
+    
+    public SPF1Record(String record) {
+        this.record = record;
+    }
 
-    private Collection modifiers = new ArrayList();
+    private List directives = new ArrayList();
+
+    private List modifiers = new ArrayList();
 
     /**
      * Return the directives as Collection
@@ -40,7 +51,7 @@ public class SPF1Record {
      * @return directives Collection of all qualifier+mechanism which should be
      *         used
      */
-    public Collection getDirectives() {
+    public List getDirectives() {
         return directives;
     }
 
@@ -49,8 +60,54 @@ public class SPF1Record {
      * 
      * @return modifiers Collection of all modifiers which should be used
      */
-    public Collection getModifiers() {
+    public List getModifiers() {
         return modifiers;
+    }
+
+    /**
+     * @return the record in its string source format
+     */
+    public String getRecord() {
+        return record;
+    }
+
+    /**
+     * @param record a record in its string source format
+     */
+    public void setRecord(String record) {
+        this.record = record;
+    }
+    
+    /**
+     * Return a single iterator over Directives and Modifiers
+     * 
+     * @return a chained iterator of the terms
+     */
+    public Iterator iterator() {
+        return new Iterator() {
+            boolean first = true;
+            Iterator current = getDirectives().iterator();
+
+            public boolean hasNext() {
+                if (current.hasNext()) { 
+                    return true;
+                } else if (first) {
+                    current = getModifiers().iterator();
+                    first = false;
+                    return current.hasNext();
+                } else return false;
+            }
+
+            public Object next() {
+                current.hasNext();
+                return current.next();
+            }
+
+            public void remove() {
+                throw new UnsupportedOperationException("Readonly iterator");
+            }
+            
+        };
     }
 
 }

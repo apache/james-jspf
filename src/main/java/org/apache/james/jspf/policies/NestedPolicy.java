@@ -17,34 +17,15 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.core;
-
-import org.apache.james.jspf.exceptions.NeutralException;
-import org.apache.james.jspf.exceptions.NoneException;
-import org.apache.james.jspf.exceptions.PermErrorException;
-import org.apache.james.jspf.exceptions.TempErrorException;
+package org.apache.james.jspf.policies;
 
 /**
- * Interface for the SPFChecker service.
+ * Interface used to set the next policy in the chain
  */
-public interface SPFChecker {
-
+public interface NestedPolicy {
     /**
-     * Run check for SPF with the given values.
-     * 
-     * @param spfData
-     *             The SPF1Data which should be used to run the check
-     * @throws PermErrorException
-     *             Get thrown if an error was detected
-     * @throws NoneException
-     *             Get thrown if no Record was found
-     * @throws TempErrorException
-     *             Get thrown if a DNS problem was detected
-     * @throws NeutralException  
-     *             Get thrown if the result should be neutral
+     * Set a new children for this Policy
+     * @param children the children policy
      */
-    public void checkSPF(SPF1Data spfData)
-            throws PermErrorException, NoneException, TempErrorException,
-            NeutralException;
-
+    public void setChildPolicy(Policy children);
 }

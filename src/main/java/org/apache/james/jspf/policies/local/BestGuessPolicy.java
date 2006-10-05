@@ -17,34 +17,20 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.core;
+package org.apache.james.jspf.policies.local;
 
+import org.apache.james.jspf.SPF1Utils;
+import org.apache.james.jspf.core.SPF1Record;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
+import org.apache.james.jspf.policies.AbstractNestedPolicy;
 
-/**
- * Interface for the SPFChecker service.
- */
-public interface SPFChecker {
+public class BestGuessPolicy extends AbstractNestedPolicy {
 
-    /**
-     * Run check for SPF with the given values.
-     * 
-     * @param spfData
-     *             The SPF1Data which should be used to run the check
-     * @throws PermErrorException
-     *             Get thrown if an error was detected
-     * @throws NoneException
-     *             Get thrown if no Record was found
-     * @throws TempErrorException
-     *             Get thrown if a DNS problem was detected
-     * @throws NeutralException  
-     *             Get thrown if the result should be neutral
-     */
-    public void checkSPF(SPF1Data spfData)
-            throws PermErrorException, NoneException, TempErrorException,
-            NeutralException;
-
+    protected SPF1Record getSPFRecordFallback(String currentDomain) throws PermErrorException, TempErrorException, NoneException, NeutralException {
+        // We should use bestguess
+        return new SPF1Record(SPF1Utils.BEST_GUESS_RECORD);
+    }
 }

@@ -21,7 +21,6 @@
 package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.DNSService;
-import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.exceptions.PermErrorException;
@@ -29,7 +28,6 @@ import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.util.SPFTermsRegexps;
 import org.apache.james.jspf.wiring.DNSServiceEnabled;
-import org.apache.james.jspf.wiring.LogEnabled;
 
 import java.util.List;
 
@@ -37,15 +35,13 @@ import java.util.List;
  * This class represent the exp modifier
  * 
  */
-public class ExpModifier extends GenericModifier implements LogEnabled, DNSServiceEnabled {
+public class ExpModifier extends GenericModifier implements DNSServiceEnabled {
 
     /**
      * ABNF: explanation = "exp" "=" domain-spec
      */
     public static final String REGEX = "[eE][xX][pP]" + "\\="
             + SPFTermsRegexps.DOMAIN_SPEC_REGEX;
-
-    private Logger log;
 
     private DNSService dnsService;
 
@@ -55,20 +51,19 @@ public class ExpModifier extends GenericModifier implements LogEnabled, DNSServi
      * 
      * @param spfData
      *            The SPF1Data which should used
-     * 
      */
-    public String run(SPF1Data spfData) {
+    protected void checkSPFLogged(SPF1Data spfData) {
         String exp = null;
         String host = getHost();
 
+        // If we should ignore the explanation we don't have to run this class
+        if (spfData.ignoreExplanation() == true)
+            return;
+        
         // If the currentResult is not fail we have no need to run all these
         // methods!
         if (spfData.getCurrentResult()== null || !spfData.getCurrentResult().equals(SPF1Constants.FAIL))
-            return null;
-        
-        // If we should ignore the explanation we don't have to run this class
-        if (spfData.ignoreExplanation() == true)
-            return null;
+            return;
 
         try {
             host = new MacroExpand(spfData, log).expandDomain(host);
@@ -76,7 +71,7 @@ public class ExpModifier extends GenericModifier implements LogEnabled, DNSServi
                 exp = getTxtCatType(dnsService, host);
             } catch (TempErrorException e) {
                 // Nothing todo here.. just return null
-                return null;
+                return;
             }
 
             if ((exp != null) && (!exp.equals(""))) {
@@ -85,23 +80,9 @@ public class ExpModifier extends GenericModifier implements LogEnabled, DNSServi
             } 
         } catch (PermErrorException e) {
             // Only catch the error and return null
-            return null;
+            return;
         }
-        return null;
-    }
-
-    /**
-     * @see org.apache.james.jspf.core.Modifier#enforceSingleInstance()
-     */
-    public boolean enforceSingleInstance() {
-        return true;
-    }
-
-    /**
-     * @see org.apache.james.jspf.wiring.LogEnabled#enableLogging(org.apache.james.jspf.core.Logger)
-     */
-    public void enableLogging(Logger logger) {
-        this.log = logger;
+        return;
     }
 
 

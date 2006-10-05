@@ -17,34 +17,48 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.core;
+package org.apache.james.jspf.policies;
 
+import org.apache.james.jspf.core.SPF1Record;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 
+import java.util.Iterator;
+import java.util.List;
+
 /**
- * Interface for the SPFChecker service.
+ * Composed policy: get a list of NestedPolicies and chain them
+ * in a single policy
  */
-public interface SPFChecker {
+public class ChainPolicy implements Policy {
+    
+    private Policy policy;
 
     /**
-     * Run check for SPF with the given values.
-     * 
-     * @param spfData
-     *             The SPF1Data which should be used to run the check
-     * @throws PermErrorException
-     *             Get thrown if an error was detected
-     * @throws NoneException
-     *             Get thrown if no Record was found
-     * @throws TempErrorException
-     *             Get thrown if a DNS problem was detected
-     * @throws NeutralException  
-     *             Get thrown if the result should be neutral
+     * Create a new ChainPolicy
+     * @param policies an array of Polcy and NestedPolicy objects
      */
-    public void checkSPF(SPF1Data spfData)
-            throws PermErrorException, NoneException, TempErrorException,
-            NeutralException;
+    public ChainPolicy(List policies) {
+        policy = null;
+        Iterator i = policies.iterator();
+        while (i.hasNext()) {
+            Policy newP = (Policy) i.next();
+            if (newP instanceof NestedPolicy) {
+                ((NestedPolicy) newP).setChildPolicy(policy);
+            }
+            policy = newP;
+        }
+    }
+    
+    /**
+     * @see org.apache.james.jspf.policies.Policy#getSPFRecord(java.lang.String)
+     */
+    public SPF1Record getSPFRecord(String currentDomain)
+            throws PermErrorException, TempErrorException, NoneException,
+            NeutralException {
+        return policy.getSPFRecord(currentDomain);
+    }
 
 }

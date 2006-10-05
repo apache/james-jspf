@@ -44,8 +44,8 @@ public class UnknownModifier implements Modifier, Configurable {
     /**
      * @see org.apache.james.jspf.core.Modifier#run(org.apache.james.jspf.core.SPF1Data)
      */
-    public String run(SPF1Data spfData) throws PermErrorException {
-        return null;
+    public void checkSPF(SPF1Data spfData) throws PermErrorException {
+        return;
     }
 
     /**

@@ -53,7 +53,7 @@ public class ExistsMechanism extends GenericMechanism implements DNSServiceEnabl
         List aRecords;
 
         // update currentDepth
-        spfData.setCurrentDepth(spfData.getCurrentDepth() + 1);
+        spfData.increaseCurrentDepth();
 
         String host = expandHost(spfData);
 

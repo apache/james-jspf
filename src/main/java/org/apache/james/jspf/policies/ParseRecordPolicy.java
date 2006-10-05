@@ -17,34 +17,30 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.core;
+package org.apache.james.jspf.policies;
 
+import org.apache.james.jspf.core.SPF1Record;
+import org.apache.james.jspf.core.SPFRecordParser;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
-import org.apache.james.jspf.exceptions.TempErrorException;
 
 /**
- * Interface for the SPFChecker service.
+ * Parse the record
  */
-public interface SPFChecker {
+public class ParseRecordPolicy extends AbstractNestedPolicy {
+
+    private SPFRecordParser parser;
+
+    public ParseRecordPolicy(SPFRecordParser parser) {
+        this.parser = parser;
+    }
 
     /**
-     * Run check for SPF with the given values.
-     * 
-     * @param spfData
-     *             The SPF1Data which should be used to run the check
-     * @throws PermErrorException
-     *             Get thrown if an error was detected
-     * @throws NoneException
-     *             Get thrown if no Record was found
-     * @throws TempErrorException
-     *             Get thrown if a DNS problem was detected
-     * @throws NeutralException  
-     *             Get thrown if the result should be neutral
+     * @see org.apache.james.jspf.policies.AbstractNestedPolicy#getSPFRecordPostFilter(java.lang.String, org.apache.james.jspf.core.SPF1Record)
      */
-    public void checkSPF(SPF1Data spfData)
-            throws PermErrorException, NoneException, TempErrorException,
-            NeutralException;
-
+    protected SPF1Record getSPFRecordPostFilter(String currentDomain, SPF1Record spfRecord) throws PermErrorException, NoneException, NeutralException {
+        // parse the record
+        return parser.parse(spfRecord.getRecord());
+    }
 }

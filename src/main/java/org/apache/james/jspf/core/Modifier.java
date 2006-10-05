@@ -20,28 +20,11 @@
 
 package org.apache.james.jspf.core;
 
-import org.apache.james.jspf.exceptions.PermErrorException;
-import org.apache.james.jspf.exceptions.TempErrorException;
-
 /**
  * This Interface represent a modifier
  * 
  */
-public interface Modifier {
-
-    /**
-     * Run the mechanismn with the give SPF1Data
-     * 
-     * @param spfData
-     *            The SPF1Data we should use
-     * @return host The host we should redirect / include
-     * @throws PermErrorException
-     *             Get thrown if there are any errors in modifiers
-     * @throws TempErrorException
-     *             Get thrown if DNS problems detected
-     */
-    public String run(SPF1Data spfData) throws PermErrorException,
-            TempErrorException;
+public interface Modifier extends SPFChecker {
 
     /**
      * Return true if the Modifier is only allowed once 

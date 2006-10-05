@@ -17,34 +17,34 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.core;
+package org.apache.james.jspf.policies;
 
+import org.apache.james.jspf.core.SPF1Record;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 
 /**
- * Interface for the SPFChecker service.
+ * Run the checks on the validity of the domain
+ * This is an override filter to be executed as the first 
+ * so it should be added as the last filter.
  */
-public interface SPFChecker {
-
+public final class InitialChecksPolicy extends AbstractNestedPolicy {
+    
     /**
-     * Run check for SPF with the given values.
-     * 
-     * @param spfData
-     *             The SPF1Data which should be used to run the check
-     * @throws PermErrorException
-     *             Get thrown if an error was detected
-     * @throws NoneException
-     *             Get thrown if no Record was found
-     * @throws TempErrorException
-     *             Get thrown if a DNS problem was detected
-     * @throws NeutralException  
-     *             Get thrown if the result should be neutral
+     * @see org.apache.james.jspf.policies.AbstractNestedPolicy#getSPFRecordOverride(java.lang.String)
      */
-    public void checkSPF(SPF1Data spfData)
-            throws PermErrorException, NoneException, TempErrorException,
-            NeutralException;
-
+    protected SPF1Record getSPFRecordOverride(String currentDomain) throws PermErrorException, TempErrorException, NoneException, NeutralException {
+        // Initial checks (spec 4.3)
+        if (currentDomain != null) {
+            String[] labels = currentDomain.split("\\.");
+            for (int i = 0; i < labels.length; i++) {
+                if (labels[i] != null && labels[i].length() > 63) {
+                    throw new NoneException("Domain "+currentDomain+" is malformed (label longer than 63 characters)");
+                }
+            }
+        }
+        return null;
+    }
 }

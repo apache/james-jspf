@@ -247,7 +247,7 @@ public class DefaultSPF1Parser implements SPFRecordParser {
         return modifierRegex.toString();
     }
 
-    /* (non-Javadoc)
+    /**
      * @see org.apache.james.jspf.parser.SPFRecordParser#parse(java.lang.String)
      */
     public SPF1Record parse(String spfRecord) throws PermErrorException,
@@ -310,7 +310,7 @@ public class DefaultSPF1Parser implements SPFRecordParser {
                             TERM_STEP_REGEX_MECHANISM_POS);
 
                     result.getDirectives().add(
-                            new Directive(qualifier, (Mechanism) mech));
+                            new Directive(qualifier, (Mechanism) mech, log));
 
                 }
 
