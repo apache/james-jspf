@@ -17,50 +17,26 @@
  * under the License.                                           *
  ****************************************************************/
 
-
-package org.apache.james.jspf;
-
-import org.apache.james.jspf.core.SPF1Constants;
+package org.apache.james.jspf.exceptions;
 
 /**
- * This class is used to return the result of an SPF lookup.
- *
+ * Root exception for SPF methods
  */
-public class SPFInternalResult {
-
-    protected String explanation = null;
-    
-    private String resultChar = null;
+public abstract class SPFResultException extends Exception {
 
     /**
-     * Construct SPFInternalResult 
+     * Exception
      * 
-     * @param resultChar The result
-     * @param explanation The explanation
+     * @param strErrorMessage string
      */
-    public SPFInternalResult(String resultChar, String explanation) {
-        this.resultChar = resultChar;
-        this.explanation = explanation;
+    public SPFResultException(String strErrorMessage) {
+        super(strErrorMessage);
     }
 
     /**
-     * Get the explanation. The explanation is only set if the result is "-" =
-     * fail
+     * The result for this exception
      * 
-     * @return explanation
+     * @return the spf result for this exception
      */
-    public String getExplanation() {
-        return explanation;
-    }
-    
-    /**
-     * Get the result char "+-~?"
-     * 
-     * @see SPF1Constants
-     * @return resultchar
-     */
-    public String getResultChar() {
-        return resultChar != null ? resultChar : "";
-    }
-
+    public abstract String getResult();
 }

@@ -26,7 +26,7 @@ import org.apache.james.jspf.core.SPF1Data;
  * This class is used to return the result of an SPF lookup.
  * 
  */
-public class SPFResult extends SPFInternalResult {
+public class SPFResult  {
 
     private String headerTextAsString = "";
 
@@ -34,16 +34,17 @@ public class SPFResult extends SPFInternalResult {
     
     private String result = null;
 
+    protected String explanation = null;
+    
     /**
      * Construct SPFResult
      * 
      * @param result the result 
-     * @param resultChar the rawResult
      * @param explanation the explanation
      * @param spf1data the SPF1Data
      */
-    public SPFResult(String result, String resultChar, String explanation, SPF1Data spf1data) {
-        super(resultChar, explanation);
+    public SPFResult(String result, String explanation, SPF1Data spf1data) {
+        this.explanation = explanation;
         this.result = result;
         this.headerTextAsString = generateHeader(result, spf1data);
     }

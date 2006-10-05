@@ -17,8 +17,9 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf;
+package org.apache.james.jspf.policies.local;
 
+import org.apache.james.jspf.SPF1Utils;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPF1Data;
@@ -31,21 +32,30 @@ import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.policies.AbstractNestedPolicy;
 
-final class DefaultExplanationPolicy extends AbstractNestedPolicy {
+/**
+ * Policy to add a default explanation
+ */
+public final class DefaultExplanationPolicy extends AbstractNestedPolicy {
     /**
-     * 
+     * log
      */
     private Logger log;
+    /**
+     * the default explanation
+     */
     private String defExplanation;
 
     /**
      * @param spf
      */
-    DefaultExplanationPolicy(Logger log, String explanation) {
+    public DefaultExplanationPolicy(Logger log, String explanation) {
         this.log = log;
         this.defExplanation = explanation;
     }
 
+    /**
+     * @see org.apache.james.jspf.policies.AbstractNestedPolicy#getSPFRecordPostFilter(java.lang.String, org.apache.james.jspf.core.SPF1Record)
+     */
     protected SPF1Record getSPFRecordPostFilter(String currentDomain, SPF1Record spfRecord) throws PermErrorException, TempErrorException, NoneException, NeutralException {
         // Default explanation policy
         spfRecord.getModifiers().add(new SPFChecker() {

@@ -20,16 +20,23 @@
 
 package org.apache.james.jspf.exceptions;
 
+import org.apache.james.jspf.SPF1Utils;
+
 /**
  * This exception get thrown if the result should be neutral
  * 
  */
-public class NeutralException extends Exception {
-
-    private static final long serialVersionUID = 1L;
+public class NeutralException extends SPFResultException {
 
     public NeutralException(String strErrorMessage) {
         super(strErrorMessage);
+    }
+
+    /**
+     * @see org.apache.james.jspf.exceptions.SPFResultException#getResult()
+     */
+    public String getResult() {
+        return SPF1Utils.NEUTRAL_CONV;
     }
 
 }

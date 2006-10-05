@@ -30,6 +30,7 @@ import org.apache.james.jspf.core.SPFRecordParser;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
+import org.apache.james.jspf.exceptions.SPFResultException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.parser.DefaultSPF1Parser;
 import org.apache.james.jspf.parser.DefaultTermsFactory;
@@ -41,6 +42,7 @@ import org.apache.james.jspf.policies.Policy;
 import org.apache.james.jspf.policies.ParseRecordPolicy;
 import org.apache.james.jspf.policies.SPFRetriever;
 import org.apache.james.jspf.policies.local.BestGuessPolicy;
+import org.apache.james.jspf.policies.local.DefaultExplanationPolicy;
 import org.apache.james.jspf.policies.local.FallbackPolicy;
 import org.apache.james.jspf.policies.local.TrustedForwarderPolicy;
 import org.apache.james.jspf.wiring.DNSServiceEnabled;
@@ -54,7 +56,7 @@ import java.util.Iterator;
 /**
  * This class is used to generate a SPF-Test and provided all intressting data.
  */
-public class SPF implements SPFChecker, Policy {
+public class SPF implements SPFChecker {
 
     DNSService dnsProbe;
 
@@ -139,7 +141,6 @@ public class SPF implements SPFChecker, Policy {
     public SPFResult checkSPF(String ipAddress, String mailFrom, String hostName) {
         SPF1Data spfData = null;
         String result = null;
-        String resultChar = null;
         String explanation = null;
 
         try {
@@ -147,21 +148,14 @@ public class SPF implements SPFChecker, Policy {
             spfData = new SPF1Data(mailFrom, hostName, ipAddress);
             spfData.enableDNSService(dnsProbe);
             checkSPF(spfData);
-            SPFInternalResult res = new SPFInternalResult(spfData.getCurrentResult(), spfData.getExplanation());
-            resultChar = res.getResultChar();
+            String resultChar = spfData.getCurrentResult() != null ? spfData.getCurrentResult() : "";
             result = SPF1Utils.resultToName(resultChar);
-            explanation = res.getExplanation();
-        } catch (PermErrorException e) {
-            log.warn(e.getMessage(),e);
-            result = SPF1Utils.PERM_ERROR_CONV;
-        } catch (NoneException e) {
-            log.warn(e.getMessage(),e);
-            result = SPF1Utils.NONE_CONV;
-        } catch (NeutralException e) {
-            result = SPF1Utils.NEUTRAL_CONV;
-        } catch (TempErrorException e) {
-            log.warn(e.getMessage(),e);
-            result = SPF1Utils.TEMP_ERROR_CONV;
+            explanation = spfData.getExplanation();
+        } catch (SPFResultException e) {
+            result = e.getResult();
+            if (!SPF1Utils.NEUTRAL_CONV.equals(result)) {
+                log.warn(e.getMessage(),e);
+            }
         } catch (IllegalStateException e) {
             // this should never happen at all. But anyway we will set the
             // result to neutral. Safety first ..
@@ -169,7 +163,7 @@ public class SPF implements SPFChecker, Policy {
             result = SPF1Constants.NEUTRAL;
         }
 
-        SPFResult ret = new SPFResult(result, resultChar, explanation, spfData);
+        SPFResult ret = new SPFResult(result, explanation, spfData);
         
         log.info("[ipAddress=" + ipAddress + "] [mailFrom=" + mailFrom
                 + "] [helo=" + hostName + "] => " + ret.getResult());
@@ -184,8 +178,21 @@ public class SPF implements SPFChecker, Policy {
     public void checkSPF(SPF1Data spfData) throws PermErrorException,
             NoneException, TempErrorException, NeutralException {
 
-        SPF1Record spfRecord = getSPFRecord(spfData.getCurrentDomain());
-        
+        SPF1Record spfRecord = getPolicy().getSPFRecord(spfData.getCurrentDomain());
+        checkSPF(spfData, spfRecord);
+    }
+
+    /**
+     * Check a given spfData with the given spfRecord
+     * 
+     * @param spfData spf data
+     * @param spfRecord record
+     * @throws PermErrorException exception
+     * @throws NoneException exception
+     * @throws TempErrorException exception
+     * @throws NeutralException exception
+     */
+    public void checkSPF(SPF1Data spfData, SPF1Record spfRecord) throws PermErrorException, NoneException, TempErrorException, NeutralException {
         Iterator i = spfRecord.iterator();
         while (i.hasNext()) {
             SPFChecker m = (SPFChecker) i.next();
@@ -193,14 +200,12 @@ public class SPF implements SPFChecker, Policy {
             m.checkSPF(spfData);
 
         }
-
-        
     }
 
     /**
-     * @see org.apache.james.jspf.policies.Policy#getSPFRecord(java.lang.String)
+     * Return a default policy for SPF
      */
-    public SPF1Record getSPFRecord(String currentDomain) throws PermErrorException, TempErrorException, NoneException, NeutralException {
+    public Policy getPolicy() {
 
         ArrayList policies = new ArrayList();
         
@@ -229,7 +234,7 @@ public class SPF implements SPFChecker, Policy {
         
         policies.add(new InitialChecksPolicy());
         
-        return new ChainPolicy(policies).getSPFRecord(currentDomain);
+        return new ChainPolicy(policies);
     }
     
     /**

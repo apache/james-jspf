@@ -27,9 +27,7 @@ import java.util.Map;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPF1Record;
 import org.apache.james.jspf.core.SPFRecordParser;
-import org.apache.james.jspf.exceptions.NeutralException;
-import org.apache.james.jspf.exceptions.NoneException;
-import org.apache.james.jspf.exceptions.PermErrorException;
+import org.apache.james.jspf.exceptions.SPFResultException;
 import org.apache.james.jspf.policies.AbstractNestedPolicy;
 
 /**
@@ -79,13 +77,7 @@ public class FallbackPolicy extends AbstractNestedPolicy {
             synchronized (fallBackMap) {
                 fallBackMap.put(host, spfRecord);
             }
-        } catch (PermErrorException e) {
-            throw new IllegalArgumentException("Invalid SPF-Record: "
-                    + rawSpfRecord);
-        } catch (NoneException e) {
-            throw new IllegalArgumentException("Invalid SPF-Record: "
-                    + rawSpfRecord);
-        } catch (NeutralException e) {
+        } catch (SPFResultException e) {
             throw new IllegalArgumentException("Invalid SPF-Record: "
                     + rawSpfRecord);
         }

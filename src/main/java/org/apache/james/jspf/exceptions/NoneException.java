@@ -20,16 +20,23 @@
 
 package org.apache.james.jspf.exceptions;
 
+import org.apache.james.jspf.SPF1Utils;
+
 /**
  * This exception get thrown if the result should be none
  * 
  */
-public class NoneException extends Exception {
-
-    private static final long serialVersionUID = 1L;
+public class NoneException extends SPFResultException {
 
     public NoneException(String strErrorMessage) {
         super(strErrorMessage);
+    }
+
+    /**
+     * @see org.apache.james.jspf.exceptions.SPFResultException#getResult()
+     */
+    public String getResult() {
+        return SPF1Utils.NONE_CONV;
     }
 
 }

@@ -175,7 +175,7 @@ public abstract class AbstractYamlTest extends TestCase {
         String resultSPF = res.getResult();
         
         if (currentTest.get("result") instanceof String) {
-            assertEquals("Test "+next+" ("+currentTest.get("description")+") failed. Returned: "+res.getResult()+" Expected: "+currentTest.get("result")+" [["+res.getResultChar()+"||"+res.getHeaderText()+"]]", currentTest.get("result"), res.getResult());
+            assertEquals("Test "+next+" ("+currentTest.get("description")+") failed. Returned: "+res.getResult()+" Expected: "+currentTest.get("result")+" [["+res.getResult()+"||"+res.getHeaderText()+"]]", currentTest.get("result"), res.getResult());
         } else {
             ArrayList results = (ArrayList) currentTest.get("result");
             boolean match = false;
