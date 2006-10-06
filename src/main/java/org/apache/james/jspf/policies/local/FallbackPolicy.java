@@ -35,7 +35,7 @@ import org.apache.james.jspf.policies.AbstractNestedPolicy;
  */
 public class FallbackPolicy extends AbstractNestedPolicy {
 
-    private Map fallBackMap;
+    private Map entryMap;
 
     private SPFRecordParser parser;
 
@@ -43,12 +43,12 @@ public class FallbackPolicy extends AbstractNestedPolicy {
 
     public FallbackPolicy(Logger log, SPFRecordParser parser) {
         this.log = log;
-        fallBackMap = Collections.synchronizedMap(new HashMap());
+        entryMap = Collections.synchronizedMap(new HashMap());
         this.parser = parser;
     }
 
     /**
-     * Add a fallback entry.
+     * Add a entry.
      * 
      * @param rawHost
      *            the host or ipaddress for which the entry should be added.
@@ -57,7 +57,7 @@ public class FallbackPolicy extends AbstractNestedPolicy {
      * @throws IllegalArgumentException
      *             get thrown on invalid spfRecord
      */
-    public void addFallBackEntry(String rawHost, String rawSpfRecord)
+    public void addEntry(String rawHost, String rawSpfRecord)
             throws IllegalArgumentException {
         String host;
         try {
@@ -74,8 +74,8 @@ public class FallbackPolicy extends AbstractNestedPolicy {
                 host = rawHost;
             }
 
-            synchronized (fallBackMap) {
-                fallBackMap.put(host, spfRecord);
+            synchronized (entryMap) {
+                entryMap.put(host, spfRecord);
             }
         } catch (SPFResultException e) {
             throw new IllegalArgumentException("Invalid SPF-Record: "
@@ -85,26 +85,26 @@ public class FallbackPolicy extends AbstractNestedPolicy {
     }
 
     /**
-     * Clear all fallBack entries
+     * Clear all entries
      * 
      */
-    public void clearFallBackEntrys() {
-        log.debug("Clear all fallback entries");
-        synchronized (fallBackMap) {
-            fallBackMap.clear();
+    public void clearEntrys() {
+        log.debug("Clear all entries");
+        synchronized (entryMap) {
+            entryMap.clear();
         }
     }
 
     /**
-     * Remove fallBack entry
+     * Remove entry
      * 
      * @param host
      *            The host
      */
-    public void removeFallBackEntrys(String host) {
+    public void removeEntry(String host) {
         log.debug("Remove fallback entry for host: " + host);
-        synchronized (fallBackMap) {
-            fallBackMap.remove(getRawFallBackEntry(host));
+        synchronized (entryMap) {
+            entryMap.remove(getRawEntry(host));
         }
     }
 
@@ -124,14 +124,14 @@ public class FallbackPolicy extends AbstractNestedPolicy {
      *         the given host
      */
     protected SPF1Record getMySPFRecord(String host) {
-        Object fallBack = null;
+        Object entry = null;
 
-        synchronized (fallBackMap) {
-            fallBack = getRawFallBackEntry(host);
+        synchronized (entryMap) {
+            entry = getRawEntry(host);
         }
 
-        if (fallBack != null) {
-            return (SPF1Record) fallBack;
+        if (entry != null) {
+            return (SPF1Record) entry;
         } else {
             return null;
         }
@@ -146,15 +146,15 @@ public class FallbackPolicy extends AbstractNestedPolicy {
      *            the host
      * @return the stored object for the given host or null
      */
-    private Object getRawFallBackEntry(String host) {
-        Iterator fallBackIt = fallBackMap.keySet().iterator();
+    private Object getRawEntry(String host) {
+        Iterator fallBackIt = entryMap.keySet().iterator();
 
         while (fallBackIt.hasNext()) {
             String rawHost = fallBackIt.next().toString();
 
             if ((rawHost.startsWith(".") && host.startsWith(rawHost))
                     || rawHost.endsWith(".") && host.endsWith(rawHost)) {
-                return fallBackMap.get(rawHost);
+                return entryMap.get(rawHost);
             }
         }
         return null;

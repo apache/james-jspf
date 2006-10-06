@@ -44,6 +44,7 @@ import org.apache.james.jspf.policies.SPFRetriever;
 import org.apache.james.jspf.policies.local.BestGuessPolicy;
 import org.apache.james.jspf.policies.local.DefaultExplanationPolicy;
 import org.apache.james.jspf.policies.local.FallbackPolicy;
+import org.apache.james.jspf.policies.local.OverridePolicy;
 import org.apache.james.jspf.policies.local.TrustedForwarderPolicy;
 import org.apache.james.jspf.wiring.DNSServiceEnabled;
 import org.apache.james.jspf.wiring.LogEnabled;
@@ -75,6 +76,8 @@ public class SPF implements SPFChecker {
     public boolean useBestGuess = false;
 
     private FallbackPolicy fallBack;
+    
+    private OverridePolicy override;
     
     private boolean useTrustedForwarder = false;
 
@@ -193,6 +196,10 @@ public class SPF implements SPFChecker {
 
         ArrayList policies = new ArrayList();
         
+        if (override != null) {
+            policies.add(override);
+        }
+        
         policies.add(new SPFRetriever(dnsProbe));
         
         if (useBestGuess) {
@@ -277,5 +284,18 @@ public class SPF implements SPFChecker {
      */
     public synchronized void setUseTrustedForwarder(boolean useTrustedForwarder) {
         this.useTrustedForwarder = useTrustedForwarder;
+    }
+    
+    /**
+     * Return the OverridePolicy object which can be used to
+     * override spfRecords for hosts
+     * 
+     * @return the OverridePolicy object
+     */
+    public synchronized OverridePolicy getOverridePolicy() {
+        if (override == null) {
+            override = new OverridePolicy(this.log, parser);
+        }
+        return override;
     }
 }
