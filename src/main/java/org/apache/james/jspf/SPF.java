@@ -259,16 +259,12 @@ public class SPF implements SPFChecker {
      * 
      * @return the FallbackPolicy object
      */
-    public FallbackPolicy getFallbackPolicy() {
+    public synchronized FallbackPolicy getFallbackPolicy() {
+        // Initialize fallback policy
+        if (fallBack == null) {
+            this.fallBack =  new FallbackPolicy(this.log, parser);
+        }
         return fallBack;
-    }
-    
-    
-    /**
-     * Initialize fallback policy and enable its usage.
-     */
-    public void initializeFallbackPolicy() {
-        this.fallBack =  new FallbackPolicy(this.log, parser);
     }
     
     /**
