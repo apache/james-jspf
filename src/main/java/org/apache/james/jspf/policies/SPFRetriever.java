@@ -100,7 +100,7 @@ public class SPFRetriever extends AbstractNestedPolicy {
                     }
     
                     // We trim the compare value only for the comparison
-                    if (compare.trim().startsWith(SPF1Constants.SPF_VERSION + " ") || compare.trim().equals(SPF1Constants.SPF_VERSION)) {
+                    if (compare.toLowerCase().trim().startsWith(SPF1Constants.SPF_VERSION + " ") || compare.trim().equalsIgnoreCase(SPF1Constants.SPF_VERSION)) {
                         if (returnValue == null) {
                             returnValue = compare;
                         } else {

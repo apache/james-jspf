@@ -258,8 +258,8 @@ public class DefaultSPF1Parser implements SPFRecordParser {
         SPF1Record result = new SPF1Record();
 
         // check the version "header"
-        if (spfRecord.startsWith(SPF1Constants.SPF_VERSION + " ") || spfRecord.equalsIgnoreCase(SPF1Constants.SPF_VERSION)) {
-            if (!spfRecord.startsWith(SPF1Constants.SPF_VERSION + " ")) throw new NeutralException("Empty SPF Record");
+        if (spfRecord.toLowerCase().startsWith(SPF1Constants.SPF_VERSION + " ") || spfRecord.equalsIgnoreCase(SPF1Constants.SPF_VERSION)) {
+            if (!spfRecord.toLowerCase().startsWith(SPF1Constants.SPF_VERSION + " ")) throw new NeutralException("Empty SPF Record");
         } else {
             throw new NoneException("No valid SPF Record: " + spfRecord);
         }
