@@ -166,6 +166,8 @@ tests:
     mailfrom: foo@example5.com
     result: [pass, permerror]
   multitxt2:
+    description: >-
+      Multiple records is a permerror, v=spf1 is case insensitive
     spec: 4.5/6
     helo: mail.example1.com
     host: 1.2.3.4
@@ -195,6 +197,14 @@ tests:
     host: 1.2.3.4
     mailfrom: foo@mail.example1.com
     result: none
+  case-insensitive:
+    description: >-
+      v=spf1 is case insensitive
+    spec: 4.5/6
+    helo: mail.example1.com
+    host: 1.2.3.4
+    mailfrom: foo@example9.com
+    result: softfail
 zonedata:
   example3.com:
     - SPF:  v=spf10
@@ -215,7 +225,7 @@ zonedata:
     - TXT:  v=spf1 +all
   example6.com:
     - TXT:  v=spf1 -all
-    - TXT:  v=spf1 +all
+    - TXT:  V=sPf1 +all
   example7.com:
     - SPF:  v=spf1 -all
     - SPF:  v=spf1 -all
@@ -223,6 +233,8 @@ zonedata:
     - SPF:  v=spf1 -all
     - SPF:  v=spf1 -all
     - TXT:  v=spf1 +all
+  example9.com:
+    - SPF:  v=SpF1 ~all
 ---
 description: Record evaluation
 tests:
@@ -1117,6 +1129,14 @@ tests:
     mailfrom: jack&jill=up@e8.example.com
     result: fail
     explanation: http://example.com/why.html?l=jack%26jill%3Dup
+  hello-macro:
+    spec: 8.1/6
+    description: |-
+      h	= HELO/EHLO domain
+    helo: msgbas2x.cos.example.com
+    host: 192.168.218.42
+    mailfrom: test@e9.example.com
+    result: pass
 zonedata:
   example.com.d.spf.example.com:
     - SPF: v=spf1 redirect=a.spf.example.com
@@ -1181,6 +1201,10 @@ zonedata:
     - SPF: v=spf1 -all exp=msg8.%{D2}
   msg8.example.com:
     - TXT: "http://example.com/why.html?l=%{L}"
+  e9.example.com:
+    - SPF: v=spf1 exists:%{h3} -all
+  cos.example.com:
+    - A: 127.0.0.1
 
 ---
 description: >-
