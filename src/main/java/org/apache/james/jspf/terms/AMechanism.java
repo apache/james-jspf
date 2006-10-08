@@ -98,6 +98,7 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled {
 
             }
         // PermError / TempError
+        // TODO: Should we replace this with the "right" Exceptions ?
         } catch (Exception e) {
             log.debug("No valid ipAddress: ",e);
             throw new PermErrorException("No valid ipAddress: "
@@ -143,7 +144,7 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled {
     public boolean checkAddressList(IPAddr checkAddress, List addressList, int cidr) throws PermErrorException {
 
         for (int i = 0; i < addressList.size(); i++) {
-            String ip = (String) addressList.get(i);
+            String ip = addressList.get(i).toString();
 
             // Check for empty record
             if (ip != null) {
