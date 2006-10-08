@@ -144,7 +144,7 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled {
     public boolean checkAddressList(IPAddr checkAddress, List addressList, int cidr) throws PermErrorException {
 
         for (int i = 0; i < addressList.size(); i++) {
-            String ip = addressList.get(i).toString();
+            String ip = (String) addressList.get(i);
 
             // Check for empty record
             if (ip != null) {
@@ -237,10 +237,8 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled {
     public List getARecords(DNSService dns, String strServer) throws PermErrorException, TempErrorException {
         List listAData;
         if (IPAddr.isIPAddr(strServer)) {
-            IPAddr ipTest = IPAddr.getAddress(strServer);
-            // Address is already an IP address, so add it to list
             listAData = new ArrayList();
-            listAData.add(ipTest);
+            listAData.add(strServer);
         } else {
             try {
                 listAData = dns.getRecords(strServer, DNSService.A);
