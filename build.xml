@@ -18,7 +18,7 @@
   <target name="clean" description="Clean the output directory">
     <delete dir="${maven.build.directory}"/>
   </target>
-  <target name="compile" depends="get-deps" description="Compile the code">
+  <target name="compile" depends="check-commons-lang, check-commons-cli, check-commons-logging, check-dnsjava, check-log4j" description="Compile the code">
     <mkdir dir="${maven.build.output}"/>
     <javac destdir="${maven.build.output}" excludes="**/package.html" debug="true" deprecation="true" optimize="false">
       <src>
@@ -75,32 +75,75 @@
     <echo> Junit isn&apos;t present in your $ANT_HOME/lib directory. Tests not executed. </echo>
     <echo>==========================================================================</echo>
   </target>
-  <target name="test-offline">
-    <condition property="maven.mode.offline">
-      <equals arg1="${build.sysclasspath}" arg2="only"/>
-    </condition>
+  
+  <target name="check-commons-lang" depends="test-commons-lang-present" unless="commons.lang.present">
+	<echo>================================ ERROR =====================================</echo>
+	<echo> You missing some dependencies to build jSPF. Please download and add them to </echo>
+	<echo> the buildpath of this project. After that try to build again. </echo>
+	<echo> The dependency that is missing is: </echo>
+	<echo> - commons-lang </echo>
+  	<echo> </echo>
+  	<echo> Get it from: http://jakarta.apache.org/commons/lang/</echo>
+	<echo>============================================================================</echo>
   </target>
-  <target name="get-deps" depends="test-offline" description="Download all dependencies" unless="maven.mode.offline">
-    <mkdir dir="${maven.repo.local}"/>
-    <get src="file://H:\stuff\work\workspace\jspf/repos/third-party-m1/commons-lang/commons-lang/1.0/commons-lang-1.0.jar" dest="${maven.repo.local}/commons-lang/commons-lang/1.0/commons-lang-1.0.jar" usetimestamp="true" ignoreerrors="true"/>
-    <get src="http://people.apache.org/repo/m2-ibiblio-rsync-repository/commons-lang/commons-lang/1.0/commons-lang-1.0.jar" dest="${maven.repo.local}/commons-lang/commons-lang/1.0/commons-lang-1.0.jar" usetimestamp="true" ignoreerrors="true"/>
-    <get src="http://people.apache.org/repo/m2-snapshot-repository/commons-lang/commons-lang/1.0/commons-lang-1.0.jar" dest="${maven.repo.local}/commons-lang/commons-lang/1.0/commons-lang-1.0.jar" usetimestamp="true" ignoreerrors="true"/>
-    <get src="http://people.apache.org/repo/m1-ibiblio-rsync-repository/commons-lang/commons-lang/1.0/commons-lang-1.0.jar" dest="${maven.repo.local}/commons-lang/commons-lang/1.0/commons-lang-1.0.jar" usetimestamp="true" ignoreerrors="true"/>
-    <get src="file://H:\stuff\work\workspace\jspf/repos/third-party-m1/commons-logging/commons-logging/1.0/commons-logging-1.0.jar" dest="${maven.repo.local}/commons-logging/commons-logging/1.0/commons-logging-1.0.jar" usetimestamp="true" ignoreerrors="true"/>
-    <get src="http://people.apache.org/repo/m2-ibiblio-rsync-repository/commons-logging/commons-logging/1.0/commons-logging-1.0.jar" dest="${maven.repo.local}/commons-logging/commons-logging/1.0/commons-logging-1.0.jar" usetimestamp="true" ignoreerrors="true"/>
-    <get src="http://people.apache.org/repo/m2-snapshot-repository/commons-logging/commons-logging/1.0/commons-logging-1.0.jar" dest="${maven.repo.local}/commons-logging/commons-logging/1.0/commons-logging-1.0.jar" usetimestamp="true" ignoreerrors="true"/>
-    <get src="http://people.apache.org/repo/m1-ibiblio-rsync-repository/commons-logging/commons-logging/1.0/commons-logging-1.0.jar" dest="${maven.repo.local}/commons-logging/commons-logging/1.0/commons-logging-1.0.jar" usetimestamp="true" ignoreerrors="true"/>
-    <get src="file://H:\stuff\work\workspace\jspf/repos/third-party-m1/dnsjava/dnsjava/2.0.1/dnsjava-2.0.1.jar" dest="${maven.repo.local}/dnsjava/dnsjava/2.0.1/dnsjava-2.0.1.jar" usetimestamp="true" ignoreerrors="true"/>
-    <get src="http://people.apache.org/repo/m2-ibiblio-rsync-repository/dnsjava/dnsjava/2.0.1/dnsjava-2.0.1.jar" dest="${maven.repo.local}/dnsjava/dnsjava/2.0.1/dnsjava-2.0.1.jar" usetimestamp="true" ignoreerrors="true"/>
-    <get src="http://people.apache.org/repo/m2-snapshot-repository/dnsjava/dnsjava/2.0.1/dnsjava-2.0.1.jar" dest="${maven.repo.local}/dnsjava/dnsjava/2.0.1/dnsjava-2.0.1.jar" usetimestamp="true" ignoreerrors="true"/>
-    <get src="http://people.apache.org/repo/m1-ibiblio-rsync-repository/dnsjava/dnsjava/2.0.1/dnsjava-2.0.1.jar" dest="${maven.repo.local}/dnsjava/dnsjava/2.0.1/dnsjava-2.0.1.jar" usetimestamp="true" ignoreerrors="true"/>
-    <get src="file://H:\stuff\work\workspace\jspf/repos/third-party-m1/commons-cli/commons-cli/1.0/commons-cli-1.0.jar" dest="${maven.repo.local}/commons-cli/commons-cli/1.0/commons-cli-1.0.jar" usetimestamp="true" ignoreerrors="true"/>
-    <get src="http://people.apache.org/repo/m2-ibiblio-rsync-repository/commons-cli/commons-cli/1.0/commons-cli-1.0.jar" dest="${maven.repo.local}/commons-cli/commons-cli/1.0/commons-cli-1.0.jar" usetimestamp="true" ignoreerrors="true"/>
-    <get src="http://people.apache.org/repo/m2-snapshot-repository/commons-cli/commons-cli/1.0/commons-cli-1.0.jar" dest="${maven.repo.local}/commons-cli/commons-cli/1.0/commons-cli-1.0.jar" usetimestamp="true" ignoreerrors="true"/>
-    <get src="http://people.apache.org/repo/m1-ibiblio-rsync-repository/commons-cli/commons-cli/1.0/commons-cli-1.0.jar" dest="${maven.repo.local}/commons-cli/commons-cli/1.0/commons-cli-1.0.jar" usetimestamp="true" ignoreerrors="true"/>
-    <get src="file://H:\stuff\work\workspace\jspf/repos/third-party-m1/log4j/log4j/1.2.13/log4j-1.2.13.jar" dest="${maven.repo.local}/log4j/log4j/1.2.13/log4j-1.2.13.jar" usetimestamp="true" ignoreerrors="true"/>
-    <get src="http://people.apache.org/repo/m2-ibiblio-rsync-repository/log4j/log4j/1.2.13/log4j-1.2.13.jar" dest="${maven.repo.local}/log4j/log4j/1.2.13/log4j-1.2.13.jar" usetimestamp="true" ignoreerrors="true"/>
-    <get src="http://people.apache.org/repo/m2-snapshot-repository/log4j/log4j/1.2.13/log4j-1.2.13.jar" dest="${maven.repo.local}/log4j/log4j/1.2.13/log4j-1.2.13.jar" usetimestamp="true" ignoreerrors="true"/>
-    <get src="http://people.apache.org/repo/m1-ibiblio-rsync-repository/log4j/log4j/1.2.13/log4j-1.2.13.jar" dest="${maven.repo.local}/log4j/log4j/1.2.13/log4j-1.2.13.jar" usetimestamp="true" ignoreerrors="true"/>
+
+  <target name="check-commons-logging" depends="test-commons-logging-present" unless="commons.logging.present">
+	<echo>================================ ERROR =====================================</echo>
+	<echo> You missing some dependencies to build jSPF. Please download and add them to </echo>
+	<echo> the buildpath of this project. After that try to build again. </echo>
+	<echo> The dependency that is missing is: </echo>
+	<echo> - commons-logging </echo>
+  	<echo> </echo>
+  	<echo> Get it from: http://jakarta.apache.org/commons/logging/</echo>
+	<echo>============================================================================</echo>
+  </target>
+	
+  <target name="check-commons-cli" depends="test-commons-cli-present" unless="commons.cli.present">
+	<echo>================================ ERROR =====================================</echo>
+	<echo> You missing some dependencies to build jSPF. Please download and add them to </echo>
+	<echo> the buildpath of this project. After that try to build again. </echo>
+	<echo> The dependency that is missing is: </echo>
+	<echo> - commons-cli </echo>
+  	<echo> </echo>
+  	<echo> Get it from: http://jakarta.apache.org/commons/cli/</echo>
+	<echo>============================================================================</echo>
+  </target>
+
+  <target name="check-dnsjava" depends="test-dnsjava-present" unless="dnsjava.present">
+	<echo>================================ ERROR =====================================</echo>
+	<echo> You missing some dependencies to build jSPF. Please download and add them to </echo>
+	<echo> the buildpath of this project. After that try to build again. </echo>
+	<echo> The dependency that is missing is: </echo>
+	<echo> - dnsjava </echo>
+  	<echo> </echo>
+  	<echo> Get it from: http://www.dnsjava.org</echo>
+	<echo>============================================================================</echo>
+  </target>
+
+  <target name="check-log4j" depends="test-log4j-present" unless="log4j.present">
+	<echo>================================ ERROR =====================================</echo>
+	<echo> You missing some dependencies to build jSPF. Please download and add them to </echo>
+	<echo> the buildpath of this project. After that try to build again. </echo>
+	<echo> The dependency that is missing is: </echo>
+	<echo> - log4j </echo>
+  	<echo> </echo>
+  	<echo> Get it from: http://logging.apache.org/log4j/</echo>
+	<echo>============================================================================</echo>
+  </target>
+
+  <target name="test-commons-lang-present">
+    <available classname="org.apache.commons.lang.CharSet" property="commons.lang.present" classpathref="build.classpath"></available>
+  </target>
+  <target name="test-commons-logging-present">
+	<available classname="org.apache.commons.logging.Log" property="commons.logging.present" classpathref="build.classpath"></available>
+  </target>
+  <target name="test-commons-cli-present">
+    <available classname="org.apache.commons.cli.CommandLineParser" property="commons.cli.present" classpathref="build.classpath"></available>
+  </target>
+  <target name="test-dnsjava-present">
+    <available classname="org.xbill.DNS.Address" property="dnsjava.present" classpathref="build.classpath"></available>
+  </target>
+  <target name="test-log4j-present">
+    <available classname="org.apache.log4j.Logger" property="log4j.present" classpathref="build.classpath"></available>
   </target>
 </project>
