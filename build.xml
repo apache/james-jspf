@@ -31,7 +31,11 @@
     </copy>
   </target>
   <target name="jar" depends="compile,test" description="Clean the JAR">
-    <jar jarfile="${maven.build.directory}/${maven.build.final.name}.jar" basedir="${maven.build.output}" excludes="**/package.html"/>
+    <jar jarfile="${maven.build.directory}/${maven.build.final.name}.jar" basedir="${maven.build.output}" excludes="**/package.html">
+      <manifest>      
+        <attribute name="Main-class" value="org.apache.james.jspf.impl.SPFQuery"/>
+      </manifest>
+    </jar>
   </target>
   <target name="compile-tests" depends="junit-present, compile" description="Compile the test code" if="junit.present">
     <mkdir dir="${maven.test.output}"/>
