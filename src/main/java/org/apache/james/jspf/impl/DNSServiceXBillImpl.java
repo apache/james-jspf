@@ -33,6 +33,7 @@ import org.xbill.DNS.Lookup;
 import org.xbill.DNS.MXRecord;
 import org.xbill.DNS.PTRRecord;
 import org.xbill.DNS.Record;
+import org.xbill.DNS.SPFRecord;
 import org.xbill.DNS.TXTRecord;
 import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
@@ -164,6 +165,10 @@ public class DNSServiceXBillImpl implements DNSService {
                         case TXT:
                             TXTRecord txt = (TXTRecord) rr[i];
                             res = txt.rdataToString();
+                            break;
+                        case SPF:
+                            SPFRecord spf = (SPFRecord) rr[i];
+                            res = spf.rdataToString();
                             break;
                         default:
                             return null;
