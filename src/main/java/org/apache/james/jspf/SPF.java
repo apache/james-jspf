@@ -41,6 +41,7 @@ import org.apache.james.jspf.policies.NoSPFRecordFoundPolicy;
 import org.apache.james.jspf.policies.Policy;
 import org.apache.james.jspf.policies.ParseRecordPolicy;
 import org.apache.james.jspf.policies.SPFRetriever;
+import org.apache.james.jspf.policies.SPFRetrieverPolicy;
 import org.apache.james.jspf.policies.local.BestGuessPolicy;
 import org.apache.james.jspf.policies.local.DefaultExplanationPolicy;
 import org.apache.james.jspf.policies.local.FallbackPolicy;
@@ -72,7 +73,6 @@ public class SPF implements SPFChecker {
      */
     public static final String TRUSTED_FORWARDER_HOST = "spf.trusted-forwarder.org";
 
-
     public boolean useBestGuess = false;
 
     private FallbackPolicy fallBack;
@@ -80,6 +80,8 @@ public class SPF implements SPFChecker {
     private OverridePolicy override;
     
     private boolean useTrustedForwarder = false;
+    
+    private boolean mustEquals = false;
 
     /**
      * Uses passed logger and passed dnsServicer
@@ -200,7 +202,11 @@ public class SPF implements SPFChecker {
             policies.add(override);
         }
         
-        policies.add(new SPFRetriever(dnsProbe));
+        if (mustEquals) {
+            policies.add(new SPFRetrieverPolicy(dnsProbe));
+        } else {
+            policies.add(new SPFRetriever(dnsProbe));
+        }
         
         if (useBestGuess) {
             policies.add(new BestGuessPolicy());
@@ -297,5 +303,15 @@ public class SPF implements SPFChecker {
             override = new OverridePolicy(this.log, parser);
         }
         return override;
+    }
+    
+    /**
+     * Set to true if a PermError should returned when a domain publish a SPF-Type
+     * and TXT-Type SPF-Record and both are not equals. Defaults false
+     * 
+     * @param mustEquals true or false
+     */
+    public synchronized void setSPFMustEqualsTXT(boolean mustEquals) {
+        this.mustEquals = mustEquals;
     }
 }

@@ -12,7 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Get the raw dns txt entry which contains a spf entry
+ * Get the raw dns txt or spf entry which contains a spf entry
  */
 public class SPFRetriever extends AbstractNestedPolicy {
     /**
@@ -55,9 +55,7 @@ public class SPFRetriever extends AbstractNestedPolicy {
     }
 
     /**
-     * Get the SPF-Record for a server given it's version
-     * 
-     * TODO: support SPF Records too. This will be done if dnsjava support it!
+     * Get the SPF-Record for a server
      * 
      * @param dns
      *            The dns service to query
@@ -71,12 +69,13 @@ public class SPFRetriever extends AbstractNestedPolicy {
      * @throws TempErrorException
      *             if the lookup result was "TRY_AGAIN"
      */
-    private String retrieveSpfRecord(String hostname)
+    protected String retrieveSpfRecord(String hostname)
             throws PermErrorException, TempErrorException {
 
-        String returnValue = null;
         try {
+            // first check for SPF-Type records
             List spfR = dns.getRecords(hostname, DNSService.SPF);
+            
             if (spfR == null || spfR.isEmpty()) {
                 // do DNS lookup for TXT
                 spfR = dns.getRecords(hostname, DNSService.TXT);
@@ -84,36 +83,62 @@ public class SPFRetriever extends AbstractNestedPolicy {
     
             // process returned records
             if (spfR != null && !spfR.isEmpty()) {
-    
-                Iterator all = spfR.iterator();
-    
-                while (all.hasNext()) {
-                    // DO NOT trim the result!
-                    String compare = all.next().toString();
-    
-                    // TODO is this correct? we remove the first and last char if the
-                    // result has an initial " 
-                    // remove '"'
-                    if (compare.charAt(0)=='"') {
-                        compare = compare.toLowerCase().substring(1,
-                                compare.length() - 1);
-                    }
-    
-                    // We trim the compare value only for the comparison
-                    if (compare.toLowerCase().trim().startsWith(SPF1Constants.SPF_VERSION + " ") || compare.trim().equalsIgnoreCase(SPF1Constants.SPF_VERSION)) {
-                        if (returnValue == null) {
-                            returnValue = compare;
-                        } else {
-                            throw new PermErrorException(
-                                    "More than 1 SPF record found for host: " + hostname);
-                        }
-                    }
-                }
+                return extractSPFRecord(spfR);
+            } else {
+                return null;
             }
-            return returnValue;
         } catch (DNSService.TimeoutException e) {
             throw new TempErrorException("Timeout querying dns");
         }
     }
+    
+    /**
+     * Return the extracted SPF-Record 
+     *  
+     * @param spfR the List which holds TXT/SPF - Records
+     * @return returnValue the extracted SPF-Record
+     * @throws PermErrorException if more then one SPF - Record was found in the 
+     *                            given List.
+     */
+    protected String extractSPFRecord(List spfR) throws PermErrorException {
+       String returnValue = null;
+        Iterator all = spfR.iterator();
+           
+        while (all.hasNext()) {
+            // DO NOT trim the result!
+            String compare = all.next().toString();
+
+            // TODO is this correct? we remove the first and last char if the
+            // result has an initial " 
+            // remove '"'
+            if (compare.charAt(0)=='"') {
+                compare = compare.toLowerCase().substring(1,
+                        compare.length() - 1);
+            }
+
+            // We trim the compare value only for the comparison
+            if (compare.toLowerCase().trim().startsWith(SPF1Constants.SPF_VERSION + " ") || compare.trim().equalsIgnoreCase(SPF1Constants.SPF_VERSION)) {
+                if (returnValue == null) {
+                    returnValue = compare;
+                } else {
+                    throw new PermErrorException(
+                            "More than 1 SPF record found");
+                }
+            }
+        }
+        
+        return returnValue;
+    }
+    
+
+    /**
+     * Return the DNSService
+     * 
+     * @return the dns
+     */
+    protected DNSService getDNSService() {
+        return dns;
+    }
+
 
 }
