@@ -162,6 +162,11 @@ tests:
     host: 10.0.0.26
     mailfrom: spf26-test.foo.bar
     result: fail
+  test-macrodata4-SPF:
+    helo: spf27-test.foo.bar
+    host: 10.0.0.26
+    mailfrom: spf27-test.foo.bar
+    result: fail
 zonedata:
   spf24-test.foo.bar:
     - TXT:  v=spf1 -all exp=exp-spf24-test.foo.bar
@@ -181,4 +186,7 @@ zonedata:
     - TXT:  v=spf1 -all exp=exp-spf26-test.foo.bar
   exp-spf26-test.foo.bar:
     - TXT:  Explanation %{t}
+  spf27-test.foo.bar:
+    - SPF:  v=spf1 -all exp=exp-spf26-test.foo.bar
+    
   

@@ -121,7 +121,7 @@ public class DNSServiceXBillImpl implements DNSService {
             case MX: recordTypeDescription = "MX"; dnsJavaType = Type.MX; break;
             case PTR: recordTypeDescription = "PTR"; dnsJavaType = Type.PTR; break;
             case TXT: recordTypeDescription = "TXT"; dnsJavaType = Type.TXT; break;
-            // case SPF: recordTypeDescString = "SPF"; dnsJavaType = Type.SPF; break;
+            case SPF: recordTypeDescription= "SPF"; dnsJavaType = Type.SPF; break;
             default: // TODO fail!
                 return null;
         }
