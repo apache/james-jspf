@@ -41,7 +41,7 @@ import org.apache.james.jspf.policies.NoSPFRecordFoundPolicy;
 import org.apache.james.jspf.policies.Policy;
 import org.apache.james.jspf.policies.ParseRecordPolicy;
 import org.apache.james.jspf.policies.SPFRetriever;
-import org.apache.james.jspf.policies.SPFRetrieverPolicy;
+import org.apache.james.jspf.policies.SPFStrictCheckerRetriever;
 import org.apache.james.jspf.policies.local.BestGuessPolicy;
 import org.apache.james.jspf.policies.local.DefaultExplanationPolicy;
 import org.apache.james.jspf.policies.local.FallbackPolicy;
@@ -203,7 +203,7 @@ public class SPF implements SPFChecker {
         }
         
         if (mustEquals) {
-            policies.add(new SPFRetrieverPolicy(dnsProbe));
+            policies.add(new SPFStrictCheckerRetriever(dnsProbe));
         } else {
             policies.add(new SPFRetriever(dnsProbe));
         }

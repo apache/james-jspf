@@ -10,9 +10,9 @@ import java.util.List;
  * Get the raw dns txt or spf entry which contains a spf entry. If a domain
  * publish both, and both are not equals it throws a PermError
  */
-public class SPFRetrieverPolicy extends SPFRetriever {
+public class SPFStrictCheckerRetriever extends SPFRetriever {
 
-    public SPFRetrieverPolicy(DNSService dns) {
+    public SPFStrictCheckerRetriever(DNSService dns) {
         super(dns);
     }
 
