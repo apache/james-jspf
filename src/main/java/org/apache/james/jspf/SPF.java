@@ -68,11 +68,6 @@ public class SPF implements SPFChecker {
     
     String defaultExplanation = null;
     
-    /**
-     * The hostname to include
-     */
-    public static final String TRUSTED_FORWARDER_HOST = "spf.trusted-forwarder.org";
-
     public boolean useBestGuess = false;
 
     private FallbackPolicy fallBack;

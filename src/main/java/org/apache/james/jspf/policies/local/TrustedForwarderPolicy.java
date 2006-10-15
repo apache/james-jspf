@@ -19,7 +19,6 @@
 
 package org.apache.james.jspf.policies.local;
 
-import org.apache.james.jspf.SPF;
 import org.apache.james.jspf.core.Directive;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPF1Record;
@@ -32,6 +31,12 @@ import org.apache.james.jspf.terms.IncludeMechanism;
 
 public class TrustedForwarderPolicy extends AbstractNestedPolicy {
 
+    /**
+     * The hostname to include
+     */
+    public static final String TRUSTED_FORWARDER_HOST = "spf.trusted-forwarder.org";
+
+    
     private Logger log;
 
     /**
@@ -44,7 +49,7 @@ public class TrustedForwarderPolicy extends AbstractNestedPolicy {
     protected SPF1Record getSPFRecordPostFilter(String currentDomain, SPF1Record spfRecord) throws PermErrorException, TempErrorException, NoneException, NeutralException {
         String mechanism = ((Directive) spfRecord.getDirectives().get(spfRecord.getDirectives().size())).toString();
         if (mechanism.equals("-all") || mechanism.equals("?all")) {
-            log.debug("Add TrustedForwarderPolicy = include:"+SPF.TRUSTED_FORWARDER_HOST);
+            log.debug("Add TrustedForwarderPolicy = include:"+TRUSTED_FORWARDER_HOST);
             try {
                 IncludeMechanism trusted = new IncludeMechanism() {
                     /**
@@ -56,7 +61,7 @@ public class TrustedForwarderPolicy extends AbstractNestedPolicy {
                         this.host = host;
                         return this;
                     }
-                }.setHost(SPF.TRUSTED_FORWARDER_HOST);
+                }.setHost(TRUSTED_FORWARDER_HOST);
                 spfRecord.getDirectives().add(spfRecord.getDirectives().size()-1, new Directive(null, trusted, log));
             } catch (PermErrorException e) {
                 // will never happen
