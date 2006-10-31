@@ -59,10 +59,13 @@ public class MXMechanism extends AMechanism {
         // Get the right host.
         String host = expandHost(spfData);
 
-        // get the ipAddress
-        checkAddress = IPAddr.getAddress(spfData.getIpAddress(), getIp4cidr());
+        // if the remote IP is an ipv6 we check ipv6 addresses, otherwise ip4
+        boolean isIPv6 = IPAddr.isIPV6(spfData.getIpAddress());
         
-        List mxRecords = getMXRecords(dnsService, host);
+        // get the ipAddress
+        checkAddress = IPAddr.getAddress(spfData.getIpAddress(), isIPv6 ? getIp6cidr() : getIp4cidr());
+        
+        List mxRecords = getMXRecords(dnsService, host, isIPv6 ? DNSService.AAAA : DNSService.A);
 
         // no mx record found
         if (mxRecords == null) return false;
@@ -77,10 +80,11 @@ public class MXMechanism extends AMechanism {
 
 
     /**
+     * @param type 
      * @see org.apache.james.jspf.core.DNSService#getMXRecords(java.lang.String,
      *      int)
      */
-    public List getMXRecords(DNSService dnsProbe, String domainName)
+    private List getMXRecords(DNSService dnsProbe, String domainName, int type)
             throws PermErrorException, TempErrorException {
         try {
             List mxR = null;
@@ -96,7 +100,7 @@ public class MXMechanism extends AMechanism {
                 if (mx != null && mx.length() > 0) {
                     log.debug("Add MX-Record " + mx + " to list");
         
-                    List res = dnsProbe.getRecords(mx, DNSService.A);
+                    List res = dnsProbe.getRecords(mx, type);
                     if (res != null) {
                         if (mxR == null) {
                             mxR = new ArrayList();
