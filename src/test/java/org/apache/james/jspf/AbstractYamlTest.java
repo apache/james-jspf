@@ -41,6 +41,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 import junit.framework.TestCase;
 
@@ -57,7 +59,6 @@ public abstract class AbstractYamlTest extends TestCase {
         this.data = def;
         this.test = test;
     }
-
 
     protected abstract String getFilename();
 
@@ -250,12 +251,19 @@ public abstract class AbstractYamlTest extends TestCase {
         }
 
         public List getRecords(String hostname, int recordType) throws TimeoutException {
+            return getRecords(hostname, recordType, 6);
+        }
+
+        public List getRecords(String hostname, int recordType, int depth) throws TimeoutException {
             String type = getRecordTypeDescription(recordType);
 
             List res;
             
             // remove trailing dot before running the search.
             if (hostname.endsWith(".")) hostname = hostname.substring(0, hostname.length()-1);
+            
+            // dns search lowercases:
+            hostname = hostname.toLowerCase(Locale.US);
             
             if (zonedata.get(hostname) != null) {
                 List l = (List) zonedata.get(hostname);
@@ -280,6 +288,9 @@ public abstract class AbstractYamlTest extends TestCase {
                             } else {
                                 res.add((String) hm.get(type));
                             }
+                        }
+                        if (hm.get("CNAME") != null && depth > 0) {
+                            return getRecords((String) hm.get("CNAME"), recordType, depth - 1);
                         }
                     } else if ("TIMEOUT".equals(o)) {
                         throw new TimeoutException();
@@ -316,18 +327,18 @@ public abstract class AbstractYamlTest extends TestCase {
     protected static class SPFYamlTestSuite {
         public String comment;
         public HashMap tests;
-        public HashMap zonedata;
+        private HashMap zonedata;
         public String getComment() {
             return comment;
         }
         
         public SPFYamlTestSuite(HashMap source, int i) {
-            this.comment = (String) source.get("description");
-            if (this.comment == null) {
-                this.comment = "Test #"+i; 
+            this.setComment((String) source.get("description"));
+            if (this.getComment() == null) {
+                this.setComment("Test #"+i); 
             }
-            this.tests = (HashMap) source.get("tests");
-            this.zonedata = (HashMap) source.get("zonedata");
+            this.setTests((HashMap) source.get("tests"));
+            this.setZonedata((HashMap) source.get("zonedata"));
         }
         
         public void setComment(String comment) {
@@ -343,7 +354,13 @@ public abstract class AbstractYamlTest extends TestCase {
             return zonedata;
         }
         public void setZonedata(HashMap zonedata) {
-            this.zonedata = zonedata;
+            this.zonedata = new HashMap();
+            Set keys = zonedata.keySet();
+            for (Iterator i = keys.iterator(); i.hasNext(); ) {
+                String hostname = (String) i.next();
+                String lowercase = hostname.toLowerCase(Locale.US);
+                this.zonedata.put(lowercase, zonedata.get(hostname));
+            }
         }
     }
 
