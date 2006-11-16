@@ -108,18 +108,6 @@ tests:
     host: 1.2.3.4
     mailfrom: foo@alltimeout.example.net
     result: temperror
-  cname-support:
-    description: CNAME RRs must be followed
-    helo: mail.example.net
-    host: 1.2.3.4
-    mailfrom: foo@alias.example.net
-    result: fail
-  cname-loop-detection:
-    description: CNAME loops must be detected
-    helo: mail.example.net
-    host: 1.2.3.4
-    mailfrom: foo@cname-loop.example.net
-    result: none
 zonedata:
   both.example.net:
     - TXT:  v=spf1 -all
@@ -138,10 +126,6 @@ zonedata:
     - TIMEOUT
   alltimeout.example.net:
     - TIMEOUT
-  alias.example.net:
-    - CNAME: both.example.net
-  cname-loop.example.net:
-    - CNAME: cname-loop.example.net
 ---
 description: Selecting records
 tests:
