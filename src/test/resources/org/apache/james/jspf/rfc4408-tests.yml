@@ -4,6 +4,7 @@
 #
 # Contributors:
 #   Stuart D Gathman	everything so far
+#   Julian Mehnle       proofread YAML syntax, spelling, formal schema
 # Informal contributors (suggestions but no code):
 #   Craig Whitmore
 #   Frank Ellermann
@@ -11,7 +12,6 @@
 #   Scott Kitterman
 #   Norman Maurer
 #   Mark Shewmaker
-#   Julian Mehnle
 #
 ---
 description: Initial processing
@@ -130,7 +130,9 @@ zonedata:
 description: Selecting records
 tests:
   nospace1:
-    description: Version must be terminated by space or end of record.
+    description: >-
+      Version must be terminated by space or end of record.  TXT pieces
+      are joined without intervening spaces.
     spec: 4.5/4
     helo: mail.example1.com
     host: 1.2.3.4
@@ -216,7 +218,7 @@ zonedata:
   example1.com:
     - SPF:  v=spf1
   example2.com:
-    - SPF:  v=spf1mx
+    - SPF:  [ 'v=spf1', 'mx' ]
   mail.example1.com:
     - A:    1.2.3.4
   example4.com:
@@ -1131,20 +1133,34 @@ tests:
   cidr6-0-ip4:
     description: >-
       IP4 connections do not match ip6.
+    comment: >-
+      There is controversy over ip4 mapped connections.  RFC4408 clearly
+      requires such connections to be considered as ip4.  However,
+      some interpret the RFC to mean that such connections should *also*
+      match appropriate ip6 mechanisms (but not, inexplicably, A or MX
+      mechanisms).  Until there is consensus, both
+      results are acceptable.
     spec: 5/9/2
     helo: mail.example.com
     host: 1.2.3.4
     mailfrom: foo@e2.example.com
-    result: neutral
+    result: [neutral, pass]
   cidr6-ip4:
     description: >-
       Even if the SMTP connection is via IPv6, an IPv4-mapped IPv6 IP address
       (see RFC 3513, Section 2.5.5) MUST still be considered an IPv4 address.
+    comment: >-
+      There is controversy over ip4 mapped connections.  RFC4408 clearly
+      requires such connections to be considered as ip4.  However,
+      some interpret the RFC to mean that such connections should *also*
+      match appropriate ip6 mechanisms (but not, inexplicably, A or MX
+      mechanisms).  Until there is consensus, both
+      results are acceptable.
     spec: 5/9/2
     helo: mail.example.com
     host: ::FFFF:1.2.3.4
     mailfrom: foo@e2.example.com
-    result: neutral
+    result: [neutral, pass]
   cidr6-0:
     description: >-
       Match any IP6
@@ -1239,7 +1255,7 @@ tests:
     explanation: DEFAULT
   include-ignores-exp:
     description: >-
-      when executing "incde", exp= from the target domain MUST NOT be used.
+      when executing "include", exp= from the target domain MUST NOT be used.
     spec: 6.2/13
     helo: mail.example.com
     host: 1.2.3.4

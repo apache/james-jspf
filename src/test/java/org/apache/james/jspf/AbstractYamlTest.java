@@ -286,7 +286,19 @@ public abstract class AbstractYamlTest extends TestCase {
                                     res.add(cname);
                                 }
                             } else {
-                                res.add((String) hm.get(type));
+                                Object obj = hm.get(type);
+                                
+                                if (obj instanceof String) {
+                                    res.add((String) obj);
+                                } else if (obj instanceof ArrayList) {
+                                    ArrayList a = (ArrayList) obj;
+                                    StringBuffer sb = new StringBuffer();
+                                    
+                                    for (int i2 = 0; i2 < a.size(); i2++) {
+                                        sb.append(a.get(i2));
+                                    }
+                                    res.add(sb.toString());
+                                }
                             }
                         }
                         if (hm.get("CNAME") != null && depth > 0) {
