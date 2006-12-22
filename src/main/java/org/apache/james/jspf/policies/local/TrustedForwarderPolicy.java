@@ -62,7 +62,7 @@ public class TrustedForwarderPolicy extends AbstractNestedPolicy {
                         return this;
                     }
                 }.setHost(TRUSTED_FORWARDER_HOST);
-                spfRecord.getDirectives().add(spfRecord.getDirectives().size()-1, new Directive(null, trusted, log));
+                spfRecord.getDirectives().add(spfRecord.getDirectives().size()-1, new Directive(null, trusted, log.getChildLogger("trustedforwarder")));
             } catch (PermErrorException e) {
                 // will never happen
             }

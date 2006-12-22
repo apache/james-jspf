@@ -68,7 +68,6 @@ public class Directive implements SPFChecker {
             TempErrorException, NoneException {
         // if already have a current result we don't run this
         if (spfData.getCurrentResult() == null) {
-            log.debug("Processing directive: " + this);
 
             if (mechanism.run(spfData)) {
                 if (qualifier != null) {
@@ -79,7 +78,9 @@ public class Directive implements SPFChecker {
                     }
                 }
                 
-                log.debug("Processed directive matched: " + this + " returned " + spfData.getCurrentResult());
+                log.info("Processed directive matched: " + this + " returned " + spfData.getCurrentResult());
+            } else {
+                log.debug("Processed directive NOT matched: " + this);
             }
 
         }

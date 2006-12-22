@@ -20,20 +20,18 @@
 package org.apache.james.jspf;
 
 import org.apache.james.jspf.core.DNSService;
-import org.apache.james.jspf.impl.DNSServiceXBillImpl;
+import org.apache.james.jspf.core.Logger;
 
 import java.util.List;
 
 public class LoggingDNSService implements DNSService {
 
     private DNSService dnsService;
+    private Logger logger;
 
-    public LoggingDNSService(DNSService service) {
+    public LoggingDNSService(DNSService service, Logger logger) {
         this.dnsService = service;
-    }
-
-    public LoggingDNSService() {
-        this.dnsService = new DNSServiceXBillImpl(new ConsoleLogger());
+        this.logger = logger;
     }
     
     public int getRecordLimit() {
@@ -46,19 +44,21 @@ public class LoggingDNSService implements DNSService {
 
     public List getLocalDomainNames() {
         List res = dnsService.getLocalDomainNames();
-        System.out.print("getLocalDomainNames() = ");
+        StringBuffer logBuff = new StringBuffer();
+        logBuff.append("getLocalDomainNames() = ");
         if (res != null) {
             for (int i = 0; i < res.size(); i++) {
-                System.out.print(res.get(i));
+                logBuff.append(res.get(i));
                 if (i == res.size() - 1) {
-                    System.out.println("");
+                    logBuff.append("");
                 } else {
-                    System.out.print(",");
+                    logBuff.append(",");
                 }
             }
         } else {
-            System.out.println("getLocalDomainNames-ret: null");
+            logBuff.append("getLocalDomainNames-ret: null");
         }
+        logger.debug(logBuff.toString());
         return res;
 
     }
@@ -70,22 +70,24 @@ public class LoggingDNSService implements DNSService {
     public List getRecords(String hostname, int recordType) throws TimeoutException {
         try {
             List result = dnsService.getRecords(hostname, recordType);
-            System.out.print("getRecords(" + hostname + "," + recordType + ") = ");
+            StringBuffer logBuff = new StringBuffer();
+            logBuff.append("getRecords(" + hostname + "," + recordType + ") = ");
             if (result != null) {
                 for (int i = 0; i < result.size(); i++) {
-                    System.out.print(result.get(i));
+                    logBuff.append(result.get(i));
                     if (i == result.size() - 1) {
-                        System.out.println("");
+                        logBuff.append("");
                     } else {
-                        System.out.print(",");
+                        logBuff.append(",");
                     }
                 }
             } else {
-                System.out.println("getRecords-ret: null");
+                logBuff.append("getRecords-ret: null");
             }
+            logger.debug(logBuff.toString());
             return result;
         } catch (TimeoutException e) {
-            System.out.println("getRecords(" + hostname
+            logger.debug("getRecords(" + hostname
                     + ") = TempErrorException[" + e.getMessage() + "]");
             throw e;
         }

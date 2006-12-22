@@ -50,20 +50,26 @@ public final class ConsoleLogger
     private final int m_logLevel;
 
     /**
+     * Current logger path.
+     */
+    private String m_path;
+
+    /**
      * Creates a new ConsoleLogger with the priority set to DEBUG.
      */
     public ConsoleLogger()
     {
-        this( LEVEL_DEBUG );
+        this( LEVEL_DEBUG , "ROOT");
     }
 
     /**
      * Creates a new ConsoleLogger.
      * @param logLevel log level typecode
      */
-    public ConsoleLogger( final int logLevel )
+    public ConsoleLogger( final int logLevel, final String path )
     {
         m_logLevel = logLevel;
+        m_path = path;
     }
 
     /**
@@ -87,6 +93,7 @@ public final class ConsoleLogger
         if( m_logLevel <= LEVEL_DEBUG )
         {
             System.out.print( "[DEBUG] " );
+            System.out.print( m_path+" " );
             System.out.println( message );
 
             if( null != throwable )
@@ -127,6 +134,7 @@ public final class ConsoleLogger
         if( m_logLevel <= LEVEL_INFO )
         {
             System.out.print( "[INFO] " );
+            System.out.print( m_path+" " );
             System.out.println( message );
 
             if( null != throwable )
@@ -167,6 +175,7 @@ public final class ConsoleLogger
         if( m_logLevel <= LEVEL_WARN )
         {
             System.out.print( "[WARNING] " );
+            System.out.print( m_path+" " );
             System.out.println( message );
 
             if( null != throwable )
@@ -207,6 +216,7 @@ public final class ConsoleLogger
         if( m_logLevel <= LEVEL_ERROR )
         {
             System.out.print( "[ERROR] " );
+            System.out.print( m_path+" " );
             System.out.println( message );
 
             if( null != throwable )
@@ -247,6 +257,7 @@ public final class ConsoleLogger
         if( m_logLevel <= LEVEL_FATAL )
         {
             System.out.print( "[FATAL ERROR] " );
+            System.out.print( m_path+" " );
             System.out.println( message );
 
             if( null != throwable )
@@ -274,6 +285,6 @@ public final class ConsoleLogger
      */
     public Logger getChildLogger( final String name )
     {
-        return this;
+        return new ConsoleLogger(m_logLevel, m_path+"."+name);
     }
 }

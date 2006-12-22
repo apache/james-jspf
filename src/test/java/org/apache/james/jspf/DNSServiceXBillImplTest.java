@@ -47,9 +47,13 @@ public class DNSServiceXBillImplTest extends TestCase {
      */
     public void testGetLocalDomainNames() throws UnknownHostException,
             TextParseException {
+        // This write MACHINE-NAME/MACHINE-ADDRESS
         System.out.println(InetAddress.getLocalHost());
+        // THIS WRITE localhost/127.0.0.1
         System.out.println(InetAddress.getAllByName(null)[0]);
+        // THIS WRITE a fully qualified MACHINE-NAME.MACHINE-DOMAIN
         System.out.println(InetAddress.getLocalHost().getCanonicalHostName());
+        // THIS WRITE localhost
         System.out.println(InetAddress.getAllByName(null)[0]
                 .getCanonicalHostName());
         Record[] record = new Lookup(Name.root, Type.ANY).run();

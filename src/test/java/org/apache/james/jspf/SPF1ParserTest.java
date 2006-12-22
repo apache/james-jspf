@@ -146,14 +146,14 @@ public class SPF1ParserTest extends TestCase {
                                 if (def.recOutAuto == null)
                                     def.recOutAuto = "";
                             }
-                        } else {
-                            System.err.println("Unknown token: " + tokens[0]);
+//                        } else {
+//                            // System.err.println("Unknown token: " + tokens[0]);
                         }
 
-                    } else {
-                        System.err
-                                .println("Ignored line for different implementation: "
-                                        + tokens[1]);
+//                    } else {
+//                        System.err
+//                                .println("Ignored line for different implementation: "
+//                                        + tokens[1]);
                     }
 
                 } else {

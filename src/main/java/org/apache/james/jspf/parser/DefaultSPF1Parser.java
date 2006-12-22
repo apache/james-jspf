@@ -310,7 +310,7 @@ public class DefaultSPF1Parser implements SPFRecordParser {
                             TERM_STEP_REGEX_MECHANISM_POS);
 
                     result.getDirectives().add(
-                            new Directive(qualifier, (Mechanism) mech, log));
+                            new Directive(qualifier, (Mechanism) mech, log.getChildLogger(qualifier+"directive")));
 
                 }
 

@@ -50,6 +50,7 @@ public abstract class AbstractYamlTest extends TestCase {
 
     SPFYamlTestSuite data;
     String test;
+    protected Logger log;
     protected static SPF spf;
     protected static SPFRecordParser parser;
     private static DNSService dns;
@@ -95,7 +96,6 @@ public abstract class AbstractYamlTest extends TestCase {
     
             public int read(char[] arg0) throws IOException {
                 int rl = super.read(arg0);
-                // System.out.println("<<< "+new String(arg0));
                 return rl;
             }
             
@@ -121,20 +121,25 @@ public abstract class AbstractYamlTest extends TestCase {
     protected void runTest() throws Throwable {
         String next = test;
         HashMap currentTest = (HashMap) data.getTests().get(next);
-        
-        System.out.println("testing "+next+": "+currentTest.get("description"));
+
+        if (log == null) {
+                log = new ConsoleLogger();
+        }
+
+        Logger testLogger = log.getChildLogger("test");
+        testLogger.info("TESTING "+next+": "+currentTest.get("description"));
     
         if (parser == null) {
-            Logger log = new ConsoleLogger();
             /* PREVIOUS SLOW WAY 
             enabledServices = new WiringServiceTable();
             enabledServices.put(LogEnabled.class, log);
             */
-            parser = new DefaultSPF1Parser(log, new DefaultTermsFactory(log, new WiringService() {
+            parser = new DefaultSPF1Parser(log.getChildLogger("parser"), new DefaultTermsFactory(log.getChildLogger("termsfactory"), new WiringService() {
 
                 public void wire(Object component) throws WiringServiceException {
                     if (component instanceof LogEnabled) {
-                        ((LogEnabled) component).enableLogging(new ConsoleLogger());
+                        String[] path = component.getClass().toString().split("\\.");
+                        ((LogEnabled) component).enableLogging(log.getChildLogger("dep").getChildLogger(path[path.length-1].toLowerCase()));
                     }
                     if (component instanceof DNSServiceEnabled) {
                         ((DNSServiceEnabled) component).enableDNSService(dns);
@@ -146,8 +151,8 @@ public abstract class AbstractYamlTest extends TestCase {
                 
             }));
         }
-        dns = new LoggingDNSService(getDNSService());
-        spf = new SPF(dns, parser, new ConsoleLogger());
+        dns = new LoggingDNSService(getDNSService(), log.getChildLogger("dns"));
+        spf = new SPF(dns, parser, log.getChildLogger("spf"));
         /* PREVIOUS SLOW WAY 
         // we add this after the creation because it is a loop reference
         enabledServices.remove(DNSServiceEnabled.class);
@@ -182,7 +187,7 @@ public abstract class AbstractYamlTest extends TestCase {
             boolean match = false;
             for (int i = 0; i < results.size(); i++) {
                 if (results.get(i).equals(resultSPF)) match = true;
-                System.err.println("checking "+results.get(i)+" => "+resultSPF);
+                // testLogger.debug("checking "+resultSPF+" against allowed result "+results.get(i));
             }
             assertTrue(match);
         }
@@ -203,6 +208,8 @@ public abstract class AbstractYamlTest extends TestCase {
     
         }
     
+        testLogger.info("PASSED. Result="+res.getResult()+" Explanation="+res.getExplanation()+" Header="+res.getHeaderText());
+        
     }
 
     /**

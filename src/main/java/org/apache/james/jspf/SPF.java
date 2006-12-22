@@ -91,7 +91,7 @@ public class SPF implements SPFChecker {
         WiringServiceTable wiringService = new WiringServiceTable();
         wiringService.put(LogEnabled.class, this.log);
         wiringService.put(DNSServiceEnabled.class, this.dnsProbe);
-        this.parser = new DefaultSPF1Parser(logger, new DefaultTermsFactory(this.log, wiringService));
+        this.parser = new DefaultSPF1Parser(logger.getChildLogger("parser"), new DefaultTermsFactory(logger.getChildLogger("termsfactory"), wiringService));
         // We add this after the parser creation because services cannot be null
         wiringService.put(SPFCheckEnabled.class, this.parser);
     }
@@ -270,7 +270,7 @@ public class SPF implements SPFChecker {
     public synchronized FallbackPolicy getFallbackPolicy() {
         // Initialize fallback policy
         if (fallBack == null) {
-            this.fallBack =  new FallbackPolicy(this.log, parser);
+            this.fallBack =  new FallbackPolicy(log.getChildLogger("fallbackpolicy"), parser);
         }
         return fallBack;
     }
@@ -295,7 +295,7 @@ public class SPF implements SPFChecker {
      */
     public synchronized OverridePolicy getOverridePolicy() {
         if (override == null) {
-            override = new OverridePolicy(this.log, parser);
+            override = new OverridePolicy(log.getChildLogger("overridepolicy"), parser);
         }
         return override;
     }
