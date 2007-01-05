@@ -71,7 +71,7 @@ public class IP4Mechanism extends GenericMechanism {
         }
         int maskLength = getMaxCidr();
         if (params.groupCount() >= 2 && params.group(2) != null) {
-            String maskLengthString = params.group(2).toString();
+            String maskLengthString = params.group(2);
             maskLength = Integer.parseInt(maskLengthString);
 
             if (maskLength > getMaxCidr() || (maskLengthString.length() > 1 && maskLengthString.startsWith("0"))) {

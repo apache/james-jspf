@@ -184,13 +184,9 @@ public class SPF1Data implements MacroData, DNSServiceEnabled {
         if (clientDomain == null) {
             clientDomain = "unknown";
             try {
-                List records = null;
                 boolean ip6 = IPAddr.isIPV6(ipAddress);
-                if (ip6) {
-                    records = dnsProbe.getRecords(IPAddr.getAddress(ipAddress).getReverseIP(), DNSService.PTR);
-                } else {
-                    records = dnsProbe.getRecords(IPAddr.getAddress(ipAddress).getReverseIP(), DNSService.PTR);
-                }
+                List records = dnsProbe.getRecords(IPAddr.getAddress(ipAddress).getReverseIP(), DNSService.PTR);
+
                 if (records != null && records.size() > 0) {
                     String record = (String) records.get(0);
                     records = dnsProbe.getRecords(record, ip6 ? DNSService.AAAA : DNSService.A);
@@ -268,10 +264,9 @@ public class SPF1Data implements MacroData, DNSServiceEnabled {
      * @see org.apache.james.jspf.macro.MacroData#getReceivingDomain()
      */
     public String getReceivingDomain() {
-        List dNames;
 
         if (receivingDomain.equals("unknown")) {
-            dNames = dnsProbe.getLocalDomainNames();
+            List dNames = dnsProbe.getLocalDomainNames();
 
             for (int i = 0; i < dNames.size(); i++) {
                 // check if the domainname is a FQDN

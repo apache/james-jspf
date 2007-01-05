@@ -99,7 +99,6 @@ public class SPF1Record {
             }
 
             public Object next() {
-                current.hasNext();
                 return current.next();
             }
 

@@ -114,7 +114,7 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled {
     public synchronized void config(Configuration params) throws PermErrorException {
         super.config(params);
         if (params.groupCount() >= 2 && params.group(2) != null) {
-            ip4cidr = Integer.parseInt(params.group(2).toString());
+            ip4cidr = Integer.parseInt(params.group(2));
             if (ip4cidr > 32) {
                 throw new PermErrorException("Ivalid IP4 CIDR length");
             }

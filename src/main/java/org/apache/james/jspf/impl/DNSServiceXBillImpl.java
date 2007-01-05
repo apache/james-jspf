@@ -45,7 +45,7 @@ import org.xbill.DNS.Type;
 public class DNSServiceXBillImpl implements DNSService {
 
     // Set seconds after which we return and TempError
-    private static int timeOut = 20;
+    private int timeOut = 20;
 
     // The logger
     private Logger log;
@@ -66,7 +66,7 @@ public class DNSServiceXBillImpl implements DNSService {
      * @see org.apache.james.jspf.core.DNSService#setTimeOut(int)
      */
     public synchronized void setTimeOut(int timeOut) {
-        DNSServiceXBillImpl.timeOut = timeOut;
+        this.timeOut = timeOut;
     }
 
     /**
