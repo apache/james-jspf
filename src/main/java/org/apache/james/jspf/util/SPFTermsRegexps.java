@@ -27,13 +27,15 @@ public interface SPFTermsRegexps {
 
     final String ALPHA_PATTERN = "[a-zA-Z]";
 
-    final String MACRO_LETTER_PATTERN = "[ctlsodipvhCTLSODIPVH]";
+    final String MACRO_LETTER_PATTERN_EXP = "[rctlsodipvhRCTLSODIPVH]";
+
+    final String MACRO_LETTER_PATTERN = "[lsodipvhLSODIPVH]";
 
     final String TRANSFORMERS_REGEX = "\\d*[r]?";
 
     final String DELEMITER_REGEX = "[\\.\\-\\+,/_\\=]";
 
-    final String MACRO_LETTERS_REGEX = MACRO_LETTER_PATTERN + TRANSFORMERS_REGEX + DELEMITER_REGEX + "*";
+    final String MACRO_LETTERS_REGEX = MACRO_LETTER_PATTERN_EXP + TRANSFORMERS_REGEX + DELEMITER_REGEX + "*";
 
     final String MACRO_EXPAND_REGEX = "\\%(?:\\{"
             + MACRO_LETTERS_REGEX + "\\}|\\%|\\_|\\-)";

@@ -51,8 +51,9 @@ public class ExpModifier extends GenericModifier implements DNSServiceEnabled {
      * 
      * @param spfData
      *            The SPF1Data which should used
+     * @throws PermErrorException 
      */
-    protected void checkSPFLogged(SPF1Data spfData) {
+    protected void checkSPFLogged(SPF1Data spfData) throws PermErrorException {
         String exp = null;
         String host = getHost();
 
@@ -65,8 +66,9 @@ public class ExpModifier extends GenericModifier implements DNSServiceEnabled {
         if (spfData.getCurrentResult()== null || !spfData.getCurrentResult().equals(SPF1Constants.FAIL))
             return;
 
+        host = new MacroExpand(spfData, log).expandDomain(host);
+
         try {
-            host = new MacroExpand(spfData, log).expandDomain(host);
             try {
                 exp = getTxtType(dnsService, host);
             } catch (TempErrorException e) {
@@ -79,6 +81,7 @@ public class ExpModifier extends GenericModifier implements DNSServiceEnabled {
                         .expandExplanation(exp));
             } 
         } catch (PermErrorException e) {
+            // TODO add logging here!
             // Only catch the error and return null
             return;
         }

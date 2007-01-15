@@ -44,11 +44,11 @@ public class MacroExpand {
 
     private Pattern macroStringPattern;
 
+    private Pattern macroLettersPattern;
+
+    private Pattern macroLettersExpPattern;
+
     private Pattern cellPattern;
-
-    private Matcher cellMatcher;
-
-    private boolean isExplanation = false;
 
     private Logger log;
 
@@ -64,6 +64,10 @@ public class MacroExpand {
         domainSpecPattern = Pattern.compile(SPFTermsRegexps.DOMAIN_SPEC_REGEX_R);
         // The real pattern replacer
         macroStringPattern = Pattern.compile(SPFTermsRegexps.MACRO_STRING_REGEX_TOKEN);
+        // The macro letters pattern
+        macroLettersPattern = Pattern.compile(SPFTermsRegexps.MACRO_LETTER_PATTERN);
+        // The macro letters pattern for explanation
+        macroLettersExpPattern = Pattern.compile(SPFTermsRegexps.MACRO_LETTER_PATTERN_EXP);
         log = logger;
     }
 
@@ -81,11 +85,10 @@ public class MacroExpand {
         log.debug("Start do expand explanation: " + input);
 
         String[] parts = input.split(" ");
-        isExplanation = true;
         StringBuffer res = new StringBuffer();
         for (int i = 0; i < parts.length; i++) {
             if (i > 0) res.append(" ");
-            res.append(expandMacroString(parts[i]));
+            res.append(expandMacroString(parts[i], true));
         }
         log.debug("Done expand explanation: " + res);
         
@@ -110,27 +113,28 @@ public class MacroExpand {
             throw new PermErrorException("Invalid DomainSpec: "+input);
         }
 
-        System.err.println(inputMatcher.group(1)+"|"+inputMatcher.group(2));
         StringBuffer res = new StringBuffer();
         if (inputMatcher.group(1) != null && inputMatcher.group(1).length() > 0) {
-            res.append(expandMacroString(inputMatcher.group(1)));
+            res.append(expandMacroString(inputMatcher.group(1), false));
         }
         if (inputMatcher.group(2) != null && inputMatcher.group(2).length() > 0) {
             if (inputMatcher.group(2).startsWith(".")) {
                 res.append(inputMatcher.group(2));
             } else {
-                res.append(expandMacroString(inputMatcher.group(2)));
+                res.append(expandMacroString(inputMatcher.group(2), false));
             }
         }
         
-        isExplanation = false;
-        String domainName = expandMacroString(input);
+        String domainName = expandMacroString(input, false);
         // reduce to less than 255 characters, deleting subdomains from left
         int split = 0;
         while (domainName.length() > 255 && split > -1) {
             split = domainName.indexOf(".");
             domainName = domainName.substring(split + 1);
         }
+
+        log.debug("Domain expanded: " + domainName);
+        
         return domainName;
     }
 
@@ -143,7 +147,7 @@ public class MacroExpand {
      * @throws PermErrorException
      *             This get thrown if invalid macros are used
      */
-    private String expandMacroString(String input) throws PermErrorException {
+    private String expandMacroString(String input, boolean isExplanation) throws PermErrorException {
 
         StringBuffer decodedValue = new StringBuffer();
         Matcher inputMatcher = macroStringPattern.matcher(input);
@@ -153,14 +157,14 @@ public class MacroExpand {
         while (inputMatcher.find()) {
             String match2 = inputMatcher.group();
             if (pos != inputMatcher.start()) {
-                throw new PermErrorException("Middle part does not match: "+input.substring(0,pos)+">>"+input.substring(pos, inputMatcher.start())+"<<"+input.substring(inputMatcher.start()));
+                throw new PermErrorException("Middle part does not match: "+input.substring(0,pos)+">>"+input.substring(pos, inputMatcher.start())+"<<"+input.substring(inputMatcher.start())+" ["+input+"]");
             }
             if (match2.length() > 0) {
                 if (match2.startsWith("%{")) {
                     macroCell = input.substring(inputMatcher.start() + 2, inputMatcher
                             .end() - 1);
                     inputMatcher
-                            .appendReplacement(decodedValue, replaceCell(macroCell));
+                            .appendReplacement(decodedValue, replaceCell(macroCell, isExplanation));
                 } else if (match2.length() == 2 && match2.startsWith("%")) {
                     // handle the % escaping
                     inputMatcher.appendReplacement(decodedValue, match2.substring(1));
@@ -188,42 +192,36 @@ public class MacroExpand {
      * @throws PermErrorException
      *             Get thrown if an error in processing happen
      */
-    private String replaceCell(String replaceValue) throws PermErrorException {
+    private String replaceCell(String replaceValue, boolean isExplanation) throws PermErrorException {
 
         String variable = "";
         String domainNumber = "";
         boolean isReversed = false;
         String delimeters = ".";
 
-        if (isExplanation) {
-            // Find command
-            cellPattern = Pattern.compile("[ctCT]");
-            cellMatcher = cellPattern.matcher(replaceValue);
-            while (cellMatcher.find()) {
-                if (cellMatcher.group().toUpperCase().equals(
-                        cellMatcher.group())) {
-                    variable = encodeURL(matchMacro(cellMatcher.group()));
-                } else {
-                    variable = matchMacro(cellMatcher.group());
-                }
-            }
-        }
+        
         // Get only command character so that 'r' command and 'r' modifier don't
         // clash
         String commandCharacter = replaceValue.substring(0, 1);
+        Matcher cellMatcher;
         // Find command
-        cellPattern = Pattern.compile("[lsodipvhrLSODIPVHR]");
-        cellMatcher = cellPattern.matcher(commandCharacter);
-        while (cellMatcher.find()) {
+        if (isExplanation) {
+            cellMatcher = macroLettersExpPattern.matcher(commandCharacter);
+        } else {
+            cellMatcher = macroLettersPattern.matcher(commandCharacter);
+        }
+        if (cellMatcher.find()) {
             if (cellMatcher.group().toUpperCase().equals(cellMatcher.group())) {
                 variable = encodeURL(matchMacro(cellMatcher.group()));
             } else {
                 variable = matchMacro(cellMatcher.group());
             }
+            // Remove Macro code so that r macro code does not clash with r the
+            // reverse modifier
+            replaceValue = replaceValue.substring(1);
+        } else {
+            throw new PermErrorException("MacroLetter not found: "+replaceValue);
         }
-        // Remove Macro code so that r macro code does not clash with r the
-        // reverse modifier
-        replaceValue = replaceValue.substring(1);
 
         // Find number of domains to use
         cellPattern = Pattern.compile("\\d+");
