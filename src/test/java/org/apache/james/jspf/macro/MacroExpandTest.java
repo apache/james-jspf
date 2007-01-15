@@ -112,6 +112,26 @@ public class MacroExpandTest extends TestCase {
                 .expandDomain("%{s}"));
     }
 
+    public void testPercK() throws PermErrorException {
+        try {
+            defIp4me.expandDomain("%{k}");
+            fail("%{k} is not a valid expansion");
+        } catch (PermErrorException e) {
+        }
+    }
+
+    public void testPercentAloneIsError() throws PermErrorException {
+        try {
+            defIp4me.expandDomain("%{s}%");
+            fail("invalid percent at end of line");
+        } catch (PermErrorException e) {
+        }
+    }
+
+    public void testDoublePercent() throws PermErrorException {
+        assertEquals("%", defIp4me.expandDomain("%%"));
+    }
+
     public void testPercO() throws PermErrorException {
         assertEquals("email.example.com", defIp4me.expandDomain("%{o}"));
     }

@@ -27,24 +27,30 @@ public interface SPFTermsRegexps {
 
     final String ALPHA_PATTERN = "[a-zA-Z]";
 
-    final String MACRO_LETTER_PATTERN = "[lsodipvhLSODIPVH]";
+    final String MACRO_LETTER_PATTERN = "[ctlsodipvhCTLSODIPVH]";
 
     final String TRANSFORMERS_REGEX = "\\d*[r]?";
 
     final String DELEMITER_REGEX = "[\\.\\-\\+,/_\\=]";
 
+    final String MACRO_LETTERS_REGEX = MACRO_LETTER_PATTERN + TRANSFORMERS_REGEX + DELEMITER_REGEX + "*";
+
     final String MACRO_EXPAND_REGEX = "\\%(?:\\{"
-            + MACRO_LETTER_PATTERN + TRANSFORMERS_REGEX + DELEMITER_REGEX + "*"
-            + "\\}|\\%|\\_|\\-)";
+            + MACRO_LETTERS_REGEX + "\\}|\\%|\\_|\\-)";
 
     final String MACRO_LITERAL_REGEX = "[\\x21-\\x24\\x26-\\x7e]";
 
     /**
+     * This is used by the MacroExpander
+     */
+    final String MACRO_STRING_REGEX_TOKEN = MACRO_EXPAND_REGEX
+    + "|" + MACRO_LITERAL_REGEX + "{1}";
+
+
+    /**
      * ABNF: macro-string = *( macro-expand / macro-literal )
      */
-    final String MACRO_STRING_REGEX = "(?:" + MACRO_EXPAND_REGEX
-            + "|" + MACRO_LITERAL_REGEX + "{1})*";
-
+    final String MACRO_STRING_REGEX = "(?:" + MACRO_STRING_REGEX_TOKEN +")*";
 
     final String ALPHA_DIGIT_PATTERN = "[a-zA-Z0-9]";
 
@@ -71,6 +77,12 @@ public interface SPFTermsRegexps {
      */
     final String DOMAIN_SPEC_REGEX = "("
             + SPFTermsRegexps.MACRO_STRING_REGEX + DOMAIN_END_REGEX + ")";
+
+    /**
+     * Spring MACRO_STRING from DOMAIN_END (domain end starts with .)
+     */
+    final String DOMAIN_SPEC_REGEX_R = "("
+            + SPFTermsRegexps.MACRO_STRING_REGEX + ")(" + DOMAIN_END_REGEX + ")";
 
 
 }

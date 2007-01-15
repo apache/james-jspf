@@ -28,6 +28,7 @@ package org.apache.james.jspf.macro;
 
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.exceptions.PermErrorException;
+import org.apache.james.jspf.util.SPFTermsRegexps;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -37,13 +38,11 @@ import java.util.regex.Pattern;
 
 public class MacroExpand {
 
-    public static final String MACRO_REGEX = "\\%\\{[lsoditpvhcrLSODITPVHCR]\\d*r?[\\.\\-\\+,/_\\=]*\\}";
-
     private MacroData macroData;
 
-    private Pattern inputPattern;
+    private Pattern domainSpecPattern;
 
-    private Matcher inputMatcher;
+    private Pattern macroStringPattern;
 
     private Pattern cellPattern;
 
@@ -61,7 +60,10 @@ public class MacroExpand {
      */
     public MacroExpand(MacroData macroData, Logger logger) {
         this.macroData = macroData;
-        inputPattern = Pattern.compile(MACRO_REGEX);
+        // This matches 2 groups
+        domainSpecPattern = Pattern.compile(SPFTermsRegexps.DOMAIN_SPEC_REGEX_R);
+        // The real pattern replacer
+        macroStringPattern = Pattern.compile(SPFTermsRegexps.MACRO_STRING_REGEX_TOKEN);
         log = logger;
     }
 
@@ -78,8 +80,16 @@ public class MacroExpand {
 
         log.debug("Start do expand explanation: " + input);
 
+        String[] parts = input.split(" ");
         isExplanation = true;
-        return expand(input);
+        StringBuffer res = new StringBuffer();
+        for (int i = 0; i < parts.length; i++) {
+            if (i > 0) res.append(" ");
+            res.append(expandMacroString(parts[i]));
+        }
+        log.debug("Done expand explanation: " + res);
+        
+        return res.toString();
     }
 
     /**
@@ -95,8 +105,26 @@ public class MacroExpand {
 
         log.debug("Start expand domain: " + input);
 
+        Matcher inputMatcher = domainSpecPattern.matcher(input);
+        if (!inputMatcher.matches() || inputMatcher.groupCount() != 2) {
+            throw new PermErrorException("Invalid DomainSpec: "+input);
+        }
+
+        System.err.println(inputMatcher.group(1)+"|"+inputMatcher.group(2));
+        StringBuffer res = new StringBuffer();
+        if (inputMatcher.group(1) != null && inputMatcher.group(1).length() > 0) {
+            res.append(expandMacroString(inputMatcher.group(1)));
+        }
+        if (inputMatcher.group(2) != null && inputMatcher.group(2).length() > 0) {
+            if (inputMatcher.group(2).startsWith(".")) {
+                res.append(inputMatcher.group(2));
+            } else {
+                res.append(expandMacroString(inputMatcher.group(2)));
+            }
+        }
+        
         isExplanation = false;
-        String domainName = expand(input);
+        String domainName = expandMacroString(input);
         // reduce to less than 255 characters, deleting subdomains from left
         int split = 0;
         while (domainName.length() > 255 && split > -1) {
@@ -115,20 +143,37 @@ public class MacroExpand {
      * @throws PermErrorException
      *             This get thrown if invalid macros are used
      */
-    private String expand(String input) throws PermErrorException {
-
-        input = replaceLiterals(input);
+    private String expandMacroString(String input) throws PermErrorException {
 
         StringBuffer decodedValue = new StringBuffer();
-        inputMatcher = inputPattern.matcher(input);
+        Matcher inputMatcher = macroStringPattern.matcher(input);
         String macroCell;
+        int pos = 0;
 
         while (inputMatcher.find()) {
-            macroCell = input.substring(inputMatcher.start() + 2, inputMatcher
-                    .end() - 1);
-            inputMatcher
-                    .appendReplacement(decodedValue, replaceCell(macroCell));
+            String match2 = inputMatcher.group();
+            if (pos != inputMatcher.start()) {
+                throw new PermErrorException("Middle part does not match: "+input.substring(0,pos)+">>"+input.substring(pos, inputMatcher.start())+"<<"+input.substring(inputMatcher.start()));
+            }
+            if (match2.length() > 0) {
+                if (match2.startsWith("%{")) {
+                    macroCell = input.substring(inputMatcher.start() + 2, inputMatcher
+                            .end() - 1);
+                    inputMatcher
+                            .appendReplacement(decodedValue, replaceCell(macroCell));
+                } else if (match2.length() == 2 && match2.startsWith("%")) {
+                    // handle the % escaping
+                    inputMatcher.appendReplacement(decodedValue, match2.substring(1));
+                }
+            }
+            
+            pos = inputMatcher.end();
         }
+        
+        if (input.length() != pos) {
+            throw new PermErrorException("End part does not match: "+input.substring(pos));
+        }
+        
         inputMatcher.appendTail(decodedValue);
 
         return decodedValue.toString();
@@ -346,26 +391,6 @@ public class MacroExpand {
         }
         return buildString.toString();
 
-    }
-
-    /**
-     * Replace all literals in the given String
-     * 
-     * @param data
-     *            The String we want to replace the literals
-     * @return given The given String with all literales replaced
-     */
-    private String replaceLiterals(String data) {
-
-        log.debug("Replace literals on String: " + data);
-
-        data = data.replaceAll("%%", "%");
-        data = data.replaceAll("%_", " ");
-        data = data.replaceAll("%-", "%20");
-
-        log.debug("Replaced String: " + data);
-
-        return data;
     }
 
     /**
