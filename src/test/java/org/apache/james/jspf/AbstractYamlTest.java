@@ -321,7 +321,6 @@ public abstract class AbstractYamlTest extends TestCase {
             }
             return null;
         }
-
     }
 
     

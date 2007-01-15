@@ -32,7 +32,7 @@ import junit.textui.TestRunner;
 
 public class RFC4408YamlTest extends AbstractYamlTest {
 
-    private static final String YAMLFILE2 = "rfc4408-tests.yml";
+    private static final String YAMLFILE2 = "rfc4408-tests-2007.01.yml";
 
     /**
      * @param name

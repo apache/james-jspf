@@ -68,7 +68,7 @@ public class ExpModifier extends GenericModifier implements DNSServiceEnabled {
         try {
             host = new MacroExpand(spfData, log).expandDomain(host);
             try {
-                exp = getTxtCatType(dnsService, host);
+                exp = getTxtType(dnsService, host);
             } catch (TempErrorException e) {
                 // Nothing todo here.. just return null
                 return;
@@ -94,11 +94,11 @@ public class ExpModifier extends GenericModifier implements DNSServiceEnabled {
      *            The hostname for which we want to retrieve the TXT-Record
      * @return String which reflect the TXT-Record
      * @throws PermErrorException
-     *             if the hostname is not resolvable
+     *             if more then one TXT-Record for explanation was found
      * @throws TempErrorException
      *             if the lookup result was "TRY_AGAIN"
      */
-    public String getTxtCatType(DNSService dns, String strServer) throws TempErrorException {
+    public String getTxtType(DNSService dns, String strServer) throws TempErrorException, PermErrorException {
         try {
             List records = dns.getRecords(strServer, DNSService.TXT);
         
@@ -106,13 +106,17 @@ public class ExpModifier extends GenericModifier implements DNSServiceEnabled {
                 return null;
             }
     
-            log.debug("Concatenating " + records.size() + " TXT-Records to one String");
-    
-            StringBuffer txtData = new StringBuffer();
-            for (int i = 0; i < records.size(); i++) {
-                txtData.append(records.get(i));
+            // See SPF-Spec 6.2
+            //
+            // If domain-spec is empty, or there are any DNS processing errors (any RCODE other than 0), 
+            // or if no records are returned, or if more than one record is returned, or if there are syntax 
+            // errors in the explanation string, then proceed as if no exp modifier was given.   
+            if (records.size() > 1) {
+                log.debug("More then one TXT-Record found for explanation");
+                throw new PermErrorException("More then one TXT-Record for explanation");
+            } else {
+                return (String) records.get(0);
             }
-            return txtData.toString();
         } catch (DNSService.TimeoutException e) {
             throw new TempErrorException("Timeout querying dns server");
         }
