@@ -32,7 +32,7 @@ import junit.textui.TestRunner;
 
 public class RFC4408YamlTest extends AbstractYamlTest {
 
-    private static final String YAMLFILE2 = "rfc4408-tests-2007.01.yml";
+    private static final String YAMLFILE2 = "rfc4408-tests.yml";
 
     /**
      * @param name
@@ -62,13 +62,23 @@ public class RFC4408YamlTest extends AbstractYamlTest {
 
         public RFC4408Suite() throws IOException {
             super();
-            List tests = loadTests(YAMLFILE2);
-            Iterator i = tests.iterator();
-            while (i.hasNext()) {
-                SPFYamlTestSuite o = (SPFYamlTestSuite) i.next();
-                Iterator ttt = o.getTests().keySet().iterator();
-                while (ttt.hasNext()) {
-                    addTest(new RFC4408YamlTest(o,(String) ttt.next()));
+            try {
+                List tests = loadTests(YAMLFILE2);
+                Iterator i = tests.iterator();
+                while (i.hasNext()) {
+                    SPFYamlTestSuite o = (SPFYamlTestSuite) i.next();
+                    Iterator ttt = o.getTests().keySet().iterator();
+                    while (ttt.hasNext()) {
+                        addTest(new RFC4408YamlTest(o,(String) ttt.next()));
+                    }
+                }
+            } catch (RuntimeException e) {
+                if ("Unable to load the file".equals(e.getMessage())) {
+                    System.err.println("WARNING: RFC4408 tests disabled.");
+                    System.err.println("The RFC4408 test-suite is not bundled with jspf due to licensing issues.");
+                    System.err.println("You can download the yaml testsuite at the following url:");
+                    System.err.println("  http://www.openspf.org/source/project/test-suite/");
+                    System.err.println("and place an rfc4408-tests.yml file in the /src/test/resources/org/apache/james/jspf folder.");
                 }
             }
         }

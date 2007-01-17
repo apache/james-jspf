@@ -92,30 +92,34 @@ public abstract class AbstractYamlTest extends TestCase {
         //InputStream is = SPFYamlTest.class.getResourceAsStream("pyspf-tests.yml");
         InputStream is = SPFYamlTest.class.getResourceAsStream(filename);
         
-        Reader br = new BufferedReader(new InputStreamReader(is)) {
-    
-            public int read(char[] arg0) throws IOException {
-                int rl = super.read(arg0);
-                return rl;
-            }
+        if (is != null) {
+            Reader br = new BufferedReader(new InputStreamReader(is)) {
+        
+                public int read(char[] arg0) throws IOException {
+                    int rl = super.read(arg0);
+                    return rl;
+                }
+                
+            };
             
-        };
-        
-        YAMLFactory fact = new DefaultYAMLFactory();
-        
-        Constructor ctor = fact.createConstructor(fact.createComposer(fact.createParser(fact.createScanner(br)),fact.createResolver()));
-        int i = 1;
-        while(ctor.checkData()) {
-            Object o = ctor.getData();
-            if (o instanceof HashMap) {
-              HashMap m = (HashMap) o;
-              SPFYamlTestSuite ts = new SPFYamlTestSuite(m, i);
-              tests.add(ts);
+            YAMLFactory fact = new DefaultYAMLFactory();
+            
+            Constructor ctor = fact.createConstructor(fact.createComposer(fact.createParser(fact.createScanner(br)),fact.createResolver()));
+            int i = 1;
+            while(ctor.checkData()) {
+                Object o = ctor.getData();
+                if (o instanceof HashMap) {
+                  HashMap m = (HashMap) o;
+                  SPFYamlTestSuite ts = new SPFYamlTestSuite(m, i);
+                  tests.add(ts);
+                }
+                i++;
             }
-            i++;
+        
+            return tests;
+        } else {
+            throw new RuntimeException("Unable to load the file");
         }
-    
-        return tests;
     }
 
     protected void runTest() throws Throwable {
