@@ -27,7 +27,7 @@
     <version>1.1-SNAPSHOT</version>
   </parent>
   <name>Apache JAMES jSPF</name>
-  <version>0.9-SNAPSHOT</version>
+  <version>0.9b4</version>
   <description>
     Apache James jSPF is an SPF spec implementation written in Java
   </description>
