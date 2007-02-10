@@ -26,7 +26,7 @@
     <section name="What is it?">
       <p>
         The jSPF library is pure Java SPF implementation. It was designed to match the current
-        SPF-Specs of 2006 (See RFC section). SPF is also knows as Sender Policy Framework.     
+        SPF-Specs of 2006-2007 (See RFC section). SPF is also knows as Sender Policy Framework.     
         It was designed to detect email spoofing.This is the solution if you ever was tired
         of getting spam from yourself. For more informations see 
         <a href="http://www.openspf.org"> openspf website</a> or <a href="http://new.openspf.org"> 
@@ -34,7 +34,13 @@
       </p>
     </section>
     <section name="News">
+    <subsection name="2007">
 
+      <h5>jSPF-0.9b4 released</h5>
+      <p>After some more work was done, we proud to announce the release of jSPF-0.9b4.</p>
+
+    </subsection>
+    
     <subsection name="2006">
 
       <h5>First public release of jSPF</h5>
@@ -45,14 +51,14 @@
     
     <section name="releases">
       <p>
-        <b>Latest and Stable: jSPF v0.9b3</b>
+        <b>Latest and Stable: jSPF v0.9b4</b>
         <br/>
-jSPF v0.9b3 is the current release.
-Both <a href=" http://james.apache.org/download.cgi">binary and source</a> distributions are available.</p>
+jSPF v0.9b4 is the current release.
+Both <a href="http://www.apache.org/dist/james/jspf">binary and source</a> distributions are available.</p>
       <p>This release passes all YAML tests published by openspf.org (still under development). So it should be fully RFC4408 compliant.</p>
       <p>
         <b>Get your hands on the latest versions..</b>
-        <br/>We put significant milestones, and potential release candidates in the <a href="http://people.apache.org/dist/james/">download area.</a>
+        <br/>We put significant milestones, and potential release candidates in the <a href="http://www.apache.org/dist/james/jspf">download area.</a>
         <br/>Whilst the quality of these versions cannot be guaranteed they may contain important bug fixes and cool new features.<br/>
       </p>
     </section>
