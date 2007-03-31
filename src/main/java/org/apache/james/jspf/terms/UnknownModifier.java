@@ -59,7 +59,12 @@ public class UnknownModifier implements Modifier, Configurable {
      * @see org.apache.james.jspf.core.Configurable#config(Configuration)
      */
     public synchronized void config(Configuration params) throws PermErrorException {
-        // Nothing to do
+        if (params.groupCount() >= 2 && params.group(1) != null) {
+            String name = params.group(1).toLowerCase();
+            if ("exp".equals(name) || "redirect".equals(name)) {
+                throw new PermErrorException("exp and redirect are not valid names for unknown modifier: this probably means an invalid syntax for exp or redirect fallback to the unkown modifier.");
+            }
+        }
     }
 
 }
