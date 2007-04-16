@@ -26,8 +26,9 @@ import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
+import org.apache.james.jspf.policies.Policy;
 
-public class OverridePolicy extends FallbackPolicy {
+public class OverridePolicy extends FallbackPolicy implements Policy {
 
     public OverridePolicy(Logger log, SPFRecordParser parser) {
         super(log, parser);
@@ -35,17 +36,12 @@ public class OverridePolicy extends FallbackPolicy {
     
 
     /**
-     * @see org.apache.james.jspf.policies.AbstractNestedPolicy#getSPFRecordPostFilter(java.lang.String, org.apache.james.jspf.core.SPF1Record)
+     * @see org.apache.james.jspf.policies.Policy#getSPFRecord(java.lang.String)
      */
-    protected SPF1Record getSPFRecordPostFilter(String currentDomain, SPF1Record res) throws PermErrorException, TempErrorException, NoneException, NeutralException {
-        return res;
-    }
-
-    /**
-     * @see org.apache.james.jspf.policies.AbstractNestedPolicy#getSPFRecordOverride(java.lang.String)
-     */
-    public SPF1Record getSPFRecordOverride(String host) {
-        return getMySPFRecord(host);
+    public SPF1Record getSPFRecord(String currentDomain)
+            throws PermErrorException, TempErrorException, NoneException,
+            NeutralException {
+        return getMySPFRecord(currentDomain);
     }
 
 }

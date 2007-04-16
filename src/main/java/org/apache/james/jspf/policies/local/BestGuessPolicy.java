@@ -25,19 +25,21 @@ import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
-import org.apache.james.jspf.policies.AbstractNestedPolicy;
+import org.apache.james.jspf.policies.PolicyPostFilter;
 
-public class BestGuessPolicy extends AbstractNestedPolicy {
+public class BestGuessPolicy implements PolicyPostFilter {
 
     /**
-     * @see org.apache.james.jspf.policies.AbstractNestedPolicy#getSPFRecordPostFilter(java.lang.String, org.apache.james.jspf.core.SPF1Record)
+     * @see org.apache.james.jspf.policies.PolicyPostFilter#getSPFRecord(java.lang.String, org.apache.james.jspf.core.SPF1Record)
      */
-    protected SPF1Record getSPFRecordPostFilter(String currentDomain, SPF1Record res) throws PermErrorException, TempErrorException, NoneException, NeutralException {
-        if (res == null) {
+    public SPF1Record getSPFRecord(String currentDomain, SPF1Record record)
+            throws PermErrorException, TempErrorException, NoneException,
+            NeutralException {
+        if (record == null) {
             // We should use bestguess
             return new SPF1Record(SPF1Utils.BEST_GUESS_RECORD);
         } else {
-            return res;
+            return record;
         }
     }
 }

@@ -19,11 +19,6 @@
 
 package org.apache.james.jspf.policies.local;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPF1Record;
 import org.apache.james.jspf.core.SPFRecordParser;
@@ -32,12 +27,17 @@ import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.SPFResultException;
 import org.apache.james.jspf.exceptions.TempErrorException;
-import org.apache.james.jspf.policies.AbstractNestedPolicy;
+import org.apache.james.jspf.policies.PolicyPostFilter;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Class to support Fallback feature
  */
-public class FallbackPolicy extends AbstractNestedPolicy {
+public class FallbackPolicy implements PolicyPostFilter {
 
     private Map entryMap;
 
@@ -113,9 +113,9 @@ public class FallbackPolicy extends AbstractNestedPolicy {
     }
 
     /**
-     * @see org.apache.james.jspf.policies.AbstractNestedPolicy#getSPFRecordPostFilter(java.lang.String, org.apache.james.jspf.core.SPF1Record)
+     * @see org.apache.james.jspf.policies.PolicyPostFilter#getSPFRecord(java.lang.String, org.apache.james.jspf.core.SPF1Record)
      */
-    protected SPF1Record getSPFRecordPostFilter(String currentDomain, SPF1Record res) throws PermErrorException, TempErrorException, NoneException, NeutralException {
+    public SPF1Record getSPFRecord(String currentDomain, SPF1Record res) throws PermErrorException, TempErrorException, NoneException, NeutralException {
         if (res == null) {
             return getMySPFRecord(currentDomain);
         } else {

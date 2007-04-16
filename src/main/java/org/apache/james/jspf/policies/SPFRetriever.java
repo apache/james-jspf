@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Get the raw dns txt or spf entry which contains a spf entry
  */
-public class SPFRetriever extends AbstractNestedPolicy {
+public class SPFRetriever implements Policy {
     /**
      * dns service
      */
@@ -32,19 +32,9 @@ public class SPFRetriever extends AbstractNestedPolicy {
 
 
     /**
-     * @see org.apache.james.jspf.policies.AbstractNestedPolicy#setChildPolicy(org.apache.james.jspf.policies.Policy)
+     * @see org.apache.james.jspf.policies.Policy#getSPFRecord(java.lang.String)
      */
-    public void setChildPolicy(Policy children) {
-        if (children != null) {
-            throw new IllegalStateException("Cannot set a child policy for SPFRetriever");
-        }
-    }
-
-
-    /**
-     * @see org.apache.james.jspf.policies.AbstractNestedPolicy#getSPFRecordOverride(java.lang.String)
-     */
-    protected SPF1Record getSPFRecordOverride(String currentDomain) throws PermErrorException, TempErrorException, NoneException, NeutralException {
+    public SPF1Record getSPFRecord(String currentDomain) throws PermErrorException, TempErrorException, NoneException, NeutralException {
         // retrieve the SPFRecord
         String spfDnsEntry = retrieveSpfRecord(currentDomain);
         if (spfDnsEntry != null) {

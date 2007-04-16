@@ -198,6 +198,7 @@ public class SPF implements SPFChecker {
     public Policy getPolicy() {
 
         ArrayList policies = new ArrayList();
+        ArrayList policyFilters = new ArrayList();
         
         if (override != null) {
             policies.add(override);
@@ -210,29 +211,29 @@ public class SPF implements SPFChecker {
         }
         
         if (useBestGuess) {
-            policies.add(new BestGuessPolicy());
+            policyFilters.add(new BestGuessPolicy());
         }
         
-        policies.add(new ParseRecordPolicy(parser));
+        policyFilters.add(new ParseRecordPolicy(parser));
         
         if (fallBack != null) {
-            policies.add(fallBack);
+            policyFilters.add(fallBack);
         }
 
-        policies.add(new NoSPFRecordFoundPolicy());
+        policyFilters.add(new NoSPFRecordFoundPolicy());
         
         // trustedForwarder support is enabled
         if (useTrustedForwarder) {
-            policies.add(new TrustedForwarderPolicy(log));
+            policyFilters.add(new TrustedForwarderPolicy(log));
         }
 
-        policies.add(new NeutralIfNotMatchPolicy());
+        policyFilters.add(new NeutralIfNotMatchPolicy());
 
-        policies.add(new DefaultExplanationPolicy(log, defaultExplanation, macroExpand));
+        policyFilters.add(new DefaultExplanationPolicy(log, defaultExplanation, macroExpand));
         
         policies.add(new InitialChecksPolicy());
         
-        return new ChainPolicy(policies);
+        return new ChainPolicy(policies, policyFilters);
     }
     
     /**

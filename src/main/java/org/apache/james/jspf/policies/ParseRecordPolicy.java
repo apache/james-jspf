@@ -28,7 +28,7 @@ import org.apache.james.jspf.exceptions.PermErrorException;
 /**
  * Parse the record
  */
-public class ParseRecordPolicy extends AbstractNestedPolicy {
+public class ParseRecordPolicy implements PolicyPostFilter {
 
     private SPFRecordParser parser;
 
@@ -37,9 +37,9 @@ public class ParseRecordPolicy extends AbstractNestedPolicy {
     }
 
     /**
-     * @see org.apache.james.jspf.policies.AbstractNestedPolicy#getSPFRecordPostFilter(java.lang.String, org.apache.james.jspf.core.SPF1Record)
+     * @see org.apache.james.jspf.policies.PolicyPostFilter#getSPFRecord(java.lang.String, org.apache.james.jspf.core.SPF1Record)
      */
-    protected SPF1Record getSPFRecordPostFilter(String currentDomain, SPF1Record spfRecord) throws PermErrorException, NoneException, NeutralException {
+    public SPF1Record getSPFRecord(String currentDomain, SPF1Record spfRecord) throws PermErrorException, NoneException, NeutralException {
         if (spfRecord == null) return null;
         // parse the record
         return parser.parse(spfRecord.getRecord());

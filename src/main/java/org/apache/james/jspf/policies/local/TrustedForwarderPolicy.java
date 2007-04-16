@@ -26,10 +26,10 @@ import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
-import org.apache.james.jspf.policies.AbstractNestedPolicy;
+import org.apache.james.jspf.policies.PolicyPostFilter;
 import org.apache.james.jspf.terms.IncludeMechanism;
 
-public class TrustedForwarderPolicy extends AbstractNestedPolicy {
+public class TrustedForwarderPolicy implements PolicyPostFilter {
 
     /**
      * The hostname to include
@@ -46,7 +46,10 @@ public class TrustedForwarderPolicy extends AbstractNestedPolicy {
         this.log = log;
     }
 
-    protected SPF1Record getSPFRecordPostFilter(String currentDomain, SPF1Record spfRecord) throws PermErrorException, TempErrorException, NoneException, NeutralException {
+    /**
+     * @see org.apache.james.jspf.policies.PolicyPostFilter#getSPFRecord(java.lang.String, org.apache.james.jspf.core.SPF1Record)
+     */
+    public SPF1Record getSPFRecord(String currentDomain, SPF1Record spfRecord) throws PermErrorException, TempErrorException, NoneException, NeutralException {
         if (spfRecord == null) return null;
         String mechanism = ((Directive) spfRecord.getDirectives().get(spfRecord.getDirectives().size())).toString();
         if (mechanism.equals("-all") || mechanism.equals("?all")) {

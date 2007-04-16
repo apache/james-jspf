@@ -30,12 +30,12 @@ import org.apache.james.jspf.exceptions.TempErrorException;
  * This is an override filter to be executed as the first 
  * so it should be added as the last filter.
  */
-public final class InitialChecksPolicy extends AbstractNestedPolicy {
+public final class InitialChecksPolicy implements Policy {
     
     /**
-     * @see org.apache.james.jspf.policies.AbstractNestedPolicy#getSPFRecordOverride(java.lang.String)
+     * @see org.apache.james.jspf.policies.Policy#getSPFRecord(java.lang.String)
      */
-    protected SPF1Record getSPFRecordOverride(String currentDomain) throws PermErrorException, TempErrorException, NoneException, NeutralException {
+    public SPF1Record getSPFRecord(String currentDomain) throws PermErrorException, TempErrorException, NoneException, NeutralException {
         // Initial checks (spec 4.3)
         if (currentDomain != null) {
             String[] labels = currentDomain.split("\\.");

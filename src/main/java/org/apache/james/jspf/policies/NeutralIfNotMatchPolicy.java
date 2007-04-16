@@ -31,12 +31,12 @@ import org.apache.james.jspf.exceptions.TempErrorException;
 /**
  * Sets the result to NEUTRAL if no directive is found 
  */
-public class NeutralIfNotMatchPolicy extends AbstractNestedPolicy {
+public class NeutralIfNotMatchPolicy implements PolicyPostFilter {
     
     /**
-     * @see org.apache.james.jspf.policies.AbstractNestedPolicy#getSPFRecordPostFilter(java.lang.String, org.apache.james.jspf.core.SPF1Record)
+     * @see org.apache.james.jspf.policies.PolicyPostFilter#getSPFRecord(java.lang.String, org.apache.james.jspf.core.SPF1Record)
      */
-    protected SPF1Record getSPFRecordPostFilter(String currentDomain, SPF1Record spfRecord) throws PermErrorException, TempErrorException, NoneException, NeutralException {
+    public SPF1Record getSPFRecord(String currentDomain, SPF1Record spfRecord) throws PermErrorException, TempErrorException, NoneException, NeutralException {
         if (spfRecord == null) return null;
         // Set the result to NEUTRAL if at least a directive is present and it didn't match
         // Maybe we should simply append a "?all" at the end, as modifier

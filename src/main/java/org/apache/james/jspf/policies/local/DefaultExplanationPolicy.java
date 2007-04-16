@@ -30,12 +30,12 @@ import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
-import org.apache.james.jspf.policies.AbstractNestedPolicy;
+import org.apache.james.jspf.policies.PolicyPostFilter;
 
 /**
  * Policy to add a default explanation
  */
-public final class DefaultExplanationPolicy extends AbstractNestedPolicy {
+public final class DefaultExplanationPolicy implements PolicyPostFilter {
     /**
      * log
      */
@@ -58,9 +58,9 @@ public final class DefaultExplanationPolicy extends AbstractNestedPolicy {
     }
 
     /**
-     * @see org.apache.james.jspf.policies.AbstractNestedPolicy#getSPFRecordPostFilter(java.lang.String, org.apache.james.jspf.core.SPF1Record)
+     * @see org.apache.james.jspf.policies.PolicyPostFilter#getSPFRecord(java.lang.String, org.apache.james.jspf.core.SPF1Record)
      */
-    protected SPF1Record getSPFRecordPostFilter(String currentDomain, SPF1Record spfRecord) throws PermErrorException, TempErrorException, NoneException, NeutralException {
+    public SPF1Record getSPFRecord(String currentDomain, SPF1Record spfRecord) throws PermErrorException, TempErrorException, NoneException, NeutralException {
         if (spfRecord == null) return null;
         // Default explanation policy.
         spfRecord.getModifiers().add(new SPFChecker() {

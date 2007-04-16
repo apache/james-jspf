@@ -34,22 +34,16 @@ import java.util.List;
  */
 public class ChainPolicy implements Policy {
     
-    private Policy policy;
+    private List policies;
+    private List policyFilters;
 
     /**
      * Create a new ChainPolicy
      * @param policies an array of Polcy and NestedPolicy objects
      */
-    public ChainPolicy(List policies) {
-        policy = null;
-        Iterator i = policies.iterator();
-        while (i.hasNext()) {
-            Policy newP = (Policy) i.next();
-            if (newP instanceof NestedPolicy) {
-                ((NestedPolicy) newP).setChildPolicy(policy);
-            }
-            policy = newP;
-        }
+    public ChainPolicy(List policies, List policyFilters) {
+        this.policies = policies;
+        this.policyFilters = policyFilters;
     }
     
     /**
@@ -58,7 +52,18 @@ public class ChainPolicy implements Policy {
     public SPF1Record getSPFRecord(String currentDomain)
             throws PermErrorException, TempErrorException, NoneException,
             NeutralException {
-        return policy.getSPFRecord(currentDomain);
+        SPF1Record res = null;
+        Iterator i = policies.iterator();
+        while (i.hasNext() && res == null) {
+            Policy newP = (Policy) i.next();
+            res = newP.getSPFRecord(currentDomain);
+        }
+        Iterator i2 = policyFilters.iterator();
+        while (i2.hasNext()) {
+            PolicyPostFilter newP = (PolicyPostFilter) i2.next();
+            res = newP.getSPFRecord(currentDomain, res);
+        }
+        return res;
     }
 
 }
