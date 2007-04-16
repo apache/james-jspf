@@ -206,11 +206,10 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled {
     public List getAAAARecords(DNSService dns, String strServer)
             throws PermErrorException, TempErrorException {
         List listAAAAData;
-        if (IPAddr.isIPAddr(strServer)) {
-            IPAddr ipTest = IPAddr.getAddress(strServer);
+        if (IPAddr.isIPV6(strServer)) {
             // Address is already an IP address, so add it to list
             listAAAAData = new ArrayList();
-            listAAAAData.add(ipTest);
+            listAAAAData.add(strServer);
         } else {
             try {
                 listAAAAData = dns.getRecords(strServer, DNSService.AAAA);
