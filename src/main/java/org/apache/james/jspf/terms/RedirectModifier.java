@@ -28,13 +28,14 @@ import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.util.SPFTermsRegexps;
+import org.apache.james.jspf.wiring.MacroExpandEnabled;
 import org.apache.james.jspf.wiring.SPFCheckEnabled;
 
 /**
  * This class represent the redirect modifier
  * 
  */
-public class RedirectModifier extends GenericModifier implements SPFCheckEnabled {
+public class RedirectModifier extends GenericModifier implements SPFCheckEnabled, MacroExpandEnabled {
 
     /**
      * ABNF: redirect = "redirect" "=" domain-spec
@@ -43,6 +44,8 @@ public class RedirectModifier extends GenericModifier implements SPFCheckEnabled
             + "\\=" + SPFTermsRegexps.DOMAIN_SPEC_REGEX;
     
     private SPFChecker spfChecker;
+
+    private MacroExpand macroExpand;
 
     /**
      * Set the host which should be used for redirection and set it in SPF1Data
@@ -67,7 +70,7 @@ public class RedirectModifier extends GenericModifier implements SPFCheckEnabled
             spfData.increaseCurrentDepth();
 
             // throws a PermErrorException that we can pass through
-            host = new MacroExpand(log).expand(host, spfData, MacroExpand.DOMAIN);
+            host = macroExpand.expand(host, spfData, MacroExpand.DOMAIN);
 
             spfData.setCurrentDomain(host);
 
@@ -100,6 +103,13 @@ public class RedirectModifier extends GenericModifier implements SPFCheckEnabled
      */
     public void enableSPFChecking(SPFChecker checker) {
         this.spfChecker = checker;
+    }
+
+    /**
+     * @see org.apache.james.jspf.wiring.MacroExpandEnabled#enableMacroExpand(org.apache.james.jspf.macro.MacroExpand)
+     */
+    public void enableMacroExpand(MacroExpand macroExpand) {
+        this.macroExpand = macroExpand;
     }
 
 }

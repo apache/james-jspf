@@ -130,9 +130,9 @@ public class DefaultTermsFactory implements TermsFactory {
     /**
      * @see org.apache.james.jspf.parser.TermsFactory#createTerm(org.apache.james.jspf.parser.TermDefinition, org.apache.james.jspf.core.MatcherBasedConfiguration)
      */
-    public Object createTerm(TermDefinition termDef, Configuration subres) throws PermErrorException, InstantiationException {
+    public Object createTerm(Class termDef, Configuration subres) throws PermErrorException, InstantiationException {
         try {
-            Object term = termDef.getTermDef().newInstance();
+            Object term = termDef.newInstance();
             
             try {
                 wiringService.wire(term);

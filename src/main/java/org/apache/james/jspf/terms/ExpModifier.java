@@ -28,6 +28,7 @@ import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.util.SPFTermsRegexps;
 import org.apache.james.jspf.wiring.DNSServiceEnabled;
+import org.apache.james.jspf.wiring.MacroExpandEnabled;
 
 import java.util.List;
 
@@ -35,7 +36,7 @@ import java.util.List;
  * This class represent the exp modifier
  * 
  */
-public class ExpModifier extends GenericModifier implements DNSServiceEnabled {
+public class ExpModifier extends GenericModifier implements DNSServiceEnabled, MacroExpandEnabled {
 
     /**
      * ABNF: explanation = "exp" "=" domain-spec
@@ -48,6 +49,8 @@ public class ExpModifier extends GenericModifier implements DNSServiceEnabled {
             + SPFTermsRegexps.DOMAIN_SPEC_REGEX+"?";
 
     private DNSService dnsService;
+    
+    private MacroExpand macroExpand;
 
     /**
      * Generate the explanation and set it in SPF1Data so it can be accessed
@@ -75,7 +78,7 @@ public class ExpModifier extends GenericModifier implements DNSServiceEnabled {
         if (spfData.getCurrentResult()== null || !spfData.getCurrentResult().equals(SPF1Constants.FAIL))
             return;
 
-        host = new MacroExpand(log).expand(host, spfData, MacroExpand.DOMAIN);
+        host = macroExpand.expand(host, spfData, MacroExpand.DOMAIN);
 
         try {
             try {
@@ -86,8 +89,8 @@ public class ExpModifier extends GenericModifier implements DNSServiceEnabled {
             }
 
             if ((exp != null) && (!exp.equals(""))) {
-                spfData.setExplanation(new MacroExpand(log)
-                        .expand(exp, spfData, MacroExpand.EXPLANATION));
+                String expandedExplanation = macroExpand.expand(exp, spfData, MacroExpand.EXPLANATION);
+                spfData.setExplanation(expandedExplanation);
             } 
         } catch (PermErrorException e) {
             // TODO add logging here!
@@ -146,6 +149,14 @@ public class ExpModifier extends GenericModifier implements DNSServiceEnabled {
      */
     public void enableDNSService(DNSService service) {
         this.dnsService = service;
+    }
+
+
+    /**
+     * @see org.apache.james.jspf.wiring.MacroExpandEnabled#enableMacroExpand(org.apache.james.jspf.macro.MacroExpand)
+     */
+    public void enableMacroExpand(MacroExpand macroExpand) {
+        this.macroExpand = macroExpand;
     }
 
 }

@@ -20,15 +20,9 @@
 
 package org.apache.james.jspf.core;
 
-import org.apache.james.jspf.SPF1Utils;
-import org.apache.james.jspf.core.DNSService.TimeoutException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.macro.MacroData;
-import org.apache.james.jspf.wiring.DNSServiceEnabled;
-
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * 
@@ -37,7 +31,7 @@ import java.util.List;
  * 
  */
 
-public class SPF1Data implements MacroData, DNSServiceEnabled {
+public class SPF1Data implements MacroData {
 
     private String ipAddress = ""; // also used for (i)<sending-host>
 
@@ -57,7 +51,7 @@ public class SPF1Data implements MacroData, DNSServiceEnabled {
 
     private String readableIP = null; // (c)
 
-    private String receivingDomain = "unknown"; // (r)
+    private String receivingDomain = null; // (r)
 
     private int currentDepth = 0;
 
@@ -71,8 +65,6 @@ public class SPF1Data implements MacroData, DNSServiceEnabled {
     private String currentResult = null;
 
     private boolean ignoreExplanation = false;
-
-    private DNSService dnsProbe;
 
     /**
      * Build the SPF1Data from the given parameters
@@ -181,33 +173,15 @@ public class SPF1Data implements MacroData, DNSServiceEnabled {
      * @see org.apache.james.jspf.macro.MacroData#getClientDomain()
      */
     public String getClientDomain() {
-        if (clientDomain == null) {
-            clientDomain = "unknown";
-            try {
-                boolean ip6 = IPAddr.isIPV6(ipAddress);
-                List records = dnsProbe.getRecords(IPAddr.getAddress(ipAddress).getReverseIP(), DNSService.PTR);
-
-                if (records != null && records.size() > 0) {
-                    String record = (String) records.get(0);
-                    records = dnsProbe.getRecords(record, ip6 ? DNSService.AAAA : DNSService.A);
-                    if (records != null && records.size() > 0) {
-                        Iterator i = records.iterator();
-                        while (i.hasNext()) {
-                            String next = (String) i.next();
-                            if (IPAddr.getAddress(ipAddress).toString().equals(IPAddr.getAddress(next).toString())) {
-                                clientDomain = record;
-                                break;
-                            }
-                        }
-                    }
-                }
-            } catch (TimeoutException e) {
-                // just return the default "unknown".
-            } catch (PermErrorException e) {
-                // just return the default "unknown".
-            }
-        }
         return clientDomain;
+    }
+    
+    /**
+     * Sets the calculated clientDomain
+     * @param clientDomain the new clientDomain
+     */
+    public void setClientDomain(String clientDomain) {
+        this.clientDomain = clientDomain;
     }
 
     /**
@@ -216,7 +190,6 @@ public class SPF1Data implements MacroData, DNSServiceEnabled {
     public String getSenderDomain() {
         return senderDomain;
     }
-
 
     /**
      * Get the ipAddress which was used to connect
@@ -264,19 +237,16 @@ public class SPF1Data implements MacroData, DNSServiceEnabled {
      * @see org.apache.james.jspf.macro.MacroData#getReceivingDomain()
      */
     public String getReceivingDomain() {
-
-        if (receivingDomain.equals("unknown")) {
-            List dNames = dnsProbe.getLocalDomainNames();
-
-            for (int i = 0; i < dNames.size(); i++) {
-                // check if the domainname is a FQDN
-                if (SPF1Utils.checkFQDN(dNames.get(i).toString())) {
-                    receivingDomain = dNames.get(i).toString();
-                    return receivingDomain;
-                }
-            }
-        }
         return receivingDomain;
+    }
+    
+    /**
+     * Sets the new receiving domain
+     * 
+     * @param receivingDomain the new receiving domain
+     */
+    public void setReceivingDomain(String receivingDomain) {
+        this.receivingDomain = receivingDomain;
     }
     
     /**
@@ -356,13 +326,6 @@ public class SPF1Data implements MacroData, DNSServiceEnabled {
      */
     public boolean ignoreExplanation() {
         return ignoreExplanation;
-    }
-
-    /**
-     * @see org.apache.james.jspf.wiring.DNSServiceEnabled#enableDNSService(org.apache.james.jspf.core.DNSService)
-     */
-    public void enableDNSService(DNSService service) {
-        this.dnsProbe = service;
     }
     
 }

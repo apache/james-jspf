@@ -33,13 +33,13 @@ public interface TermsFactory {
     /**
      * Create a new term starting from the TermDefinition created by this factory
      * 
-     * @param termDef the TermDefinition (returned by this factory)
+     * @param class the TermDefinition.getTermDef (returned by this factory)
      * @param subres (the configuration)
      * @return the generated object
      * @throws PermErrorException if something goes wrong
      * @throws InstantiationException 
      */
-    public Object createTerm(TermDefinition termDef, Configuration subres)
+    public Object createTerm(Class klass, Configuration subres)
             throws PermErrorException, InstantiationException;
 
     /**

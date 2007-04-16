@@ -22,10 +22,12 @@ package org.apache.james.jspf;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPFRecordParser;
+import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.parser.DefaultSPF1Parser;
 import org.apache.james.jspf.parser.DefaultTermsFactory;
 import org.apache.james.jspf.wiring.DNSServiceEnabled;
 import org.apache.james.jspf.wiring.LogEnabled;
+import org.apache.james.jspf.wiring.MacroExpandEnabled;
 import org.apache.james.jspf.wiring.SPFCheckEnabled;
 import org.apache.james.jspf.wiring.WiringService;
 import org.jvyaml.Constructor;
@@ -51,6 +53,7 @@ public abstract class AbstractYamlTest extends TestCase {
     SPFYamlTestSuite data;
     String test;
     protected Logger log;
+    protected static MacroExpand macroExpand;
     protected static SPF spf;
     protected static SPFRecordParser parser;
     private static DNSService dns;
@@ -145,6 +148,9 @@ public abstract class AbstractYamlTest extends TestCase {
                         String[] path = component.getClass().toString().split("\\.");
                         ((LogEnabled) component).enableLogging(log.getChildLogger("dep").getChildLogger(path[path.length-1].toLowerCase()));
                     }
+                    if (component instanceof MacroExpandEnabled) {
+                        ((MacroExpandEnabled) component).enableMacroExpand(macroExpand);
+                    }
                     if (component instanceof DNSServiceEnabled) {
                         ((DNSServiceEnabled) component).enableDNSService(dns);
                     }
@@ -156,7 +162,8 @@ public abstract class AbstractYamlTest extends TestCase {
             }));
         }
         dns = new LoggingDNSService(getDNSService(), log.getChildLogger("dns"));
-        spf = new SPF(dns, parser, log.getChildLogger("spf"));
+        macroExpand = new MacroExpand(log.getChildLogger("macroExpand"), dns);
+        spf = new SPF(dns, parser, log.getChildLogger("spf"), macroExpand);
         /* PREVIOUS SLOW WAY 
         // we add this after the creation because it is a loop reference
         enabledServices.remove(DNSServiceEnabled.class);
@@ -220,7 +227,7 @@ public abstract class AbstractYamlTest extends TestCase {
      * @return
      */
     protected DNSService getDNSService() {
-        SPFYamlDNSService yamlDNSService = new SPFYamlDNSService((HashMap) data.getZonedata());
+        SPFYamlDNSService yamlDNSService = new SPFYamlDNSService(data.getZonedata());
         return yamlDNSService;
     }
 
@@ -300,7 +307,7 @@ public abstract class AbstractYamlTest extends TestCase {
                                 Object obj = hm.get(type);
                                 
                                 if (obj instanceof String) {
-                                    res.add((String) obj);
+                                    res.add(obj);
                                 } else if (obj instanceof ArrayList) {
                                     ArrayList a = (ArrayList) obj;
                                     StringBuffer sb = new StringBuffer();

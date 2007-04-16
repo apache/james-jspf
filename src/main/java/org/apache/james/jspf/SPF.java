@@ -32,6 +32,7 @@ import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.SPFResultException;
 import org.apache.james.jspf.exceptions.TempErrorException;
+import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.parser.DefaultSPF1Parser;
 import org.apache.james.jspf.parser.DefaultTermsFactory;
 import org.apache.james.jspf.policies.ChainPolicy;
@@ -49,6 +50,7 @@ import org.apache.james.jspf.policies.local.OverridePolicy;
 import org.apache.james.jspf.policies.local.TrustedForwarderPolicy;
 import org.apache.james.jspf.wiring.DNSServiceEnabled;
 import org.apache.james.jspf.wiring.LogEnabled;
+import org.apache.james.jspf.wiring.MacroExpandEnabled;
 import org.apache.james.jspf.wiring.SPFCheckEnabled;
 import org.apache.james.jspf.wiring.WiringServiceTable;
 
@@ -78,6 +80,8 @@ public class SPF implements SPFChecker {
     
     private boolean mustEquals = false;
 
+    private MacroExpand macroExpand;
+
     /**
      * Uses passed logger and passed dnsServicer
      * 
@@ -91,6 +95,8 @@ public class SPF implements SPFChecker {
         WiringServiceTable wiringService = new WiringServiceTable();
         wiringService.put(LogEnabled.class, this.log);
         wiringService.put(DNSServiceEnabled.class, this.dnsProbe);
+        this.macroExpand = new MacroExpand(logger.getChildLogger("macroExpand"), this.dnsProbe);
+        wiringService.put(MacroExpandEnabled.class, this.macroExpand);
         this.parser = new DefaultSPF1Parser(logger.getChildLogger("parser"), new DefaultTermsFactory(logger.getChildLogger("termsfactory"), wiringService));
         // We add this after the parser creation because services cannot be null
         wiringService.put(SPFCheckEnabled.class, this.parser);
@@ -104,11 +110,12 @@ public class SPF implements SPFChecker {
      * @param parser the parser to use
      * @param logger the logger to use
      */
-    public SPF(DNSService dnsProbe, SPFRecordParser parser, Logger logger) {
+    public SPF(DNSService dnsProbe, SPFRecordParser parser, Logger logger, MacroExpand macroExpand) {
         super();
         this.dnsProbe = dnsProbe;
         this.parser = parser;
         this.log = logger;
+        this.macroExpand = macroExpand;
     }
 
     /**
@@ -130,7 +137,6 @@ public class SPF implements SPFChecker {
         try {
             // Setup the data
             spfData = new SPF1Data(mailFrom, hostName, ipAddress);
-            spfData.enableDNSService(dnsProbe);
             checkSPF(spfData);
             String resultChar = spfData.getCurrentResult() != null ? spfData.getCurrentResult() : "";
             result = SPF1Utils.resultToName(resultChar);
@@ -222,7 +228,7 @@ public class SPF implements SPFChecker {
 
         policies.add(new NeutralIfNotMatchPolicy());
 
-        policies.add(new DefaultExplanationPolicy(log, defaultExplanation));
+        policies.add(new DefaultExplanationPolicy(log, defaultExplanation, macroExpand));
         
         policies.add(new InitialChecksPolicy());
         

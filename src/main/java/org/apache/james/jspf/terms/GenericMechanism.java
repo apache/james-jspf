@@ -28,12 +28,13 @@ import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.wiring.LogEnabled;
+import org.apache.james.jspf.wiring.MacroExpandEnabled;
 
 /**
  * This abstract class represent a gerneric mechanism
  *  
  */
-public abstract class GenericMechanism implements Mechanism, Configurable, LogEnabled {
+public abstract class GenericMechanism implements Mechanism, Configurable, LogEnabled, MacroExpandEnabled {
 
     /**
      * ABNF: ip4-cidr-length = "/" 1*DIGIT
@@ -56,6 +57,8 @@ public abstract class GenericMechanism implements Mechanism, Configurable, LogEn
 
     protected Logger log;
 
+    protected MacroExpand macroExpand;
+
     /**
      * Expand the hostname
      * 
@@ -68,7 +71,7 @@ public abstract class GenericMechanism implements Mechanism, Configurable, LogEn
             host = spfData.getCurrentDomain();
         } else {
             // throws a PermErrorException that we cat pass through
-            host = new MacroExpand(log).expand(host, spfData, MacroExpand.DOMAIN);
+            host = macroExpand.expand(host, spfData, MacroExpand.DOMAIN);
         }
         return host;
     }
@@ -98,4 +101,10 @@ public abstract class GenericMechanism implements Mechanism, Configurable, LogEn
         this.log = logger;
     }
 
+    /**
+     * @see org.apache.james.jspf.wiring.MacroExpandEnabled#enableMacroExpand(org.apache.james.jspf.macro.MacroExpand)
+     */
+    public void enableMacroExpand(MacroExpand macroExpand) {
+        this.macroExpand = macroExpand;
+    }
 }

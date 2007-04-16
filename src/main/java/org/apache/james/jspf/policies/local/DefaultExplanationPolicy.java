@@ -44,20 +44,24 @@ public final class DefaultExplanationPolicy extends AbstractNestedPolicy {
      * the default explanation
      */
     private String defExplanation;
+    
+    private MacroExpand macroExpand;
 
     /**
+     * @param macroExpand 
      * @param spf
      */
-    public DefaultExplanationPolicy(Logger log, String explanation) {
+    public DefaultExplanationPolicy(Logger log, String explanation, MacroExpand macroExpand) {
         this.log = log;
         this.defExplanation = explanation;
+        this.macroExpand = macroExpand;
     }
 
     /**
      * @see org.apache.james.jspf.policies.AbstractNestedPolicy#getSPFRecordPostFilter(java.lang.String, org.apache.james.jspf.core.SPF1Record)
      */
     protected SPF1Record getSPFRecordPostFilter(String currentDomain, SPF1Record spfRecord) throws PermErrorException, TempErrorException, NoneException, NeutralException {
-        // Default explanation policy
+        // Default explanation policy.
         spfRecord.getModifiers().add(new SPFChecker() {
             public void checkSPF(SPF1Data spfData) throws PermErrorException, NoneException, TempErrorException, NeutralException {
                 
@@ -70,8 +74,7 @@ public final class DefaultExplanationPolicy extends AbstractNestedPolicy {
                             explanation = defExplanation;
                         }
                         try {
-                            explanation = new MacroExpand(log)
-                                    .expand(explanation, spfData, MacroExpand.EXPLANATION);
+                            explanation = macroExpand.expand(explanation, spfData, MacroExpand.EXPLANATION);
                             
                             spfData.setExplanation(explanation);
                         } catch (PermErrorException e) {

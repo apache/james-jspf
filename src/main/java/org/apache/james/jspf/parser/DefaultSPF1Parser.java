@@ -336,7 +336,7 @@ public class DefaultSPF1Parser implements SPFRecordParser {
                 Configuration subres = new MatcherBasedConfiguration(res, k, c
                         .getMatchSize());
                 try {
-                    return termsFactory.createTerm(c, subres);
+                    return termsFactory.createTerm(c.getTermDef(), subres);
                 } catch (InstantiationException e) {
                     e.printStackTrace();
                     // TODO is it ok to use a Runtime for this? Or should we use a PermError here?

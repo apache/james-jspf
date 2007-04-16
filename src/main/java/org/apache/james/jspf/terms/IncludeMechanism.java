@@ -34,13 +34,14 @@ import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.util.SPFTermsRegexps;
 import org.apache.james.jspf.wiring.LogEnabled;
+import org.apache.james.jspf.wiring.MacroExpandEnabled;
 import org.apache.james.jspf.wiring.SPFCheckEnabled;
 
 /**
  * This class represent the incude mechanism
  * 
  */
-public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SPFCheckEnabled {
+public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SPFCheckEnabled, MacroExpandEnabled {
 
     /**
      * ABNF: include = "include" ":" domain-spec
@@ -53,6 +54,8 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
     protected Logger log;
 
     private SPFChecker spfChecker;
+
+    private MacroExpand macroExpand;
 
     /**
      * Set the host which should be used for include
@@ -72,7 +75,7 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
         spfData.increaseCurrentDepth();      
         
         // throws a PermErrorException that we can pass through
-        host = new MacroExpand(log).expand(host, spfData, MacroExpand.DOMAIN);
+        host = macroExpand.expand(host, spfData, MacroExpand.DOMAIN);
 
         String prevRes = spfData.getCurrentResult();
         String prevHost = spfData.getCurrentDomain();
@@ -149,5 +152,12 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
      */
     public void enableSPFChecking(SPFChecker checker) {
         this.spfChecker = checker;
+    }
+
+    /**
+     * @see org.apache.james.jspf.wiring.MacroExpandEnabled#enableMacroExpand(org.apache.james.jspf.macro.MacroExpand)
+     */
+    public void enableMacroExpand(MacroExpand macroExpand) {
+        this.macroExpand = macroExpand;
     }
 }

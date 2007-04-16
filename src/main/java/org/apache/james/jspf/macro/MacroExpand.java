@@ -26,13 +26,20 @@ package org.apache.james.jspf.macro;
  * 
  */
 
+import org.apache.james.jspf.SPF1Utils;
+import org.apache.james.jspf.core.DNSService;
+import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.Logger;
+import org.apache.james.jspf.core.SPF1Data;
+import org.apache.james.jspf.core.DNSService.TimeoutException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.util.SPFTermsRegexps;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -50,6 +57,8 @@ public class MacroExpand {
 
     private Logger log;
 
+    private DNSService dnsProbe;
+
     public static final boolean EXPLANATION = true;
     
     public static final boolean DOMAIN = false;
@@ -60,7 +69,7 @@ public class MacroExpand {
      * @param spfData the MacroData to use
      * @param logger the logget to use
      */
-    public MacroExpand(Logger logger) {
+    public MacroExpand(Logger logger, DNSService dnsProbe) {
         // This matches 2 groups
         domainSpecPattern = Pattern.compile(SPFTermsRegexps.DOMAIN_SPEC_REGEX_R);
         // The real pattern replacer
@@ -69,6 +78,7 @@ public class MacroExpand {
         macroLettersExpPattern = Pattern.compile(SPFTermsRegexps.MACRO_LETTER_PATTERN_EXP);
         macroLettersPattern = Pattern.compile(SPFTermsRegexps.MACRO_LETTER_PATTERN);
         log = logger;
+        this.dnsProbe = dnsProbe;
     }
     
     public String expand(String input, MacroData macroData, boolean isExplanation) throws PermErrorException {
@@ -306,10 +316,55 @@ public class MacroExpand {
             rValue = macroData.getReadableIP();
         } else if (variable.equalsIgnoreCase("p")) {
             rValue = macroData.getClientDomain();
+            if (rValue == null) {
+                rValue = "unknown";
+                if (macroData instanceof SPF1Data) {
+                    SPF1Data spf1data = (SPF1Data) macroData;
+                    try {
+                        boolean ip6 = IPAddr.isIPV6(spf1data.getIpAddress());
+                        List records = dnsProbe.getRecords(IPAddr.getAddress(spf1data.getIpAddress()).getReverseIP(), DNSService.PTR);
+    
+                        if (records != null && records.size() > 0) {
+                            String record = (String) records.get(0);
+                            records = dnsProbe.getRecords(record, ip6 ? DNSService.AAAA : DNSService.A);
+                            if (records != null && records.size() > 0) {
+                                Iterator i = records.iterator();
+                                while (i.hasNext()) {
+                                    String next = (String) i.next();
+                                    if (IPAddr.getAddress(spf1data.getIpAddress()).toString().equals(IPAddr.getAddress(next).toString())) {
+                                        rValue = record;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    } catch (TimeoutException e) {
+                        // just return the default "unknown".
+                    } catch (PermErrorException e) {
+                        // just return the default "unknown".
+                    }
+                    spf1data.setClientDomain(rValue);
+                }
+            }
         } else if (variable.equalsIgnoreCase("o")) {
             rValue = macroData.getSenderDomain();
         } else if (variable.equalsIgnoreCase("r")) {
             rValue = macroData.getReceivingDomain();
+            if (rValue == null) {
+                rValue = "unknown";
+                List dNames = dnsProbe.getLocalDomainNames();
+
+                for (int i = 0; i < dNames.size(); i++) {
+                    // check if the domainname is a FQDN
+                    if (SPF1Utils.checkFQDN(dNames.get(i).toString())) {
+                        rValue = dNames.get(i).toString();
+                        if (macroData instanceof SPF1Data) {
+                            ((SPF1Data) macroData).setReceivingDomain(rValue);
+                        }
+                        break;
+                    }
+                }
+            }
         }
 
         if (rValue == null) {

@@ -103,8 +103,8 @@ public class MacroExpandTest extends TestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
-        defIp4me = new MacroExpand(new ConsoleLogger());
-        defIp6me = new MacroExpand(new ConsoleLogger());
+        defIp4me = new MacroExpand(new ConsoleLogger(), null);
+        defIp6me = new MacroExpand(new ConsoleLogger(), null);
     }
 
     public void testPercS() throws PermErrorException {
