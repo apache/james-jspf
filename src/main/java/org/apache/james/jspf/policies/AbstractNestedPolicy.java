@@ -40,21 +40,13 @@ public abstract class AbstractNestedPolicy implements NestedPolicy, Policy {
         SPF1Record res = getSPFRecordOverride(currentDomain);
         if (res == null && childPolicy != null) {
             res = childPolicy.getSPFRecord(currentDomain);
-            if (res == null) {
-                res = getSPFRecordFallback(currentDomain);
-            } else {
-                res = getSPFRecordPostFilter(currentDomain, res);
-            }
+            res = getSPFRecordPostFilter(currentDomain, res);
         }
         return res;
     }
 
     protected SPF1Record getSPFRecordPostFilter(String currentDomain, SPF1Record res) throws PermErrorException, TempErrorException, NoneException, NeutralException {
         return res;
-    }
-
-    protected SPF1Record getSPFRecordFallback(String currentDomain) throws PermErrorException, TempErrorException, NoneException, NeutralException {
-        return null;
     }
 
     protected SPF1Record getSPFRecordOverride(String currentDomain) throws PermErrorException, TempErrorException, NoneException, NeutralException {

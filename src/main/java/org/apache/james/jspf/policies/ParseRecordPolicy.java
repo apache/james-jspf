@@ -40,6 +40,7 @@ public class ParseRecordPolicy extends AbstractNestedPolicy {
      * @see org.apache.james.jspf.policies.AbstractNestedPolicy#getSPFRecordPostFilter(java.lang.String, org.apache.james.jspf.core.SPF1Record)
      */
     protected SPF1Record getSPFRecordPostFilter(String currentDomain, SPF1Record spfRecord) throws PermErrorException, NoneException, NeutralException {
+        if (spfRecord == null) return null;
         // parse the record
         return parser.parse(spfRecord.getRecord());
     }

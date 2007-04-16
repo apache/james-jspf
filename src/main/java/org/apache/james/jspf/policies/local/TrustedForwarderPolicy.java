@@ -47,6 +47,7 @@ public class TrustedForwarderPolicy extends AbstractNestedPolicy {
     }
 
     protected SPF1Record getSPFRecordPostFilter(String currentDomain, SPF1Record spfRecord) throws PermErrorException, TempErrorException, NoneException, NeutralException {
+        if (spfRecord == null) return null;
         String mechanism = ((Directive) spfRecord.getDirectives().get(spfRecord.getDirectives().size())).toString();
         if (mechanism.equals("-all") || mechanism.equals("?all")) {
             log.debug("Add TrustedForwarderPolicy = include:"+TRUSTED_FORWARDER_HOST);

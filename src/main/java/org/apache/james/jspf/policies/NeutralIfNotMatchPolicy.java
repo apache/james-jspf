@@ -37,6 +37,7 @@ public class NeutralIfNotMatchPolicy extends AbstractNestedPolicy {
      * @see org.apache.james.jspf.policies.AbstractNestedPolicy#getSPFRecordPostFilter(java.lang.String, org.apache.james.jspf.core.SPF1Record)
      */
     protected SPF1Record getSPFRecordPostFilter(String currentDomain, SPF1Record spfRecord) throws PermErrorException, TempErrorException, NoneException, NeutralException {
+        if (spfRecord == null) return null;
         // Set the result to NEUTRAL if at least a directive is present and it didn't match
         // Maybe we should simply append a "?all" at the end, as modifier
         if (spfRecord.getDirectives().size() > 0) {

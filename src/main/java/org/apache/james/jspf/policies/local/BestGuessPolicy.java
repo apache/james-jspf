@@ -29,8 +29,15 @@ import org.apache.james.jspf.policies.AbstractNestedPolicy;
 
 public class BestGuessPolicy extends AbstractNestedPolicy {
 
-    protected SPF1Record getSPFRecordFallback(String currentDomain) throws PermErrorException, TempErrorException, NoneException, NeutralException {
-        // We should use bestguess
-        return new SPF1Record(SPF1Utils.BEST_GUESS_RECORD);
+    /**
+     * @see org.apache.james.jspf.policies.AbstractNestedPolicy#getSPFRecordPostFilter(java.lang.String, org.apache.james.jspf.core.SPF1Record)
+     */
+    protected SPF1Record getSPFRecordPostFilter(String currentDomain, SPF1Record res) throws PermErrorException, TempErrorException, NoneException, NeutralException {
+        if (res == null) {
+            // We should use bestguess
+            return new SPF1Record(SPF1Utils.BEST_GUESS_RECORD);
+        } else {
+            return res;
+        }
     }
 }

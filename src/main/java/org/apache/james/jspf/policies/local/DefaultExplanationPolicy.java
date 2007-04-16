@@ -61,6 +61,7 @@ public final class DefaultExplanationPolicy extends AbstractNestedPolicy {
      * @see org.apache.james.jspf.policies.AbstractNestedPolicy#getSPFRecordPostFilter(java.lang.String, org.apache.james.jspf.core.SPF1Record)
      */
     protected SPF1Record getSPFRecordPostFilter(String currentDomain, SPF1Record spfRecord) throws PermErrorException, TempErrorException, NoneException, NeutralException {
+        if (spfRecord == null) return null;
         // Default explanation policy.
         spfRecord.getModifiers().add(new SPFChecker() {
             public void checkSPF(SPF1Data spfData) throws PermErrorException, NoneException, TempErrorException, NeutralException {

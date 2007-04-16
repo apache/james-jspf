@@ -30,9 +30,13 @@ import org.apache.james.jspf.exceptions.TempErrorException;
  */
 public class NoSPFRecordFoundPolicy extends AbstractNestedPolicy {
     /**
-     * @see org.apache.james.jspf.policies.AbstractNestedPolicy#getSPFRecordFallback(java.lang.String)
+     * @see org.apache.james.jspf.policies.AbstractNestedPolicy#getSPFRecordPostFilter(java.lang.String, org.apache.james.jspf.core.SPF1Record)
      */
-    protected SPF1Record getSPFRecordFallback(String currentDomain) throws PermErrorException, TempErrorException, NoneException, NeutralException {
-        throw new NoneException("No SPF record found for host: " + currentDomain);
+    protected SPF1Record getSPFRecordPostFilter(String currentDomain, SPF1Record res) throws PermErrorException, TempErrorException, NoneException, NeutralException {
+        if (res == null) {
+            throw new NoneException("No SPF record found for host: " + currentDomain);
+        } else {
+            return res;
+        }
     }
 }
