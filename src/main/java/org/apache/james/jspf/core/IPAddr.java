@@ -91,14 +91,10 @@ public class IPAddr {
      * @return true or false
      */
     public static boolean isIPAddr(String data) {
-        if (data instanceof String) {
-            try {
-                getAddress((String) data);
-                return true;
-            } catch (PermErrorException e) {
-                return false;
-            }
-        } else {
+        try {
+            getAddress(data);
+            return true;
+        } catch (PermErrorException e) {
             return false;
         }
     }
