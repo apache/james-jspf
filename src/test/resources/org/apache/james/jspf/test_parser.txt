@@ -265,11 +265,14 @@ rec-in          /.*/ SPF record in:  v=spf1 a:/x32.com//12 redirect=asdf.net
 err-msg         /.*/ no errors
 rec-out         /.*/ SPF record:  v=spf1 a:/x32.com//12 redirect:asdf.net
 
-spftest spf "v=spf1 a:/x32.com//12 redirect=softfail"
-rec-in          /.*/ SPF record in:  v=spf1 a:/x32.com//12 redirect=softfail
-err-msg         jspf no errors
-err-msg         /.*/ Warning: Hostname has a missing or invalid TLD
-rec-out         /.*/ SPF record:  v=spf1 a:/x32.com//12 redirect:softfail
+# This is currently under discussion in the RFC4408 errata.
+# http://www.openspf.org/RFC_4408/Errata#empty-exp
+# Some of the proposed solution would declare this a a perm failure, others as a no error.
+#spftest spf "v=spf1 a:/x32.com//12 redirect=softfail"
+#rec-in          /.*/ SPF record in:  v=spf1 a:/x32.com//12 redirect=softfail
+#err-msg         jspf no errors
+#err-msg         /.*/ Warning: Hostname has a missing or invalid TLD
+#rec-out         /.*/ SPF record:  v=spf1 a:/x32.com//12 redirect:softfail
 
 spftest spf "v=spf1 a:/x32.com//12"
 rec-in          /.*/ SPF record in:  v=spf1 a:/x32.com//12

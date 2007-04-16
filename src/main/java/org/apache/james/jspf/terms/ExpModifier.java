@@ -39,9 +39,13 @@ public class ExpModifier extends GenericModifier implements DNSServiceEnabled {
 
     /**
      * ABNF: explanation = "exp" "=" domain-spec
+     * 
+     * NOTE: the last +"?" has been added to support RFC4408 ERRATA for the EXP modifier.
+     * An "exp=" should not result in a perm error but should be ignored.
+     * Errata: http://www.openspf.org/RFC_4408/Errata#empty-exp
      */
     public static final String REGEX = "[eE][xX][pP]" + "\\="
-            + SPFTermsRegexps.DOMAIN_SPEC_REGEX;
+            + SPFTermsRegexps.DOMAIN_SPEC_REGEX+"?";
 
     private DNSService dnsService;
 
@@ -56,6 +60,11 @@ public class ExpModifier extends GenericModifier implements DNSServiceEnabled {
     protected void checkSPFLogged(SPF1Data spfData) throws PermErrorException {
         String exp = null;
         String host = getHost();
+        
+        // RFC4408 Errata: http://www.openspf.org/RFC_4408/Errata#empty-exp
+        if (host == null) {
+            return;
+        }
 
         // If we should ignore the explanation we don't have to run this class
         if (spfData.ignoreExplanation() == true)
