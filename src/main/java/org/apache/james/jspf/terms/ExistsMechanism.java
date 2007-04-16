@@ -24,7 +24,6 @@ import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
-import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.util.SPFTermsRegexps;
 import org.apache.james.jspf.wiring.DNSServiceEnabled;
 
@@ -56,9 +55,6 @@ public class ExistsMechanism extends GenericMechanism implements DNSServiceEnabl
         spfData.increaseCurrentDepth();
 
         String host = expandHost(spfData);
-
-        // throws a PermErrorException that we can pass through
-        host = new MacroExpand(spfData, log).expandDomain(host);
 
         try {
             aRecords = dnsService.getRecords(host,DNSService.A);
