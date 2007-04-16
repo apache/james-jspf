@@ -72,7 +72,7 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
         spfData.increaseCurrentDepth();      
         
         // throws a PermErrorException that we can pass through
-        host = new MacroExpand(spfData, log).expandDomain(host);
+        host = new MacroExpand(log).expand(host, spfData, MacroExpand.DOMAIN);
 
         String prevRes = spfData.getCurrentResult();
         String prevHost = spfData.getCurrentDomain();

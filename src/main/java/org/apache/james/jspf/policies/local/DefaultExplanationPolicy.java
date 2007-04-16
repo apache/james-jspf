@@ -70,8 +70,10 @@ public final class DefaultExplanationPolicy extends AbstractNestedPolicy {
                             explanation = defExplanation;
                         }
                         try {
-                            spfData.setExplanation(new MacroExpand(spfData, log)
-                                    .expandExplanation(explanation));
+                            explanation = new MacroExpand(log)
+                                    .expand(explanation, spfData, MacroExpand.EXPLANATION);
+                            
+                            spfData.setExplanation(explanation);
                         } catch (PermErrorException e) {
                             // Should never happen !
                             log.debug("Invalid defaulfExplanation: " + explanation);

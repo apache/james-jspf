@@ -75,7 +75,7 @@ public class ExpModifier extends GenericModifier implements DNSServiceEnabled {
         if (spfData.getCurrentResult()== null || !spfData.getCurrentResult().equals(SPF1Constants.FAIL))
             return;
 
-        host = new MacroExpand(spfData, log).expandDomain(host);
+        host = new MacroExpand(log).expand(host, spfData, MacroExpand.DOMAIN);
 
         try {
             try {
@@ -86,8 +86,8 @@ public class ExpModifier extends GenericModifier implements DNSServiceEnabled {
             }
 
             if ((exp != null) && (!exp.equals(""))) {
-                spfData.setExplanation(new MacroExpand(spfData, log)
-                        .expandExplanation(exp));
+                spfData.setExplanation(new MacroExpand(log)
+                        .expand(exp, spfData, MacroExpand.EXPLANATION));
             } 
         } catch (PermErrorException e) {
             // TODO add logging here!

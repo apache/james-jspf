@@ -103,18 +103,18 @@ public class MacroExpandTest extends TestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
-        defIp4me = new MacroExpand(new rfcIP4MacroData(), new ConsoleLogger());
-        defIp6me = new MacroExpand(new rfcIP6MacroData(), new ConsoleLogger());
+        defIp4me = new MacroExpand(new ConsoleLogger());
+        defIp6me = new MacroExpand(new ConsoleLogger());
     }
 
     public void testPercS() throws PermErrorException {
         assertEquals("strong-bad@email.example.com", defIp4me
-                .expandDomain("%{s}"));
+                .expand("%{s}", new rfcIP4MacroData(), MacroExpand.DOMAIN));
     }
 
     public void testPercK() throws PermErrorException {
         try {
-            defIp4me.expandDomain("%{k}");
+            defIp4me.expand("%{k}", new rfcIP4MacroData(), MacroExpand.DOMAIN);
             fail("%{k} is not a valid expansion");
         } catch (PermErrorException e) {
         }
@@ -122,67 +122,67 @@ public class MacroExpandTest extends TestCase {
 
     public void testPercentAloneIsError() throws PermErrorException {
         try {
-            defIp4me.expandDomain("%{s}%");
+            defIp4me.expand("%{s}%", new rfcIP4MacroData(), MacroExpand.DOMAIN);
             fail("invalid percent at end of line");
         } catch (PermErrorException e) {
         }
     }
 
     public void testDoublePercent() throws PermErrorException {
-        assertEquals("%", defIp4me.expandDomain("%%"));
+        assertEquals("%", defIp4me.expand("%%", new rfcIP4MacroData(), MacroExpand.DOMAIN));
     }
 
     public void testPercO() throws PermErrorException {
-        assertEquals("email.example.com", defIp4me.expandDomain("%{o}"));
+        assertEquals("email.example.com", defIp4me.expand("%{o}", new rfcIP4MacroData(), MacroExpand.DOMAIN));
     }
 
     public void testPercD() throws PermErrorException {
-        assertEquals("email.example.com", defIp4me.expandDomain("%{d}"));
-        assertEquals("email.example.com", defIp4me.expandDomain("%{d4}"));
-        assertEquals("email.example.com", defIp4me.expandDomain("%{d3}"));
-        assertEquals("example.com", defIp4me.expandDomain("%{d2}"));
-        assertEquals("com", defIp4me.expandDomain("%{d1}"));
-        assertEquals("com.example.email", defIp4me.expandDomain("%{dr}"));
-        assertEquals("example.email", defIp4me.expandDomain("%{d2r}"));
+        assertEquals("email.example.com", defIp4me.expand("%{d}", new rfcIP4MacroData(), MacroExpand.DOMAIN));
+        assertEquals("email.example.com", defIp4me.expand("%{d4}", new rfcIP4MacroData(), MacroExpand.DOMAIN));
+        assertEquals("email.example.com", defIp4me.expand("%{d3}", new rfcIP4MacroData(), MacroExpand.DOMAIN));
+        assertEquals("example.com", defIp4me.expand("%{d2}", new rfcIP4MacroData(), MacroExpand.DOMAIN));
+        assertEquals("com", defIp4me.expand("%{d1}", new rfcIP4MacroData(), MacroExpand.DOMAIN));
+        assertEquals("com.example.email", defIp4me.expand("%{dr}", new rfcIP4MacroData(), MacroExpand.DOMAIN));
+        assertEquals("example.email", defIp4me.expand("%{d2r}", new rfcIP4MacroData(), MacroExpand.DOMAIN));
     }
 
     public void testPercL() throws PermErrorException {
-        assertEquals("strong-bad", defIp4me.expandDomain("%{l}"));
-        assertEquals("strong.bad", defIp4me.expandDomain("%{l-}"));
-        assertEquals("strong-bad", defIp4me.expandDomain("%{lr}"));
-        assertEquals("bad.strong", defIp4me.expandDomain("%{lr-}"));
-        assertEquals("strong", defIp4me.expandDomain("%{l1r-}"));
+        assertEquals("strong-bad", defIp4me.expand("%{l}", new rfcIP4MacroData(), MacroExpand.DOMAIN));
+        assertEquals("strong.bad", defIp4me.expand("%{l-}", new rfcIP4MacroData(), MacroExpand.DOMAIN));
+        assertEquals("strong-bad", defIp4me.expand("%{lr}", new rfcIP4MacroData(), MacroExpand.DOMAIN));
+        assertEquals("bad.strong", defIp4me.expand("%{lr-}", new rfcIP4MacroData(), MacroExpand.DOMAIN));
+        assertEquals("strong", defIp4me.expand("%{l1r-}", new rfcIP4MacroData(), MacroExpand.DOMAIN));
     }
 
     public void testExample1() throws PermErrorException {
         assertEquals("3.2.0.192.in-addr._spf.example.com", defIp4me
-                .expandDomain("%{ir}.%{v}._spf.%{d2}"));
+                .expand("%{ir}.%{v}._spf.%{d2}", new rfcIP4MacroData(), MacroExpand.DOMAIN));
     }
 
     public void testExample2() throws PermErrorException {
         assertEquals("bad.strong.lp._spf.example.com", defIp4me
-                .expandDomain("%{lr-}.lp._spf.%{d2}"));
+                .expand("%{lr-}.lp._spf.%{d2}", new rfcIP4MacroData(), MacroExpand.DOMAIN));
     }
 
     public void testExample3() throws PermErrorException {
         assertEquals("bad.strong.lp.3.2.0.192.in-addr._spf.example.com",
-                defIp4me.expandDomain("%{lr-}.lp.%{ir}.%{v}._spf.%{d2}"));
+                defIp4me.expand("%{lr-}.lp.%{ir}.%{v}._spf.%{d2}", new rfcIP4MacroData(), MacroExpand.DOMAIN));
     }
 
     public void testExample4() throws PermErrorException {
         assertEquals("3.2.0.192.in-addr.strong.lp._spf.example.com", defIp4me
-                .expandDomain("%{ir}.%{v}.%{l1r-}.lp._spf.%{d2}"));
+                .expand("%{ir}.%{v}.%{l1r-}.lp._spf.%{d2}", new rfcIP4MacroData(), MacroExpand.DOMAIN));
     }
 
     public void testExample5() throws PermErrorException {
         assertEquals("example.com.trusted-domains.example.net", defIp4me
-                .expandDomain("%{d2}.trusted-domains.example.net"));
+                .expand("%{d2}.trusted-domains.example.net", new rfcIP4MacroData(), MacroExpand.DOMAIN));
     }
 
     public void testExample6_ipv6() throws PermErrorException {
         assertEquals(
                 "1.0.B.C.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.B.D.0.1.0.0.2.ip6._spf.example.com",
-                defIp6me.expandDomain("%{ir}.%{v}._spf.%{d2}"));
+                defIp6me.expand("%{ir}.%{v}._spf.%{d2}", new rfcIP6MacroData(), MacroExpand.DOMAIN));
     }
 
 }

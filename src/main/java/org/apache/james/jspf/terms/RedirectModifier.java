@@ -67,7 +67,7 @@ public class RedirectModifier extends GenericModifier implements SPFCheckEnabled
             spfData.increaseCurrentDepth();
 
             // throws a PermErrorException that we can pass through
-            host = new MacroExpand(spfData, log).expandDomain(host);
+            host = new MacroExpand(log).expand(host, spfData, MacroExpand.DOMAIN);
 
             spfData.setCurrentDomain(host);
 

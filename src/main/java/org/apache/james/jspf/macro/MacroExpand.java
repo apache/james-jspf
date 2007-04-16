@@ -38,8 +38,6 @@ import java.util.regex.Pattern;
 
 public class MacroExpand {
 
-    private MacroData macroData;
-
     private Pattern domainSpecPattern;
 
     private Pattern macroStringPattern;
@@ -52,23 +50,33 @@ public class MacroExpand {
 
     private Logger log;
 
+    public static final boolean EXPLANATION = true;
+    
+    public static final boolean DOMAIN = false;
+
     /**
      * Construct MacroExpand
      * 
      * @param spfData the MacroData to use
      * @param logger the logget to use
      */
-    public MacroExpand(MacroData macroData, Logger logger) {
-        this.macroData = macroData;
+    public MacroExpand(Logger logger) {
         // This matches 2 groups
         domainSpecPattern = Pattern.compile(SPFTermsRegexps.DOMAIN_SPEC_REGEX_R);
         // The real pattern replacer
         macroStringPattern = Pattern.compile(SPFTermsRegexps.MACRO_STRING_REGEX_TOKEN);
         // The macro letters pattern
-        macroLettersPattern = Pattern.compile(SPFTermsRegexps.MACRO_LETTER_PATTERN);
-        // The macro letters pattern for explanation
         macroLettersExpPattern = Pattern.compile(SPFTermsRegexps.MACRO_LETTER_PATTERN_EXP);
+        macroLettersPattern = Pattern.compile(SPFTermsRegexps.MACRO_LETTER_PATTERN);
         log = logger;
+    }
+    
+    public String expand(String input, MacroData macroData, boolean isExplanation) throws PermErrorException {
+        if (isExplanation) {
+            return expandExplanation(input, macroData);
+        } else {
+            return expandDomain(input, macroData);
+        }
     }
 
     /**
@@ -80,7 +88,7 @@ public class MacroExpand {
      * @throws PermErrorException
      *             Get thrown if invalid macros are used
      */
-    public String expandExplanation(String input) throws PermErrorException {
+    private String expandExplanation(String input, MacroData macroData) throws PermErrorException {
 
         log.debug("Start do expand explanation: " + input);
 
@@ -88,7 +96,7 @@ public class MacroExpand {
         StringBuffer res = new StringBuffer();
         for (int i = 0; i < parts.length; i++) {
             if (i > 0) res.append(" ");
-            res.append(expandMacroString(parts[i], true));
+            res.append(expandMacroString(parts[i], macroData, true));
         }
         log.debug("Done expand explanation: " + res);
         
@@ -104,7 +112,7 @@ public class MacroExpand {
      * @throws PermErrorException
      *             This get thrown if invalid macros are used
      */
-    public String expandDomain(String input) throws PermErrorException {
+    private String expandDomain(String input, MacroData macroData) throws PermErrorException {
 
         log.debug("Start expand domain: " + input);
 
@@ -115,17 +123,17 @@ public class MacroExpand {
 
         StringBuffer res = new StringBuffer();
         if (inputMatcher.group(1) != null && inputMatcher.group(1).length() > 0) {
-            res.append(expandMacroString(inputMatcher.group(1), false));
+            res.append(expandMacroString(inputMatcher.group(1), macroData, false));
         }
         if (inputMatcher.group(2) != null && inputMatcher.group(2).length() > 0) {
             if (inputMatcher.group(2).startsWith(".")) {
                 res.append(inputMatcher.group(2));
             } else {
-                res.append(expandMacroString(inputMatcher.group(2), false));
+                res.append(expandMacroString(inputMatcher.group(2), macroData, false));
             }
         }
         
-        String domainName = expandMacroString(input, false);
+        String domainName = expandMacroString(input, macroData, false);
         // reduce to less than 255 characters, deleting subdomains from left
         int split = 0;
         while (domainName.length() > 255 && split > -1) {
@@ -147,7 +155,7 @@ public class MacroExpand {
      * @throws PermErrorException
      *             This get thrown if invalid macros are used
      */
-    private String expandMacroString(String input, boolean isExplanation) throws PermErrorException {
+    private String expandMacroString(String input, MacroData macroData, boolean isExplanation) throws PermErrorException {
 
         StringBuffer decodedValue = new StringBuffer();
         Matcher inputMatcher = macroStringPattern.matcher(input);
@@ -164,7 +172,7 @@ public class MacroExpand {
                     macroCell = input.substring(inputMatcher.start() + 2, inputMatcher
                             .end() - 1);
                     inputMatcher
-                            .appendReplacement(decodedValue, replaceCell(macroCell, isExplanation));
+                            .appendReplacement(decodedValue, replaceCell(macroCell, macroData, isExplanation));
                 } else if (match2.length() == 2 && match2.startsWith("%")) {
                     // handle the % escaping
                     inputMatcher.appendReplacement(decodedValue, match2.substring(1));
@@ -192,7 +200,7 @@ public class MacroExpand {
      * @throws PermErrorException
      *             Get thrown if an error in processing happen
      */
-    private String replaceCell(String replaceValue, boolean isExplanation) throws PermErrorException {
+    private String replaceCell(String replaceValue, MacroData macroData, boolean isExplanation) throws PermErrorException {
 
         String variable = "";
         String domainNumber = "";
@@ -212,9 +220,9 @@ public class MacroExpand {
         }
         if (cellMatcher.find()) {
             if (cellMatcher.group().toUpperCase().equals(cellMatcher.group())) {
-                variable = encodeURL(matchMacro(cellMatcher.group()));
+                variable = encodeURL(matchMacro(cellMatcher.group(), macroData));
             } else {
-                variable = matchMacro(cellMatcher.group());
+                variable = matchMacro(cellMatcher.group(), macroData);
             }
             // Remove Macro code so that r macro code does not clash with r the
             // reverse modifier
@@ -275,7 +283,7 @@ public class MacroExpand {
      *             Get thrown if the given variable is an unknown macro
      * 
      */
-    private String matchMacro(String macro) throws PermErrorException {
+    private String matchMacro(String macro, MacroData macroData) throws PermErrorException {
 
         String rValue = null;
 
