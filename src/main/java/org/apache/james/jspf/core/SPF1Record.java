@@ -70,13 +70,6 @@ public class SPF1Record {
     public String getRecord() {
         return record;
     }
-
-    /**
-     * @param record a record in its string source format
-     */
-    public void setRecord(String record) {
-        this.record = record;
-    }
     
     /**
      * Return a single iterator over Directives and Modifiers
