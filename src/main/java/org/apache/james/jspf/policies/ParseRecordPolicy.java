@@ -42,6 +42,10 @@ public class ParseRecordPolicy implements PolicyPostFilter {
     public SPF1Record getSPFRecord(String currentDomain, SPF1Record spfRecord) throws PermErrorException, NoneException, NeutralException {
         if (spfRecord == null) return null;
         // parse the record
-        return parser.parse(spfRecord.getRecord());
+        if (spfRecord.getRecord() != null) {
+            return parser.parse(spfRecord.getRecord());
+        } else {
+            return spfRecord;
+        }
     }
 }
