@@ -35,11 +35,21 @@ public class DNSRequest {
         this.hostname = hostname;
         this.recordType = recordType;
     }
-    
+
+    /**
+     * Return the hostname to process the request for
+     * 
+     * @return the hostname
+     */
     public String getHostname() {
         return hostname;
     }
 
+    /**
+     * Return the RecordType which is use for this request
+     * 
+     * @return the RecordType
+     */
     public int getRecordType() {
         return recordType;
     }

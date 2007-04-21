@@ -7,12 +7,12 @@ source from subversion or a source tarball.
 
 Steps:
 
-1) Install maven2 (v2.0.4 as of the time of this writing)
+1) Install maven2 (v2.0.6 as of the time of this writing)
 
 2) Add maven2 to your path.  For me, I do the following:
-   $ tar zxvf maven-2.0.4.tar.gz
-   $ mv maven-2.0.4 /usr/local
-   $ ln -sf /usr/local/maven-2.0.4/bin/mvn /usr/local/bin/mvn
+   $ tar zxvf maven-2.0.6.tar.gz
+   $ mv maven-2.0.6 /usr/local
+   $ ln -sf /usr/local/maven-2.0.6/bin/mvn /usr/local/bin/mvn
 
  3) Change directory to jspf source dir
    $ cd jspf-x/

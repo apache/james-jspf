@@ -23,6 +23,10 @@ import org.apache.james.jspf.core.DNSService.TimeoutException;
 
 import java.util.List;
 
+/**
+ * Represent a DNSResponse
+ *
+ */
 public class DNSResponse {
     
     private List response;
@@ -39,6 +43,13 @@ public class DNSResponse {
         this.response = response;
     }
     
+    /**
+     * Returns the DNS response
+     * 
+     * @return the dns repsonse
+     * @throws TimeoutException get thrown if an timeout was returned while tried to 
+     *         process a dns request
+     */
     public List getResponse() throws TimeoutException {
         if (exception != null) {
             throw exception;
