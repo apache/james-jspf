@@ -24,7 +24,7 @@ import org.apache.james.jspf.core.Configurable;
 import org.apache.james.jspf.core.Configuration;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.Modifier;
-import org.apache.james.jspf.core.SPF1Data;
+import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.wiring.LogEnabled;
@@ -40,10 +40,10 @@ public abstract class GenericModifier implements Modifier, Configurable, LogEnab
     protected Logger log;
 
     /**
-     * @see org.apache.james.jspf.core.Modifier#run(SPF1Data)
+     * @see org.apache.james.jspf.core.Modifier#run(SPFSession)
      * 
      */
-    public void checkSPF(SPF1Data spfData) throws PermErrorException,
+    public void checkSPF(SPFSession spfData) throws PermErrorException,
             TempErrorException {
         log.debug("Processing modifier: " + this);
         checkSPFLogged(spfData);
@@ -51,7 +51,7 @@ public abstract class GenericModifier implements Modifier, Configurable, LogEnab
                 + spfData.getCurrentResult());
     }
     
-    protected abstract void checkSPFLogged(SPF1Data spfData) throws PermErrorException,
+    protected abstract void checkSPFLogged(SPFSession spfData) throws PermErrorException,
         TempErrorException;
 
 

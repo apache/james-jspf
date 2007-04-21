@@ -43,7 +43,7 @@ public interface Mechanism {
      * @throws NoneException
      *             Get thrown if no valid records was found
      */
-    public boolean run(SPF1Data spfData) throws PermErrorException,
+    public boolean run(SPFSession spfData) throws PermErrorException,
             TempErrorException, NoneException;
 
 }

@@ -24,6 +24,9 @@ import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.macro.MacroData;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * 
  * This Class is used as a container between the other classes. All necessary
@@ -31,7 +34,7 @@ import org.apache.james.jspf.macro.MacroData;
  * 
  */
 
-public class SPF1Data implements MacroData {
+public class SPFSession implements MacroData {
 
     private String ipAddress = ""; // also used for (i)<sending-host>
 
@@ -65,6 +68,8 @@ public class SPF1Data implements MacroData {
     private String currentResult = null;
 
     private boolean ignoreExplanation = false;
+    
+    private Map attributes = new HashMap();
 
     /**
      * Build the SPF1Data from the given parameters
@@ -82,7 +87,7 @@ public class SPF1Data implements MacroData {
      * @throws NoneException
      *             Get thrown if no valid emailaddress get passed
      */
-    public SPF1Data(String mailFrom, String heloDomain, String clientIP) throws PermErrorException, NoneException {
+    public SPFSession(String mailFrom, String heloDomain, String clientIP) throws PermErrorException, NoneException {
         super();
         this.mailFrom = mailFrom.trim();
         this.hostName = heloDomain.trim();
@@ -326,6 +331,26 @@ public class SPF1Data implements MacroData {
      */
     public boolean ignoreExplanation() {
         return ignoreExplanation;
+    }
+    
+    /**
+     * Retrieve a stored attribute
+     * 
+     * @param key the attribute key
+     * @return the stored attribute
+     */
+    public Object getAttribute(String key) {
+        return attributes.get(key);
+    }
+    
+    /**
+     * Sets a new attribute in the session
+     * 
+     * @param key attribute key
+     * @param value the value for this attribute
+     */
+    public void setAttribute(String key, Object value) {
+        this.attributes.put(key, value);
     }
     
 }

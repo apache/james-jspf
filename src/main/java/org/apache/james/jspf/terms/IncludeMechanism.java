@@ -25,7 +25,7 @@ import org.apache.james.jspf.core.Configuration;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.Mechanism;
 import org.apache.james.jspf.core.SPF1Constants;
-import org.apache.james.jspf.core.SPF1Data;
+import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
@@ -68,7 +68,7 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
      * @throws TempErrorException 
      *             if the dns return a temp error
      */
-    public boolean run(SPF1Data spfData) throws PermErrorException, TempErrorException {
+    public boolean run(SPFSession spfData) throws PermErrorException, TempErrorException {
         String host = getHost();
 
         // update currentDepth

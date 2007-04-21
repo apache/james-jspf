@@ -20,7 +20,7 @@
 
 package org.apache.james.jspf;
 
-import org.apache.james.jspf.core.SPF1Data;
+import org.apache.james.jspf.core.SPFSession;
 
 /**
  * This class is used to return the result of an SPF lookup.
@@ -43,7 +43,7 @@ public class SPFResult  {
      * @param explanation the explanation
      * @param spf1data the SPF1Data
      */
-    public SPFResult(String result, String explanation, SPF1Data spf1data) {
+    public SPFResult(String result, String explanation, SPFSession spf1data) {
         this.explanation = explanation;
         this.result = result;
         this.headerTextAsString = generateHeader(result, spf1data);
@@ -81,7 +81,7 @@ public class SPFResult  {
      * 
      * @param result The result we should use to generate the header
      */
-    private String generateHeader(String result, SPF1Data spfData) {
+    private String generateHeader(String result, SPFSession spfData) {
 
         StringBuffer headerText = new StringBuffer();
 

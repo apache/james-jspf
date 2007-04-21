@@ -20,7 +20,7 @@
 package org.apache.james.jspf.policies;
 
 import org.apache.james.jspf.core.SPF1Constants;
-import org.apache.james.jspf.core.SPF1Data;
+import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.core.SPF1Record;
 import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.exceptions.NeutralException;
@@ -42,7 +42,7 @@ public class NeutralIfNotMatchPolicy implements PolicyPostFilter {
         // Maybe we should simply append a "?all" at the end, as modifier
         if (spfRecord.getDirectives().size() > 0) {
             spfRecord.getModifiers().add(new SPFChecker() {
-                public void checkSPF(SPF1Data spfData) throws PermErrorException, NoneException, TempErrorException, NeutralException {
+                public void checkSPF(SPFSession spfData) throws PermErrorException, NoneException, TempErrorException, NeutralException {
                     // If no match was found set the result to neutral
                     if (spfData.getCurrentResult() == null) {
                         spfData.setCurrentResult(SPF1Constants.NEUTRAL);

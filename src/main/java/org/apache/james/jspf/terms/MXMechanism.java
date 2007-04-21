@@ -22,7 +22,7 @@ package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.IPAddr;
-import org.apache.james.jspf.core.SPF1Data;
+import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
@@ -47,9 +47,9 @@ public class MXMechanism extends AMechanism {
     /**
      * 
      * @throws NoneException 
-     * @see org.apache.james.jspf.core.GenericMechanism#run(org.apache.james.jspf.core.SPF1Data)
+     * @see org.apache.james.jspf.core.GenericMechanism#run(org.apache.james.jspf.core.SPFSession)
      */
-    public boolean run(SPF1Data spfData) throws PermErrorException,
+    public boolean run(SPFSession spfData) throws PermErrorException,
             TempErrorException{
         IPAddr checkAddress;
 

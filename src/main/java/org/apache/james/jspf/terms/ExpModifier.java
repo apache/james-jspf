@@ -22,7 +22,7 @@ package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.SPF1Constants;
-import org.apache.james.jspf.core.SPF1Data;
+import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
@@ -60,7 +60,7 @@ public class ExpModifier extends GenericModifier implements DNSServiceEnabled, M
      *            The SPF1Data which should used
      * @throws PermErrorException 
      */
-    protected void checkSPFLogged(SPF1Data spfData) throws PermErrorException {
+    protected void checkSPFLogged(SPFSession spfData) throws PermErrorException {
         String exp = null;
         String host = getHost();
         

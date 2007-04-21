@@ -23,7 +23,7 @@ package org.apache.james.jspf;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPF1Constants;
-import org.apache.james.jspf.core.SPF1Data;
+import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.core.SPF1Record;
 import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.core.SPFRecordParser;
@@ -130,13 +130,13 @@ public class SPF implements SPFChecker {
      * @return result The SPFResult
      */
     public SPFResult checkSPF(String ipAddress, String mailFrom, String hostName) {
-        SPF1Data spfData = null;
+        SPFSession spfData = null;
         String result = null;
         String explanation = null;
 
         try {
             // Setup the data
-            spfData = new SPF1Data(mailFrom, hostName, ipAddress);
+            spfData = new SPFSession(mailFrom, hostName, ipAddress);
             checkSPF(spfData);
             String resultChar = spfData.getCurrentResult() != null ? spfData.getCurrentResult() : "";
             result = SPF1Utils.resultToName(resultChar);
@@ -163,9 +163,9 @@ public class SPF implements SPFChecker {
     }
     
     /**
-     * @see org.apache.james.jspf.SPFChecker#checkSPF(org.apache.james.jspf.core.SPF1Data)
+     * @see org.apache.james.jspf.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
      */
-    public void checkSPF(SPF1Data spfData) throws PermErrorException,
+    public void checkSPF(SPFSession spfData) throws PermErrorException,
             NoneException, TempErrorException, NeutralException {
 
         SPF1Record spfRecord = getPolicy().getSPFRecord(spfData.getCurrentDomain());
@@ -182,7 +182,7 @@ public class SPF implements SPFChecker {
      * @throws TempErrorException exception
      * @throws NeutralException exception
      */
-    public void checkSPF(SPF1Data spfData, SPF1Record spfRecord) throws PermErrorException, NoneException, TempErrorException, NeutralException {
+    public void checkSPF(SPFSession spfData, SPF1Record spfRecord) throws PermErrorException, NoneException, TempErrorException, NeutralException {
         Iterator i = spfRecord.iterator();
         while (i.hasNext()) {
             SPFChecker m = (SPFChecker) i.next();

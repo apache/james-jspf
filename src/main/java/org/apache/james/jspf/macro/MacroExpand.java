@@ -30,7 +30,7 @@ import org.apache.james.jspf.SPF1Utils;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.Logger;
-import org.apache.james.jspf.core.SPF1Data;
+import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.core.DNSService.TimeoutException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.util.SPFTermsRegexps;
@@ -318,8 +318,8 @@ public class MacroExpand {
             rValue = macroData.getClientDomain();
             if (rValue == null) {
                 rValue = "unknown";
-                if (macroData instanceof SPF1Data) {
-                    SPF1Data spf1data = (SPF1Data) macroData;
+                if (macroData instanceof SPFSession) {
+                    SPFSession spf1data = (SPFSession) macroData;
                     try {
                         boolean ip6 = IPAddr.isIPV6(spf1data.getIpAddress());
                         List records = dnsProbe.getRecords(IPAddr.getAddress(spf1data.getIpAddress()).getReverseIP(), DNSService.PTR);
@@ -358,8 +358,8 @@ public class MacroExpand {
                     // check if the domainname is a FQDN
                     if (SPF1Utils.checkFQDN(dNames.get(i).toString())) {
                         rValue = dNames.get(i).toString();
-                        if (macroData instanceof SPF1Data) {
-                            ((SPF1Data) macroData).setReceivingDomain(rValue);
+                        if (macroData instanceof SPFSession) {
+                            ((SPFSession) macroData).setReceivingDomain(rValue);
                         }
                         break;
                     }

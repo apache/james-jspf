@@ -43,7 +43,7 @@ public interface SPFChecker {
      * @throws NeutralException  
      *             Get thrown if the result should be neutral
      */
-    public void checkSPF(SPF1Data spfData)
+    public void checkSPF(SPFSession spfData)
             throws PermErrorException, NoneException, TempErrorException,
             NeutralException;
 

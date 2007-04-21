@@ -20,7 +20,7 @@
 
 package org.apache.james.jspf.terms;
 
-import org.apache.james.jspf.core.SPF1Data;
+import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
@@ -59,7 +59,7 @@ public class RedirectModifier extends GenericModifier implements SPFCheckEnabled
      * @throws TempErrorException
      *             if an DNS problem accurred
      */
-    protected void checkSPFLogged(SPF1Data spfData) throws PermErrorException,
+    protected void checkSPFLogged(SPFSession spfData) throws PermErrorException,
             TempErrorException {
         // the redirect modifier is used only when we had no previous matches
         if (spfData.getCurrentResult() == null) {

@@ -24,13 +24,13 @@ import org.apache.james.jspf.exceptions.PermErrorException;
 
 import junit.framework.TestCase;
 
-public class SPF1DataTest extends TestCase {
+public class SPFSessionTest extends TestCase {
 
     /*
      * Test method for 'org.apache.james.jspf.core.SPF1Data.getMacroIpAddress()'
      */
     public void testGetMacroIpAddress() throws PermErrorException, NoneException {
-        SPF1Data d = new SPF1Data("mailfrom@fromdomain.com","helodomain.com","2001:DB8::CB01");
+        SPFSession d = new SPFSession("mailfrom@fromdomain.com","helodomain.com","2001:DB8::CB01");
         assertEquals("2.0.0.1.0.D.B.8.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.C.B.0.1",d.getMacroIpAddress());
     }
 

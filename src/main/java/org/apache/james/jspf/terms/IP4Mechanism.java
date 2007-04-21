@@ -22,7 +22,7 @@ package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.Configuration;
 import org.apache.james.jspf.core.IPAddr;
-import org.apache.james.jspf.core.SPF1Data;
+import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.util.Inet6Util;
 
@@ -42,9 +42,9 @@ public class IP4Mechanism extends GenericMechanism {
 
     /**
      * 
-     * @see org.apache.james.jspf.core.GenericMechanism#run(org.apache.james.jspf.core.SPF1Data)
+     * @see org.apache.james.jspf.core.GenericMechanism#run(org.apache.james.jspf.core.SPFSession)
      */
-    public boolean run(SPF1Data spfData) throws PermErrorException {
+    public boolean run(SPFSession spfData) throws PermErrorException {
         IPAddr originalIP;
 
         originalIP = IPAddr.getAddress(spfData.getIpAddress(), getIp()

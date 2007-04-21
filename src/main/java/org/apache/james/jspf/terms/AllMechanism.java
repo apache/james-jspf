@@ -23,7 +23,7 @@ package org.apache.james.jspf.terms;
 import org.apache.james.jspf.core.Configurable;
 import org.apache.james.jspf.core.Configuration;
 import org.apache.james.jspf.core.Mechanism;
-import org.apache.james.jspf.core.SPF1Data;
+import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.exceptions.PermErrorException;
 
 /**
@@ -35,9 +35,9 @@ public class AllMechanism implements Mechanism, Configurable {
     public static final String REGEX = "[aA][lL][lL]";
 
     /**
-     * @see org.apache.james.jspf.core.Mechanism#run(SPF1Data)
+     * @see org.apache.james.jspf.core.Mechanism#run(SPFSession)
      */
-    public boolean run(SPF1Data spfData) throws PermErrorException {
+    public boolean run(SPFSession spfData) throws PermErrorException {
         return true;
     }
 

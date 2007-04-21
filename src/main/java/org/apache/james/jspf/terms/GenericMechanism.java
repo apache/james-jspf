@@ -24,7 +24,7 @@ import org.apache.james.jspf.core.Configurable;
 import org.apache.james.jspf.core.Configuration;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.Mechanism;
-import org.apache.james.jspf.core.SPF1Data;
+import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.wiring.LogEnabled;
@@ -65,7 +65,7 @@ public abstract class GenericMechanism implements Mechanism, Configurable, LogEn
      * @param spfData The SPF1Data to use
      * @throws PermErrorException get Thrown if invalid macros are used
      */
-    protected String expandHost(SPF1Data spfData) throws PermErrorException {
+    protected String expandHost(SPFSession spfData) throws PermErrorException {
         String host = getDomain();
         if (host == null) {
             host = spfData.getCurrentDomain();

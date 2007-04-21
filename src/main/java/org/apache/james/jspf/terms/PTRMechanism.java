@@ -22,7 +22,7 @@ package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.IPAddr;
-import org.apache.james.jspf.core.SPF1Data;
+import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.util.SPFTermsRegexps;
@@ -46,9 +46,9 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled 
     private DNSService dnsService;
 
     /**
-     * @see org.apache.james.jspf.core.Mechanism#run(org.apache.james.jspf.core.SPF1Data)
+     * @see org.apache.james.jspf.core.Mechanism#run(org.apache.james.jspf.core.SPFSession)
      */
-    public boolean run(SPF1Data spfData) throws PermErrorException,
+    public boolean run(SPFSession spfData) throws PermErrorException,
             TempErrorException {
         String compareDomain;
         ArrayList validatedHosts = new ArrayList();

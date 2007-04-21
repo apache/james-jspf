@@ -64,7 +64,7 @@ public class Directive implements SPFChecker {
      * @throws TempErrorException get thrown if a TempError should returned
      * @throws NoneException get thrown if a NoneException should returned;
      */
-    public void checkSPF(SPF1Data spfData) throws PermErrorException,
+    public void checkSPF(SPFSession spfData) throws PermErrorException,
             TempErrorException, NoneException {
         // if already have a current result we don't run this
         if (spfData.getCurrentResult() == null) {

@@ -22,7 +22,7 @@ package org.apache.james.jspf.policies.local;
 import org.apache.james.jspf.SPF1Utils;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPF1Constants;
-import org.apache.james.jspf.core.SPF1Data;
+import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.core.SPF1Record;
 import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.exceptions.NeutralException;
@@ -64,7 +64,7 @@ public final class DefaultExplanationPolicy implements PolicyPostFilter {
         if (spfRecord == null) return null;
         // Default explanation policy.
         spfRecord.getModifiers().add(new SPFChecker() {
-            public void checkSPF(SPF1Data spfData) throws PermErrorException, NoneException, TempErrorException, NeutralException {
+            public void checkSPF(SPFSession spfData) throws PermErrorException, NoneException, TempErrorException, NeutralException {
                 
                 if (SPF1Constants.FAIL.equals(spfData.getCurrentResult())) {  
                     if (spfData.getExplanation()==null || spfData.getExplanation().equals("")) {
