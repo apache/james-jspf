@@ -29,21 +29,25 @@
         SPF-Specs of 2006-2007 (See RFC section). SPF is also knows as Sender Policy Framework.     
         It was designed to detect email spoofing.This is the solution if you ever was tired
         of getting spam from yourself. For more informations see 
-        <a href="http://www.openspf.org"> openspf website</a> or <a href="http://new.openspf.org"> 
-        new openspf website </a>.
+        <a href="http://www.openspf.org"> openspf website</a>.
       </p>
     </section>
     <section name="News">
     <subsection name="2007">
 
-      <h5>jSPF-0.9b4 released</h5>
-      <p>After some more work was done, we proud to announce the release of jSPF-0.9b4.</p>
+      <h4>Feb/2007 - jSPF-0.9b4 released</h4>
+      <p>After some more work was done, we proud to announce the <a href="../downloadunstable.cgi">release</a> 
+      of jSPF-0.9b4. 0.9b4 correctly supports SPF DNS record type (previously we only supported TXT record type) and 
+      introduce support for spf extension policies like fallback, override, trusted forwarder.</p>
 
     </subsection>
     
     <subsection name="2006">
 
-      <h5>First public release of jSPF</h5>
+      <h4>Sep/2006 - jSPF-0.9b3 released</h4>
+      <p>0.9b3 introduces YAML based unit tests to check RFC compliance and a couple of minor fixes.</p>
+
+      <h4>Jul/2006 - First public release of jSPF</h4>
       <p>After a fully rewrite of spf-java we finally release jSPF.</p>
 
     </subsection>
@@ -51,16 +55,18 @@
     
     <section name="releases">
       <p>
-        <b>Latest and Stable: jSPF v0.9b4</b>
+        <b>Latest: jSPF v0.9b4</b>
         <br/>
 jSPF v0.9b4 is the current release.
-Both <a href="http://www.apache.org/dist/james/jspf">binary and source</a> distributions are available.</p>
+Both <a href="../downloadunstable.cgi">binary and source</a> distributions are available.</p>
       <p>This release passes all YAML tests published by openspf.org (still under development). So it should be fully RFC4408 compliant.</p>
+      <!-- 
       <p>
         <b>Get your hands on the latest versions..</b>
         <br/>We put significant milestones, and potential release candidates in the <a href="http://www.apache.org/dist/james/jspf">download area.</a>
         <br/>Whilst the quality of these versions cannot be guaranteed they may contain important bug fixes and cool new features.<br/>
       </p>
+       -->
     </section>
   </body>
 </document>
