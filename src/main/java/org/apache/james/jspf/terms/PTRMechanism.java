@@ -20,15 +20,17 @@
 
 package org.apache.james.jspf.terms;
 
+import org.apache.james.jspf.core.DNSRequest;
+import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
+import org.apache.james.jspf.util.DNSResolver;
 import org.apache.james.jspf.util.SPFTermsRegexps;
 import org.apache.james.jspf.wiring.DNSServiceEnabled;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,6 +38,12 @@ import java.util.List;
  * 
  */
 public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled {
+
+    private static final String ATTRIBUTE_CURRENT_DOMAIN = "PTRMechanism.currentDomain";
+
+    private static final String ATTRIBUTE_EXPANDED_HOST = "PTRMechanism.expandedHost";
+
+    private static final String ATTRIBUTE_DOMAIN_LIST = "PTRMechanism.domainListCheck";
 
     /**
      * ABNF: PTR = "ptr" [ ":" domain-spec ]
@@ -50,68 +58,14 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled 
      */
     public boolean run(SPFSession spfData) throws PermErrorException,
             TempErrorException {
-        String compareDomain;
-        ArrayList validatedHosts = new ArrayList();
-
         // update currentDepth
         spfData.increaseCurrentDepth();
 
-        // Get the right host.
-        String host = expandHost(spfData);
-
-        try {
-            // Get PTR Records for the ipAddress which is provided by SPF1Data
-            IPAddr ip = IPAddr.getAddress(spfData.getIpAddress());
-            List domainList = dnsService.getRecords(ip.getReverseIP(), DNSService.PTR);
-    
-            // No PTR records found
-            if (domainList == null) return false;
-    
-            // check if the maximum lookup count is reached
-            if (dnsService.getRecordLimit() > 0 && domainList.size() > dnsService.getRecordLimit()) {
-                // Truncate the PTR list to getRecordLimit.
-                // See #ptr-limit rfc4408 test
-                domainList = domainList.subList(0, dnsService.getRecordLimit()-1);
-                // throw new PermErrorException("Maximum PTR lookup count reached");
-            }
-              
-            for (int i = 0; i < domainList.size(); i++) {
-                List aList = null;
-                
-                // check if the connecting ip is ip6. If so lookup AAAA record
-                if (IPAddr.isIPV6(spfData.getIpAddress())) {
-                    // Get aaaa record for this
-                    aList = dnsService.getRecords(
-                            (String) domainList.get(i), DNSService.AAAA);
-                } else {
-                    // Get a record for this
-                    aList = dnsService.getRecords(
-                            (String) domainList.get(i), DNSService.A);
-                }
-                if (aList != null) {
-                    for (int j = 0; j < aList.size(); j++) {
-                        if (aList.get(j).equals(spfData.getIpAddress())) {
-                            validatedHosts.add(domainList.get(i));
-                        }
-                    }
-                }
-            }
-    
-            // Check if we match one of this ptr!
-            for (int j = 0; j < validatedHosts.size(); j++) {
-                compareDomain = (String) validatedHosts.get(j);
-                
-                if (compareDomain.equals(host)
-                        || compareDomain.endsWith("." + host)) {
-                    return true;
-                }
-            }
-            
-            return false;
-        } catch (DNSService.TimeoutException e) {
-            throw new TempErrorException("Timeout querying the dns server");
-        }
-
+        // Get PTR Records for the ipAddress which is provided by SPF1Data
+        IPAddr ip = IPAddr.getAddress(spfData.getIpAddress());
+        
+        DNSResponse response = DNSResolver.lookup(dnsService, new DNSRequest(ip.getReverseIP(), DNSService.PTR));
+        return this.onDNSResponse(response, spfData);
     }
 
     /**
@@ -119,6 +73,93 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled 
      */
     public void enableDNSService(DNSService service) {
         this.dnsService = service;
+    }
+
+    /**
+     * @see org.apache.james.jspf.core.Mechanism#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
+     */
+    public boolean onDNSResponse(DNSResponse response, SPFSession spfSession)
+            throws PermErrorException, TempErrorException {
+        
+        List domainList = (List) spfSession.getAttribute(ATTRIBUTE_DOMAIN_LIST);
+        try {
+            if (domainList == null) {
+            
+                domainList = response.getResponse();
+                
+                // No PTR records found
+                if (domainList == null) return false;
+        
+                // check if the maximum lookup count is reached
+                if (dnsService.getRecordLimit() > 0 && domainList.size() > dnsService.getRecordLimit()) {
+                    // Truncate the PTR list to getRecordLimit.
+                    // See #ptr-limit rfc4408 test
+                    domainList = domainList.subList(0, dnsService.getRecordLimit()-1);
+                    // throw new PermErrorException("Maximum PTR lookup count reached");
+                }
+                
+                spfSession.setAttribute(ATTRIBUTE_DOMAIN_LIST, domainList);
+                
+                // Get the right host.
+                String host = expandHost(spfSession);
+                
+                spfSession.setAttribute(ATTRIBUTE_EXPANDED_HOST, host);
+                
+            } else {
+
+                String compareDomain = (String) spfSession.getAttribute(ATTRIBUTE_CURRENT_DOMAIN);
+                String host = (String) spfSession.getAttribute(ATTRIBUTE_EXPANDED_HOST);
+    
+                List aList = response.getResponse();
+    
+                        
+                if (aList != null) {
+                    for (int j = 0; j < aList.size(); j++) {
+                        if (aList.get(j).equals(spfSession.getIpAddress())) {
+                            
+                            if (compareDomain.equals(host)
+                                    || compareDomain.endsWith("." + host)) {
+                                return true;
+                            }
+                            
+                        }
+                    }
+                }
+            
+            }
+        } catch (DNSService.TimeoutException e) {
+            throw new TempErrorException("Timeout querying the dns server");
+        }
+        
+
+        try {
+
+            if (domainList.size() > 0) {
+                String currentDomain = (String) domainList.remove(0);
+        
+                DNSRequest dnsRequest;
+                // check if the connecting ip is ip6. If so lookup AAAA record
+                if (IPAddr.isIPV6(spfSession.getIpAddress())) {
+                    // Get aaaa record for this
+                    dnsRequest = new DNSRequest(currentDomain, DNSService.AAAA);
+                } else {
+                    // Get a record for this
+                    dnsRequest = new DNSRequest(currentDomain, DNSService.A);
+                }
+                
+                spfSession.setAttribute(ATTRIBUTE_CURRENT_DOMAIN, currentDomain);
+                
+                return this.onDNSResponse(DNSResolver.lookup(dnsService, dnsRequest), spfSession);
+                
+            } else {
+                return false;
+            }
+
+        } finally {
+            spfSession.setAttribute(ATTRIBUTE_DOMAIN_LIST, null);
+            spfSession.setAttribute(ATTRIBUTE_CURRENT_DOMAIN, null);
+        }
+
     }
 
 

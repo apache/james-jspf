@@ -21,9 +21,12 @@
 package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.Configuration;
+import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.SPFSession;
+import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
+import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.util.Inet6Util;
 
 /**
@@ -113,5 +116,14 @@ public class IP4Mechanism extends GenericMechanism {
         } else {
             return "ip4:"+getIp().getIPAddress()+"/"+getIp().getMaskLength();
         }
+    }
+
+    /**
+     * @see org.apache.james.jspf.core.Mechanism#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
+     */
+    public boolean onDNSResponse(DNSResponse response, SPFSession spfSession)
+            throws PermErrorException, TempErrorException, NoneException {
+        // not needed, IP4Mechanism does not require further lookups
+        return false;
     }
 }

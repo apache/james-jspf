@@ -20,10 +20,13 @@
 
 package org.apache.james.jspf.terms;
 
+import org.apache.james.jspf.core.DNSRequest;
+import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
+import org.apache.james.jspf.util.DNSResolver;
 import org.apache.james.jspf.util.SPFTermsRegexps;
 import org.apache.james.jspf.wiring.DNSServiceEnabled;
 
@@ -31,7 +34,6 @@ import java.util.List;
 
 /**
  * This class represent the exists mechanism
- * 
  */
 public class ExistsMechanism extends GenericMechanism implements DNSServiceEnabled {
 
@@ -49,27 +51,34 @@ public class ExistsMechanism extends GenericMechanism implements DNSServiceEnabl
      */
     public boolean run(SPFSession spfData) throws PermErrorException,
             TempErrorException {
-        List aRecords;
-
         // update currentDepth
         spfData.increaseCurrentDepth();
 
         String host = expandHost(spfData);
 
+        return this.onDNSResponse(DNSResolver.lookup(dnsService, new DNSRequest(host,DNSService.A)), spfData);
+    }
+
+    /**
+     * @see org.apache.james.jspf.core.Mechanism#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
+     */
+    public boolean onDNSResponse(DNSResponse response, SPFSession spfSession) throws PermErrorException, TempErrorException {
+        List aRecords;
+        
         try {
-            aRecords = dnsService.getRecords(host,DNSService.A);
+            aRecords = response.getResponse();
         } catch (DNSService.TimeoutException e) {
             return false;
         }
-       
+        
         if (aRecords != null && aRecords.size() > 0) {
             return true;
         }
-
+        
         // No match found
         return false;
     }
-    
+
     /**
      * @see java.lang.Object#toString()
      */
@@ -83,6 +92,5 @@ public class ExistsMechanism extends GenericMechanism implements DNSServiceEnabl
     public void enableDNSService(DNSService service) {
         this.dnsService = service;
     }
-
 
 }

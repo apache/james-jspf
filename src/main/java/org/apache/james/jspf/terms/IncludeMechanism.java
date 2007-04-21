@@ -22,6 +22,7 @@ package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.Configurable;
 import org.apache.james.jspf.core.Configuration;
+import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.Mechanism;
 import org.apache.james.jspf.core.SPF1Constants;
@@ -159,5 +160,14 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
      */
     public void enableMacroExpand(MacroExpand macroExpand) {
         this.macroExpand = macroExpand;
+    }
+
+    /**
+     * @see org.apache.james.jspf.core.Mechanism#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
+     */
+    public boolean onDNSResponse(DNSResponse response, SPFSession spfSession)
+            throws PermErrorException, TempErrorException, NoneException {
+        // not called yet.
+        return false;
     }
 }
