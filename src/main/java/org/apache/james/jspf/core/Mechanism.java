@@ -45,5 +45,11 @@ public interface Mechanism {
      */
     public boolean run(SPFSession spfData) throws PermErrorException,
             TempErrorException, NoneException;
+    
+    /**
+     * Temporary, to evaluate impact on the redesign.
+     */
+    public boolean onDNSResponse(DNSResponse response, SPFSession spfSession) throws PermErrorException,
+    TempErrorException, NoneException;
 
 }

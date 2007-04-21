@@ -22,9 +22,12 @@ package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.Configurable;
 import org.apache.james.jspf.core.Configuration;
+import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.Mechanism;
 import org.apache.james.jspf.core.SPFSession;
+import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
+import org.apache.james.jspf.exceptions.TempErrorException;
 
 /**
  * This class represent the all mechanism
@@ -54,6 +57,15 @@ public class AllMechanism implements Mechanism, Configurable {
      */
     public String toString() {
         return "all";
+    }
+
+    /**
+     * @see org.apache.james.jspf.core.Mechanism#onDNSResponse(org.apache.james.jspf.core.SPFSession)
+     */
+    public boolean onDNSResponse(DNSResponse response, SPFSession spfSession)
+            throws PermErrorException, TempErrorException, NoneException {
+        // never called
+        return false;
     }
 
 }

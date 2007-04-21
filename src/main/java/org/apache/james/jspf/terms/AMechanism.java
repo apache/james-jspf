@@ -21,11 +21,15 @@
 package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.Configuration;
+import org.apache.james.jspf.core.DNSRequest;
+import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.SPFSession;
+import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
+import org.apache.james.jspf.util.DNSResolver;
 import org.apache.james.jspf.util.Inet6Util;
 import org.apache.james.jspf.util.SPFTermsRegexps;
 import org.apache.james.jspf.wiring.DNSServiceEnabled;
@@ -66,34 +70,24 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled {
 
         // get the ipAddress
         try {
-            if (Inet6Util.isValidIPV4Address(spfData.getIpAddress())) {
-
-                IPAddr checkAddress = IPAddr.getAddress(spfData.getIpAddress(),
-                        getIp4cidr());
+            boolean validIPV4Address = Inet6Util.isValidIPV4Address(spfData.getIpAddress());
+            spfData.setAttribute("AMechanism.ipv4check", Boolean.valueOf(validIPV4Address));
+            if (validIPV4Address) {
 
                 List aRecords = getARecords(dnsService,host);
-     
-                // no a records just return null
                 if (aRecords == null) {
-                    return false;
+                    return onDNSResponse(DNSResolver.lookup(dnsService, new DNSRequest(host, DNSService.A)), spfData);
+                } else {
+                    return onDNSResponse(new DNSResponse(aRecords), spfData);
                 }
-
-                if (checkAddressList(checkAddress, aRecords, getIp4cidr())) {
-                    return true;
-                }
+     
             } else {
-                IPAddr checkAddress = IPAddr.getAddress(spfData.getIpAddress(),
-                        getIp6cidr());
-
+                
                 List aaaaRecords = getAAAARecords(dnsService, host);
-                
-                // no aaaa records just return false
                 if (aaaaRecords == null) {
-                    return false;
-                }
-                
-                if (checkAddressList(checkAddress, aaaaRecords, getIp6cidr())) {
-                    return true;
+                    return onDNSResponse(DNSResolver.lookup(dnsService, new DNSRequest(host, DNSService.AAAA)), spfData);
+                } else {
+                    return onDNSResponse(new DNSResponse(aaaaRecords), spfData);
                 }
 
             }
@@ -104,8 +98,6 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled {
             throw new PermErrorException("No valid ipAddress: "
                     + spfData.getIpAddress());
         }
-        // No match found
-        return false;
     }
 
     /**
@@ -205,17 +197,11 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled {
      */
     public List getAAAARecords(DNSService dns, String strServer)
             throws PermErrorException, TempErrorException {
-        List listAAAAData;
+        List listAAAAData = null;
         if (IPAddr.isIPV6(strServer)) {
             // Address is already an IP address, so add it to list
             listAAAAData = new ArrayList();
             listAAAAData.add(strServer);
-        } else {
-            try {
-                listAAAAData = dns.getRecords(strServer, DNSService.AAAA);
-            } catch (DNSService.TimeoutException e) {
-                throw new TempErrorException("Timeout querying dns server");
-            }
         }
         return listAAAAData;
     }
@@ -234,16 +220,10 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled {
      *             if the lookup result was "TRY_AGAIN"
      */
     public List getARecords(DNSService dns, String strServer) throws PermErrorException, TempErrorException {
-        List listAData;
+        List listAData = null;
         if (IPAddr.isIPAddr(strServer)) {
             listAData = new ArrayList();
             listAData.add(strServer);
-        } else {
-            try {
-                listAData = dns.getRecords(strServer, DNSService.A);
-            } catch (DNSService.TimeoutException e) {
-                throw new TempErrorException("Timeout querying dns server");
-            }
         }
         return listAData;
     }
@@ -253,6 +233,46 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled {
      */
     public void enableDNSService(DNSService service) {
         this.dnsService = service;
+    }
+
+    /**
+     * @see org.apache.james.jspf.core.Mechanism#onDNSResponse(org.apache.james.jspf.core.SPFSession)
+     */
+    public boolean onDNSResponse(DNSResponse response, SPFSession spfSession)
+        throws PermErrorException, TempErrorException, NoneException {
+        List listAData = null;
+        try {
+            listAData = response.getResponse();
+        } catch (DNSService.TimeoutException e) {
+            throw new TempErrorException("Timeout querying dns server");
+        }
+        // no a records just return null
+        if (listAData == null) {
+            return false;
+        }
+
+        Boolean ipv4check = (Boolean) spfSession.getAttribute("AMechanism.ipv4check");
+        if (ipv4check.booleanValue()) {
+
+            IPAddr checkAddress = IPAddr.getAddress(spfSession.getIpAddress(),
+                    getIp4cidr());
+
+            if (checkAddressList(checkAddress, listAData, getIp4cidr())) {
+                return true;
+            }
+
+        } else {
+
+            IPAddr checkAddress = IPAddr.getAddress(spfSession.getIpAddress(),
+                    getIp6cidr());
+            
+            if (checkAddressList(checkAddress, listAData, getIp6cidr())) {
+                return true;
+            }
+
+        }
+        
+        return false;
     }
 
 }
