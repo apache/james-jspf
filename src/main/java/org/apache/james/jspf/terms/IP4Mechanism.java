@@ -21,6 +21,7 @@
 package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.Configuration;
+import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.Directive;
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.SPFSession;
@@ -45,13 +46,15 @@ public class IP4Mechanism extends GenericMechanism {
      * 
      * @see org.apache.james.jspf.core.GenericMechanism#run(org.apache.james.jspf.core.SPFSession)
      */
-    public void checkSPF(SPFSession spfData) throws PermErrorException {
+    public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException {
         IPAddr originalIP;
 
         originalIP = IPAddr.getAddress(spfData.getIpAddress(), getIp()
                 .getMaskLength());
 
         spfData.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.valueOf(getIp().getMaskedIPAddress().equals(originalIP.getMaskedIPAddress())));
+        
+        return null;
     }
 
     /**

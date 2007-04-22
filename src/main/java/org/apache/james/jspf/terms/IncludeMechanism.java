@@ -22,8 +22,8 @@ package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.Configurable;
 import org.apache.james.jspf.core.Configuration;
+import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.DNSResponse;
-import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.Directive;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.Mechanism;
@@ -36,9 +36,7 @@ import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
-import org.apache.james.jspf.util.DNSResolver;
 import org.apache.james.jspf.util.SPFTermsRegexps;
-import org.apache.james.jspf.wiring.DNSServiceEnabled;
 import org.apache.james.jspf.wiring.LogEnabled;
 import org.apache.james.jspf.wiring.MacroExpandEnabled;
 import org.apache.james.jspf.wiring.SPFCheckEnabled;
@@ -47,7 +45,7 @@ import org.apache.james.jspf.wiring.SPFCheckEnabled;
  * This class represent the incude mechanism
  * 
  */
-public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SPFCheckEnabled, MacroExpandEnabled, DNSServiceEnabled {
+public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SPFCheckEnabled, MacroExpandEnabled {
 
     private final class ExceptionCatcher implements SPFCheckerExceptionCatcher {
         private SPFChecker spfChecker;
@@ -90,7 +88,7 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
     }
 
     private final class ExpandedChecker implements SPFChecker {
-        public void checkSPF(SPFSession spfData) throws PermErrorException,
+        public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
                 TempErrorException {
 
             // throws a PermErrorException that we can pass through
@@ -104,6 +102,8 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
             spfData.setCurrentResult(null);
             
             spfData.pushChecker(spfChecker);
+            
+            return null;
         }
     }
 
@@ -112,7 +112,7 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
 
         private String previousDomain;
 
-        public void checkSPF(SPFSession spfData) throws PermErrorException,
+        public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
                 TempErrorException, NeutralException, NoneException {
             
             spfData.setIgnoreExplanation(false);
@@ -121,6 +121,7 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
 
             spfData.popExceptionCatcher();
             
+            return null;
         }
 
         public SPFChecker init(SPFSession spfSession) {
@@ -138,7 +139,7 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
     private final class CleanupAndResultChecker implements SPFChecker {
         private SPFChecker finallyChecker;
 
-        public void checkSPF(SPFSession spfData) throws PermErrorException,
+        public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
                 TempErrorException, NeutralException, NoneException {
             
             String currentResult = spfData.getCurrentResult();
@@ -157,7 +158,7 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
                 throw new TempErrorException("included checkSPF returned an Illegal result");
             }
 
-
+            return null;
         }
 
         public SPFChecker init(SPFChecker finallyChecker) {
@@ -180,12 +181,10 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
 
     private MacroExpand macroExpand;
 
-    private DNSService dnsService;
-
     /**
      * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
      */
-    public void checkSPF(SPFSession spfData) throws PermErrorException, TempErrorException, NoneException, NeutralException {
+    public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException, TempErrorException, NoneException, NeutralException {
         // update currentDepth
         spfData.increaseCurrentDepth();
         
@@ -196,8 +195,7 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
         spfData.pushExceptionCatcher(new ExceptionCatcher().setExceptionHandlerChecker(cleanupAndResultHandler, finallyChecker));
         
         spfData.pushChecker(new ExpandedChecker());
-        DNSResolver.hostExpand(dnsService, macroExpand, getHost(), spfData, MacroExpand.DOMAIN);
-
+        return macroExpand.checkExpand(getHost(), spfData, MacroExpand.DOMAIN);
     }
 
     /**
@@ -252,12 +250,5 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
             throws PermErrorException, TempErrorException, NoneException {
         // not called yet.
         return false;
-    }
-
-    /**
-     * @see org.apache.james.jspf.wiring.DNSServiceEnabled#enableDNSService(org.apache.james.jspf.core.DNSService)
-     */
-    public void enableDNSService(DNSService service) {
-        this.dnsService = service;
     }
 }

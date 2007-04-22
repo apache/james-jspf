@@ -22,6 +22,7 @@ package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.Configurable;
 import org.apache.james.jspf.core.Configuration;
+import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.Modifier;
 import org.apache.james.jspf.core.SPFSession;
@@ -47,15 +48,16 @@ public abstract class GenericModifier implements Modifier, Configurable, LogEnab
      * @see org.apache.james.jspf.core.Modifier#run(SPFSession)
      * 
      */
-    public void checkSPF(SPFSession spfData) throws PermErrorException,
+    public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
             TempErrorException, NeutralException, NoneException {
         log.debug("Processing modifier: " + this);
-        checkSPFLogged(spfData);
+        DNSLookupContinuation res = checkSPFLogged(spfData);
         log.debug("Processed modifier: " + this + " resulted in "
-                + spfData.getCurrentResult());
+                + res == null ? spfData.getCurrentResult() : " dns continuation...");
+        return res;
     }
     
-    protected abstract void checkSPFLogged(SPFSession spfData) throws PermErrorException,
+    protected abstract DNSLookupContinuation checkSPFLogged(SPFSession spfData) throws PermErrorException,
         TempErrorException, NeutralException, NoneException;
 
 

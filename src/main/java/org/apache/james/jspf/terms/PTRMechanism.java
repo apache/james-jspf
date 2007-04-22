@@ -20,6 +20,7 @@
 
 package org.apache.james.jspf.terms;
 
+import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.DNSService;
@@ -33,7 +34,6 @@ import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
-import org.apache.james.jspf.util.DNSResolver;
 import org.apache.james.jspf.util.SPFTermsRegexps;
 import org.apache.james.jspf.wiring.DNSServiceEnabled;
 
@@ -46,7 +46,19 @@ import java.util.List;
 public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled, SPFCheckerDNSResponseListener {
 
     private final class ExpandedChecker implements SPFChecker {
-        public void checkSPF(SPFSession spfData) throws PermErrorException,
+        private CleanupChecker cleanupChecker = new CleanupChecker();
+
+        private final class CleanupChecker implements SPFChecker {
+            public DNSLookupContinuation checkSPF(SPFSession spfData)
+                    throws PermErrorException, TempErrorException,
+                    NeutralException, NoneException {
+                spfData.setAttribute(ATTRIBUTE_DOMAIN_LIST, null);
+                spfData.setAttribute(ATTRIBUTE_CURRENT_DOMAIN, null);
+                return null;
+            }
+        }
+
+        public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
                 TempErrorException, NeutralException, NoneException {
 
             // Get PTR Records for the ipAddress which is provided by SPF1Data
@@ -56,8 +68,10 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled,
             String host = expandHost(spfData);
             
             spfData.setAttribute(ATTRIBUTE_EXPANDED_HOST, host);
+            
+            spfData.pushChecker(cleanupChecker);
 
-            DNSResolver.lookup(dnsService, new DNSRequest(ip.getReverseIP(), DNSService.PTR), spfData, PTRMechanism.this);
+            return new DNSLookupContinuation(new DNSRequest(ip.getReverseIP(), DNSService.PTR), PTRMechanism.this);
         }
     }
 
@@ -80,13 +94,13 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled,
     /**
      * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
      */
-    public void checkSPF(SPFSession spfData) throws PermErrorException,
+    public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
             TempErrorException, NeutralException, NoneException {
         // update currentDepth
         spfData.increaseCurrentDepth();
 
         spfData.pushChecker(expandedChecker);
-        DNSResolver.hostExpand(dnsService, macroExpand, getDomain(), spfData, MacroExpand.DOMAIN);
+        return macroExpand.checkExpand(getDomain(), spfData, MacroExpand.DOMAIN);
     }
 
     /**
@@ -99,7 +113,7 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled,
     /**
      * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
      */
-    public void onDNSResponse(DNSResponse response, SPFSession spfSession)
+    public DNSLookupContinuation onDNSResponse(DNSResponse response, SPFSession spfSession)
             throws PermErrorException, TempErrorException, NoneException, NeutralException {
         
         List domainList = (List) spfSession.getAttribute(ATTRIBUTE_DOMAIN_LIST);
@@ -111,7 +125,7 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled,
                 // No PTR records found
                 if (domainList == null) {
                     spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
-                    return;
+                    return null;
                 }
         
                 // check if the maximum lookup count is reached
@@ -139,7 +153,7 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled,
                             if (compareDomain.equals(host)
                                     || compareDomain.endsWith("." + host)) {
                                 spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.TRUE);
-                                return;
+                                return null;
                             }
                             
                         }
@@ -152,33 +166,25 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled,
         }
         
 
-        try {
-
-            if (domainList.size() > 0) {
-                String currentDomain = (String) domainList.remove(0);
-        
-                DNSRequest dnsRequest;
-                // check if the connecting ip is ip6. If so lookup AAAA record
-                if (IPAddr.isIPV6(spfSession.getIpAddress())) {
-                    // Get aaaa record for this
-                    dnsRequest = new DNSRequest(currentDomain, DNSService.AAAA);
-                } else {
-                    // Get a record for this
-                    dnsRequest = new DNSRequest(currentDomain, DNSService.A);
-                }
-                
-                spfSession.setAttribute(ATTRIBUTE_CURRENT_DOMAIN, currentDomain);
-                
-                DNSResolver.lookup(dnsService, dnsRequest, spfSession, PTRMechanism.this);
-                return;
+        if (domainList.size() > 0) {
+            String currentDomain = (String) domainList.remove(0);
+    
+            DNSRequest dnsRequest;
+            // check if the connecting ip is ip6. If so lookup AAAA record
+            if (IPAddr.isIPV6(spfSession.getIpAddress())) {
+                // Get aaaa record for this
+                dnsRequest = new DNSRequest(currentDomain, DNSService.AAAA);
             } else {
-                spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
-                return;
+                // Get a record for this
+                dnsRequest = new DNSRequest(currentDomain, DNSService.A);
             }
-
-        } finally {
-            spfSession.setAttribute(ATTRIBUTE_DOMAIN_LIST, null);
-            spfSession.setAttribute(ATTRIBUTE_CURRENT_DOMAIN, null);
+            
+            spfSession.setAttribute(ATTRIBUTE_CURRENT_DOMAIN, currentDomain);
+            
+            return new DNSLookupContinuation(dnsRequest, PTRMechanism.this);
+        } else {
+            spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
+            return null;
         }
 
     }

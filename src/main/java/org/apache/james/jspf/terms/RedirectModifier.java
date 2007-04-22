@@ -19,18 +19,16 @@
 
 package org.apache.james.jspf.terms;
 
-import org.apache.james.jspf.core.DNSService;
+import org.apache.james.jspf.core.DNSLookupContinuation;
+import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.core.SPFCheckerExceptionCatcher;
 import org.apache.james.jspf.core.SPFSession;
-import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
-import org.apache.james.jspf.util.DNSResolver;
 import org.apache.james.jspf.util.SPFTermsRegexps;
-import org.apache.james.jspf.wiring.DNSServiceEnabled;
 import org.apache.james.jspf.wiring.MacroExpandEnabled;
 import org.apache.james.jspf.wiring.SPFCheckEnabled;
 
@@ -39,7 +37,7 @@ import org.apache.james.jspf.wiring.SPFCheckEnabled;
  * 
  */
 public class RedirectModifier extends GenericModifier implements
-        SPFCheckEnabled, MacroExpandEnabled, DNSServiceEnabled {
+        SPFCheckEnabled, MacroExpandEnabled {
 
     private final class ExceptionCatcher implements SPFCheckerExceptionCatcher {
         private SPFChecker spfChecker;
@@ -86,7 +84,7 @@ public class RedirectModifier extends GenericModifier implements
     }
 
     private final class ExpandedChecker implements SPFChecker {
-        public void checkSPF(SPFSession spfData)
+        public DNSLookupContinuation checkSPF(SPFSession spfData)
                 throws PermErrorException, NoneException,
                 TempErrorException, NeutralException {
             String host = getHost();
@@ -99,11 +97,12 @@ public class RedirectModifier extends GenericModifier implements
             spfData.setCurrentDomain(host);
 
             spfData.pushChecker(spfChecker);
+            return null;
         }
     }
 
     private final class CleanupChecker implements SPFChecker {
-        public void checkSPF(SPFSession spfData)
+        public DNSLookupContinuation checkSPF(SPFSession spfData)
                 throws PermErrorException, TempErrorException,
                 NeutralException, NoneException {
             // After the redirect we should not use the
@@ -111,6 +110,7 @@ public class RedirectModifier extends GenericModifier implements
             spfData.setIgnoreExplanation(true);
             
             spfData.popExceptionCatcher();
+            return null;
         }
     }
 
@@ -123,8 +123,6 @@ public class RedirectModifier extends GenericModifier implements
     private SPFChecker spfChecker;
 
     private MacroExpand macroExpand;
-
-    private DNSService dnsService;
 
     private SPFChecker cleanupChecker = new CleanupChecker();
 
@@ -146,7 +144,7 @@ public class RedirectModifier extends GenericModifier implements
      * @throws NoneException
      * @throws NeutralException
      */
-    protected void checkSPFLogged(SPFSession spfData)
+    protected DNSLookupContinuation checkSPFLogged(SPFSession spfData)
             throws PermErrorException, TempErrorException, NeutralException,
             NoneException {
         // the redirect modifier is used only when we had no previous matches
@@ -160,9 +158,9 @@ public class RedirectModifier extends GenericModifier implements
             spfData.pushExceptionCatcher(exceptionCatcher);
 
             spfData.pushChecker(expandedChecker);
-            DNSResolver.hostExpand(dnsService, macroExpand, getHost(), spfData,
-                    MacroExpand.DOMAIN);
+            return macroExpand.checkExpand(getHost(), spfData, MacroExpand.DOMAIN);
         }
+        return null;
     }
 
     /**
@@ -184,10 +182,6 @@ public class RedirectModifier extends GenericModifier implements
      */
     public void enableMacroExpand(MacroExpand macroExpand) {
         this.macroExpand = macroExpand;
-    }
-
-    public void enableDNSService(DNSService service) {
-        this.dnsService = service;
     }
 
 }

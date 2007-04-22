@@ -20,6 +20,7 @@
 
 package org.apache.james.jspf.terms;
 
+import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.DNSService;
@@ -33,7 +34,6 @@ import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
-import org.apache.james.jspf.util.DNSResolver;
 import org.apache.james.jspf.util.SPFTermsRegexps;
 
 import java.util.ArrayList;
@@ -46,13 +46,13 @@ import java.util.List;
 public class MXMechanism extends AMechanism implements SPFCheckerDNSResponseListener {
 
     private final class ExpandedChecker implements SPFChecker {
-        public void checkSPF(SPFSession spfData) throws PermErrorException,
+        public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
                 TempErrorException, NeutralException, NoneException {
 
             // Get the right host.
             String host = expandHost(spfData);
             
-            DNSResolver.lookup(dnsService, new DNSRequest(host, DNSService.MX), spfData, MXMechanism.this);
+            return new DNSLookupContinuation(new DNSRequest(host, DNSService.MX), MXMechanism.this);
         }
     }
 
@@ -70,34 +70,34 @@ public class MXMechanism extends AMechanism implements SPFCheckerDNSResponseList
     /**
      * @see org.apache.james.jspf.terms.AMechanism#checkSPF(org.apache.james.jspf.core.SPFSession)
      */
-    public void checkSPF(SPFSession spfData) throws PermErrorException,
+    public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
             TempErrorException, NeutralException, NoneException{
 
         // update currentDepth
         spfData.increaseCurrentDepth();
 
         spfData.pushChecker(expandedChecker);
-        DNSResolver.hostExpand(dnsService, macroExpand, getDomain(), spfData, MacroExpand.DOMAIN);
+        return macroExpand.checkExpand(getDomain(), spfData, MacroExpand.DOMAIN);
     }
 
     /**
      * @see org.apache.james.jspf.terms.AMechanism#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
      */
-    public void onDNSResponse(DNSResponse response, SPFSession spfSession)
+    public DNSLookupContinuation onDNSResponse(DNSResponse response, SPFSession spfSession)
         throws PermErrorException, TempErrorException, NoneException, NeutralException {
         try {
             
             List records = (List) spfSession.getAttribute(ATTRIBUTE_CHECK_RECORDS);
             List mxR = (List) spfSession.getAttribute(ATTRIBUTE_MX_RECORDS);
-            
+
             if (records == null) {
             
                 records = response.getResponse();
-                
+
                 if (records == null) {
                     // no mx record found
                     spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
-                    return;
+                    return null;
                 }
                 
                 spfSession.setAttribute(ATTRIBUTE_CHECK_RECORDS, records);
@@ -105,7 +105,7 @@ public class MXMechanism extends AMechanism implements SPFCheckerDNSResponseList
             } else {
                 
                 List res = response.getResponse();
-                
+
                 if (res != null) {
                     if (mxR == null) {
                         mxR = new ArrayList();
@@ -122,18 +122,17 @@ public class MXMechanism extends AMechanism implements SPFCheckerDNSResponseList
             String mx;
             while (records.size() > 0 && (mx = (String) records.remove(0)) != null && mx.length() > 0) {
                 log.debug("Add MX-Record " + mx + " to list");
-    
-                DNSResolver.lookup(dnsService, new DNSRequest(mx, isIPv6 ? DNSService.AAAA : DNSService.A), spfSession, MXMechanism.this);
-                return;
+
+                return new DNSLookupContinuation(new DNSRequest(mx, isIPv6 ? DNSService.AAAA : DNSService.A), MXMechanism.this);
                 
             }
                 
             // no mx record found
             if (mxR == null || mxR.size() == 0) {
                 spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
-                return;
+                return null;
             }
-            
+
             // get the ipAddress
             IPAddr checkAddress;
             checkAddress = IPAddr.getAddress(spfSession.getIpAddress(), isIPv6 ? getIp6cidr() : getIp4cidr());
@@ -142,7 +141,7 @@ public class MXMechanism extends AMechanism implements SPFCheckerDNSResponseList
             spfSession.setAttribute(ATTRIBUTE_CHECK_RECORDS, null);
             spfSession.setAttribute(ATTRIBUTE_MX_RECORDS, null);
             spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.valueOf(checkAddressList(checkAddress, mxR, getIp4cidr())));
-            return;
+            return null;
             
         } catch (DNSService.TimeoutException e) {
             spfSession.setAttribute(ATTRIBUTE_CHECK_RECORDS, null);

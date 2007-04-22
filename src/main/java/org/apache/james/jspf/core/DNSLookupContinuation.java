@@ -19,29 +19,23 @@
 
 package org.apache.james.jspf.core;
 
-import org.apache.james.jspf.exceptions.NeutralException;
-import org.apache.james.jspf.exceptions.NoneException;
-import org.apache.james.jspf.exceptions.PermErrorException;
-import org.apache.james.jspf.exceptions.TempErrorException;
-
-public interface SPFCheckerDNSResponseListener {
+public class DNSLookupContinuation {
     
-    /**
-     * Continue the check for SPF with the given values and the given DNSResponse
-     * 
-     * @param response
-     *             The DNSResponse which should be used to run the check
-     * @param session
-     *             The SPFSession which should be used to run the check
-     * @throws PermErrorException
-     *             Get thrown if an error was detected
-     * @throws NoneException
-     *             Get thrown if no Record was found
-     * @throws TempErrorException
-     *             Get thrown if a DNS problem was detected
-     * @throws NeutralException  
-     *             Get thrown if the result should be neutral
-     */
-    public DNSLookupContinuation onDNSResponse(DNSResponse response, SPFSession session) throws PermErrorException, NoneException, TempErrorException, NeutralException;
+    private DNSRequest request;
+    private SPFCheckerDNSResponseListener listener;
 
+    public DNSLookupContinuation(DNSRequest request, SPFCheckerDNSResponseListener listener) {
+        this.request = request;
+        this.listener = listener;
+    }
+
+    public DNSRequest getRequest() {
+        return request;
+    }
+
+    public SPFCheckerDNSResponseListener getListener() {
+        return listener;
+    }
+
+    
 }

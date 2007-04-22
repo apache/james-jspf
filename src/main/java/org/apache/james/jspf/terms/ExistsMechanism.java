@@ -20,6 +20,7 @@
 
 package org.apache.james.jspf.terms;
 
+import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.DNSService;
@@ -32,22 +33,20 @@ import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
-import org.apache.james.jspf.util.DNSResolver;
 import org.apache.james.jspf.util.SPFTermsRegexps;
-import org.apache.james.jspf.wiring.DNSServiceEnabled;
 
 import java.util.List;
 
 /**
  * This class represent the exists mechanism
  */
-public class ExistsMechanism extends GenericMechanism implements DNSServiceEnabled, SPFCheckerDNSResponseListener {
+public class ExistsMechanism extends GenericMechanism implements SPFCheckerDNSResponseListener {
 
     private final class ExpandedChecker implements SPFChecker {
-        public void checkSPF(SPFSession spfData) throws PermErrorException,
+        public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
                 TempErrorException, NeutralException, NoneException {
             String host = expandHost(spfData);
-            DNSResolver.lookup(dnsService, new DNSRequest(host,DNSService.A), spfData, ExistsMechanism.this);
+            return new DNSLookupContinuation(new DNSRequest(host,DNSService.A), ExistsMechanism.this);
         }
     }
 
@@ -57,43 +56,41 @@ public class ExistsMechanism extends GenericMechanism implements DNSServiceEnabl
     public static final String REGEX = "[eE][xX][iI][sS][tT][sS]" + "\\:"
             + SPFTermsRegexps.DOMAIN_SPEC_REGEX;
 
-    private DNSService dnsService;
-
     private SPFChecker expandedChecker = new ExpandedChecker();
 
     /**
      * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
      */
-    public void checkSPF(SPFSession spfData) throws PermErrorException,
+    public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
             TempErrorException, NeutralException, NoneException {
         // update currentDepth
         spfData.increaseCurrentDepth();
 
         spfData.pushChecker(expandedChecker);
-        DNSResolver.hostExpand(dnsService, macroExpand, getDomain(), spfData, MacroExpand.DOMAIN);
-        
+        return macroExpand.checkExpand(getDomain(), spfData, MacroExpand.DOMAIN);
     }
 
     /**
      * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
      */
-    public void onDNSResponse(DNSResponse response, SPFSession spfSession) throws PermErrorException, TempErrorException {
+    public DNSLookupContinuation onDNSResponse(DNSResponse response, SPFSession spfSession) throws PermErrorException, TempErrorException {
         List aRecords;
         
         try {
             aRecords = response.getResponse();
         } catch (DNSService.TimeoutException e) {
             spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
-            return;
+            return null;
         }
         
         if (aRecords != null && aRecords.size() > 0) {
             spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.TRUE);
-            return;
+            return null;
         }
         
         // No match found
         spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
+        return null;
     }
 
     /**
@@ -101,13 +98,6 @@ public class ExistsMechanism extends GenericMechanism implements DNSServiceEnabl
      */
     public String toString() {
         return "exists:"+getDomain();
-    }
-
-    /**
-     * @see org.apache.james.jspf.wiring.DNSServiceEnabled#enableDNSService(org.apache.james.jspf.core.DNSService)
-     */
-    public void enableDNSService(DNSService service) {
-        this.dnsService = service;
     }
 
 }

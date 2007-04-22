@@ -19,6 +19,7 @@
 
 package org.apache.james.jspf.policies;
 
+import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.core.SPF1Record;
@@ -34,11 +35,12 @@ import org.apache.james.jspf.exceptions.TempErrorException;
 public class NeutralIfNotMatchPolicy implements PolicyPostFilter {
     
     private final class NeutralIfNotMatchModifier implements SPFChecker {
-        public void checkSPF(SPFSession spfData) throws PermErrorException, TempErrorException, NeutralException {
+        public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException, TempErrorException, NeutralException {
             // If no match was found set the result to neutral
             if (spfData.getCurrentResult() == null) {
                 spfData.setCurrentResult(SPF1Constants.NEUTRAL);
             }
+            return null;
         }
 
         public String toString() {

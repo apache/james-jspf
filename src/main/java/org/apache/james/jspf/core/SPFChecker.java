@@ -44,7 +44,7 @@ public interface SPFChecker {
      *             Get thrown if the result should be neutral
      * @throws NoneException 
      */
-    public void checkSPF(SPFSession spfData) throws PermErrorException,
+    public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
             TempErrorException, NeutralException, NoneException;
 
 //    /**

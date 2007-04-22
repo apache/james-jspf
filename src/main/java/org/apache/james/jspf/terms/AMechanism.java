@@ -21,6 +21,7 @@
 package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.Configuration;
+import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.DNSService;
@@ -34,10 +35,8 @@ import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
-import org.apache.james.jspf.util.DNSResolver;
 import org.apache.james.jspf.util.Inet6Util;
 import org.apache.james.jspf.util.SPFTermsRegexps;
-import org.apache.james.jspf.wiring.DNSServiceEnabled;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +45,7 @@ import java.util.List;
  * This class represent the a mechanism
  * 
  */
-public class AMechanism extends GenericMechanism implements DNSServiceEnabled, SPFCheckerDNSResponseListener {
+public class AMechanism extends GenericMechanism implements SPFCheckerDNSResponseListener {
 
     private static final String ATTRIBUTE_AMECHANISM_IPV4CHECK = "AMechanism.ipv4check";
 
@@ -61,12 +60,10 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled, S
 
     private int ip6cidr;
 
-    protected DNSService dnsService;
-    
     private SPFChecker expandedChecker = new ExpandedChecker();
 
     private final class ExpandedChecker implements SPFChecker {
-        public void checkSPF(SPFSession spfData) throws PermErrorException,
+        public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
                 TempErrorException, NeutralException, NoneException {
             // Get the right host.
             String host = expandHost(spfData);
@@ -77,20 +74,20 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled, S
                 spfData.setAttribute(ATTRIBUTE_AMECHANISM_IPV4CHECK, Boolean.valueOf(validIPV4Address));
                 if (validIPV4Address) {
 
-                    List aRecords = getARecords(dnsService,host);
+                    List aRecords = getARecords(host);
                     if (aRecords == null) {
-                        DNSResolver.lookup(dnsService, new DNSRequest(host, DNSService.A), spfData, AMechanism.this);
+                        return new DNSLookupContinuation(new DNSRequest(host, DNSService.A), AMechanism.this);
                     } else {
-                        onDNSResponse(new DNSResponse(aRecords), spfData);
+                        return onDNSResponse(new DNSResponse(aRecords), spfData);
                     }
          
                 } else {
                     
-                    List aaaaRecords = getAAAARecords(dnsService, host);
+                    List aaaaRecords = getAAAARecords(host);
                     if (aaaaRecords == null) {
-                        DNSResolver.lookup(dnsService, new DNSRequest(host, DNSService.AAAA), spfData, AMechanism.this);
+                        return new DNSLookupContinuation(new DNSRequest(host, DNSService.AAAA), AMechanism.this);
                     } else {
-                        onDNSResponse(new DNSResponse(aaaaRecords), spfData);
+                        return onDNSResponse(new DNSResponse(aaaaRecords), spfData);
                     }
 
                 }
@@ -108,13 +105,13 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled, S
     /**
      * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
      */
-    public void checkSPF(SPFSession spfData) throws PermErrorException, TempErrorException, NeutralException, NoneException {
+    public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException, TempErrorException, NeutralException, NoneException {
         // update currentDepth
         spfData.increaseCurrentDepth();
 
         spfData.pushChecker(expandedChecker);
         
-        DNSResolver.hostExpand(dnsService, macroExpand, getDomain(), spfData, MacroExpand.DOMAIN);
+        return macroExpand.checkExpand(getDomain(), spfData, MacroExpand.DOMAIN);
     }
 
     /**
@@ -212,8 +209,7 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled, S
     /**
      * Retrieve a list of AAAA records
      */
-    public List getAAAARecords(DNSService dns, String strServer)
-            throws PermErrorException, TempErrorException {
+    public List getAAAARecords(String strServer) {
         List listAAAAData = null;
         if (IPAddr.isIPV6(strServer)) {
             // Address is already an IP address, so add it to list
@@ -227,16 +223,11 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled, S
     /**
      * Get a list of IPAddr's for a server
      * 
-     * @params dns the DNSService to query
      * @param strServer
      *            The hostname or ipAddress whe should get the A-Records for
      * @return The ipAddresses
-     * @throws PermErrorException
-     *             if an PermError should be returned
-     * @throws TempErrorException
-     *             if the lookup result was "TRY_AGAIN"
      */
-    public List getARecords(DNSService dns, String strServer) throws PermErrorException, TempErrorException {
+    public List getARecords(String strServer) {
         List listAData = null;
         if (IPAddr.isIPAddr(strServer)) {
             listAData = new ArrayList();
@@ -246,17 +237,9 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled, S
     }
 
     /**
-     * @see org.apache.james.jspf.wiring.DNSServiceEnabled#enableDNSService(org.apache.james.jspf.core.DNSService)
-     */
-    public void enableDNSService(DNSService service) {
-        this.dnsService = service;
-    }
-
-
-    /**
      * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
      */
-    public void onDNSResponse(DNSResponse response, SPFSession spfSession)
+    public DNSLookupContinuation onDNSResponse(DNSResponse response, SPFSession spfSession)
         throws PermErrorException, TempErrorException, NoneException, NeutralException {
         List listAData = null;
         try {
@@ -267,7 +250,7 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled, S
         // no a records just return null
         if (listAData == null) {
             spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
-            return;
+            return null;
         }
 
         Boolean ipv4check = (Boolean) spfSession.getAttribute(ATTRIBUTE_AMECHANISM_IPV4CHECK);
@@ -278,7 +261,7 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled, S
 
             if (checkAddressList(checkAddress, listAData, getIp4cidr())) {
                 spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.TRUE);
-                return;
+                return null;
             }
 
         } else {
@@ -288,13 +271,13 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled, S
             
             if (checkAddressList(checkAddress, listAData, getIp6cidr())) {
                 spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.TRUE);
-                return;
+                return null;
             }
 
         }
         
         spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
-        return;
+        return null;
     }
 
 }

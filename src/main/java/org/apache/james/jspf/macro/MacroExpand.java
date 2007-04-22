@@ -27,15 +27,25 @@ package org.apache.james.jspf.macro;
  */
 
 import org.apache.james.jspf.SPF1Utils;
+import org.apache.james.jspf.core.DNSLookupContinuation;
+import org.apache.james.jspf.core.DNSRequest;
+import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.DNSService;
+import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.Logger;
+import org.apache.james.jspf.core.SPFCheckerDNSResponseListener;
 import org.apache.james.jspf.core.SPFSession;
+import org.apache.james.jspf.core.DNSService.TimeoutException;
+import org.apache.james.jspf.exceptions.NeutralException;
+import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
+import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.util.SPFTermsRegexps;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -80,6 +90,85 @@ public class MacroExpand {
         macroLettersPattern = Pattern.compile(SPFTermsRegexps.MACRO_LETTER_PATTERN);
         log = logger;
         this.dnsProbe = dnsProbe;
+    }
+    
+
+    private static final class AResponseListener implements
+            SPFCheckerDNSResponseListener {
+        public DNSLookupContinuation onDNSResponse(DNSResponse response, SPFSession session)
+                throws PermErrorException, NoneException, TempErrorException,
+                NeutralException {
+            // just return the default "unknown" if we cannot find anything
+            // later
+            session.setClientDomain("unknown");
+            try {
+                List records = response.getResponse();
+                if (records != null && records.size() > 0) {
+                    Iterator i = records.iterator();
+                    while (i.hasNext()) {
+                        String next = (String) i.next();
+                        if (IPAddr.getAddress(session.getIpAddress())
+                                .toString().equals(
+                                        IPAddr.getAddress(next).toString())) {
+                            session
+                                    .setClientDomain((String) session
+                                            .getAttribute(ATTRIBUTE_MACRO_EXPAND_CHECKED_RECORD));
+                            break;
+                        }
+                    }
+                }
+            } catch (TimeoutException e) {
+                // just return the default "unknown".
+            } catch (PermErrorException e) {
+                // just return the default "unknown".
+            }
+            return null;
+        }
+    }
+
+    private static final class PTRResponseListener implements
+            SPFCheckerDNSResponseListener {
+
+        public DNSLookupContinuation onDNSResponse(DNSResponse response, SPFSession session)
+                throws PermErrorException, NoneException, TempErrorException,
+                NeutralException {
+
+            try {
+                boolean ip6 = IPAddr.isIPV6(session.getIpAddress());
+                List records = response.getResponse();
+
+                if (records != null && records.size() > 0) {
+                    String record = (String) records.get(0);
+                    session.setAttribute(ATTRIBUTE_MACRO_EXPAND_CHECKED_RECORD,
+                            record);
+
+                    return new DNSLookupContinuation(new DNSRequest(record,
+                            ip6 ? DNSService.AAAA : DNSService.A), 
+                            new AResponseListener());
+
+                }
+            } catch (TimeoutException e) {
+                // just return the default "unknown".
+                session.setClientDomain("unknown");
+            }
+            return null;
+
+        }
+    }
+
+    private static final String ATTRIBUTE_MACRO_EXPAND_CHECKED_RECORD = "MacroExpand.checkedRecord";
+
+    public DNSLookupContinuation checkExpand(String input, SPFSession session, boolean isExplanation) throws PermErrorException {
+        if (input != null) {
+            String host = this.expand(input, session, isExplanation);
+            if (host == null) {
+
+                return new DNSLookupContinuation(new DNSRequest(IPAddr
+                        .getAddress(session.getIpAddress()).getReverseIP(),
+                        DNSService.PTR), new PTRResponseListener());
+            }
+        }
+        return null;
     }
     
     public String expand(String input, MacroData macroData, boolean isExplanation) throws PermErrorException {

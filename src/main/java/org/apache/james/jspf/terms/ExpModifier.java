@@ -20,6 +20,7 @@
 
 package org.apache.james.jspf.terms;
 
+import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.DNSService;
@@ -32,9 +33,7 @@ import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
-import org.apache.james.jspf.util.DNSResolver;
 import org.apache.james.jspf.util.SPFTermsRegexps;
-import org.apache.james.jspf.wiring.DNSServiceEnabled;
 import org.apache.james.jspf.wiring.MacroExpandEnabled;
 
 import java.util.List;
@@ -43,10 +42,10 @@ import java.util.List;
  * This class represent the exp modifier
  * 
  */
-public class ExpModifier extends GenericModifier implements DNSServiceEnabled, MacroExpandEnabled, SPFCheckerDNSResponseListener {
+public class ExpModifier extends GenericModifier implements MacroExpandEnabled, SPFCheckerDNSResponseListener {
 
     private final class ExpandedExplanationChecker implements SPFChecker {
-        public void checkSPF(SPFSession spfData)
+        public DNSLookupContinuation checkSPF(SPFSession spfData)
                 throws PermErrorException, NoneException,
                 TempErrorException, NeutralException {
             try {
@@ -56,16 +55,17 @@ public class ExpModifier extends GenericModifier implements DNSServiceEnabled, M
             } catch (PermErrorException e) {
                 // ignore syntax error on explanation expansion
             }
+            return null;
         }
     }
 
 
     private final class ExpandedChecker implements SPFChecker {
-        public void checkSPF(SPFSession spfData) throws PermErrorException,
+        public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
                 NoneException, TempErrorException, NeutralException {
             String host = macroExpand.expand(getHost(), spfData, MacroExpand.DOMAIN);
 
-            DNSResolver.lookup(dnsService, new DNSRequest(host, DNSService.TXT), spfData, ExpModifier.this);
+            return new DNSLookupContinuation(new DNSRequest(host, DNSService.TXT), ExpModifier.this);
         }
     }
 
@@ -82,8 +82,6 @@ public class ExpModifier extends GenericModifier implements DNSServiceEnabled, M
     public static final String REGEX = "[eE][xX][pP]" + "\\="
             + SPFTermsRegexps.DOMAIN_SPEC_REGEX+"?";
 
-    private DNSService dnsService;
-    
     private MacroExpand macroExpand;
 
     private ExpandedChecker expandedChecker = new ExpandedChecker();
@@ -101,25 +99,25 @@ public class ExpModifier extends GenericModifier implements DNSServiceEnabled, M
      * @throws NoneException 
      * @throws NeutralException 
      */
-    protected void checkSPFLogged(SPFSession spfData) throws PermErrorException, TempErrorException, NeutralException, NoneException {
+    protected DNSLookupContinuation checkSPFLogged(SPFSession spfData) throws PermErrorException, TempErrorException, NeutralException, NoneException {
         String host = getHost();
         
         // RFC4408 Errata: http://www.openspf.org/RFC_4408/Errata#empty-exp
         if (host == null) {
-            return;
+            return null;
         }
 
         // If we should ignore the explanation we don't have to run this class
         if (spfData.ignoreExplanation() == true)
-            return;
+            return null;
         
         // If the currentResult is not fail we have no need to run all these
         // methods!
         if (spfData.getCurrentResult()== null || !spfData.getCurrentResult().equals(SPF1Constants.FAIL))
-            return;
+            return null;
 
         spfData.pushChecker(expandedChecker);
-        DNSResolver.hostExpand(dnsService, macroExpand, host, spfData, MacroExpand.DOMAIN);
+        return macroExpand.checkExpand(host, spfData, MacroExpand.DOMAIN);
     }
 
     /**
@@ -141,12 +139,12 @@ public class ExpModifier extends GenericModifier implements DNSServiceEnabled, M
     /**
      * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
      */
-    public void onDNSResponse(DNSResponse lookup, SPFSession spfData) throws PermErrorException, TempErrorException, NeutralException, NoneException {
+    public DNSLookupContinuation onDNSResponse(DNSResponse lookup, SPFSession spfData) throws PermErrorException, TempErrorException, NeutralException, NoneException {
         try {
             List records = lookup.getResponse();
         
             if (records == null) {
-                return;
+                return null;
             }
     
             // See SPF-Spec 6.2
@@ -169,7 +167,7 @@ public class ExpModifier extends GenericModifier implements DNSServiceEnabled, M
                     
                     try {
                         spfData.pushChecker(expandedExplanationChecker);
-                        DNSResolver.hostExpand(dnsService, macroExpand, exp, spfData, MacroExpand.EXPLANATION);
+                        return macroExpand.checkExpand(exp, spfData, MacroExpand.EXPLANATION);
                     } catch (PermErrorException e) {
                         // ignore syntax error on explanation expansion
                     }
@@ -180,8 +178,8 @@ public class ExpModifier extends GenericModifier implements DNSServiceEnabled, M
 
         } catch (DNSService.TimeoutException e) {
             // Nothing todo here.. just return null
-            return;
         }
+        return null;
     }
     
     /**
@@ -190,14 +188,6 @@ public class ExpModifier extends GenericModifier implements DNSServiceEnabled, M
     public String toString() {
        return "exp="+getHost();
     }
-
-    /**
-     * @see org.apache.james.jspf.wiring.DNSServiceEnabled#enableDNSService(org.apache.james.jspf.core.DNSService)
-     */
-    public void enableDNSService(DNSService service) {
-        this.dnsService = service;
-    }
-
 
     /**
      * @see org.apache.james.jspf.wiring.MacroExpandEnabled#enableMacroExpand(org.apache.james.jspf.macro.MacroExpand)

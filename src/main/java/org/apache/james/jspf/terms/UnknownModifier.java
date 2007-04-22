@@ -22,6 +22,7 @@ package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.Configurable;
 import org.apache.james.jspf.core.Configuration;
+import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.Modifier;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.exceptions.PermErrorException;
@@ -44,8 +45,8 @@ public class UnknownModifier implements Modifier, Configurable {
     /**
      * @see org.apache.james.jspf.core.Modifier#run(org.apache.james.jspf.core.SPFSession)
      */
-    public void checkSPF(SPFSession spfData) throws PermErrorException {
-        return;
+    public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException {
+        return null;
     }
 
     /**

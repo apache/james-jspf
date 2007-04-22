@@ -32,7 +32,7 @@ public class Directive implements SPFChecker {
 
     private final class MechanismResultChecker implements SPFChecker {
 
-        public void checkSPF(SPFSession spfData)
+        public DNSLookupContinuation checkSPF(SPFSession spfData)
                 throws PermErrorException, TempErrorException,
                 NeutralException, NoneException {
             Boolean res = (Boolean) spfData.getAttribute(ATTRIBUTE_MECHANISM_RESULT);
@@ -47,6 +47,7 @@ public class Directive implements SPFChecker {
             } else {
                 log.debug("Processed directive NOT matched: " + this);
             }
+            return null;
         }
         
     }
@@ -93,7 +94,7 @@ public class Directive implements SPFChecker {
      * @throws NoneException get thrown if a NoneException should returned;
      * @throws NeutralException 
      */
-    public void checkSPF(SPFSession spfData) throws PermErrorException,
+    public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
             TempErrorException, NoneException, NeutralException {
         // if already have a current result we don't run this
         if (spfData.getCurrentResult() == null) {
@@ -105,6 +106,7 @@ public class Directive implements SPFChecker {
             spfData.pushChecker(mechanism);
 
         }
+        return null;
     }
 
     /**

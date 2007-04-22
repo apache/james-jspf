@@ -20,6 +20,8 @@
 
 package org.apache.james.jspf;
 
+import org.apache.james.jspf.core.DNSLookupContinuation;
+import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPF1Constants;
@@ -28,6 +30,7 @@ import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.core.SPF1Record;
 import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.core.SPFRecordParser;
+import org.apache.james.jspf.core.DNSService.TimeoutException;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
@@ -139,7 +142,48 @@ public class SPF implements SPFChecker {
         try {
             // Setup the data
             spfData = new SPFSession(mailFrom, hostName, ipAddress);
-            checkSPF(spfData);
+            
+            
+            spfData.pushChecker(this);
+            SPFChecker checker;
+            while ((checker = spfData.popChecker()) != null) {
+                // only execute checkers we added (better recursivity)
+                log.debug("Executing checker: "+checker);
+                try {
+                    DNSLookupContinuation cont = checker.checkSPF(spfData);
+                    // if the checker returns a continuation we return it
+                    while (cont != null) {
+                        DNSResponse response;
+                        try {
+                            response = new DNSResponse(dnsProbe.getRecords(
+                                    cont.getRequest().getHostname(), cont.getRequest().getRecordType()));
+                        } catch (TimeoutException e) {
+                            response = new DNSResponse(e);
+                        }
+                        cont = cont.getListener().onDNSResponse(response, spfData);
+                    }
+                } catch (Exception e) {
+                    SPFCheckerExceptionCatcher catcher = spfData.getExceptionCatcher();
+                    if (catcher != null) {
+                        catcher.onException(e, spfData);
+                    } else {
+                        log.debug("Checker execution resulted in unmanaged exception: "+checker+" => "+e);
+                        if (e instanceof PermErrorException) {
+                            throw (PermErrorException) e;
+                        } else if (e instanceof TempErrorException) {
+                            throw (TempErrorException) e;
+                        } else if (e instanceof NeutralException) {
+                            throw (NeutralException) e;
+                        } else if (e instanceof NoneException) {
+                            throw (NoneException) e;
+                        } else {
+                            throw new IllegalStateException(e);
+                        }
+                    }
+                }
+            }
+            
+            
             String resultChar = spfData.getCurrentResult() != null ? spfData.getCurrentResult() : "";
             result = SPF1Utils.resultToName(resultChar);
             explanation = spfData.getExplanation();
@@ -167,24 +211,11 @@ public class SPF implements SPFChecker {
     /**
      * @see org.apache.james.jspf.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
      */
-    public void checkSPF(SPFSession spfData) throws PermErrorException,
+    public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
             NoneException, TempErrorException, NeutralException {
 
         SPF1Record spfRecord = getPolicy().getSPFRecord(spfData.getCurrentDomain());
-        checkSPF(spfData, spfRecord);
-    }
-
-    /**
-     * Check a given spfData with the given spfRecord
-     * 
-     * @param spfData spf data
-     * @param spfRecord record
-     * @throws PermErrorException exception
-     * @throws NoneException exception
-     * @throws TempErrorException exception
-     * @throws NeutralException exception
-     */
-    public void checkSPF(SPFSession spfData, SPF1Record spfRecord) throws PermErrorException, NoneException, TempErrorException, NeutralException {
+        
         LinkedList reversedCheckers = new LinkedList();
         Iterator i = spfRecord.iterator();
         while (i.hasNext()) {
@@ -194,36 +225,9 @@ public class SPF implements SPFChecker {
         for (int k = 0; k < reversedCheckers.size(); k++) {
             spfData.pushChecker((SPFChecker) reversedCheckers.get(k));
         }
-        
-        // To make it asynchronous we should start the executor and 
-        // return here.. instead we run the executor locally by now.
 
-        SPFChecker checker;
-        while ((checker = spfData.popChecker()) != null) {
-            // only execute checkers we added (better recursivity)
-            log.debug("Executing checker: "+checker);
-            try {
-                checker.checkSPF(spfData);
-            } catch (Exception e) {
-                SPFCheckerExceptionCatcher catcher = spfData.getExceptionCatcher();
-                if (catcher != null) {
-                    catcher.onException(e, spfData);
-                } else {
-                    log.debug("Checker execution resulted in unmanaged exception: "+checker+" => "+e);
-                    if (e instanceof PermErrorException) {
-                        throw (PermErrorException) e;
-                    } else if (e instanceof TempErrorException) {
-                        throw (TempErrorException) e;
-                    } else if (e instanceof NeutralException) {
-                        throw (NeutralException) e;
-                    } else if (e instanceof NoneException) {
-                        throw (NeutralException) e;
-                    } else {
-                        throw new IllegalStateException(e);
-                    }
-                }
-            }
-        }
+        // done
+        return null;
     }
 
     /**
@@ -263,7 +267,7 @@ public class SPF implements SPFChecker {
 
         policyFilters.add(new NeutralIfNotMatchPolicy());
 
-        policyFilters.add(new DefaultExplanationPolicy(log, defaultExplanation, macroExpand, dnsProbe));
+        policyFilters.add(new DefaultExplanationPolicy(log, defaultExplanation, macroExpand));
         
         policies.add(new InitialChecksPolicy());
         

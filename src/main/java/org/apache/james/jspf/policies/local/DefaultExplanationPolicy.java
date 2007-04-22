@@ -20,19 +20,18 @@
 package org.apache.james.jspf.policies.local;
 
 import org.apache.james.jspf.SPF1Utils;
-import org.apache.james.jspf.core.DNSService;
+import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPF1Constants;
-import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.core.SPF1Record;
 import org.apache.james.jspf.core.SPFChecker;
+import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.policies.PolicyPostFilter;
-import org.apache.james.jspf.util.DNSResolver;
 
 /**
  * Policy to add a default explanation
@@ -48,7 +47,7 @@ public final class DefaultExplanationPolicy implements PolicyPostFilter {
         }
         
         private final class ExplanationChecker implements SPFChecker {
-            public void checkSPF(SPFSession spfData)
+            public DNSLookupContinuation checkSPF(SPFSession spfData)
                     throws PermErrorException,
                     NoneException, TempErrorException,
                     NeutralException {
@@ -61,10 +60,11 @@ public final class DefaultExplanationPolicy implements PolicyPostFilter {
                     // Should never happen !
                     log.debug("Invalid defaulfExplanation: " + attExplanation);
                 }
+                return null;
             }
         }
 
-        public void checkSPF(SPFSession spfData) throws PermErrorException, NoneException, TempErrorException, NeutralException {
+        public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException, NoneException, TempErrorException, NeutralException {
             
             if (SPF1Constants.FAIL.equals(spfData.getCurrentResult())) {  
                 if (spfData.getExplanation()==null || spfData.getExplanation().equals("")) {
@@ -76,9 +76,11 @@ public final class DefaultExplanationPolicy implements PolicyPostFilter {
                     }
                     spfData.setAttribute(ATTRIBUTE_DEFAULT_EXPLANATION_POLICY_EXPLANATION, explanation);
                     spfData.pushChecker(explanationCheckr);
-                    DNSResolver.hostExpand(dnsService, macroExpand, explanation, spfData, MacroExpand.EXPLANATION);
+                    return macroExpand.checkExpand(explanation, spfData, MacroExpand.EXPLANATION);
                 }
             }
+            
+            return null;
         }
 
         public String toString() {
@@ -103,17 +105,14 @@ public final class DefaultExplanationPolicy implements PolicyPostFilter {
     
     private MacroExpand macroExpand;
     
-    private DNSService dnsService;
-
     /**
      * @param macroExpand 
      * @param spf
      */
-    public DefaultExplanationPolicy(Logger log, String explanation, MacroExpand macroExpand, DNSService dnsService) {
+    public DefaultExplanationPolicy(Logger log, String explanation, MacroExpand macroExpand) {
         this.log = log;
         this.defExplanation = explanation;
         this.macroExpand = macroExpand;
-        this.dnsService = dnsService;
     }
 
     /**
