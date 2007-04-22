@@ -21,6 +21,7 @@
 package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.Configuration;
+import org.apache.james.jspf.core.Directive;
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.exceptions.PermErrorException;
@@ -44,18 +45,13 @@ public class IP4Mechanism extends GenericMechanism {
      * 
      * @see org.apache.james.jspf.core.GenericMechanism#run(org.apache.james.jspf.core.SPFSession)
      */
-    public boolean run(SPFSession spfData) throws PermErrorException {
+    public void checkSPF(SPFSession spfData) throws PermErrorException {
         IPAddr originalIP;
 
         originalIP = IPAddr.getAddress(spfData.getIpAddress(), getIp()
                 .getMaskLength());
 
-        if (getIp().getMaskedIPAddress().equals(originalIP.getMaskedIPAddress())) {
-            return true;
-        } else {
-            // No match
-            return false;
-        }
+        spfData.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.valueOf(getIp().getMaskedIPAddress().equals(originalIP.getMaskedIPAddress())));
     }
 
     /**

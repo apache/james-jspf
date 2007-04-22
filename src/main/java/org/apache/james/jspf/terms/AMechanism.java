@@ -24,6 +24,7 @@ import org.apache.james.jspf.core.Configuration;
 import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.DNSService;
+import org.apache.james.jspf.core.Directive;
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.core.SPFSession;
@@ -46,7 +47,7 @@ import java.util.List;
  */
 public class AMechanism extends GenericMechanism implements DNSServiceEnabled {
 
-    private static final String ATTRIBUTE_AMECHANISM_RESULT = "AMechanism.result";
+    private static final String ATTRIBUTE_AMECHANISM_IPV4CHECK = "AMechanism.ipv4check";
 
     /**
      * ABNF: A = "a" [ ":" domain-spec ] [ dual-cidr-length ]
@@ -62,13 +63,9 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled {
     protected DNSService dnsService;
 
     /**
-     * 
-     * @throws NoneException 
-     * @throws NeutralException 
-     * @see org.apache.james.jspf.core.GenericMechanism#run(org.apache.james.jspf.core.SPFSession)
+     * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
      */
-    public boolean run(SPFSession spfData) throws PermErrorException,
-            TempErrorException, NeutralException, NoneException {
+    public void checkSPF(SPFSession spfData) throws PermErrorException, TempErrorException, NeutralException, NoneException {
         // update currentDepth
         spfData.increaseCurrentDepth();
 
@@ -82,7 +79,7 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled {
                 // get the ipAddress
                 try {
                     boolean validIPV4Address = Inet6Util.isValidIPV4Address(spfData.getIpAddress());
-                    spfData.setAttribute("AMechanism.ipv4check", Boolean.valueOf(validIPV4Address));
+                    spfData.setAttribute(ATTRIBUTE_AMECHANISM_IPV4CHECK, Boolean.valueOf(validIPV4Address));
                     if (validIPV4Address) {
 
                         List aRecords = getARecords(dnsService,host);
@@ -115,9 +112,6 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled {
         };
         
         DNSResolver.hostExpand(dnsService, macroExpand, getDomain(), spfData, MacroExpand.DOMAIN, checker);
-        
-        Boolean res = (Boolean) spfData.getAttribute(ATTRIBUTE_AMECHANISM_RESULT);
-        return res != null ? res.booleanValue() : false;
     }
 
     /**
@@ -266,18 +260,18 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled {
         }
         // no a records just return null
         if (listAData == null) {
-            spfSession.setAttribute(ATTRIBUTE_AMECHANISM_RESULT, Boolean.FALSE);
+            spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
             return;
         }
 
-        Boolean ipv4check = (Boolean) spfSession.getAttribute("AMechanism.ipv4check");
+        Boolean ipv4check = (Boolean) spfSession.getAttribute(ATTRIBUTE_AMECHANISM_IPV4CHECK);
         if (ipv4check.booleanValue()) {
 
             IPAddr checkAddress = IPAddr.getAddress(spfSession.getIpAddress(),
                     getIp4cidr());
 
             if (checkAddressList(checkAddress, listAData, getIp4cidr())) {
-                spfSession.setAttribute(ATTRIBUTE_AMECHANISM_RESULT, Boolean.TRUE);
+                spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.TRUE);
                 return;
             }
 
@@ -287,13 +281,13 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled {
                     getIp6cidr());
             
             if (checkAddressList(checkAddress, listAData, getIp6cidr())) {
-                spfSession.setAttribute(ATTRIBUTE_AMECHANISM_RESULT, Boolean.TRUE);
+                spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.TRUE);
                 return;
             }
 
         }
         
-        spfSession.setAttribute(ATTRIBUTE_AMECHANISM_RESULT, Boolean.FALSE);
+        spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
         return;
     }
 

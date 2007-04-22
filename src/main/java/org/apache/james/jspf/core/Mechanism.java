@@ -20,32 +20,11 @@
 
 package org.apache.james.jspf.core;
 
-import org.apache.james.jspf.exceptions.NeutralException;
-import org.apache.james.jspf.exceptions.NoneException;
-import org.apache.james.jspf.exceptions.PermErrorException;
-import org.apache.james.jspf.exceptions.TempErrorException;
 
 /**
  * This Interface represent a mechanismn
  * 
  */
-public interface Mechanism {
+public interface Mechanism extends SPFChecker {
 
-    /**
-     * Run the mechanismn with the give SPF1Data
-     * 
-     * @param spfData
-     *            The SPF1Data
-     * @return true if the mechanism match. Otherwise false
-     * @throws PermErrorException
-     *             Get thrown if there are any errors in modifiers
-     * @throws TempErrorException
-     *             Get thrown if DNS problems detected
-     * @throws NoneException 
-     *             Get thrown if no valid records was found
-     * @throws NeutralException 
-     */
-    public boolean run(SPFSession spfData) throws PermErrorException,
-            TempErrorException, NoneException, NeutralException;
-    
 }

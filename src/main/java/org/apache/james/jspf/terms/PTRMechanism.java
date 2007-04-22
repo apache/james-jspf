@@ -23,6 +23,7 @@ package org.apache.james.jspf.terms;
 import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.DNSService;
+import org.apache.james.jspf.core.Directive;
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.core.SPFSession;
@@ -54,17 +55,13 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled 
      */
     public static final String REGEX = "[pP][tT][rR]" + "(?:\\:"
             + SPFTermsRegexps.DOMAIN_SPEC_REGEX + ")?";
-
-    private static final String ATTRIBUTE_MECHANISM_RESULT = "PTRMechanism.result";
     
     private DNSService dnsService;
 
     /**
-     * @throws NoneException 
-     * @throws NeutralException 
-     * @see org.apache.james.jspf.core.Mechanism#run(org.apache.james.jspf.core.SPFSession)
+     * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
      */
-    public boolean run(SPFSession spfData) throws PermErrorException,
+    public void checkSPF(SPFSession spfData) throws PermErrorException,
             TempErrorException, NeutralException, NoneException {
         // update currentDepth
         spfData.increaseCurrentDepth();
@@ -90,11 +87,6 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled 
         };
         
         DNSResolver.hostExpand(dnsService, macroExpand, getDomain(), spfData, MacroExpand.DOMAIN, checker);
-        
-        Boolean res = (Boolean) spfData.getAttribute(ATTRIBUTE_MECHANISM_RESULT);
-        return res != null ? res.booleanValue() : false;
-
-        
     }
 
     /**
@@ -118,7 +110,7 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled 
                 
                 // No PTR records found
                 if (domainList == null) {
-                    spfSession.setAttribute(ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
+                    spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
                     return;
                 }
         
@@ -146,7 +138,7 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled 
                             
                             if (compareDomain.equals(host)
                                     || compareDomain.endsWith("." + host)) {
-                                spfSession.setAttribute(ATTRIBUTE_MECHANISM_RESULT, Boolean.TRUE);
+                                spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.TRUE);
                                 return;
                             }
                             
@@ -180,7 +172,7 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled 
                 onDNSResponse(DNSResolver.lookup(dnsService, dnsRequest), spfSession);
                 return;
             } else {
-                spfSession.setAttribute(ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
+                spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
                 return;
             }
 

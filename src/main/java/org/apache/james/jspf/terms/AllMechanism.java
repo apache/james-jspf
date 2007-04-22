@@ -35,10 +35,10 @@ public class AllMechanism implements Mechanism, Configurable {
     public static final String REGEX = "[aA][lL][lL]";
 
     /**
-     * @see org.apache.james.jspf.core.Mechanism#run(SPFSession)
+     * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
      */
-    public boolean run(SPFSession spfData) throws PermErrorException {
-        return true;
+    public void checkSPF(SPFSession spfData) throws PermErrorException {
+        return;
     }
 
     /**

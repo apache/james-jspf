@@ -30,6 +30,8 @@ import org.apache.james.jspf.exceptions.TempErrorException;
  */
 public class Directive implements SPFChecker {
 
+    public static final String ATTRIBUTE_MECHANISM_RESULT = "Mechanism.result";
+
     protected String qualifier = "+";
 
     private Mechanism mechanism = null;
@@ -72,7 +74,12 @@ public class Directive implements SPFChecker {
         // if already have a current result we don't run this
         if (spfData.getCurrentResult() == null) {
 
-            if (mechanism.run(spfData)) {
+            spfData.setAttribute(ATTRIBUTE_MECHANISM_RESULT, null);
+
+            mechanism.checkSPF(spfData);
+            
+            Boolean res = (Boolean) spfData.getAttribute(ATTRIBUTE_MECHANISM_RESULT);
+            if (res != null ? res.booleanValue() : true) {
                 if (qualifier.equals("")) {
                     spfData.setCurrentResult(SPF1Constants.PASS);
                 } else {

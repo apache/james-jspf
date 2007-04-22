@@ -23,6 +23,7 @@ package org.apache.james.jspf.terms;
 import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.DNSService;
+import org.apache.james.jspf.core.Directive;
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.core.SPFSession;
@@ -52,16 +53,10 @@ public class MXMechanism extends AMechanism {
             + SPFTermsRegexps.DOMAIN_SPEC_REGEX + ")?" + "(?:"
             + DUAL_CIDR_LENGTH_REGEX + ")?";
     
-    private static final String ATTRIBUTE_MECHANISM_RESULT = "MXMechanism.result";
-
     /**
-     * 
-     * @throws NoneException 
-     * @throws NeutralException 
-     * @throws NoneException 
-     * @see org.apache.james.jspf.core.GenericMechanism#run(org.apache.james.jspf.core.SPFSession)
+     * @see org.apache.james.jspf.terms.AMechanism#checkSPF(org.apache.james.jspf.core.SPFSession)
      */
-    public boolean run(SPFSession spfData) throws PermErrorException,
+    public void checkSPF(SPFSession spfData) throws PermErrorException,
             TempErrorException, NeutralException, NoneException{
 
         // update currentDepth
@@ -81,9 +76,6 @@ public class MXMechanism extends AMechanism {
         };
         
         DNSResolver.hostExpand(dnsService, macroExpand, getDomain(), spfData, MacroExpand.DOMAIN, checker);
-        
-        Boolean res = (Boolean) spfData.getAttribute(ATTRIBUTE_MECHANISM_RESULT);
-        return res != null ? res.booleanValue() : false;
     }
 
     /**
@@ -102,7 +94,7 @@ public class MXMechanism extends AMechanism {
                 
                 if (records == null) {
                     // no mx record found
-                    spfSession.setAttribute(ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
+                    spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
                     return;
                 }
                 
@@ -137,7 +129,7 @@ public class MXMechanism extends AMechanism {
                 
             // no mx record found
             if (mxR == null || mxR.size() == 0) {
-                spfSession.setAttribute(ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
+                spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
                 return;
             }
             
@@ -148,7 +140,7 @@ public class MXMechanism extends AMechanism {
             // clean up attributes
             spfSession.setAttribute(ATTRIBUTE_CHECK_RECORDS, null);
             spfSession.setAttribute(ATTRIBUTE_MX_RECORDS, null);
-            spfSession.setAttribute(ATTRIBUTE_MECHANISM_RESULT, Boolean.valueOf(checkAddressList(checkAddress, mxR, getIp4cidr())));
+            spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.valueOf(checkAddressList(checkAddress, mxR, getIp4cidr())));
             return;
             
         } catch (DNSService.TimeoutException e) {

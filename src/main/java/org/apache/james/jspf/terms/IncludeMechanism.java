@@ -24,6 +24,7 @@ import org.apache.james.jspf.core.Configurable;
 import org.apache.james.jspf.core.Configuration;
 import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.DNSService;
+import org.apache.james.jspf.core.Directive;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.Mechanism;
 import org.apache.james.jspf.core.SPF1Constants;
@@ -64,19 +65,9 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
     private DNSService dnsService;
 
     /**
-     * Set the host which should be used for include
-     * 
-     * @param spfData
-     *            The SPF1Data which should used
-     * @return The host which should be included
-     * @throws PermErrorException
-     *             if an error is in the redirect modifier
-     * @throws TempErrorException 
-     *             if the dns return a temp error
-     * @throws NoneException 
-     * @throws NeutralException 
+     * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
      */
-    public boolean run(SPFSession spfData) throws PermErrorException, TempErrorException, NoneException {
+    public void checkSPF(SPFSession spfData) throws PermErrorException, TempErrorException, NoneException {
         // update currentDepth
         spfData.increaseCurrentDepth();      
         
@@ -116,10 +107,10 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
                         throw new TempErrorException("included checkSPF returned null");
                     } else if (spfData.getCurrentResult().equals(SPF1Constants.PASS)) {
                         // TODO this won't work asynchronously
-                        spfData.setAttribute("IncludeMechanism.result", Boolean.TRUE);
+                        spfData.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.TRUE);
                     } else if (spfData.getCurrentResult().equals(SPF1Constants.FAIL) || spfData.getCurrentResult().equals(SPF1Constants.SOFTFAIL) || spfData.getCurrentResult().equals(SPF1Constants.NEUTRAL)) {
                         // TODO this won't work asynchronously
-                        spfData.setAttribute("IncludeMechanism.result", Boolean.FALSE);
+                        spfData.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
                     } else {
                         throw new TempErrorException("included checkSPF returned an Illegal result");
                     }
@@ -141,10 +132,6 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        
-        // TODO this won't work asynchronously
-        Boolean res = (Boolean) spfData.getAttribute("IncludeMechanism.result");
-        return res != null ? res.booleanValue() : false;
     }
 
     /**

@@ -23,6 +23,7 @@ package org.apache.james.jspf.terms;
 import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.DNSService;
+import org.apache.james.jspf.core.Directive;
 import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.exceptions.NeutralException;
@@ -47,17 +48,12 @@ public class ExistsMechanism extends GenericMechanism implements DNSServiceEnabl
     public static final String REGEX = "[eE][xX][iI][sS][tT][sS]" + "\\:"
             + SPFTermsRegexps.DOMAIN_SPEC_REGEX;
 
-    private static final String ATTRIBUTE_MECHANISM_RESULT = "ExistsMechanism.result";
-    
     private DNSService dnsService;
 
     /**
-     * 
-     * @throws NoneException 
-     * @throws NeutralException 
-     * @see org.apache.james.jspf.core.GenericMechanism#run(org.apache.james.jspf.core.SPFSession)
+     * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
      */
-    public boolean run(SPFSession spfData) throws PermErrorException,
+    public void checkSPF(SPFSession spfData) throws PermErrorException,
             TempErrorException, NeutralException, NoneException {
         // update currentDepth
         spfData.increaseCurrentDepth();
@@ -74,9 +70,6 @@ public class ExistsMechanism extends GenericMechanism implements DNSServiceEnabl
         
         DNSResolver.hostExpand(dnsService, macroExpand, getDomain(), spfData, MacroExpand.DOMAIN, checker);
         
-        Boolean res = (Boolean) spfData.getAttribute(ATTRIBUTE_MECHANISM_RESULT);
-        return res != null ? res.booleanValue() : false;
-
     }
 
     /**
@@ -88,17 +81,17 @@ public class ExistsMechanism extends GenericMechanism implements DNSServiceEnabl
         try {
             aRecords = response.getResponse();
         } catch (DNSService.TimeoutException e) {
-            spfSession.setAttribute(ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
+            spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
             return;
         }
         
         if (aRecords != null && aRecords.size() > 0) {
-            spfSession.setAttribute(ATTRIBUTE_MECHANISM_RESULT, Boolean.TRUE);
+            spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.TRUE);
             return;
         }
         
         // No match found
-        spfSession.setAttribute(ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
+        spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
     }
 
     /**
