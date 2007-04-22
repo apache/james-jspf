@@ -52,6 +52,10 @@ public interface DNSService {
      * @throws TempErrorException on timeout.
      */
     public List getRecords(String hostname, int recordType) throws TimeoutException;
+    
+    
+    public void getRecordsAsynch(String hostname, int recordType, Object id, IResponseQueue responsePool);
+    
 
     /**
      * Try to get all domain names for the running host

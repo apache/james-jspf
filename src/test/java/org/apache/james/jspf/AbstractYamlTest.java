@@ -20,8 +20,11 @@
 package org.apache.james.jspf;
 
 import org.apache.james.jspf.core.DNSService;
+import org.apache.james.jspf.core.IResponseQueue;
 import org.apache.james.jspf.core.Logger;
+import org.apache.james.jspf.core.SPFExecutor;
 import org.apache.james.jspf.core.SPFRecordParser;
+import org.apache.james.jspf.core.StagedMultipleSPFExecutor;
 import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.parser.DefaultSPF1Parser;
 import org.apache.james.jspf.parser.DefaultTermsFactory;
@@ -53,6 +56,7 @@ public abstract class AbstractYamlTest extends TestCase {
     SPFYamlTestSuite data;
     String test;
     protected Logger log;
+    private SPFExecutor executor;
     protected static MacroExpand macroExpand;
     protected static SPF spf;
     protected static SPFRecordParser parser;
@@ -163,7 +167,8 @@ public abstract class AbstractYamlTest extends TestCase {
         }
         dns = new LoggingDNSService(getDNSService(), log.getChildLogger("dns"));
         macroExpand = new MacroExpand(log.getChildLogger("macroExpand"), dns);
-        spf = new SPF(dns, parser, log.getChildLogger("spf"), macroExpand);
+        executor = new StagedMultipleSPFExecutor(log, dns); 
+        spf = new SPF(dns, parser, log.getChildLogger("spf"), macroExpand, executor);
         /* PREVIOUS SLOW WAY 
         // we add this after the creation because it is a loop reference
         enabledServices.remove(DNSServiceEnabled.class);
@@ -331,6 +336,15 @@ public abstract class AbstractYamlTest extends TestCase {
                 return res.size() > 0 ? res : null;
             }
             return null;
+        }
+        
+        public void getRecordsAsynch(String hostname, int recordType, Object id,
+                IResponseQueue responsePool) {
+            try {
+                responsePool.insertResponse(new ResponseImpl(id, getRecords(hostname, recordType)));
+            } catch (TimeoutException e) {
+                responsePool.insertResponse(new ResponseImpl(id, e));
+            }
         }
     }
 

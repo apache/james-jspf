@@ -76,6 +76,8 @@ public class SPFSession implements MacroData {
     
     private Stack catchers = new Stack();
 
+    private String currentResultExpanded;
+    
     /**
      * Build the SPF1Data from the given parameters
      * 
@@ -396,4 +398,19 @@ public class SPFSession implements MacroData {
             return (SPFCheckerExceptionCatcher) catchers.peek();
         }
     }
+
+    /**
+     * @param result
+     */
+    public void setCurrentResultExpanded(String result) {
+        this.currentResultExpanded = result;
+    }
+
+    /**
+     * @return current result converted/expanded
+     */
+    public String getCurrentResultExpanded() {
+        return currentResultExpanded;
+    }
+
 }

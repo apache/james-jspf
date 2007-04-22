@@ -21,6 +21,7 @@ package org.apache.james.jspf;
 
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.Logger;
+import org.apache.james.jspf.core.IResponseQueue;
 
 import java.util.List;
 
@@ -91,5 +92,11 @@ public class LoggingDNSService implements DNSService {
                     + ") = TempErrorException[" + e.getMessage() + "]");
             throw e;
         }
+    }
+
+    public void getRecordsAsynch(String hostname, int recordType, Object id,
+            IResponseQueue responsePool) {
+        logger.debug("getRecordsAsynch("+hostname+","+recordType);
+        dnsService.getRecordsAsynch(hostname, recordType, id, responsePool);
     }
 }

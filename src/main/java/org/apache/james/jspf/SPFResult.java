@@ -28,13 +28,17 @@ import org.apache.james.jspf.core.SPFSession;
  */
 public class SPFResult  {
 
-    private String headerTextAsString = "";
+    protected String headerTextAsString = "";
 
-    private String headerName = "Received-SPF";
+    protected String headerName = "Received-SPF";
     
-    private String result = null;
+    protected String result = null;
 
     protected String explanation = null;
+    
+    protected SPFResult() {
+        
+    }
     
     /**
      * Construct SPFResult
@@ -43,9 +47,17 @@ public class SPFResult  {
      * @param explanation the explanation
      * @param spf1data the SPF1Data
      */
-    public SPFResult(String result, String explanation, SPFSession spf1data) {
-        this.explanation = explanation;
-        this.result = result;
+    public SPFResult(SPFSession spf1data) {
+        setSPFSession(spf1data);
+    }
+    
+    /**
+     * Initialize the result.
+     * @param spf1data
+     */
+    protected void setSPFSession(SPFSession spf1data) {
+        this.explanation = spf1data.getExplanation();
+        this.result = spf1data.getCurrentResultExpanded();
         this.headerTextAsString = generateHeader(result, spf1data);
     }
 

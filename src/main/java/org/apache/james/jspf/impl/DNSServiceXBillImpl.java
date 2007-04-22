@@ -19,14 +19,11 @@
 
 package org.apache.james.jspf.impl;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
-
+import org.apache.james.jspf.ResponseImpl;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.Logger;
+import org.apache.james.jspf.core.IResponseQueue;
 import org.xbill.DNS.AAAARecord;
 import org.xbill.DNS.ARecord;
 import org.xbill.DNS.Lookup;
@@ -37,6 +34,11 @@ import org.xbill.DNS.SPFRecord;
 import org.xbill.DNS.TXTRecord;
 import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class contains helper to get all neccassary DNS infos that are needed
@@ -187,6 +189,16 @@ public class DNSServiceXBillImpl implements DNSService {
             records = null;
         }
         return records;
+    }
+
+    public void getRecordsAsynch(String hostname, int recordType, Object id,
+            IResponseQueue responsePool) {
+        try {
+            responsePool.insertResponse(new ResponseImpl(id, getRecords(hostname, recordType)));
+        } catch (TimeoutException e) {
+            responsePool.insertResponse(new ResponseImpl(id, e));
+        }
+
     }
 
 }
