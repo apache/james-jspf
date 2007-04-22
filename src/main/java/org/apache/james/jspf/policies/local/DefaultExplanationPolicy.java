@@ -82,7 +82,7 @@ public final class DefaultExplanationPolicy implements PolicyPostFilter {
                             explanation = defExplanation;
                         }
                         spfData.setAttribute(ATTRIBUTE_DEFAULT_EXPLANATION_POLICY_EXPLANATION, explanation);
-                        DNSResolver.hostExpand(dnsService, macroExpand, explanation, spfData, MacroExpand.EXPLANATION, new SPFChecker() {
+                        spfData.pushChecker(new SPFChecker() {
 
                             public void checkSPF(SPFSession spfData)
                                     throws PermErrorException,
@@ -100,6 +100,7 @@ public final class DefaultExplanationPolicy implements PolicyPostFilter {
                             }
                             
                         });
+                        DNSResolver.hostExpand(dnsService, macroExpand, explanation, spfData, MacroExpand.EXPLANATION);
                     }
                 }
             }

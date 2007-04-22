@@ -20,6 +20,7 @@
 package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.DNSService;
+import org.apache.james.jspf.core.SPFCheckerExceptionCatcher;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.exceptions.NeutralException;
@@ -74,44 +75,91 @@ public class RedirectModifier extends GenericModifier implements
 
             // update currentDepth
             spfData.increaseCurrentDepth();
+            
+            SPFChecker cleanupHandler = new SPFChecker() {
 
+                public void checkSPF(SPFSession spfData)
+                        throws PermErrorException, TempErrorException,
+                        NeutralException, NoneException {
+                    // After the redirect we should not use the
+                    // explanation from the orginal record
+                    spfData.setIgnoreExplanation(true);
+                    
+                    spfData.popExceptionCatcher();
+                }
+                
+            };
+            
+            spfData.pushChecker(cleanupHandler);
+            
+            SPFChecker checker = new SPFChecker() {
+
+                public void checkSPF(SPFSession spfData)
+                        throws PermErrorException, NoneException,
+                        TempErrorException, NeutralException {
+                    String host = getHost();
+
+                    // throws a PermErrorException that we can pass
+                    // through
+                    host = macroExpand.expand(host, spfData,
+                            MacroExpand.DOMAIN);
+
+                    spfData.setCurrentDomain(host);
+
+                    spfData.pushChecker(spfChecker);
+                }
+
+            };
+            
+            spfData.pushExceptionCatcher(new SPFCheckerExceptionCatcher() {
+
+                private SPFChecker spfChecker;
+                private SPFChecker finallyChecker;
+
+                public void onException(Exception exception, SPFSession session)
+                        throws PermErrorException, NoneException,
+                        TempErrorException, NeutralException {
+                    
+                    finallyChecker.checkSPF(session);
+
+                    // remove every checker until the initialized one
+                    SPFChecker checker;
+                    while ((checker = session.popChecker())!=spfChecker) {
+                        log.debug("Redurect resulted in exception. Removing checker: "+checker);
+                    }
+
+                    if (exception instanceof NeutralException) {
+                        throw new PermErrorException(
+                        "included checkSPF returned NeutralException");
+
+                    } else if (exception instanceof NoneException) {
+                        // no spf record assigned to the redirect domain
+                        throw new PermErrorException(
+                                "included checkSPF returned NoneException");
+                    } else if (exception instanceof PermErrorException){
+                        throw (PermErrorException) exception;
+                    } else if (exception instanceof TempErrorException){
+                        throw (TempErrorException) exception;
+                    } else if (exception instanceof RuntimeException){
+                        throw (RuntimeException) exception;
+                    } else {
+                        throw new IllegalStateException(exception);
+                    }
+                }
+
+                public SPFCheckerExceptionCatcher setExceptionHandlerChecker(
+                        SPFChecker checker, SPFChecker finallyChecker) {
+                    this.spfChecker = checker;
+                    this.finallyChecker = finallyChecker;
+                    return this;
+                }
+
+            }.setExceptionHandlerChecker(cleanupHandler, cleanupHandler));
+
+
+            spfData.pushChecker(checker);
             DNSResolver.hostExpand(dnsService, macroExpand, getHost(), spfData,
-                    MacroExpand.DOMAIN, new SPFChecker() {
-
-                        public void checkSPF(SPFSession spfData)
-                                throws PermErrorException, NoneException,
-                                TempErrorException, NeutralException {
-                            String host = getHost();
-
-                            // throws a PermErrorException that we can pass
-                            // through
-                            host = macroExpand.expand(host, spfData,
-                                    MacroExpand.DOMAIN);
-
-                            spfData.setCurrentDomain(host);
-
-                            // TODO change this to work asynchronously
-                            try {
-                                System.out.println("Redirect...");
-                                spfChecker.checkSPF(spfData);
-                                System.out.println("Redirect... DONE");
-                            } catch (NoneException e) {
-                                // no spf record assigned to the redirect domain
-                                throw new PermErrorException(
-                                        "included checkSPF returned NoneException");
-                            } catch (NeutralException e) {
-                                throw new PermErrorException(
-                                        "included checkSPF returned NeutralException");
-
-                            } finally {
-                                // After the redirect we should not use the
-                                // explanation from the orginal record
-                                spfData.setIgnoreExplanation(true);
-                            }
-                        }
-
-                    });
-
+                    MacroExpand.DOMAIN);
         }
     }
 

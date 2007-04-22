@@ -23,6 +23,7 @@ package org.apache.james.jspf;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPF1Constants;
+import org.apache.james.jspf.core.SPFCheckerExceptionCatcher;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.core.SPF1Record;
 import org.apache.james.jspf.core.SPFChecker;
@@ -190,14 +191,7 @@ public class SPF implements SPFChecker {
             reversedCheckers.addFirst(i.next());
         }
 
-        // try to remember the starting checker to better handle recursion.
-        SPFChecker startChecker = spfData.popChecker();
-        if (startChecker != null) {
-            spfData.pushChecker(startChecker);
-        }
-
         for (int k = 0; k < reversedCheckers.size(); k++) {
-            System.out.println("Pushing checker: "+reversedCheckers.get(k));
             spfData.pushChecker((SPFChecker) reversedCheckers.get(k));
         }
         
@@ -207,13 +201,27 @@ public class SPF implements SPFChecker {
         SPFChecker checker;
         while ((checker = spfData.popChecker()) != null) {
             // only execute checkers we added (better recursivity)
-            if (startChecker != null && startChecker == checker) {
-                System.out.println("NOT Executing checker: "+checker);
-                spfData.pushChecker(startChecker);
-                break;
-            } else {
-                System.out.println("Executing checker.: "+checker);
+            log.debug("Executing checker: "+checker);
+            try {
                 checker.checkSPF(spfData);
+            } catch (Exception e) {
+                SPFCheckerExceptionCatcher catcher = spfData.getExceptionCatcher();
+                if (catcher != null) {
+                    catcher.onException(e, spfData);
+                } else {
+                    log.debug("Checker execution resulted in unmanaged exception: "+checker+" => "+e);
+                    if (e instanceof PermErrorException) {
+                        throw (PermErrorException) e;
+                    } else if (e instanceof TempErrorException) {
+                        throw (TempErrorException) e;
+                    } else if (e instanceof NeutralException) {
+                        throw (NeutralException) e;
+                    } else if (e instanceof NoneException) {
+                        throw (NeutralException) e;
+                    } else {
+                        throw new IllegalStateException(e);
+                    }
+                }
             }
         }
     }

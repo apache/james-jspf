@@ -89,7 +89,7 @@ public class ExpModifier extends GenericModifier implements DNSServiceEnabled, M
         if (spfData.getCurrentResult()== null || !spfData.getCurrentResult().equals(SPF1Constants.FAIL))
             return;
 
-        DNSResolver.hostExpand(dnsService, macroExpand, host, spfData, MacroExpand.DOMAIN, new SPFChecker() {
+        spfData.pushChecker(new SPFChecker() {
 
             public void checkSPF(SPFSession spfData) throws PermErrorException,
                     NoneException, TempErrorException, NeutralException {
@@ -99,6 +99,7 @@ public class ExpModifier extends GenericModifier implements DNSServiceEnabled, M
             }
             
         });
+        DNSResolver.hostExpand(dnsService, macroExpand, host, spfData, MacroExpand.DOMAIN);
     }
 
     /**
@@ -147,7 +148,7 @@ public class ExpModifier extends GenericModifier implements DNSServiceEnabled, M
                 if ((exp != null) && (!exp.equals(""))) {
                     
                     try {
-                        DNSResolver.hostExpand(dnsService, macroExpand, exp, spfData, MacroExpand.EXPLANATION, new SPFChecker() {
+                        spfData.pushChecker(new SPFChecker() {
     
                             public void checkSPF(SPFSession spfData)
                                     throws PermErrorException, NoneException,
@@ -162,6 +163,7 @@ public class ExpModifier extends GenericModifier implements DNSServiceEnabled, M
                             }
                             
                         });
+                        DNSResolver.hostExpand(dnsService, macroExpand, exp, spfData, MacroExpand.EXPLANATION);
                     } catch (PermErrorException e) {
                         // ignore syntax error on explanation expansion
                     }

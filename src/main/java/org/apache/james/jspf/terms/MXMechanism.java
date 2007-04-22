@@ -76,7 +76,8 @@ public class MXMechanism extends AMechanism implements SPFCheckerDNSResponseList
             
         };
         
-        DNSResolver.hostExpand(dnsService, macroExpand, getDomain(), spfData, MacroExpand.DOMAIN, checker);
+        spfData.pushChecker(checker);
+        DNSResolver.hostExpand(dnsService, macroExpand, getDomain(), spfData, MacroExpand.DOMAIN);
     }
 
     /**
@@ -110,7 +111,6 @@ public class MXMechanism extends AMechanism implements SPFCheckerDNSResponseList
                         mxR = new ArrayList();
                         spfSession.setAttribute(ATTRIBUTE_MX_RECORDS, mxR);
                     }
-                    System.out.println("ADDALL: "+res);
                     mxR.addAll(res);
                 }
                 

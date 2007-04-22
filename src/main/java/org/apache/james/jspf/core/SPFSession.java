@@ -73,6 +73,8 @@ public class SPFSession implements MacroData {
     private Map attributes = new HashMap();
     
     private Stack checkers = new Stack();
+    
+    private Stack catchers = new Stack();
 
     /**
      * Build the SPF1Data from the given parameters
@@ -370,7 +372,28 @@ public class SPFSession implements MacroData {
         if (checkers.isEmpty()) {
             return null;
         } else {
-            return (SPFChecker) checkers.pop();
+            SPFChecker checker = (SPFChecker) checkers.pop();
+            return checker;
+        }
+    }
+
+    public void pushExceptionCatcher(SPFCheckerExceptionCatcher catcher) {
+        catchers.push(catcher);
+    }
+    
+    public SPFCheckerExceptionCatcher popExceptionCatcher() {
+        if (catchers.isEmpty()) {
+            return null;
+        } else {
+            return (SPFCheckerExceptionCatcher) catchers.pop();
+        }
+    }
+
+    public SPFCheckerExceptionCatcher getExceptionCatcher() {
+        if (catchers.isEmpty()) {
+            return null;
+        } else {
+            return (SPFCheckerExceptionCatcher) catchers.peek();
         }
     }
 }

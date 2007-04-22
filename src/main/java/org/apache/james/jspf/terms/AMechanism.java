@@ -111,8 +111,8 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled, S
             }
             
         };
-        
-        DNSResolver.hostExpand(dnsService, macroExpand, getDomain(), spfData, MacroExpand.DOMAIN, checker);
+        spfData.pushChecker(checker);
+        DNSResolver.hostExpand(dnsService, macroExpand, getDomain(), spfData, MacroExpand.DOMAIN);
     }
 
     /**

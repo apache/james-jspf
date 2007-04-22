@@ -23,7 +23,6 @@ import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.IPAddr;
-import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.core.SPFCheckerDNSResponseListener;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.core.DNSService.TimeoutException;
@@ -57,8 +56,7 @@ public class DNSResolver {
         listener.onDNSResponse(response, session);
     }
     
-    public static void hostExpand(DNSService dnsService, MacroExpand macroExpand, String input, final SPFSession spfSession, boolean isExplanation, final SPFChecker next) throws PermErrorException, TempErrorException, NeutralException, NoneException {
-        spfSession.pushChecker(next);
+    public static void hostExpand(DNSService dnsService, MacroExpand macroExpand, String input, final SPFSession spfSession, boolean isExplanation) throws PermErrorException, TempErrorException, NeutralException, NoneException {
         if (input != null) {
             String host = macroExpand.expand(input, spfSession, isExplanation);
             if (host == null) {

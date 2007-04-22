@@ -68,8 +68,8 @@ public class ExistsMechanism extends GenericMechanism implements DNSServiceEnabl
             }
             
         };
-        
-        DNSResolver.hostExpand(dnsService, macroExpand, getDomain(), spfData, MacroExpand.DOMAIN, checker);
+        spfData.pushChecker(checker);
+        DNSResolver.hostExpand(dnsService, macroExpand, getDomain(), spfData, MacroExpand.DOMAIN);
         
     }
 

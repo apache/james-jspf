@@ -86,7 +86,8 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled,
             
         };
         
-        DNSResolver.hostExpand(dnsService, macroExpand, getDomain(), spfData, MacroExpand.DOMAIN, checker);
+        spfData.pushChecker(checker);
+        DNSResolver.hostExpand(dnsService, macroExpand, getDomain(), spfData, MacroExpand.DOMAIN);
     }
 
     /**
