@@ -24,9 +24,13 @@ import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.IPAddr;
+import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.core.SPFSession;
+import org.apache.james.jspf.exceptions.NeutralException;
+import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
+import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.util.DNSResolver;
 import org.apache.james.jspf.util.SPFTermsRegexps;
 import org.apache.james.jspf.wiring.DNSServiceEnabled;
@@ -50,22 +54,47 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled 
      */
     public static final String REGEX = "[pP][tT][rR]" + "(?:\\:"
             + SPFTermsRegexps.DOMAIN_SPEC_REGEX + ")?";
+
+    private static final String ATTRIBUTE_MECHANISM_RESULT = "PTRMechanism.result";
     
     private DNSService dnsService;
 
     /**
+     * @throws NoneException 
+     * @throws NeutralException 
      * @see org.apache.james.jspf.core.Mechanism#run(org.apache.james.jspf.core.SPFSession)
      */
     public boolean run(SPFSession spfData) throws PermErrorException,
-            TempErrorException {
+            TempErrorException, NeutralException, NoneException {
         // update currentDepth
         spfData.increaseCurrentDepth();
 
-        // Get PTR Records for the ipAddress which is provided by SPF1Data
-        IPAddr ip = IPAddr.getAddress(spfData.getIpAddress());
         
-        DNSResponse response = DNSResolver.lookup(dnsService, new DNSRequest(ip.getReverseIP(), DNSService.PTR));
-        return this.onDNSResponse(response, spfData);
+        SPFChecker checker = new SPFChecker() {
+
+            public void checkSPF(SPFSession spfData) throws PermErrorException,
+                    TempErrorException, NeutralException, NoneException {
+
+                // Get PTR Records for the ipAddress which is provided by SPF1Data
+                IPAddr ip = IPAddr.getAddress(spfData.getIpAddress());
+
+                // Get the right host.
+                String host = expandHost(spfData);
+                
+                spfData.setAttribute(ATTRIBUTE_EXPANDED_HOST, host);
+
+                DNSResponse response = DNSResolver.lookup(dnsService, new DNSRequest(ip.getReverseIP(), DNSService.PTR));
+                onDNSResponse(response, spfData);
+            }
+            
+        };
+        
+        DNSResolver.hostExpand(dnsService, macroExpand, getDomain(), spfData, MacroExpand.DOMAIN, checker);
+        
+        Boolean res = (Boolean) spfData.getAttribute(ATTRIBUTE_MECHANISM_RESULT);
+        return res != null ? res.booleanValue() : false;
+
+        
     }
 
     /**
@@ -78,7 +107,7 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled 
     /**
      * @see org.apache.james.jspf.core.Mechanism#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
      */
-    public boolean onDNSResponse(DNSResponse response, SPFSession spfSession)
+    private void onDNSResponse(DNSResponse response, SPFSession spfSession)
             throws PermErrorException, TempErrorException {
         
         List domainList = (List) spfSession.getAttribute(ATTRIBUTE_DOMAIN_LIST);
@@ -88,7 +117,10 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled 
                 domainList = response.getResponse();
                 
                 // No PTR records found
-                if (domainList == null) return false;
+                if (domainList == null) {
+                    spfSession.setAttribute(ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
+                    return;
+                }
         
                 // check if the maximum lookup count is reached
                 if (dnsService.getRecordLimit() > 0 && domainList.size() > dnsService.getRecordLimit()) {
@@ -99,11 +131,6 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled 
                 }
                 
                 spfSession.setAttribute(ATTRIBUTE_DOMAIN_LIST, domainList);
-                
-                // Get the right host.
-                String host = expandHost(spfSession);
-                
-                spfSession.setAttribute(ATTRIBUTE_EXPANDED_HOST, host);
                 
             } else {
 
@@ -119,7 +146,8 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled 
                             
                             if (compareDomain.equals(host)
                                     || compareDomain.endsWith("." + host)) {
-                                return true;
+                                spfSession.setAttribute(ATTRIBUTE_MECHANISM_RESULT, Boolean.TRUE);
+                                return;
                             }
                             
                         }
@@ -149,10 +177,11 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled 
                 
                 spfSession.setAttribute(ATTRIBUTE_CURRENT_DOMAIN, currentDomain);
                 
-                return this.onDNSResponse(DNSResolver.lookup(dnsService, dnsRequest), spfSession);
-                
+                onDNSResponse(DNSResolver.lookup(dnsService, dnsRequest), spfSession);
+                return;
             } else {
-                return false;
+                spfSession.setAttribute(ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
+                return;
             }
 
         } finally {

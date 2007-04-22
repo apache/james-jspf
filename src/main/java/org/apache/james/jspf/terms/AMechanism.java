@@ -25,10 +25,13 @@ import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.IPAddr;
+import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.core.SPFSession;
+import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
+import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.util.DNSResolver;
 import org.apache.james.jspf.util.Inet6Util;
 import org.apache.james.jspf.util.SPFTermsRegexps;
@@ -42,6 +45,8 @@ import java.util.List;
  * 
  */
 public class AMechanism extends GenericMechanism implements DNSServiceEnabled {
+
+    private static final String ATTRIBUTE_AMECHANISM_RESULT = "AMechanism.result";
 
     /**
      * ABNF: A = "a" [ ":" domain-spec ] [ dual-cidr-length ]
@@ -58,46 +63,61 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled {
 
     /**
      * 
+     * @throws NoneException 
+     * @throws NeutralException 
      * @see org.apache.james.jspf.core.GenericMechanism#run(org.apache.james.jspf.core.SPFSession)
      */
     public boolean run(SPFSession spfData) throws PermErrorException,
-            TempErrorException {
+            TempErrorException, NeutralException, NoneException {
         // update currentDepth
         spfData.increaseCurrentDepth();
 
-        // Get the right host.
-        String host = expandHost(spfData);
+        SPFChecker checker = new SPFChecker() {
 
-        // get the ipAddress
-        try {
-            boolean validIPV4Address = Inet6Util.isValidIPV4Address(spfData.getIpAddress());
-            spfData.setAttribute("AMechanism.ipv4check", Boolean.valueOf(validIPV4Address));
-            if (validIPV4Address) {
+            public void checkSPF(SPFSession spfData) throws PermErrorException,
+                    TempErrorException, NeutralException, NoneException {
+                // Get the right host.
+                String host = expandHost(spfData);
 
-                List aRecords = getARecords(dnsService,host);
-                if (aRecords == null) {
-                    return onDNSResponse(DNSResolver.lookup(dnsService, new DNSRequest(host, DNSService.A)), spfData);
-                } else {
-                    return onDNSResponse(new DNSResponse(aRecords), spfData);
+                // get the ipAddress
+                try {
+                    boolean validIPV4Address = Inet6Util.isValidIPV4Address(spfData.getIpAddress());
+                    spfData.setAttribute("AMechanism.ipv4check", Boolean.valueOf(validIPV4Address));
+                    if (validIPV4Address) {
+
+                        List aRecords = getARecords(dnsService,host);
+                        if (aRecords == null) {
+                            onDNSResponse(DNSResolver.lookup(dnsService, new DNSRequest(host, DNSService.A)), spfData);
+                        } else {
+                            onDNSResponse(new DNSResponse(aRecords), spfData);
+                        }
+             
+                    } else {
+                        
+                        List aaaaRecords = getAAAARecords(dnsService, host);
+                        if (aaaaRecords == null) {
+                            onDNSResponse(DNSResolver.lookup(dnsService, new DNSRequest(host, DNSService.AAAA)), spfData);
+                        } else {
+                            onDNSResponse(new DNSResponse(aaaaRecords), spfData);
+                        }
+
+                    }
+                // PermError / TempError
+                // TODO: Should we replace this with the "right" Exceptions ?
+                } catch (Exception e) {
+                    log.debug("No valid ipAddress: ",e);
+                    throw new PermErrorException("No valid ipAddress: "
+                            + spfData.getIpAddress());
                 }
-     
-            } else {
                 
-                List aaaaRecords = getAAAARecords(dnsService, host);
-                if (aaaaRecords == null) {
-                    return onDNSResponse(DNSResolver.lookup(dnsService, new DNSRequest(host, DNSService.AAAA)), spfData);
-                } else {
-                    return onDNSResponse(new DNSResponse(aaaaRecords), spfData);
-                }
-
             }
-        // PermError / TempError
-        // TODO: Should we replace this with the "right" Exceptions ?
-        } catch (Exception e) {
-            log.debug("No valid ipAddress: ",e);
-            throw new PermErrorException("No valid ipAddress: "
-                    + spfData.getIpAddress());
-        }
+            
+        };
+        
+        DNSResolver.hostExpand(dnsService, macroExpand, getDomain(), spfData, MacroExpand.DOMAIN, checker);
+        
+        Boolean res = (Boolean) spfData.getAttribute(ATTRIBUTE_AMECHANISM_RESULT);
+        return res != null ? res.booleanValue() : false;
     }
 
     /**
@@ -235,10 +255,8 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled {
         this.dnsService = service;
     }
 
-    /**
-     * @see org.apache.james.jspf.core.Mechanism#onDNSResponse(org.apache.james.jspf.core.SPFSession)
-     */
-    public boolean onDNSResponse(DNSResponse response, SPFSession spfSession)
+
+    private void onDNSResponse(DNSResponse response, SPFSession spfSession)
         throws PermErrorException, TempErrorException, NoneException {
         List listAData = null;
         try {
@@ -248,7 +266,8 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled {
         }
         // no a records just return null
         if (listAData == null) {
-            return false;
+            spfSession.setAttribute(ATTRIBUTE_AMECHANISM_RESULT, Boolean.FALSE);
+            return;
         }
 
         Boolean ipv4check = (Boolean) spfSession.getAttribute("AMechanism.ipv4check");
@@ -258,7 +277,8 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled {
                     getIp4cidr());
 
             if (checkAddressList(checkAddress, listAData, getIp4cidr())) {
-                return true;
+                spfSession.setAttribute(ATTRIBUTE_AMECHANISM_RESULT, Boolean.TRUE);
+                return;
             }
 
         } else {
@@ -267,12 +287,14 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled {
                     getIp6cidr());
             
             if (checkAddressList(checkAddress, listAData, getIp6cidr())) {
-                return true;
+                spfSession.setAttribute(ATTRIBUTE_AMECHANISM_RESULT, Boolean.TRUE);
+                return;
             }
 
         }
         
-        return false;
+        spfSession.setAttribute(ATTRIBUTE_AMECHANISM_RESULT, Boolean.FALSE);
+        return;
     }
 
 }

@@ -33,18 +33,25 @@ public interface SPFChecker {
      * Run check for SPF with the given values.
      * 
      * @param spfData
-     *             The SPF1Data which should be used to run the check
+     *            The SPF1Data which should be used to run the check
      * @throws PermErrorException
      *             Get thrown if an error was detected
      * @throws NoneException
      *             Get thrown if no Record was found
      * @throws TempErrorException
      *             Get thrown if a DNS problem was detected
-     * @throws NeutralException  
+     * @throws NeutralException
      *             Get thrown if the result should be neutral
+     * @throws NoneException 
      */
-    public void checkSPF(SPFSession spfData)
-            throws PermErrorException, NoneException, TempErrorException,
-            NeutralException;
+    public void checkSPF(SPFSession spfData) throws PermErrorException,
+            TempErrorException, NeutralException, NoneException;
 
+//    /**
+//     * Temporary, to evaluate impact on the redesign.
+//     */
+//    public void onDNSResponse(DNSResponse response, SPFSession spfSession)
+//            throws PermErrorException, NoneException, TempErrorException,
+//            NeutralException;
+//
 }

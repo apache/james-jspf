@@ -23,17 +23,20 @@ package org.apache.james.jspf.terms;
 import org.apache.james.jspf.core.Configurable;
 import org.apache.james.jspf.core.Configuration;
 import org.apache.james.jspf.core.DNSResponse;
+import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.Mechanism;
 import org.apache.james.jspf.core.SPF1Constants;
-import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.core.SPFChecker;
+import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
+import org.apache.james.jspf.util.DNSResolver;
 import org.apache.james.jspf.util.SPFTermsRegexps;
+import org.apache.james.jspf.wiring.DNSServiceEnabled;
 import org.apache.james.jspf.wiring.LogEnabled;
 import org.apache.james.jspf.wiring.MacroExpandEnabled;
 import org.apache.james.jspf.wiring.SPFCheckEnabled;
@@ -42,7 +45,7 @@ import org.apache.james.jspf.wiring.SPFCheckEnabled;
  * This class represent the incude mechanism
  * 
  */
-public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SPFCheckEnabled, MacroExpandEnabled {
+public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SPFCheckEnabled, MacroExpandEnabled, DNSServiceEnabled {
 
     /**
      * ABNF: include = "include" ":" domain-spec
@@ -58,6 +61,8 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
 
     private MacroExpand macroExpand;
 
+    private DNSService dnsService;
+
     /**
      * Set the host which should be used for include
      * 
@@ -68,53 +73,78 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
      *             if an error is in the redirect modifier
      * @throws TempErrorException 
      *             if the dns return a temp error
+     * @throws NoneException 
+     * @throws NeutralException 
      */
-    public boolean run(SPFSession spfData) throws PermErrorException, TempErrorException {
-        String host = getHost();
-
+    public boolean run(SPFSession spfData) throws PermErrorException, TempErrorException, NoneException {
         // update currentDepth
         spfData.increaseCurrentDepth();      
         
-        // throws a PermErrorException that we can pass through
-        host = macroExpand.expand(host, spfData, MacroExpand.DOMAIN);
+        SPFChecker checker = new SPFChecker() {
 
-        String prevRes = spfData.getCurrentResult();
-        String prevHost = spfData.getCurrentDomain();
+            public void checkSPF(SPFSession spfData) throws PermErrorException,
+                    TempErrorException {
+
+                // throws a PermErrorException that we can pass through
+                String host = macroExpand.expand(getHost(), spfData, MacroExpand.DOMAIN);
+
+                // TODO understand what exactly we have to do now that spfData is a session
+                // and contains much more than the input data.
+                // do we need to create a new session at all?
+                // do we need to backup the session attributes and restore them?
+                String prevRes = spfData.getCurrentResult();
+                String prevHost = spfData.getCurrentDomain();
+                
+                try {
+            
+                    spfData.setCurrentDomain(host);
+                    
+                    // On includes we should not use the explanation of the included domain
+                    spfData.setIgnoreExplanation(true);
+                    // set a null current result
+                    spfData.setCurrentResult(null);
+                    
+                    try {
+                         spfChecker.checkSPF(spfData);
+                    } catch (NeutralException e) {
+                        throw new PermErrorException("included checkSPF returned NeutralException");
+                    } catch (NoneException e) {
+                        throw new PermErrorException("included checkSPF returned NoneException");
+                    }
+                    
+                    if (spfData.getCurrentResult() == null) {
+                        throw new TempErrorException("included checkSPF returned null");
+                    } else if (spfData.getCurrentResult().equals(SPF1Constants.PASS)) {
+                        // TODO this won't work asynchronously
+                        spfData.setAttribute("IncludeMechanism.result", Boolean.TRUE);
+                    } else if (spfData.getCurrentResult().equals(SPF1Constants.FAIL) || spfData.getCurrentResult().equals(SPF1Constants.SOFTFAIL) || spfData.getCurrentResult().equals(SPF1Constants.NEUTRAL)) {
+                        // TODO this won't work asynchronously
+                        spfData.setAttribute("IncludeMechanism.result", Boolean.FALSE);
+                    } else {
+                        throw new TempErrorException("included checkSPF returned an Illegal result");
+                    }
+                } finally {
+                    // Reset the ignore
+                    spfData.setIgnoreExplanation(false);
+                    spfData.setCurrentDomain(prevHost);
+                    spfData.setCurrentResult(prevRes);
+                }
+                    
+
+            }
+            
+        };
         
         try {
-    
-            spfData.setCurrentDomain(host);
-            
-            // On includes we should not use the explanation of the included domain
-            spfData.setIgnoreExplanation(true);
-            // set a null current result
-            spfData.setCurrentResult(null);
-            
-            try {
-                 spfChecker.checkSPF(spfData);
-              
-            } catch (NoneException e) {
-                throw new PermErrorException("included checkSPF returned NoneException");
-            } catch (NeutralException e) {
-                throw new PermErrorException("included checkSPF returned NeutralException");
-            }
-            
-            if (spfData.getCurrentResult() == null) {
-                throw new TempErrorException("included checkSPF returned null");
-            } else if (spfData.getCurrentResult().equals(SPF1Constants.PASS)) {
-                return true;
-            } else if (spfData.getCurrentResult().equals(SPF1Constants.FAIL) || spfData.getCurrentResult().equals(SPF1Constants.SOFTFAIL) || spfData.getCurrentResult().equals(SPF1Constants.NEUTRAL)) {
-                return false;
-            } else {
-                throw new TempErrorException("included checkSPF returned an Illegal result");
-            }
-        } finally {
-            // Reset the ignore
-            spfData.setIgnoreExplanation(false);
-            spfData.setCurrentDomain(prevHost);
-            spfData.setCurrentResult(prevRes);
+            DNSResolver.hostExpand(dnsService, macroExpand, getHost(), spfData, MacroExpand.DOMAIN, checker);
+        } catch (NeutralException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
-            
+        
+        // TODO this won't work asynchronously
+        Boolean res = (Boolean) spfData.getAttribute("IncludeMechanism.result");
+        return res != null ? res.booleanValue() : false;
     }
 
     /**
@@ -169,5 +199,12 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
             throws PermErrorException, TempErrorException, NoneException {
         // not called yet.
         return false;
+    }
+
+    /**
+     * @see org.apache.james.jspf.wiring.DNSServiceEnabled#enableDNSService(org.apache.james.jspf.core.DNSService)
+     */
+    public void enableDNSService(DNSService service) {
+        this.dnsService = service;
     }
 }

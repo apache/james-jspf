@@ -42,7 +42,7 @@ public class NeutralIfNotMatchPolicy implements PolicyPostFilter {
         // Maybe we should simply append a "?all" at the end, as modifier
         if (spfRecord.getDirectives().size() > 0) {
             spfRecord.getModifiers().add(new SPFChecker() {
-                public void checkSPF(SPFSession spfData) throws PermErrorException, NoneException, TempErrorException, NeutralException {
+                public void checkSPF(SPFSession spfData) throws PermErrorException, TempErrorException, NeutralException {
                     // If no match was found set the result to neutral
                     if (spfData.getCurrentResult() == null) {
                         spfData.setCurrentResult(SPF1Constants.NEUTRAL);

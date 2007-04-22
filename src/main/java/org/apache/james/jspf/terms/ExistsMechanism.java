@@ -23,9 +23,13 @@ package org.apache.james.jspf.terms;
 import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.DNSService;
+import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.core.SPFSession;
+import org.apache.james.jspf.exceptions.NeutralException;
+import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
+import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.util.DNSResolver;
 import org.apache.james.jspf.util.SPFTermsRegexps;
 import org.apache.james.jspf.wiring.DNSServiceEnabled;
@@ -42,41 +46,59 @@ public class ExistsMechanism extends GenericMechanism implements DNSServiceEnabl
      */
     public static final String REGEX = "[eE][xX][iI][sS][tT][sS]" + "\\:"
             + SPFTermsRegexps.DOMAIN_SPEC_REGEX;
+
+    private static final String ATTRIBUTE_MECHANISM_RESULT = "ExistsMechanism.result";
     
     private DNSService dnsService;
 
     /**
      * 
+     * @throws NoneException 
+     * @throws NeutralException 
      * @see org.apache.james.jspf.core.GenericMechanism#run(org.apache.james.jspf.core.SPFSession)
      */
     public boolean run(SPFSession spfData) throws PermErrorException,
-            TempErrorException {
+            TempErrorException, NeutralException, NoneException {
         // update currentDepth
         spfData.increaseCurrentDepth();
 
-        String host = expandHost(spfData);
+        SPFChecker checker = new SPFChecker() {
 
-        return this.onDNSResponse(DNSResolver.lookup(dnsService, new DNSRequest(host,DNSService.A)), spfData);
+            public void checkSPF(SPFSession spfData) throws PermErrorException,
+                    TempErrorException, NeutralException, NoneException {
+                String host = expandHost(spfData);
+                onDNSResponse(DNSResolver.lookup(dnsService, new DNSRequest(host,DNSService.A)), spfData);
+            }
+            
+        };
+        
+        DNSResolver.hostExpand(dnsService, macroExpand, getDomain(), spfData, MacroExpand.DOMAIN, checker);
+        
+        Boolean res = (Boolean) spfData.getAttribute(ATTRIBUTE_MECHANISM_RESULT);
+        return res != null ? res.booleanValue() : false;
+
     }
 
     /**
      * @see org.apache.james.jspf.core.Mechanism#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
      */
-    public boolean onDNSResponse(DNSResponse response, SPFSession spfSession) throws PermErrorException, TempErrorException {
+    private void onDNSResponse(DNSResponse response, SPFSession spfSession) throws PermErrorException, TempErrorException {
         List aRecords;
         
         try {
             aRecords = response.getResponse();
         } catch (DNSService.TimeoutException e) {
-            return false;
+            spfSession.setAttribute(ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
+            return;
         }
         
         if (aRecords != null && aRecords.size() > 0) {
-            return true;
+            spfSession.setAttribute(ATTRIBUTE_MECHANISM_RESULT, Boolean.TRUE);
+            return;
         }
         
         // No match found
-        return false;
+        spfSession.setAttribute(ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
     }
 
     /**

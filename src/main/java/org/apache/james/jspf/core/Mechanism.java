@@ -20,6 +20,7 @@
 
 package org.apache.james.jspf.core;
 
+import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
@@ -40,16 +41,11 @@ public interface Mechanism {
      *             Get thrown if there are any errors in modifiers
      * @throws TempErrorException
      *             Get thrown if DNS problems detected
-     * @throws NoneException
+     * @throws NoneException 
      *             Get thrown if no valid records was found
+     * @throws NeutralException 
      */
     public boolean run(SPFSession spfData) throws PermErrorException,
-            TempErrorException, NoneException;
+            TempErrorException, NoneException, NeutralException;
     
-    /**
-     * Temporary, to evaluate impact on the redesign.
-     */
-    public boolean onDNSResponse(DNSResponse response, SPFSession spfSession) throws PermErrorException,
-    TempErrorException, NoneException;
-
 }

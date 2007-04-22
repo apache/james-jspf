@@ -28,17 +28,14 @@ package org.apache.james.jspf.macro;
 
 import org.apache.james.jspf.SPF1Utils;
 import org.apache.james.jspf.core.DNSService;
-import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPFSession;
-import org.apache.james.jspf.core.DNSService.TimeoutException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.util.SPFTermsRegexps;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -62,6 +59,10 @@ public class MacroExpand {
     public static final boolean EXPLANATION = true;
     
     public static final boolean DOMAIN = false;
+    
+    public static class RequireClientDomain extends Exception {
+        
+    }
 
     /**
      * Construct MacroExpand
@@ -82,10 +83,14 @@ public class MacroExpand {
     }
     
     public String expand(String input, MacroData macroData, boolean isExplanation) throws PermErrorException {
-        if (isExplanation) {
-            return expandExplanation(input, macroData);
-        } else {
-            return expandDomain(input, macroData);
+        try {
+            if (isExplanation) {
+                return expandExplanation(input, macroData);
+            } else {
+                return expandDomain(input, macroData);
+            }
+        } catch (RequireClientDomain e) {
+            return null;
         }
     }
 
@@ -97,8 +102,9 @@ public class MacroExpand {
      * @return expanded The expanded explanation
      * @throws PermErrorException
      *             Get thrown if invalid macros are used
+     * @throws RequireClientDomain 
      */
-    private String expandExplanation(String input, MacroData macroData) throws PermErrorException {
+    private String expandExplanation(String input, MacroData macroData) throws PermErrorException, RequireClientDomain {
 
         log.debug("Start do expand explanation: " + input);
 
@@ -121,8 +127,9 @@ public class MacroExpand {
      * @return expanded The domain with replaced macros
      * @throws PermErrorException
      *             This get thrown if invalid macros are used
+     * @throws RequireClientDomain 
      */
-    private String expandDomain(String input, MacroData macroData) throws PermErrorException {
+    private String expandDomain(String input, MacroData macroData) throws PermErrorException, RequireClientDomain {
 
         log.debug("Start expand domain: " + input);
 
@@ -164,8 +171,9 @@ public class MacroExpand {
      * @return expanded The expanded given String
      * @throws PermErrorException
      *             This get thrown if invalid macros are used
+     * @throws RequireClientDomain 
      */
-    private String expandMacroString(String input, MacroData macroData, boolean isExplanation) throws PermErrorException {
+    private String expandMacroString(String input, MacroData macroData, boolean isExplanation) throws PermErrorException, RequireClientDomain {
 
         StringBuffer decodedValue = new StringBuffer();
         Matcher inputMatcher = macroStringPattern.matcher(input);
@@ -209,8 +217,9 @@ public class MacroExpand {
      * @return returnData The String with replaced macros
      * @throws PermErrorException
      *             Get thrown if an error in processing happen
+     * @throws RequireClientDomain 
      */
-    private String replaceCell(String replaceValue, MacroData macroData, boolean isExplanation) throws PermErrorException {
+    private String replaceCell(String replaceValue, MacroData macroData, boolean isExplanation) throws PermErrorException, RequireClientDomain {
 
         String variable = "";
         String domainNumber = "";
@@ -291,9 +300,10 @@ public class MacroExpand {
      * @return rValue The value for the given macro
      * @throws PermErrorException
      *             Get thrown if the given variable is an unknown macro
-     * 
+     * @throws RequireClientDomain requireClientDomain if the client domain is needed
+     *             and not yet resolved.
      */
-    private String matchMacro(String macro, MacroData macroData) throws PermErrorException {
+    private String matchMacro(String macro, MacroData macroData) throws PermErrorException, RequireClientDomain {
 
         String rValue = null;
 
@@ -317,34 +327,7 @@ public class MacroExpand {
         } else if (variable.equalsIgnoreCase("p")) {
             rValue = macroData.getClientDomain();
             if (rValue == null) {
-                rValue = "unknown";
-                if (macroData instanceof SPFSession) {
-                    SPFSession spf1data = (SPFSession) macroData;
-                    try {
-                        boolean ip6 = IPAddr.isIPV6(spf1data.getIpAddress());
-                        List records = dnsProbe.getRecords(IPAddr.getAddress(spf1data.getIpAddress()).getReverseIP(), DNSService.PTR);
-    
-                        if (records != null && records.size() > 0) {
-                            String record = (String) records.get(0);
-                            records = dnsProbe.getRecords(record, ip6 ? DNSService.AAAA : DNSService.A);
-                            if (records != null && records.size() > 0) {
-                                Iterator i = records.iterator();
-                                while (i.hasNext()) {
-                                    String next = (String) i.next();
-                                    if (IPAddr.getAddress(spf1data.getIpAddress()).toString().equals(IPAddr.getAddress(next).toString())) {
-                                        rValue = record;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    } catch (TimeoutException e) {
-                        // just return the default "unknown".
-                    } catch (PermErrorException e) {
-                        // just return the default "unknown".
-                    }
-                    spf1data.setClientDomain(rValue);
-                }
+                throw new RequireClientDomain();
             }
         } else if (variable.equalsIgnoreCase("o")) {
             rValue = macroData.getSenderDomain();

@@ -229,7 +229,7 @@ public class SPF implements SPFChecker {
 
         policyFilters.add(new NeutralIfNotMatchPolicy());
 
-        policyFilters.add(new DefaultExplanationPolicy(log, defaultExplanation, macroExpand));
+        policyFilters.add(new DefaultExplanationPolicy(log, defaultExplanation, macroExpand, dnsProbe));
         
         policies.add(new InitialChecksPolicy());
         

@@ -20,6 +20,7 @@
 package org.apache.james.jspf.policies.local;
 
 import org.apache.james.jspf.SPF1Utils;
+import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPFSession;
@@ -31,11 +32,14 @@ import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.policies.PolicyPostFilter;
+import org.apache.james.jspf.util.DNSResolver;
 
 /**
  * Policy to add a default explanation
  */
 public final class DefaultExplanationPolicy implements PolicyPostFilter {
+    private static final String ATTRIBUTE_DEFAULT_EXPLANATION_POLICY_EXPLANATION = "DefaultExplanationPolicy.explanation";
+    
     /**
      * log
      */
@@ -46,15 +50,18 @@ public final class DefaultExplanationPolicy implements PolicyPostFilter {
     private String defExplanation;
     
     private MacroExpand macroExpand;
+    
+    private DNSService dnsService;
 
     /**
      * @param macroExpand 
      * @param spf
      */
-    public DefaultExplanationPolicy(Logger log, String explanation, MacroExpand macroExpand) {
+    public DefaultExplanationPolicy(Logger log, String explanation, MacroExpand macroExpand, DNSService dnsService) {
         this.log = log;
         this.defExplanation = explanation;
         this.macroExpand = macroExpand;
+        this.dnsService = dnsService;
     }
 
     /**
@@ -74,14 +81,25 @@ public final class DefaultExplanationPolicy implements PolicyPostFilter {
                         } else {
                             explanation = defExplanation;
                         }
-                        try {
-                            explanation = macroExpand.expand(explanation, spfData, MacroExpand.EXPLANATION);
+                        spfData.setAttribute(ATTRIBUTE_DEFAULT_EXPLANATION_POLICY_EXPLANATION, explanation);
+                        DNSResolver.hostExpand(dnsService, macroExpand, explanation, spfData, MacroExpand.EXPLANATION, new SPFChecker() {
+
+                            public void checkSPF(SPFSession spfData)
+                                    throws PermErrorException,
+                                    NoneException, TempErrorException,
+                                    NeutralException {
+                                String attExplanation = (String) spfData.getAttribute(ATTRIBUTE_DEFAULT_EXPLANATION_POLICY_EXPLANATION);
+                                try {
+                                    String explanation = macroExpand.expand(attExplanation, spfData, MacroExpand.EXPLANATION);
+                                    
+                                    spfData.setExplanation(explanation);
+                                } catch (PermErrorException e) {
+                                    // Should never happen !
+                                    log.debug("Invalid defaulfExplanation: " + attExplanation);
+                                }
+                            }
                             
-                            spfData.setExplanation(explanation);
-                        } catch (PermErrorException e) {
-                            // Should never happen !
-                            log.debug("Invalid defaulfExplanation: " + explanation);
-                        }
+                        });
                     }
                 }
             }
