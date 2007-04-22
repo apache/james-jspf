@@ -43,6 +43,14 @@ import java.util.List;
  */
 public class ExistsMechanism extends GenericMechanism implements DNSServiceEnabled, SPFCheckerDNSResponseListener {
 
+    private final class ExpandedChecker implements SPFChecker {
+        public void checkSPF(SPFSession spfData) throws PermErrorException,
+                TempErrorException, NeutralException, NoneException {
+            String host = expandHost(spfData);
+            DNSResolver.lookup(dnsService, new DNSRequest(host,DNSService.A), spfData, ExistsMechanism.this);
+        }
+    }
+
     /**
      * ABNF: exists = "exists" ":" domain-spec
      */
@@ -50,6 +58,8 @@ public class ExistsMechanism extends GenericMechanism implements DNSServiceEnabl
             + SPFTermsRegexps.DOMAIN_SPEC_REGEX;
 
     private DNSService dnsService;
+
+    private SPFChecker expandedChecker = new ExpandedChecker();
 
     /**
      * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
@@ -59,16 +69,7 @@ public class ExistsMechanism extends GenericMechanism implements DNSServiceEnabl
         // update currentDepth
         spfData.increaseCurrentDepth();
 
-        SPFChecker checker = new SPFChecker() {
-
-            public void checkSPF(SPFSession spfData) throws PermErrorException,
-                    TempErrorException, NeutralException, NoneException {
-                String host = expandHost(spfData);
-                DNSResolver.lookup(dnsService, new DNSRequest(host,DNSService.A), spfData, ExistsMechanism.this);
-            }
-            
-        };
-        spfData.pushChecker(checker);
+        spfData.pushChecker(expandedChecker);
         DNSResolver.hostExpand(dnsService, macroExpand, getDomain(), spfData, MacroExpand.DOMAIN);
         
     }

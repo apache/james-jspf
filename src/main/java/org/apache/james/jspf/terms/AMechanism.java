@@ -62,6 +62,48 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled, S
     private int ip6cidr;
 
     protected DNSService dnsService;
+    
+    private SPFChecker expandedChecker = new ExpandedChecker();
+
+    private final class ExpandedChecker implements SPFChecker {
+        public void checkSPF(SPFSession spfData) throws PermErrorException,
+                TempErrorException, NeutralException, NoneException {
+            // Get the right host.
+            String host = expandHost(spfData);
+
+            // get the ipAddress
+            try {
+                boolean validIPV4Address = Inet6Util.isValidIPV4Address(spfData.getIpAddress());
+                spfData.setAttribute(ATTRIBUTE_AMECHANISM_IPV4CHECK, Boolean.valueOf(validIPV4Address));
+                if (validIPV4Address) {
+
+                    List aRecords = getARecords(dnsService,host);
+                    if (aRecords == null) {
+                        DNSResolver.lookup(dnsService, new DNSRequest(host, DNSService.A), spfData, AMechanism.this);
+                    } else {
+                        onDNSResponse(new DNSResponse(aRecords), spfData);
+                    }
+         
+                } else {
+                    
+                    List aaaaRecords = getAAAARecords(dnsService, host);
+                    if (aaaaRecords == null) {
+                        DNSResolver.lookup(dnsService, new DNSRequest(host, DNSService.AAAA), spfData, AMechanism.this);
+                    } else {
+                        onDNSResponse(new DNSResponse(aaaaRecords), spfData);
+                    }
+
+                }
+            // PermError / TempError
+            // TODO: Should we replace this with the "right" Exceptions ?
+            } catch (Exception e) {
+                log.debug("No valid ipAddress: ",e);
+                throw new PermErrorException("No valid ipAddress: "
+                        + spfData.getIpAddress());
+            }
+            
+        }
+    }
 
     /**
      * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
@@ -70,48 +112,8 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled, S
         // update currentDepth
         spfData.increaseCurrentDepth();
 
-        SPFChecker checker = new SPFChecker() {
-
-            public void checkSPF(SPFSession spfData) throws PermErrorException,
-                    TempErrorException, NeutralException, NoneException {
-                // Get the right host.
-                String host = expandHost(spfData);
-
-                // get the ipAddress
-                try {
-                    boolean validIPV4Address = Inet6Util.isValidIPV4Address(spfData.getIpAddress());
-                    spfData.setAttribute(ATTRIBUTE_AMECHANISM_IPV4CHECK, Boolean.valueOf(validIPV4Address));
-                    if (validIPV4Address) {
-
-                        List aRecords = getARecords(dnsService,host);
-                        if (aRecords == null) {
-                            DNSResolver.lookup(dnsService, new DNSRequest(host, DNSService.A), spfData, AMechanism.this);
-                        } else {
-                            onDNSResponse(new DNSResponse(aRecords), spfData);
-                        }
-             
-                    } else {
-                        
-                        List aaaaRecords = getAAAARecords(dnsService, host);
-                        if (aaaaRecords == null) {
-                            DNSResolver.lookup(dnsService, new DNSRequest(host, DNSService.AAAA), spfData, AMechanism.this);
-                        } else {
-                            onDNSResponse(new DNSResponse(aaaaRecords), spfData);
-                        }
-
-                    }
-                // PermError / TempError
-                // TODO: Should we replace this with the "right" Exceptions ?
-                } catch (Exception e) {
-                    log.debug("No valid ipAddress: ",e);
-                    throw new PermErrorException("No valid ipAddress: "
-                            + spfData.getIpAddress());
-                }
-                
-            }
-            
-        };
-        spfData.pushChecker(checker);
+        spfData.pushChecker(expandedChecker);
+        
         DNSResolver.hostExpand(dnsService, macroExpand, getDomain(), spfData, MacroExpand.DOMAIN);
     }
 

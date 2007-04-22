@@ -33,6 +33,19 @@ import org.apache.james.jspf.exceptions.TempErrorException;
  */
 public class NeutralIfNotMatchPolicy implements PolicyPostFilter {
     
+    private final class NeutralIfNotMatchModifier implements SPFChecker {
+        public void checkSPF(SPFSession spfData) throws PermErrorException, TempErrorException, NeutralException {
+            // If no match was found set the result to neutral
+            if (spfData.getCurrentResult() == null) {
+                spfData.setCurrentResult(SPF1Constants.NEUTRAL);
+            }
+        }
+
+        public String toString() {
+            return "defaultresult";
+        }
+    }
+
     /**
      * @see org.apache.james.jspf.policies.PolicyPostFilter#getSPFRecord(java.lang.String, org.apache.james.jspf.core.SPF1Record)
      */
@@ -41,18 +54,7 @@ public class NeutralIfNotMatchPolicy implements PolicyPostFilter {
         // Set the result to NEUTRAL if at least a directive is present and it didn't match
         // Maybe we should simply append a "?all" at the end, as modifier
         if (spfRecord.getDirectives().size() > 0) {
-            spfRecord.getModifiers().add(new SPFChecker() {
-                public void checkSPF(SPFSession spfData) throws PermErrorException, TempErrorException, NeutralException {
-                    // If no match was found set the result to neutral
-                    if (spfData.getCurrentResult() == null) {
-                        spfData.setCurrentResult(SPF1Constants.NEUTRAL);
-                    }
-                }
-                
-                public String toString() {
-                    return "defaultresult";
-                }
-            });
+            spfRecord.getModifiers().add(new NeutralIfNotMatchModifier());
         }
         return spfRecord;
     }

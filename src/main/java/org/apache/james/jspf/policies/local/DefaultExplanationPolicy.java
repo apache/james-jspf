@@ -38,6 +38,58 @@ import org.apache.james.jspf.util.DNSResolver;
  * Policy to add a default explanation
  */
 public final class DefaultExplanationPolicy implements PolicyPostFilter {
+    
+    private final class DefaultExplanationChecker implements SPFChecker {
+        
+        private SPFChecker explanationCheckr;
+        
+        public DefaultExplanationChecker() {
+            this.explanationCheckr = new ExplanationChecker();
+        }
+        
+        private final class ExplanationChecker implements SPFChecker {
+            public void checkSPF(SPFSession spfData)
+                    throws PermErrorException,
+                    NoneException, TempErrorException,
+                    NeutralException {
+                String attExplanation = (String) spfData.getAttribute(ATTRIBUTE_DEFAULT_EXPLANATION_POLICY_EXPLANATION);
+                try {
+                    String explanation = macroExpand.expand(attExplanation, spfData, MacroExpand.EXPLANATION);
+                    
+                    spfData.setExplanation(explanation);
+                } catch (PermErrorException e) {
+                    // Should never happen !
+                    log.debug("Invalid defaulfExplanation: " + attExplanation);
+                }
+            }
+        }
+
+        public void checkSPF(SPFSession spfData) throws PermErrorException, NoneException, TempErrorException, NeutralException {
+            
+            if (SPF1Constants.FAIL.equals(spfData.getCurrentResult())) {  
+                if (spfData.getExplanation()==null || spfData.getExplanation().equals("")) {
+                    String explanation;
+                    if (defExplanation == null) {
+                        explanation = SPF1Utils.DEFAULT_EXPLANATION;
+                    } else {
+                        explanation = defExplanation;
+                    }
+                    spfData.setAttribute(ATTRIBUTE_DEFAULT_EXPLANATION_POLICY_EXPLANATION, explanation);
+                    spfData.pushChecker(explanationCheckr);
+                    DNSResolver.hostExpand(dnsService, macroExpand, explanation, spfData, MacroExpand.EXPLANATION);
+                }
+            }
+        }
+
+        public String toString() {
+            if (defExplanation == null) {
+                return "defaultExplanation";
+            } else {
+                return "defaultExplanation="+defExplanation;
+            }
+        }
+    }
+
     private static final String ATTRIBUTE_DEFAULT_EXPLANATION_POLICY_EXPLANATION = "DefaultExplanationPolicy.explanation";
     
     /**
@@ -70,49 +122,7 @@ public final class DefaultExplanationPolicy implements PolicyPostFilter {
     public SPF1Record getSPFRecord(String currentDomain, SPF1Record spfRecord) throws PermErrorException, TempErrorException, NoneException, NeutralException {
         if (spfRecord == null) return null;
         // Default explanation policy.
-        spfRecord.getModifiers().add(new SPFChecker() {
-            public void checkSPF(SPFSession spfData) throws PermErrorException, NoneException, TempErrorException, NeutralException {
-                
-                if (SPF1Constants.FAIL.equals(spfData.getCurrentResult())) {  
-                    if (spfData.getExplanation()==null || spfData.getExplanation().equals("")) {
-                        String explanation;
-                        if (defExplanation == null) {
-                            explanation = SPF1Utils.DEFAULT_EXPLANATION;
-                        } else {
-                            explanation = defExplanation;
-                        }
-                        spfData.setAttribute(ATTRIBUTE_DEFAULT_EXPLANATION_POLICY_EXPLANATION, explanation);
-                        spfData.pushChecker(new SPFChecker() {
-
-                            public void checkSPF(SPFSession spfData)
-                                    throws PermErrorException,
-                                    NoneException, TempErrorException,
-                                    NeutralException {
-                                String attExplanation = (String) spfData.getAttribute(ATTRIBUTE_DEFAULT_EXPLANATION_POLICY_EXPLANATION);
-                                try {
-                                    String explanation = macroExpand.expand(attExplanation, spfData, MacroExpand.EXPLANATION);
-                                    
-                                    spfData.setExplanation(explanation);
-                                } catch (PermErrorException e) {
-                                    // Should never happen !
-                                    log.debug("Invalid defaulfExplanation: " + attExplanation);
-                                }
-                            }
-                            
-                        });
-                        DNSResolver.hostExpand(dnsService, macroExpand, explanation, spfData, MacroExpand.EXPLANATION);
-                    }
-                }
-            }
-            
-            public String toString() {
-                if (defExplanation == null) {
-                    return "defaultExplanation";
-                } else {
-                    return "defaultExplanation="+defExplanation;
-                }
-            }
-        });
+        spfRecord.getModifiers().add(new DefaultExplanationChecker());
         return spfRecord;
     }
 }

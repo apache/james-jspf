@@ -45,6 +45,17 @@ import java.util.List;
  */
 public class MXMechanism extends AMechanism implements SPFCheckerDNSResponseListener {
 
+    private final class ExpandedChecker implements SPFChecker {
+        public void checkSPF(SPFSession spfData) throws PermErrorException,
+                TempErrorException, NeutralException, NoneException {
+
+            // Get the right host.
+            String host = expandHost(spfData);
+            
+            DNSResolver.lookup(dnsService, new DNSRequest(host, DNSService.MX), spfData, MXMechanism.this);
+        }
+    }
+
     private static final String ATTRIBUTE_MX_RECORDS = "MXMechanism.mxRecords";
     private static final String ATTRIBUTE_CHECK_RECORDS = "MXMechanism.checkRecords";
     /**
@@ -53,6 +64,8 @@ public class MXMechanism extends AMechanism implements SPFCheckerDNSResponseList
     public static final String REGEX = "[mM][xX]" + "(?:\\:"
             + SPFTermsRegexps.DOMAIN_SPEC_REGEX + ")?" + "(?:"
             + DUAL_CIDR_LENGTH_REGEX + ")?";
+    
+    private SPFChecker expandedChecker = new ExpandedChecker();
     
     /**
      * @see org.apache.james.jspf.terms.AMechanism#checkSPF(org.apache.james.jspf.core.SPFSession)
@@ -63,20 +76,7 @@ public class MXMechanism extends AMechanism implements SPFCheckerDNSResponseList
         // update currentDepth
         spfData.increaseCurrentDepth();
 
-        SPFChecker checker = new SPFChecker() {
-
-            public void checkSPF(SPFSession spfData) throws PermErrorException,
-                    TempErrorException, NeutralException, NoneException {
-
-                // Get the right host.
-                String host = expandHost(spfData);
-                
-                DNSResolver.lookup(dnsService, new DNSRequest(host, DNSService.MX), spfData, MXMechanism.this);
-            }
-            
-        };
-        
-        spfData.pushChecker(checker);
+        spfData.pushChecker(expandedChecker);
         DNSResolver.hostExpand(dnsService, macroExpand, getDomain(), spfData, MacroExpand.DOMAIN);
     }
 

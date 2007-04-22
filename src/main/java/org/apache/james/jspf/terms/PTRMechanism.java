@@ -45,6 +45,22 @@ import java.util.List;
  */
 public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled, SPFCheckerDNSResponseListener {
 
+    private final class ExpandedChecker implements SPFChecker {
+        public void checkSPF(SPFSession spfData) throws PermErrorException,
+                TempErrorException, NeutralException, NoneException {
+
+            // Get PTR Records for the ipAddress which is provided by SPF1Data
+            IPAddr ip = IPAddr.getAddress(spfData.getIpAddress());
+
+            // Get the right host.
+            String host = expandHost(spfData);
+            
+            spfData.setAttribute(ATTRIBUTE_EXPANDED_HOST, host);
+
+            DNSResolver.lookup(dnsService, new DNSRequest(ip.getReverseIP(), DNSService.PTR), spfData, PTRMechanism.this);
+        }
+    }
+
     private static final String ATTRIBUTE_CURRENT_DOMAIN = "PTRMechanism.currentDomain";
 
     private static final String ATTRIBUTE_EXPANDED_HOST = "PTRMechanism.expandedHost";
@@ -59,6 +75,8 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled,
     
     private DNSService dnsService;
 
+    private SPFChecker expandedChecker = new ExpandedChecker();
+
     /**
      * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
      */
@@ -67,26 +85,7 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled,
         // update currentDepth
         spfData.increaseCurrentDepth();
 
-        
-        SPFChecker checker = new SPFChecker() {
-
-            public void checkSPF(SPFSession spfData) throws PermErrorException,
-                    TempErrorException, NeutralException, NoneException {
-
-                // Get PTR Records for the ipAddress which is provided by SPF1Data
-                IPAddr ip = IPAddr.getAddress(spfData.getIpAddress());
-
-                // Get the right host.
-                String host = expandHost(spfData);
-                
-                spfData.setAttribute(ATTRIBUTE_EXPANDED_HOST, host);
-
-                DNSResolver.lookup(dnsService, new DNSRequest(ip.getReverseIP(), DNSService.PTR), spfData, PTRMechanism.this);
-            }
-            
-        };
-        
-        spfData.pushChecker(checker);
+        spfData.pushChecker(expandedChecker);
         DNSResolver.hostExpand(dnsService, macroExpand, getDomain(), spfData, MacroExpand.DOMAIN);
     }
 

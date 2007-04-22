@@ -30,6 +30,27 @@ import org.apache.james.jspf.exceptions.TempErrorException;
  */
 public class Directive implements SPFChecker {
 
+    private final class MechanismResultChecker implements SPFChecker {
+
+        public void checkSPF(SPFSession spfData)
+                throws PermErrorException, TempErrorException,
+                NeutralException, NoneException {
+            Boolean res = (Boolean) spfData.getAttribute(ATTRIBUTE_MECHANISM_RESULT);
+            if (res != null ? res.booleanValue() : true) {
+                if (qualifier.equals("")) {
+                    spfData.setCurrentResult(SPF1Constants.PASS);
+                } else {
+                    spfData.setCurrentResult(qualifier);
+                }
+                
+                log.info("Processed directive matched: " + Directive.this + " returned " + spfData.getCurrentResult());
+            } else {
+                log.debug("Processed directive NOT matched: " + this);
+            }
+        }
+        
+    }
+
     public static final String ATTRIBUTE_MECHANISM_RESULT = "Mechanism.result";
 
     protected String qualifier = "+";
@@ -37,6 +58,8 @@ public class Directive implements SPFChecker {
     private Mechanism mechanism = null;
 
     private Logger log;
+
+    private MechanismResultChecker resultChecker;
 
     /**
      * Construct Directive
@@ -56,6 +79,7 @@ public class Directive implements SPFChecker {
         if (mechanism == null) {
             throw new PermErrorException("Mechanism cannot be null");
         }
+        this.resultChecker  = new MechanismResultChecker();
         this.mechanism = mechanism;
     }
 
@@ -74,37 +98,9 @@ public class Directive implements SPFChecker {
         // if already have a current result we don't run this
         if (spfData.getCurrentResult() == null) {
 
-            Boolean previous = (Boolean) spfData.getAttribute(ATTRIBUTE_MECHANISM_RESULT);
             spfData.setAttribute(ATTRIBUTE_MECHANISM_RESULT, null);
 
-            spfData.pushChecker(new SPFChecker() {
-
-                private Boolean previous;
-
-                public void checkSPF(SPFSession spfData)
-                        throws PermErrorException, TempErrorException,
-                        NeutralException, NoneException {
-                    Boolean res = (Boolean) spfData.getAttribute(ATTRIBUTE_MECHANISM_RESULT);
-                    if (res != null ? res.booleanValue() : true) {
-                        if (qualifier.equals("")) {
-                            spfData.setCurrentResult(SPF1Constants.PASS);
-                        } else {
-                            spfData.setCurrentResult(qualifier);
-                        }
-                        
-                        log.info("Processed directive matched: " + Directive.this + " returned " + spfData.getCurrentResult());
-                    } else {
-                        log.debug("Processed directive NOT matched: " + this);
-                    }
-                    spfData.setAttribute(ATTRIBUTE_MECHANISM_RESULT, previous);
-                }
-
-                public SPFChecker setPrevious(Boolean previous) {
-                    this.previous = previous;
-                    return this;
-                }
-                
-            }.setPrevious(previous));
+            spfData.pushChecker(resultChecker);
             
             spfData.pushChecker(mechanism);
 

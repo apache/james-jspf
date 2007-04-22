@@ -45,6 +45,31 @@ import java.util.List;
  */
 public class ExpModifier extends GenericModifier implements DNSServiceEnabled, MacroExpandEnabled, SPFCheckerDNSResponseListener {
 
+    private final class ExpandedExplanationChecker implements SPFChecker {
+        public void checkSPF(SPFSession spfData)
+                throws PermErrorException, NoneException,
+                TempErrorException, NeutralException {
+            try {
+                String exp = (String) spfData.getAttribute(ATTRIBUTE_EXPAND_EXPLANATION);
+                String expandedExplanation = macroExpand.expand(exp, spfData, MacroExpand.EXPLANATION);
+                spfData.setExplanation(expandedExplanation);
+            } catch (PermErrorException e) {
+                // ignore syntax error on explanation expansion
+            }
+        }
+    }
+
+
+    private final class ExpandedChecker implements SPFChecker {
+        public void checkSPF(SPFSession spfData) throws PermErrorException,
+                NoneException, TempErrorException, NeutralException {
+            String host = macroExpand.expand(getHost(), spfData, MacroExpand.DOMAIN);
+
+            DNSResolver.lookup(dnsService, new DNSRequest(host, DNSService.TXT), spfData, ExpModifier.this);
+        }
+    }
+
+
     private static final String ATTRIBUTE_EXPAND_EXPLANATION = "ExpModifier.ExpandExplanation";
 
     /**
@@ -60,6 +85,10 @@ public class ExpModifier extends GenericModifier implements DNSServiceEnabled, M
     private DNSService dnsService;
     
     private MacroExpand macroExpand;
+
+    private ExpandedChecker expandedChecker = new ExpandedChecker();
+
+    private ExpandedExplanationChecker expandedExplanationChecker = new ExpandedExplanationChecker();
 
     /**
      * Generate the explanation and set it in SPF1Data so it can be accessed
@@ -89,16 +118,7 @@ public class ExpModifier extends GenericModifier implements DNSServiceEnabled, M
         if (spfData.getCurrentResult()== null || !spfData.getCurrentResult().equals(SPF1Constants.FAIL))
             return;
 
-        spfData.pushChecker(new SPFChecker() {
-
-            public void checkSPF(SPFSession spfData) throws PermErrorException,
-                    NoneException, TempErrorException, NeutralException {
-                String host = macroExpand.expand(getHost(), spfData, MacroExpand.DOMAIN);
-
-                DNSResolver.lookup(dnsService, new DNSRequest(host, DNSService.TXT), spfData, ExpModifier.this);
-            }
-            
-        });
+        spfData.pushChecker(expandedChecker);
         DNSResolver.hostExpand(dnsService, macroExpand, host, spfData, MacroExpand.DOMAIN);
     }
 
@@ -148,21 +168,7 @@ public class ExpModifier extends GenericModifier implements DNSServiceEnabled, M
                 if ((exp != null) && (!exp.equals(""))) {
                     
                     try {
-                        spfData.pushChecker(new SPFChecker() {
-    
-                            public void checkSPF(SPFSession spfData)
-                                    throws PermErrorException, NoneException,
-                                    TempErrorException, NeutralException {
-                                try {
-                                    String exp = (String) spfData.getAttribute(ATTRIBUTE_EXPAND_EXPLANATION);
-                                    String expandedExplanation = macroExpand.expand(exp, spfData, MacroExpand.EXPLANATION);
-                                    spfData.setExplanation(expandedExplanation);
-                                } catch (PermErrorException e) {
-                                    // ignore syntax error on explanation expansion
-                                }
-                            }
-                            
-                        });
+                        spfData.pushChecker(expandedExplanationChecker);
                         DNSResolver.hostExpand(dnsService, macroExpand, exp, spfData, MacroExpand.EXPLANATION);
                     } catch (PermErrorException e) {
                         // ignore syntax error on explanation expansion

@@ -49,6 +49,123 @@ import org.apache.james.jspf.wiring.SPFCheckEnabled;
  */
 public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SPFCheckEnabled, MacroExpandEnabled, DNSServiceEnabled {
 
+    private final class ExceptionCatcher implements SPFCheckerExceptionCatcher {
+        private SPFChecker spfChecker;
+
+        private SPFChecker finallyChecker;
+
+        public void onException(Exception exception, SPFSession session)
+                throws PermErrorException, NoneException,
+                TempErrorException, NeutralException {
+            
+            // remove every checker until the initialized one
+            SPFChecker checker;
+            while ((checker = session.popChecker())!=spfChecker) {
+                log.debug("Redurect resulted in exception. Removing checker: "+checker);
+            }
+            
+            finallyChecker.checkSPF(session);
+            
+            if (exception instanceof NeutralException) {
+                throw new PermErrorException("included checkSPF returned NeutralException");
+            } else if (exception instanceof NoneException) {
+                throw new PermErrorException("included checkSPF returned NoneException");
+            } else if (exception instanceof PermErrorException){
+                throw (PermErrorException) exception;
+            } else if (exception instanceof TempErrorException){
+                throw (TempErrorException) exception;
+            } else if (exception instanceof RuntimeException){
+                throw (RuntimeException) exception;
+            } else {
+                throw new IllegalStateException(exception);
+            }
+        }
+
+        public SPFCheckerExceptionCatcher setExceptionHandlerChecker(
+                SPFChecker checker, SPFChecker finallyChecker) {
+            this.spfChecker = checker;
+            this.finallyChecker = finallyChecker;
+            return this;
+        }
+    }
+
+    private final class ExpandedChecker implements SPFChecker {
+        public void checkSPF(SPFSession spfData) throws PermErrorException,
+                TempErrorException {
+
+            // throws a PermErrorException that we can pass through
+            String host = macroExpand.expand(getHost(), spfData, MacroExpand.DOMAIN);
+            
+            spfData.setCurrentDomain(host);
+            
+            // On includes we should not use the explanation of the included domain
+            spfData.setIgnoreExplanation(true);
+            // set a null current result
+            spfData.setCurrentResult(null);
+            
+            spfData.pushChecker(spfChecker);
+        }
+    }
+
+    private final class FinallyChecker implements SPFChecker {
+        private String previousResult;
+
+        private String previousDomain;
+
+        public void checkSPF(SPFSession spfData) throws PermErrorException,
+                TempErrorException, NeutralException, NoneException {
+            
+            spfData.setIgnoreExplanation(false);
+            spfData.setCurrentDomain(previousDomain);
+            spfData.setCurrentResult(previousResult);
+
+            spfData.popExceptionCatcher();
+            
+        }
+
+        public SPFChecker init(SPFSession spfSession) {
+
+            // TODO understand what exactly we have to do now that spfData is a session
+            // and contains much more than the input data.
+            // do we need to create a new session at all?
+            // do we need to backup the session attributes and restore them?
+            this.previousResult = spfSession.getCurrentResult();
+            this.previousDomain = spfSession.getCurrentDomain();
+            return this;
+        }
+    }
+
+    private final class CleanupAndResultChecker implements SPFChecker {
+        private SPFChecker finallyChecker;
+
+        public void checkSPF(SPFSession spfData) throws PermErrorException,
+                TempErrorException, NeutralException, NoneException {
+            
+            String currentResult = spfData.getCurrentResult();
+            
+            finallyChecker.checkSPF(spfData);
+            
+            if (currentResult == null) {
+                throw new TempErrorException("included checkSPF returned null");
+            } else if (currentResult.equals(SPF1Constants.PASS)) {
+                // TODO this won't work asynchronously
+                spfData.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.TRUE);
+            } else if (currentResult.equals(SPF1Constants.FAIL) || currentResult.equals(SPF1Constants.SOFTFAIL) || currentResult.equals(SPF1Constants.NEUTRAL)) {
+                // TODO this won't work asynchronously
+                spfData.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
+            } else {
+                throw new TempErrorException("included checkSPF returned an Illegal result");
+            }
+
+
+        }
+
+        public SPFChecker init(SPFChecker finallyChecker) {
+            this.finallyChecker = finallyChecker;
+            return this;
+        }
+    }
+
     /**
      * ABNF: include = "include" ":" domain-spec
      */
@@ -72,139 +189,15 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
         // update currentDepth
         spfData.increaseCurrentDepth();
         
-        SPFChecker finallyChecker = new SPFChecker() {
-
-            private String previousResult;
-            private String previousDomain;
-
-            public void checkSPF(SPFSession spfData) throws PermErrorException,
-                    TempErrorException, NeutralException, NoneException {
-                
-                spfData.setIgnoreExplanation(false);
-                spfData.setCurrentDomain(previousDomain);
-                spfData.setCurrentResult(previousResult);
-
-                spfData.popExceptionCatcher();
-                
-            }
-
-
-            public SPFChecker init(SPFSession spfSession) {
-
-                // TODO understand what exactly we have to do now that spfData is a session
-                // and contains much more than the input data.
-                // do we need to create a new session at all?
-                // do we need to backup the session attributes and restore them?
-                this.previousResult = spfSession.getCurrentResult();
-                this.previousDomain = spfSession.getCurrentDomain();
-                return this;
-            }
-
-        }.init(spfData);
+        SPFChecker finallyChecker = new FinallyChecker().init(spfData);
         
-        SPFChecker cleanupAndResultHandler = new SPFChecker() {
-
-            private SPFChecker finallyChecker;
-
-            public void checkSPF(SPFSession spfData) throws PermErrorException,
-                    TempErrorException, NeutralException, NoneException {
-                
-                String currentResult = spfData.getCurrentResult();
-                
-                finallyChecker.checkSPF(spfData);
-                
-                if (currentResult == null) {
-                    throw new TempErrorException("included checkSPF returned null");
-                } else if (currentResult.equals(SPF1Constants.PASS)) {
-                    // TODO this won't work asynchronously
-                    spfData.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.TRUE);
-                } else if (currentResult.equals(SPF1Constants.FAIL) || currentResult.equals(SPF1Constants.SOFTFAIL) || currentResult.equals(SPF1Constants.NEUTRAL)) {
-                    // TODO this won't work asynchronously
-                    spfData.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
-                } else {
-                    throw new TempErrorException("included checkSPF returned an Illegal result");
-                }
-
-
-            }
-
-            public SPFChecker init(SPFChecker finallyChecker) {
-                this.finallyChecker = finallyChecker;
-                return this;
-            }
-            
-        }.init(finallyChecker);
-        
+        SPFChecker cleanupAndResultHandler = new CleanupAndResultChecker().init(finallyChecker);
         spfData.pushChecker(cleanupAndResultHandler);
+        spfData.pushExceptionCatcher(new ExceptionCatcher().setExceptionHandlerChecker(cleanupAndResultHandler, finallyChecker));
         
-        SPFChecker checker = new SPFChecker() {
-
-            public void checkSPF(SPFSession spfData) throws PermErrorException,
-                    TempErrorException {
-
-                // throws a PermErrorException that we can pass through
-                String host = macroExpand.expand(getHost(), spfData, MacroExpand.DOMAIN);
-                
-                spfData.setCurrentDomain(host);
-                
-                // On includes we should not use the explanation of the included domain
-                spfData.setIgnoreExplanation(true);
-                // set a null current result
-                spfData.setCurrentResult(null);
-                
-                spfData.pushChecker(spfChecker);
-            }
-            
-        };
-        
-        spfData.pushExceptionCatcher(new SPFCheckerExceptionCatcher() {
-
-            private SPFChecker spfChecker;
-            private SPFChecker finallyChecker;
-
-            public void onException(Exception exception, SPFSession session)
-                    throws PermErrorException, NoneException,
-                    TempErrorException, NeutralException {
-                
-                // remove every checker until the initialized one
-                SPFChecker checker;
-                while ((checker = session.popChecker())!=spfChecker) {
-                    log.debug("Redurect resulted in exception. Removing checker: "+checker);
-                }
-                
-                finallyChecker.checkSPF(session);
-                
-                if (exception instanceof NeutralException) {
-                    throw new PermErrorException("included checkSPF returned NeutralException");
-                } else if (exception instanceof NoneException) {
-                    throw new PermErrorException("included checkSPF returned NoneException");
-                } else if (exception instanceof PermErrorException){
-                    throw (PermErrorException) exception;
-                } else if (exception instanceof TempErrorException){
-                    throw (TempErrorException) exception;
-                } else if (exception instanceof RuntimeException){
-                    throw (RuntimeException) exception;
-                } else {
-                    throw new IllegalStateException(exception);
-                }
-            }
-
-            public SPFCheckerExceptionCatcher setExceptionHandlerChecker(
-                    SPFChecker checker, SPFChecker finallyChecker) {
-                this.spfChecker = checker;
-                this.finallyChecker = finallyChecker;
-                return this;
-            }
-
-        }.setExceptionHandlerChecker(cleanupAndResultHandler, finallyChecker));
-        
-        // TODO check if this is ok. I removed the catch and all tests still pass.
-//        try {
-        spfData.pushChecker(checker);
+        spfData.pushChecker(new ExpandedChecker());
         DNSResolver.hostExpand(dnsService, macroExpand, getHost(), spfData, MacroExpand.DOMAIN);
-//        } catch (NeutralException e) {
-//            // catch neutral exception.
-//        }
+
     }
 
     /**
