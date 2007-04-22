@@ -37,33 +37,30 @@ import org.apache.james.jspf.policies.PolicyPostFilter;
  * Policy to add a default explanation
  */
 public final class DefaultExplanationPolicy implements PolicyPostFilter {
+
     
+    private final class ExplanationChecker implements SPFChecker {
+        public DNSLookupContinuation checkSPF(SPFSession spfData)
+                throws PermErrorException,
+                NoneException, TempErrorException,
+                NeutralException {
+            String attExplanation = (String) spfData.getAttribute(ATTRIBUTE_DEFAULT_EXPLANATION_POLICY_EXPLANATION);
+            try {
+                String explanation = macroExpand.expand(attExplanation, spfData, MacroExpand.EXPLANATION);
+                
+                spfData.setExplanation(explanation);
+            } catch (PermErrorException e) {
+                // Should never happen !
+                log.debug("Invalid defaulfExplanation: " + attExplanation);
+            }
+            return null;
+        }
+    }
+
     private final class DefaultExplanationChecker implements SPFChecker {
         
-        private SPFChecker explanationCheckr;
+        private SPFChecker explanationCheckr = new ExplanationChecker();
         
-        public DefaultExplanationChecker() {
-            this.explanationCheckr = new ExplanationChecker();
-        }
-        
-        private final class ExplanationChecker implements SPFChecker {
-            public DNSLookupContinuation checkSPF(SPFSession spfData)
-                    throws PermErrorException,
-                    NoneException, TempErrorException,
-                    NeutralException {
-                String attExplanation = (String) spfData.getAttribute(ATTRIBUTE_DEFAULT_EXPLANATION_POLICY_EXPLANATION);
-                try {
-                    String explanation = macroExpand.expand(attExplanation, spfData, MacroExpand.EXPLANATION);
-                    
-                    spfData.setExplanation(explanation);
-                } catch (PermErrorException e) {
-                    // Should never happen !
-                    log.debug("Invalid defaulfExplanation: " + attExplanation);
-                }
-                return null;
-            }
-        }
-
         public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException, NoneException, TempErrorException, NeutralException {
             
             if (SPF1Constants.FAIL.equals(spfData.getCurrentResult())) {  
