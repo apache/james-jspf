@@ -58,10 +58,8 @@ import org.apache.james.jspf.wiring.MacroExpandEnabled;
 import org.apache.james.jspf.wiring.SPFCheckEnabled;
 import org.apache.james.jspf.wiring.WiringServiceTable;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 
 /**
  * This class is used to generate a SPF-Test and provided all intressting data.
@@ -98,20 +96,7 @@ public class SPF implements SPFChecker {
         public DNSLookupContinuation checkSPF(SPFSession spfData)
                 throws PermErrorException, TempErrorException,
                 NeutralException, NoneException {
-            List policies = getPolicies();
-            List policyFiters = getPolicyFilters();
-            LinkedList resultCheckers = new LinkedList();
-            
-            for (int i = 0; i < policies.size(); i++) {
-                Policy policy = (Policy) policies.get(i);
-                resultCheckers.add(new SPFPolicyChecker(policy));
-            }
-            
-            for (int i = 0; i < policyFiters.size(); i++) {
-                PolicyPostFilter policyPostFilter = (PolicyPostFilter) policyFiters.get(i);
-                resultCheckers.add(new SPFPolicyPostFilterChecker(policyPostFilter));
-            }
-            
+            LinkedList resultCheckers = getPolicies();
 
             while (resultCheckers.size() > 0) {
                 SPFChecker removeLast = (SPFChecker) resultCheckers.removeLast();
@@ -173,7 +158,7 @@ public class SPF implements SPFChecker {
 
     }
 
-    private static final String ATTRIBUTE_SPF1_RECORD = "SPF.SPF1Record";
+    public static final String ATTRIBUTE_SPF1_RECORD = "SPF.SPF1Record";
 
     DNSService dnsProbe;
 
@@ -334,51 +319,44 @@ public class SPF implements SPFChecker {
     /**
      * Return a default policy for SPF
      */
-    public List getPolicies() {
+    public LinkedList getPolicies() {
 
-        ArrayList policies = new ArrayList();
+        LinkedList policies = new LinkedList();
         
         if (override != null) {
-            policies.add(override);
+            policies.add(new SPFPolicyChecker(override));
         }
         
         if (mustEquals) {
-            policies.add(new SPFStrictCheckerRetriever(dnsProbe));
+            policies.add(new SPFStrictCheckerRetriever());
         } else {
-            policies.add(new SPFRetriever(dnsProbe));
+            policies.add(new SPFRetriever());
         }
 
-        policies.add(new InitialChecksPolicy());
-        
-        return policies;
-    }
-    
-    public List getPolicyFilters() {
-
-        ArrayList policyFilters = new ArrayList();
+        policies.add(new SPFPolicyChecker(new InitialChecksPolicy()));
 
         if (useBestGuess) {
-            policyFilters.add(new BestGuessPolicy());
+            policies.add(new SPFPolicyPostFilterChecker(new BestGuessPolicy()));
         }
         
-        policyFilters.add(new ParseRecordPolicy(parser));
+        policies.add(new SPFPolicyPostFilterChecker(new ParseRecordPolicy(parser)));
         
         if (fallBack != null) {
-            policyFilters.add(fallBack);
+            policies.add(new SPFPolicyPostFilterChecker(fallBack));
         }
 
-        policyFilters.add(new NoSPFRecordFoundPolicy());
+        policies.add(new SPFPolicyPostFilterChecker(new NoSPFRecordFoundPolicy()));
         
         // trustedForwarder support is enabled
         if (useTrustedForwarder) {
-            policyFilters.add(new TrustedForwarderPolicy(log));
+            policies.add(new SPFPolicyPostFilterChecker(new TrustedForwarderPolicy(log)));
         }
 
-        policyFilters.add(new NeutralIfNotMatchPolicy());
+        policies.add(new SPFPolicyPostFilterChecker(new NeutralIfNotMatchPolicy()));
 
-        policyFilters.add(new DefaultExplanationPolicy(log, defaultExplanation, macroExpand));
+        policies.add(new SPFPolicyPostFilterChecker(new DefaultExplanationPolicy(log, defaultExplanation, macroExpand)));
         
-        return policyFilters;
+        return policies;
     }
     
     /**

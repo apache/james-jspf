@@ -1,8 +1,16 @@
 package org.apache.james.jspf.policies;
 
+import org.apache.james.jspf.SPF;
+import org.apache.james.jspf.core.DNSLookupContinuation;
+import org.apache.james.jspf.core.DNSRequest;
+import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPF1Record;
+import org.apache.james.jspf.core.SPFChecker;
+import org.apache.james.jspf.core.SPFCheckerDNSResponseListener;
+import org.apache.james.jspf.core.SPFSession;
+import org.apache.james.jspf.core.DNSService.TimeoutException;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
@@ -14,74 +22,8 @@ import java.util.List;
 /**
  * Get the raw dns txt or spf entry which contains a spf entry
  */
-public class SPFRetriever implements Policy {
-    /**
-     * dns service
-     */
-    private final DNSService dns;
+public class SPFRetriever implements SPFChecker {
 
-
-    /**
-     * A new instance of the SPFRetriever
-     * 
-     * @param dns the dns service
-     */
-    public SPFRetriever(DNSService dns) {
-        this.dns = dns;
-    }
-
-
-    /**
-     * @see org.apache.james.jspf.policies.Policy#getSPFRecord(java.lang.String)
-     */
-    public SPF1Record getSPFRecord(String currentDomain) throws PermErrorException, TempErrorException, NoneException, NeutralException {
-        // retrieve the SPFRecord
-        String spfDnsEntry = retrieveSpfRecord(currentDomain);
-        if (spfDnsEntry != null) {
-            return new SPF1Record(spfDnsEntry);
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Get the SPF-Record for a server
-     * 
-     * @param dns
-     *            The dns service to query
-     * @param hostname
-     *            The hostname for which we want to retrieve the SPF-Record
-     * @param spfVersion
-     *            The SPF-Version which should used.
-     * @return The SPF-Record if one is found.
-     * @throws PermErrorException
-     *             if more then one SPF-Record was found.
-     * @throws TempErrorException
-     *             if the lookup result was "TRY_AGAIN"
-     */
-    protected String retrieveSpfRecord(String hostname)
-            throws PermErrorException, TempErrorException {
-
-        try {
-            // first check for SPF-Type records
-            List spfR = dns.getRecords(hostname, DNSService.SPF);
-            
-            if (spfR == null || spfR.isEmpty()) {
-                // do DNS lookup for TXT
-                spfR = dns.getRecords(hostname, DNSService.TXT);
-            }
-    
-            // process returned records
-            if (spfR != null && !spfR.isEmpty()) {
-                return extractSPFRecord(spfR);
-            } else {
-                return null;
-            }
-        } catch (DNSService.TimeoutException e) {
-            throw new TempErrorException("Timeout querying dns");
-        }
-    }
-    
     /**
      * Return the extracted SPF-Record 
      *  
@@ -91,7 +33,9 @@ public class SPFRetriever implements Policy {
      *                            given List.
      */
     protected String extractSPFRecord(List spfR) throws PermErrorException {
-       String returnValue = null;
+        if (spfR == null || spfR.isEmpty()) return null;
+        
+        String returnValue = null;
         Iterator all = spfR.iterator();
            
         while (all.hasNext()) {
@@ -121,13 +65,68 @@ public class SPFRetriever implements Policy {
     }
     
 
-    /**
-     * Return the DNSService
-     * 
-     * @return the dns
-     */
-    protected DNSService getDNSService() {
-        return dns;
+    public DNSLookupContinuation checkSPF(SPFSession spfData)
+            throws PermErrorException, TempErrorException, NeutralException,
+            NoneException {
+        SPF1Record res = (SPF1Record) spfData.getAttribute(SPF.ATTRIBUTE_SPF1_RECORD);
+        if (res == null) {
+            String currentDomain = spfData.getCurrentDomain();
+            return new DNSLookupContinuation(new DNSRequest(currentDomain, DNSService.SPF), new SPFCheckerDNSResponseListener() {
+
+                public DNSLookupContinuation onDNSResponse(
+                        DNSResponse response, SPFSession session)
+                        throws PermErrorException, NoneException,
+                        TempErrorException, NeutralException {
+                    try {
+                        List spfR = response.getResponse();
+                        
+                        if (spfR == null || spfR.isEmpty()) {
+                            
+                            String currentDomain = session.getCurrentDomain();
+                            return new DNSLookupContinuation(new DNSRequest(currentDomain, DNSService.TXT), new SPFCheckerDNSResponseListener() {
+
+                                public DNSLookupContinuation onDNSResponse(
+                                        DNSResponse response, SPFSession session)
+                                        throws PermErrorException,
+                                        NoneException, TempErrorException,
+                                        NeutralException {
+                                    
+                                    List spfR;
+                                    try {
+                                        spfR = response.getResponse();
+                                        String record = extractSPFRecord(spfR);
+                                        if (record != null) {
+                                            session.setAttribute(SPF.ATTRIBUTE_SPF1_RECORD, new SPF1Record(record));
+                                        }
+                                    } catch (TimeoutException e) {
+                                        throw new TempErrorException("Timeout querying dns");
+                                    }
+                                    return null;
+                                    
+                                }
+                                
+                            });
+                            
+                        } else {
+                            
+                            String record = extractSPFRecord(spfR);
+                            if (record != null) {
+                                session.setAttribute(SPF.ATTRIBUTE_SPF1_RECORD, new SPF1Record(record));
+                            }
+                            
+                        }
+                        
+                        return null;
+                        
+                    } catch (DNSService.TimeoutException e) {
+                        throw new TempErrorException("Timeout querying dns");
+                    }
+                }
+                
+            });
+            
+        }
+        return null;
     }
 
 
