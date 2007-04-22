@@ -67,7 +67,7 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
     /**
      * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
      */
-    public void checkSPF(SPFSession spfData) throws PermErrorException, TempErrorException, NoneException {
+    public void checkSPF(SPFSession spfData) throws PermErrorException, TempErrorException, NoneException, NeutralException {
         // update currentDepth
         spfData.increaseCurrentDepth();      
         
@@ -96,7 +96,10 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
                     spfData.setCurrentResult(null);
                     
                     try {
+                         System.out.println("===> INCLUDE");
                          spfChecker.checkSPF(spfData);
+                         System.out.println("===> INCLUDE DONE");
+                         
                     } catch (NeutralException e) {
                         throw new PermErrorException("included checkSPF returned NeutralException");
                     } catch (NoneException e) {
@@ -126,12 +129,12 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
             
         };
         
-        try {
+        // TODO check if this is ok. I removed the catch and all tests still pass.
+//        try {
             DNSResolver.hostExpand(dnsService, macroExpand, getHost(), spfData, MacroExpand.DOMAIN, checker);
-        } catch (NeutralException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+//        } catch (NeutralException e) {
+//            // catch neutral exception.
+//        }
     }
 
     /**

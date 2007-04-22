@@ -92,7 +92,9 @@ public class RedirectModifier extends GenericModifier implements
 
                             // TODO change this to work asynchronously
                             try {
+                                System.out.println("Redirect...");
                                 spfChecker.checkSPF(spfData);
+                                System.out.println("Redirect... DONE");
                             } catch (NoneException e) {
                                 // no spf record assigned to the redirect domain
                                 throw new PermErrorException(

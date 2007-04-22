@@ -26,6 +26,7 @@ import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.Directive;
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.SPFChecker;
+import org.apache.james.jspf.core.SPFCheckerDNSResponseListener;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
@@ -42,7 +43,7 @@ import java.util.List;
  * This class represent the mx mechanism
  * 
  */
-public class MXMechanism extends AMechanism {
+public class MXMechanism extends AMechanism implements SPFCheckerDNSResponseListener {
 
     private static final String ATTRIBUTE_MX_RECORDS = "MXMechanism.mxRecords";
     private static final String ATTRIBUTE_CHECK_RECORDS = "MXMechanism.checkRecords";
@@ -70,7 +71,7 @@ public class MXMechanism extends AMechanism {
                 // Get the right host.
                 String host = expandHost(spfData);
                 
-                onDNSResponse(DNSResolver.lookup(dnsService, new DNSRequest(host, DNSService.MX)), spfData);
+                DNSResolver.lookup(dnsService, new DNSRequest(host, DNSService.MX), spfData, MXMechanism.this);
             }
             
         };
@@ -79,10 +80,10 @@ public class MXMechanism extends AMechanism {
     }
 
     /**
-     * @see org.apache.james.jspf.core.Mechanism#onDNSResponse(org.apache.james.jspf.core.SPFSession)
+     * @see org.apache.james.jspf.terms.AMechanism#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
      */
-    private void onDNSResponse(DNSResponse response, SPFSession spfSession)
-        throws PermErrorException, TempErrorException {
+    public void onDNSResponse(DNSResponse response, SPFSession spfSession)
+        throws PermErrorException, TempErrorException, NoneException, NeutralException {
         try {
             
             List records = (List) spfSession.getAttribute(ATTRIBUTE_CHECK_RECORDS);
@@ -122,7 +123,7 @@ public class MXMechanism extends AMechanism {
             while (records.size() > 0 && (mx = (String) records.remove(0)) != null && mx.length() > 0) {
                 log.debug("Add MX-Record " + mx + " to list");
     
-                this.onDNSResponse(DNSResolver.lookup(dnsService, new DNSRequest(mx, isIPv6 ? DNSService.AAAA : DNSService.A)), spfSession);
+                DNSResolver.lookup(dnsService, new DNSRequest(mx, isIPv6 ? DNSService.AAAA : DNSService.A), spfSession, MXMechanism.this);
                 return;
                 
             }

@@ -56,6 +56,7 @@ import org.apache.james.jspf.wiring.WiringServiceTable;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 /**
  * This class is used to generate a SPF-Test and provided all intressting data.
@@ -99,7 +100,7 @@ public class SPF implements SPFChecker {
         wiringService.put(MacroExpandEnabled.class, this.macroExpand);
         this.parser = new DefaultSPF1Parser(logger.getChildLogger("parser"), new DefaultTermsFactory(logger.getChildLogger("termsfactory"), wiringService));
         // We add this after the parser creation because services cannot be null
-        wiringService.put(SPFCheckEnabled.class, this.parser);
+        wiringService.put(SPFCheckEnabled.class, this);
     }
     
     
@@ -183,12 +184,37 @@ public class SPF implements SPFChecker {
      * @throws NeutralException exception
      */
     public void checkSPF(SPFSession spfData, SPF1Record spfRecord) throws PermErrorException, NoneException, TempErrorException, NeutralException {
+        LinkedList reversedCheckers = new LinkedList();
         Iterator i = spfRecord.iterator();
         while (i.hasNext()) {
-            SPFChecker m = (SPFChecker) i.next();
+            reversedCheckers.addFirst(i.next());
+        }
 
-            m.checkSPF(spfData);
+        // try to remember the starting checker to better handle recursion.
+        SPFChecker startChecker = spfData.popChecker();
+        if (startChecker != null) {
+            spfData.pushChecker(startChecker);
+        }
 
+        for (int k = 0; k < reversedCheckers.size(); k++) {
+            System.out.println("Pushing checker: "+reversedCheckers.get(k));
+            spfData.pushChecker((SPFChecker) reversedCheckers.get(k));
+        }
+        
+        // To make it asynchronous we should start the executor and 
+        // return here.. instead we run the executor locally by now.
+
+        SPFChecker checker;
+        while ((checker = spfData.popChecker()) != null) {
+            // only execute checkers we added (better recursivity)
+            if (startChecker != null && startChecker == checker) {
+                System.out.println("NOT Executing checker: "+checker);
+                spfData.pushChecker(startChecker);
+                break;
+            } else {
+                System.out.println("Executing checker.: "+checker);
+                checker.checkSPF(spfData);
+            }
         }
     }
 

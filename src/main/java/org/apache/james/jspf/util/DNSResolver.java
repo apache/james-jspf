@@ -42,20 +42,28 @@ public class DNSResolver {
 
     /**
      * This is used temporarily to synchronously obtain a DNSResponse for a DNSRequest
+     * @throws NeutralException 
+     * @throws TempErrorException 
+     * @throws NoneException 
+     * @throws PermErrorException 
      */
-    public static DNSResponse lookup(DNSService service, DNSRequest request) {
+    public static void lookup(DNSService service, DNSRequest request, SPFSession session, SPFCheckerDNSResponseListener listener) throws PermErrorException, NoneException, TempErrorException, NeutralException {
+        DNSResponse response;
         try {
-            return new DNSResponse(service.getRecords(request.getHostname(), request.getRecordType()));
+            response = new DNSResponse(service.getRecords(request.getHostname(), request.getRecordType()));
         } catch (TimeoutException e) {
-            return new DNSResponse(e);
+            response = new DNSResponse(e);
         }
+        listener.onDNSResponse(response, session);
     }
     
     public static void hostExpand(DNSService dnsService, MacroExpand macroExpand, String input, final SPFSession spfSession, boolean isExplanation, final SPFChecker next) throws PermErrorException, TempErrorException, NeutralException, NoneException {
+        spfSession.pushChecker(next);
         if (input != null) {
             String host = macroExpand.expand(input, spfSession, isExplanation);
             if (host == null) {
-                new SPFCheckerDNSResponseListener() {
+                
+                DNSResolver.lookup(dnsService, new DNSRequest(IPAddr.getAddress(spfSession.getIpAddress()).getReverseIP(), DNSService.PTR), spfSession,new SPFCheckerDNSResponseListener() {
     
                     private DNSService dnsService;
     
@@ -71,8 +79,7 @@ public class DNSResolver {
                                 String record = (String) records.get(0);
                                 spfSession.setAttribute(ATTRIBUTE_MACRO_EXPAND_CHECKED_RECORD, record);
                                 
-                                DNSResponse resp = DNSResolver.lookup(dnsService, new DNSRequest(record, ip6 ? DNSService.AAAA : DNSService.A));
-                                new SPFCheckerDNSResponseListener() {
+                                DNSResolver.lookup(dnsService, new DNSRequest(record, ip6 ? DNSService.AAAA : DNSService.A), spfSession, new SPFCheckerDNSResponseListener() {
                                     
                                     public void onDNSResponse(DNSResponse response,
                                             SPFSession session) throws PermErrorException,
@@ -97,20 +104,16 @@ public class DNSResolver {
                                             // just return the default "unknown".
                                         }
                                         
-                                        next.checkSPF(spfSession);
-    
                                     }
-                                }.onDNSResponse(resp, session);
+                                });
                                 
                             }
                         } catch (TimeoutException e) {
                             // just return the default "unknown".
                             spfSession.setClientDomain("unknown");
-                            next.checkSPF(spfSession);
                         } catch (PermErrorException e) {
                             // just return the default "unknown".
                             spfSession.setClientDomain("unknown");
-                            next.checkSPF(spfSession);
                         }
                         
                     }
@@ -121,12 +124,8 @@ public class DNSResolver {
                         return this;
                     }
                     
-                }.setDNSService(dnsService).onDNSResponse(DNSResolver.lookup(dnsService, new DNSRequest(IPAddr.getAddress(spfSession.getIpAddress()).getReverseIP(), DNSService.PTR)), spfSession);
-            } else {
-                next.checkSPF(spfSession);
+                }.setDNSService(dnsService));
             }
-        } else {
-            next.checkSPF(spfSession);
         }
     }
 

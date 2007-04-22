@@ -25,6 +25,7 @@ import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.Directive;
 import org.apache.james.jspf.core.SPFChecker;
+import org.apache.james.jspf.core.SPFCheckerDNSResponseListener;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
@@ -40,7 +41,7 @@ import java.util.List;
 /**
  * This class represent the exists mechanism
  */
-public class ExistsMechanism extends GenericMechanism implements DNSServiceEnabled {
+public class ExistsMechanism extends GenericMechanism implements DNSServiceEnabled, SPFCheckerDNSResponseListener {
 
     /**
      * ABNF: exists = "exists" ":" domain-spec
@@ -63,7 +64,7 @@ public class ExistsMechanism extends GenericMechanism implements DNSServiceEnabl
             public void checkSPF(SPFSession spfData) throws PermErrorException,
                     TempErrorException, NeutralException, NoneException {
                 String host = expandHost(spfData);
-                onDNSResponse(DNSResolver.lookup(dnsService, new DNSRequest(host,DNSService.A)), spfData);
+                DNSResolver.lookup(dnsService, new DNSRequest(host,DNSService.A), spfData, ExistsMechanism.this);
             }
             
         };
@@ -73,9 +74,9 @@ public class ExistsMechanism extends GenericMechanism implements DNSServiceEnabl
     }
 
     /**
-     * @see org.apache.james.jspf.core.Mechanism#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
+     * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
      */
-    private void onDNSResponse(DNSResponse response, SPFSession spfSession) throws PermErrorException, TempErrorException {
+    public void onDNSResponse(DNSResponse response, SPFSession spfSession) throws PermErrorException, TempErrorException {
         List aRecords;
         
         try {

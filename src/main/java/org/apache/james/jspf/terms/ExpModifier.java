@@ -25,6 +25,7 @@ import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPFChecker;
+import org.apache.james.jspf.core.SPFCheckerDNSResponseListener;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
@@ -42,7 +43,7 @@ import java.util.List;
  * This class represent the exp modifier
  * 
  */
-public class ExpModifier extends GenericModifier implements DNSServiceEnabled, MacroExpandEnabled {
+public class ExpModifier extends GenericModifier implements DNSServiceEnabled, MacroExpandEnabled, SPFCheckerDNSResponseListener {
 
     private static final String ATTRIBUTE_EXPAND_EXPLANATION = "ExpModifier.ExpandExplanation";
 
@@ -94,7 +95,7 @@ public class ExpModifier extends GenericModifier implements DNSServiceEnabled, M
                     NoneException, TempErrorException, NeutralException {
                 String host = macroExpand.expand(getHost(), spfData, MacroExpand.DOMAIN);
 
-                onDNSResponse(DNSResolver.lookup(dnsService, new DNSRequest(host, DNSService.TXT)), spfData);
+                DNSResolver.lookup(dnsService, new DNSRequest(host, DNSService.TXT), spfData, ExpModifier.this);
             }
             
         });
@@ -114,6 +115,10 @@ public class ExpModifier extends GenericModifier implements DNSServiceEnabled, M
      * @throws TempErrorException 
      * @throws TempErrorException
      *             if the lookup result was "TRY_AGAIN"
+     */
+    
+    /**
+     * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
      */
     public void onDNSResponse(DNSResponse lookup, SPFSession spfData) throws PermErrorException, TempErrorException, NeutralException, NoneException {
         try {
@@ -147,9 +152,13 @@ public class ExpModifier extends GenericModifier implements DNSServiceEnabled, M
                             public void checkSPF(SPFSession spfData)
                                     throws PermErrorException, NoneException,
                                     TempErrorException, NeutralException {
-                                String exp = (String) spfData.getAttribute(ATTRIBUTE_EXPAND_EXPLANATION);
-                                String expandedExplanation = macroExpand.expand(exp, spfData, MacroExpand.EXPLANATION);
-                                spfData.setExplanation(expandedExplanation);
+                                try {
+                                    String exp = (String) spfData.getAttribute(ATTRIBUTE_EXPAND_EXPLANATION);
+                                    String expandedExplanation = macroExpand.expand(exp, spfData, MacroExpand.EXPLANATION);
+                                    spfData.setExplanation(expandedExplanation);
+                                } catch (PermErrorException e) {
+                                    // ignore syntax error on explanation expansion
+                                }
                             }
                             
                         });

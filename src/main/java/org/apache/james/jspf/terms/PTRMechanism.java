@@ -26,6 +26,7 @@ import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.Directive;
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.SPFChecker;
+import org.apache.james.jspf.core.SPFCheckerDNSResponseListener;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
@@ -42,7 +43,7 @@ import java.util.List;
  * This class represent the ptr mechanism
  * 
  */
-public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled {
+public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled, SPFCheckerDNSResponseListener {
 
     private static final String ATTRIBUTE_CURRENT_DOMAIN = "PTRMechanism.currentDomain";
 
@@ -80,8 +81,7 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled 
                 
                 spfData.setAttribute(ATTRIBUTE_EXPANDED_HOST, host);
 
-                DNSResponse response = DNSResolver.lookup(dnsService, new DNSRequest(ip.getReverseIP(), DNSService.PTR));
-                onDNSResponse(response, spfData);
+                DNSResolver.lookup(dnsService, new DNSRequest(ip.getReverseIP(), DNSService.PTR), spfData, PTRMechanism.this);
             }
             
         };
@@ -97,10 +97,10 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled 
     }
 
     /**
-     * @see org.apache.james.jspf.core.Mechanism#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
+     * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
      */
-    private void onDNSResponse(DNSResponse response, SPFSession spfSession)
-            throws PermErrorException, TempErrorException {
+    public void onDNSResponse(DNSResponse response, SPFSession spfSession)
+            throws PermErrorException, TempErrorException, NoneException, NeutralException {
         
         List domainList = (List) spfSession.getAttribute(ATTRIBUTE_DOMAIN_LIST);
         try {
@@ -169,7 +169,7 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled 
                 
                 spfSession.setAttribute(ATTRIBUTE_CURRENT_DOMAIN, currentDomain);
                 
-                onDNSResponse(DNSResolver.lookup(dnsService, dnsRequest), spfSession);
+                DNSResolver.lookup(dnsService, dnsRequest, spfSession, PTRMechanism.this);
                 return;
             } else {
                 spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);

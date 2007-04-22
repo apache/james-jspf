@@ -27,6 +27,7 @@ import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.Directive;
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.SPFChecker;
+import org.apache.james.jspf.core.SPFCheckerDNSResponseListener;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
@@ -45,7 +46,7 @@ import java.util.List;
  * This class represent the a mechanism
  * 
  */
-public class AMechanism extends GenericMechanism implements DNSServiceEnabled {
+public class AMechanism extends GenericMechanism implements DNSServiceEnabled, SPFCheckerDNSResponseListener {
 
     private static final String ATTRIBUTE_AMECHANISM_IPV4CHECK = "AMechanism.ipv4check";
 
@@ -84,7 +85,7 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled {
 
                         List aRecords = getARecords(dnsService,host);
                         if (aRecords == null) {
-                            onDNSResponse(DNSResolver.lookup(dnsService, new DNSRequest(host, DNSService.A)), spfData);
+                            DNSResolver.lookup(dnsService, new DNSRequest(host, DNSService.A), spfData, AMechanism.this);
                         } else {
                             onDNSResponse(new DNSResponse(aRecords), spfData);
                         }
@@ -93,7 +94,7 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled {
                         
                         List aaaaRecords = getAAAARecords(dnsService, host);
                         if (aaaaRecords == null) {
-                            onDNSResponse(DNSResolver.lookup(dnsService, new DNSRequest(host, DNSService.AAAA)), spfData);
+                            DNSResolver.lookup(dnsService, new DNSRequest(host, DNSService.AAAA), spfData, AMechanism.this);
                         } else {
                             onDNSResponse(new DNSResponse(aaaaRecords), spfData);
                         }
@@ -250,8 +251,11 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled {
     }
 
 
-    private void onDNSResponse(DNSResponse response, SPFSession spfSession)
-        throws PermErrorException, TempErrorException, NoneException {
+    /**
+     * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
+     */
+    public void onDNSResponse(DNSResponse response, SPFSession spfSession)
+        throws PermErrorException, TempErrorException, NoneException, NeutralException {
         List listAData = null;
         try {
             listAData = response.getResponse();

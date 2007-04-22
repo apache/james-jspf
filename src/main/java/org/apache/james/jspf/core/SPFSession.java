@@ -26,6 +26,7 @@ import org.apache.james.jspf.macro.MacroData;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 
 /**
  * 
@@ -70,6 +71,8 @@ public class SPFSession implements MacroData {
     private boolean ignoreExplanation = false;
     
     private Map attributes = new HashMap();
+    
+    private Stack checkers = new Stack();
 
     /**
      * Build the SPF1Data from the given parameters
@@ -352,5 +355,22 @@ public class SPFSession implements MacroData {
     public void setAttribute(String key, Object value) {
         this.attributes.put(key, value);
     }
+
+    /**
+     * @param mechanism
+     */
+    public void pushChecker(SPFChecker checker) {
+        checkers.push(checker);
+    }
     
+    /**
+     * @return the last checker
+     */
+    public SPFChecker popChecker() {
+        if (checkers.isEmpty()) {
+            return null;
+        } else {
+            return (SPFChecker) checkers.pop();
+        }
+    }
 }
