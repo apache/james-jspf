@@ -59,7 +59,7 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
             // remove every checker until the initialized one
             SPFChecker checker;
             while ((checker = session.popChecker())!=spfChecker) {
-                log.debug("Redurect resulted in exception. Removing checker: "+checker);
+                log.debug("Include resulted in exception. Removing checker: "+checker);
             }
             
             finallyChecker.checkSPF(session);

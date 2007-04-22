@@ -59,7 +59,7 @@ public class RedirectModifier extends GenericModifier implements
             // remove every checker until the initialized one
             SPFChecker checker;
             while ((checker = session.popChecker())!=spfChecker) {
-                log.debug("Redurect resulted in exception. Removing checker: "+checker);
+                log.debug("Redirect resulted in exception. Removing checker: "+checker);
             }
 
             if (exception instanceof NeutralException) {
