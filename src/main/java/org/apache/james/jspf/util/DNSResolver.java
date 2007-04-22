@@ -36,93 +36,115 @@ import java.util.Iterator;
 import java.util.List;
 
 public class DNSResolver {
-    
+
+    private static final class AResponseListener implements
+            SPFCheckerDNSResponseListener {
+        public void onDNSResponse(DNSResponse response, SPFSession session)
+                throws PermErrorException, NoneException, TempErrorException,
+                NeutralException {
+            // just return the default "unknown" if we cannot find anything
+            // later
+            session.setClientDomain("unknown");
+            try {
+                List records = response.getResponse();
+                if (records != null && records.size() > 0) {
+                    Iterator i = records.iterator();
+                    while (i.hasNext()) {
+                        String next = (String) i.next();
+                        if (IPAddr.getAddress(session.getIpAddress())
+                                .toString().equals(
+                                        IPAddr.getAddress(next).toString())) {
+                            session
+                                    .setClientDomain((String) session
+                                            .getAttribute(ATTRIBUTE_MACRO_EXPAND_CHECKED_RECORD));
+                            break;
+                        }
+                    }
+                }
+            } catch (TimeoutException e) {
+                // just return the default "unknown".
+            } catch (PermErrorException e) {
+                // just return the default "unknown".
+            }
+
+        }
+    }
+
+    private static final class PTRResponseListener implements
+            SPFCheckerDNSResponseListener {
+        private DNSService dnsService;
+
+        public void onDNSResponse(DNSResponse response, SPFSession session)
+                throws PermErrorException, NoneException, TempErrorException,
+                NeutralException {
+
+            try {
+                boolean ip6 = IPAddr.isIPV6(session.getIpAddress());
+                List records = response.getResponse();
+
+                if (records != null && records.size() > 0) {
+                    String record = (String) records.get(0);
+                    session.setAttribute(ATTRIBUTE_MACRO_EXPAND_CHECKED_RECORD,
+                            record);
+
+                    DNSResolver.lookup(dnsService, new DNSRequest(record,
+                            ip6 ? DNSService.AAAA : DNSService.A), session,
+                            new AResponseListener());
+
+                }
+            } catch (TimeoutException e) {
+                // just return the default "unknown".
+                session.setClientDomain("unknown");
+            } catch (PermErrorException e) {
+                // just return the default "unknown".
+                session.setClientDomain("unknown");
+            }
+
+        }
+
+        public SPFCheckerDNSResponseListener setDNSService(DNSService dnsService) {
+            this.dnsService = dnsService;
+            return this;
+        }
+    }
+
     private static final String ATTRIBUTE_MACRO_EXPAND_CHECKED_RECORD = "MacroExpand.checkedRecord";
 
     /**
-     * This is used temporarily to synchronously obtain a DNSResponse for a DNSRequest
-     * @throws NeutralException 
-     * @throws TempErrorException 
-     * @throws NoneException 
-     * @throws PermErrorException 
+     * This is used temporarily to synchronously obtain a DNSResponse for a
+     * DNSRequest
+     * 
+     * @throws NeutralException
+     * @throws TempErrorException
+     * @throws NoneException
+     * @throws PermErrorException
      */
-    public static void lookup(DNSService service, DNSRequest request, SPFSession session, SPFCheckerDNSResponseListener listener) throws PermErrorException, NoneException, TempErrorException, NeutralException {
+    public static void lookup(DNSService service, DNSRequest request,
+            SPFSession session, SPFCheckerDNSResponseListener listener)
+            throws PermErrorException, NoneException, TempErrorException,
+            NeutralException {
         DNSResponse response;
         try {
-            response = new DNSResponse(service.getRecords(request.getHostname(), request.getRecordType()));
+            response = new DNSResponse(service.getRecords(
+                    request.getHostname(), request.getRecordType()));
         } catch (TimeoutException e) {
             response = new DNSResponse(e);
         }
         listener.onDNSResponse(response, session);
     }
-    
-    public static void hostExpand(DNSService dnsService, MacroExpand macroExpand, String input, final SPFSession spfSession, boolean isExplanation) throws PermErrorException, TempErrorException, NeutralException, NoneException {
+
+    public static void hostExpand(DNSService dnsService,
+            MacroExpand macroExpand, String input, final SPFSession spfSession,
+            boolean isExplanation) throws PermErrorException,
+            TempErrorException, NeutralException, NoneException {
         if (input != null) {
             String host = macroExpand.expand(input, spfSession, isExplanation);
             if (host == null) {
-                
-                DNSResolver.lookup(dnsService, new DNSRequest(IPAddr.getAddress(spfSession.getIpAddress()).getReverseIP(), DNSService.PTR), spfSession,new SPFCheckerDNSResponseListener() {
-    
-                    private DNSService dnsService;
-    
-                    public void onDNSResponse(DNSResponse response,
-                            SPFSession session) throws PermErrorException,
-                            NoneException, TempErrorException, NeutralException {
-                        
-                        try {
-                            boolean ip6 = IPAddr.isIPV6(session.getIpAddress());
-                            List records = response.getResponse();
-        
-                            if (records != null && records.size() > 0) {
-                                String record = (String) records.get(0);
-                                spfSession.setAttribute(ATTRIBUTE_MACRO_EXPAND_CHECKED_RECORD, record);
-                                
-                                DNSResolver.lookup(dnsService, new DNSRequest(record, ip6 ? DNSService.AAAA : DNSService.A), spfSession, new SPFCheckerDNSResponseListener() {
-                                    
-                                    public void onDNSResponse(DNSResponse response,
-                                            SPFSession session) throws PermErrorException,
-                                            NoneException, TempErrorException, NeutralException {
-                                        // just return the default "unknown" if we cannot find anything later
-                                        spfSession.setClientDomain("unknown");
-                                        try {
-                                            List records = response.getResponse();
-                                            if (records != null && records.size() > 0) {
-                                                Iterator i = records.iterator();
-                                                while (i.hasNext()) {
-                                                    String next = (String) i.next();
-                                                    if (IPAddr.getAddress(session.getIpAddress()).toString().equals(IPAddr.getAddress(next).toString())) {
-                                                        spfSession.setClientDomain((String) spfSession.getAttribute(ATTRIBUTE_MACRO_EXPAND_CHECKED_RECORD));
-                                                        break;
-                                                    }
-                                                }
-                                            }
-                                        } catch (TimeoutException e) {
-                                            // just return the default "unknown".
-                                        } catch (PermErrorException e) {
-                                            // just return the default "unknown".
-                                        }
-                                        
-                                    }
-                                });
-                                
-                            }
-                        } catch (TimeoutException e) {
-                            // just return the default "unknown".
-                            spfSession.setClientDomain("unknown");
-                        } catch (PermErrorException e) {
-                            // just return the default "unknown".
-                            spfSession.setClientDomain("unknown");
-                        }
-                        
-                    }
-    
-                    public SPFCheckerDNSResponseListener setDNSService(
-                            DNSService dnsService) {
-                        this.dnsService = dnsService;
-                        return this;
-                    }
-                    
-                }.setDNSService(dnsService));
+
+                DNSResolver.lookup(dnsService, new DNSRequest(IPAddr
+                        .getAddress(spfSession.getIpAddress()).getReverseIP(),
+                        DNSService.PTR), spfSession, new PTRResponseListener()
+                        .setDNSService(dnsService));
             }
         }
     }
