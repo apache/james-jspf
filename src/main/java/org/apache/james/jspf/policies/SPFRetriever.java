@@ -65,12 +65,17 @@ public class SPFRetriever implements SPFChecker {
     }
     
 
+    /**
+     * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
+     */
     public DNSLookupContinuation checkSPF(SPFSession spfData)
             throws PermErrorException, TempErrorException, NeutralException,
             NoneException {
         SPF1Record res = (SPF1Record) spfData.getAttribute(SPF.ATTRIBUTE_SPF1_RECORD);
         if (res == null) {
             String currentDomain = spfData.getCurrentDomain();
+            
+            //TODO: Should we better used nested classes for better readablity ?
             return new DNSLookupContinuation(new DNSRequest(currentDomain, DNSService.SPF), new SPFCheckerDNSResponseListener() {
 
                 public DNSLookupContinuation onDNSResponse(
@@ -128,6 +133,5 @@ public class SPFRetriever implements SPFChecker {
         }
         return null;
     }
-
 
 }

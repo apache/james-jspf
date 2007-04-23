@@ -52,6 +52,9 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
 
         private SPFChecker finallyChecker;
 
+        /**
+         * @see org.apache.james.jspf.core.SPFCheckerExceptionCatcher#onException(java.lang.Exception, org.apache.james.jspf.core.SPFSession)
+         */
         public void onException(Exception exception, SPFSession session)
                 throws PermErrorException, NoneException,
                 TempErrorException, NeutralException {
@@ -88,6 +91,10 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
     }
 
     private final class ExpandedChecker implements SPFChecker {
+      
+        /**
+        * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
+        */
         public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
                 TempErrorException {
 
@@ -112,6 +119,9 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
 
         private String previousDomain;
 
+        /**
+         * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
+         */
         public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
                 TempErrorException, NeutralException, NoneException {
             
@@ -139,6 +149,9 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
     private final class CleanupAndResultChecker implements SPFChecker {
         private SPFChecker finallyChecker;
 
+        /**
+         * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
+         */
         public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
                 TempErrorException, NeutralException, NoneException {
             

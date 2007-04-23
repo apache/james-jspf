@@ -21,10 +21,25 @@ package org.apache.james.jspf.core;
 
 public interface IResponse {
     
+    /**
+     * Get id of the IResponse object
+     * 
+     * @return id
+     */
     public Object getId();
     
+    /**
+     * Get the value which is stored in the IResponse object
+     * 
+     * @return object
+     */
     public Object getValue();
     
+    /**
+     * Return the exception which was stored for the IResponse object
+     * 
+     * @return exception
+     */
     public Exception getException();
 
 }

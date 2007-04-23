@@ -45,6 +45,10 @@ import java.util.List;
 public class ExpModifier extends GenericModifier implements MacroExpandEnabled, SPFCheckerDNSResponseListener {
 
     private final class ExpandedExplanationChecker implements SPFChecker {
+       
+        /**
+         * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
+         */
         public DNSLookupContinuation checkSPF(SPFSession spfData)
                 throws PermErrorException, NoneException,
                 TempErrorException, NeutralException {
@@ -61,6 +65,10 @@ public class ExpModifier extends GenericModifier implements MacroExpandEnabled, 
 
 
     private final class ExpandedChecker implements SPFChecker {
+        
+        /**
+         * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
+         */
         public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
                 NoneException, TempErrorException, NeutralException {
             String host = macroExpand.expand(getHost(), spfData, MacroExpand.DOMAIN);

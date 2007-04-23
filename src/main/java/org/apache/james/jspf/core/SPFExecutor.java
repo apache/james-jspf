@@ -23,6 +23,12 @@ import org.apache.james.jspf.FutureSPFResult;
 
 public interface SPFExecutor {
 
+    /**
+     * Execute SPF queries
+     * 
+     * @param session 
+     * @param result
+     */
     public void execute(SPFSession session, FutureSPFResult result);
     
 }

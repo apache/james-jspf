@@ -50,6 +50,9 @@ public class RedirectModifier extends GenericModifier implements
             this.finallyChecker = finallyChecker;
         }
 
+        /**
+         * @see org.apache.james.jspf.core.SPFCheckerExceptionCatcher#onException(java.lang.Exception, org.apache.james.jspf.core.SPFSession)
+         */
         public void onException(Exception exception, SPFSession session)
                 throws PermErrorException, NoneException,
                 TempErrorException, NeutralException {
@@ -84,6 +87,10 @@ public class RedirectModifier extends GenericModifier implements
     }
 
     private final class ExpandedChecker implements SPFChecker {
+        
+        /**
+         * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
+         */
         public DNSLookupContinuation checkSPF(SPFSession spfData)
                 throws PermErrorException, NoneException,
                 TempErrorException, NeutralException {
@@ -102,6 +109,10 @@ public class RedirectModifier extends GenericModifier implements
     }
 
     private final class CleanupChecker implements SPFChecker {
+      
+        /**
+        * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
+        */
         public DNSLookupContinuation checkSPF(SPFSession spfData)
                 throws PermErrorException, TempErrorException,
                 NeutralException, NoneException {

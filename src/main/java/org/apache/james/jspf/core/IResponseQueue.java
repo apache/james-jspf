@@ -22,10 +22,25 @@ package org.apache.james.jspf.core;
 import java.util.List;
 
 
+/**
+ * Queue implementation which is used to manage IResponse
+ *
+ */
 public interface IResponseQueue extends List {
     
+    /**
+     * Return the last IResponse in the queue. If the queue is empty it will
+     * wait until a IResponse was added
+     * 
+     * @return response
+     */
     public IResponse removeResponse();
     
+    /**
+     *  Add the given Response to the end of the queue. 
+     *  
+     * @param r
+     */
     public void insertResponse(IResponse r);
 
 }

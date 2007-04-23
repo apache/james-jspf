@@ -46,6 +46,10 @@ import java.util.List;
 public class MXMechanism extends AMechanism implements SPFCheckerDNSResponseListener {
 
     private final class ExpandedChecker implements SPFChecker {
+        
+        /**
+         * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
+         */
         public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
                 TempErrorException, NeutralException, NoneException {
 

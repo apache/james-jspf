@@ -361,13 +361,18 @@ public class SPFSession implements MacroData {
     }
 
     /**
-     * @param mechanism
+     * Add the given SPFChecker on top of the stack
+     * 
+     * @param checker  
      */
     public void pushChecker(SPFChecker checker) {
         checkers.push(checker);
     }
     
     /**
+     * Remove the SPFChecker on the top and return it. If no SPFChecker is left
+     * null is returned
+     * 
      * @return the last checker
      */
     public SPFChecker popChecker() {
@@ -379,10 +384,21 @@ public class SPFSession implements MacroData {
         }
     }
 
+    /**
+     * Add the given SPFCheckerExceptionCatcher on top of the stack
+     * 
+     * @param catcher
+     */
     public void pushExceptionCatcher(SPFCheckerExceptionCatcher catcher) {
         catchers.push(catcher);
     }
     
+    /**
+     * Remove the SPFCheckerExceptionCatcher on the top and return it. If no SPFCheckerExceptionCatcher is left
+     * null is returned
+     * 
+     * @return the last catcher
+     */
     public SPFCheckerExceptionCatcher popExceptionCatcher() {
         if (catchers.isEmpty()) {
             return null;
@@ -391,6 +407,12 @@ public class SPFSession implements MacroData {
         }
     }
 
+    /**
+     * Return the SPFCheckerExceptionCatcher on the top of the Stack, but not 
+     * remove it. If no SPFCheckerExceptionCatcher is left null is returned
+     * 
+     * @return the last catcher
+     */
     public SPFCheckerExceptionCatcher getExceptionCatcher() {
         if (catchers.isEmpty()) {
             return null;

@@ -28,6 +28,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Async implementation of SPFExecutor
+ *
+ */
 public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
 
     private static final String ATTRIBUTE_STAGED_EXECUTOR_CONTINUATION = "StagedMultipleSPFExecutor.continuation";
@@ -36,11 +40,17 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
 
         private int waitingThreads = 0;
 
+        /**
+         * @see org.apache.james.jspf.core.IResponseQueue#insertResponse(org.apache.james.jspf.core.IResponse)
+         */
         public synchronized void insertResponse(IResponse r) {
             addLast(r);
             notify();
         }
 
+        /**
+         * @see org.apache.james.jspf.core.IResponseQueue#removeResponse()
+         */
         public synchronized IResponse removeResponse() {
             if ( isEmpty() ) {
                 try { waitingThreads++; wait();}
@@ -49,6 +59,9 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
             }
             return (IResponse)removeFirst();        }
 
+        /**
+         * @see java.util.AbstractCollection#isEmpty()
+         */
         public boolean isEmpty() {
             return  (size() - waitingThreads <= 0);
         }
@@ -75,6 +88,9 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
         this.worker.start();
     }
 
+    /**
+     * @see org.apache.james.jspf.core.SPFExecutor#execute(org.apache.james.jspf.core.SPFSession, org.apache.james.jspf.FutureSPFResult)
+     */
     public void execute(SPFSession session, FutureSPFResult result) {
         
         SPFChecker checker;

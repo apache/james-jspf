@@ -35,6 +35,10 @@ import org.apache.james.jspf.exceptions.TempErrorException;
 public class NeutralIfNotMatchPolicy implements PolicyPostFilter {
     
     private final class NeutralIfNotMatchModifier implements SPFChecker {
+        
+        /**
+         * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
+         */
         public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException, TempErrorException, NeutralException {
             // If no match was found set the result to neutral
             if (spfData.getCurrentResult() == null) {

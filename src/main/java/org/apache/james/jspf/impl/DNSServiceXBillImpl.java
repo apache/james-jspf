@@ -191,6 +191,9 @@ public class DNSServiceXBillImpl implements DNSService {
         return records;
     }
 
+    /**
+     * @see org.apache.james.jspf.core.DNSService#getRecordsAsynch(java.lang.String, int, java.lang.Object, org.apache.james.jspf.core.IResponseQueue)
+     */
     public void getRecordsAsynch(String hostname, int recordType, Object id,
             IResponseQueue responsePool) {
         try {

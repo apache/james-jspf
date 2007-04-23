@@ -23,6 +23,9 @@ import org.apache.james.jspf.FutureSPFResult;
 import org.apache.james.jspf.core.DNSService.TimeoutException;
 import org.apache.james.jspf.exceptions.SPFResultException;
 
+/**
+ * Synchronous implementation of SPFExecuter. All queries will get executed synchronously
+ */
 public class SynchronousSPFExecutor implements SPFExecutor {
     
     private Logger log;
@@ -33,6 +36,9 @@ public class SynchronousSPFExecutor implements SPFExecutor {
         this.dnsProbe = service;
     }
 
+    /**
+     * @see org.apache.james.jspf.core.SPFExecutor#execute(org.apache.james.jspf.core.SPFSession, org.apache.james.jspf.FutureSPFResult)
+     */
     public void execute(SPFSession session, FutureSPFResult result) {
         SPFChecker checker;
         while ((checker = session.popChecker()) != null) {

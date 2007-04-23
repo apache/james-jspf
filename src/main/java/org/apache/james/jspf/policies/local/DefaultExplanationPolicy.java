@@ -61,6 +61,9 @@ public final class DefaultExplanationPolicy implements PolicyPostFilter {
         
         private SPFChecker explanationCheckr = new ExplanationChecker();
         
+        /**
+         * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
+         */
         public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException, NoneException, TempErrorException, NeutralException {
             
             if (SPF1Constants.FAIL.equals(spfData.getCurrentResult())) {  

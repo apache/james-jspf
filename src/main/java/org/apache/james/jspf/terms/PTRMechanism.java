@@ -49,6 +49,10 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled,
         private CleanupChecker cleanupChecker = new CleanupChecker();
 
         private final class CleanupChecker implements SPFChecker {
+
+            /**
+             * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
+             */
             public DNSLookupContinuation checkSPF(SPFSession spfData)
                     throws PermErrorException, TempErrorException,
                     NeutralException, NoneException {
@@ -58,6 +62,9 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled,
             }
         }
 
+        /**
+         * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
+         */
         public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
                 TempErrorException, NeutralException, NoneException {
 

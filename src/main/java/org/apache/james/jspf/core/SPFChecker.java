@@ -47,6 +47,8 @@ public interface SPFChecker {
     public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
             TempErrorException, NeutralException, NoneException;
 
+//    TODO: Can we remove this ?
+    
 //    /**
 //     * Temporary, to evaluate impact on the redesign.
 //     */

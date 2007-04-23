@@ -54,6 +54,14 @@ public interface DNSService {
     public List getRecords(String hostname, int recordType) throws TimeoutException;
     
     
+    /**
+     * Execute the query and store the response in the given IResponseQueue
+     * 
+     * @param hostname host to be queried
+     * @param recordType the record type: MX, A, AAAA, PTR, TXT, SPF
+     * @param id the id which will be used to store the response to the queue
+     * @param responsePool the queue in which the response will get stored
+     */
     public void getRecordsAsynch(String hostname, int recordType, Object id, IResponseQueue responsePool);
     
 

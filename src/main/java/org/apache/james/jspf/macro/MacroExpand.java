@@ -95,6 +95,10 @@ public class MacroExpand {
 
     private static final class AResponseListener implements
             SPFCheckerDNSResponseListener {
+        
+        /**
+         * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
+         */
         public DNSLookupContinuation onDNSResponse(DNSResponse response, SPFSession session)
                 throws PermErrorException, NoneException, TempErrorException,
                 NeutralException {
@@ -129,6 +133,9 @@ public class MacroExpand {
     private static final class PTRResponseListener implements
             SPFCheckerDNSResponseListener {
 
+        /**
+         * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
+         */
         public DNSLookupContinuation onDNSResponse(DNSResponse response, SPFSession session)
                 throws PermErrorException, NoneException, TempErrorException,
                 NeutralException {

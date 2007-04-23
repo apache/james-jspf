@@ -29,10 +29,20 @@ public class DNSLookupContinuation {
         this.listener = listener;
     }
 
+    /**
+     * Return the DNSRequest which was used
+     * 
+     * @return request
+     */
     public DNSRequest getRequest() {
         return request;
     }
 
+    /**
+     * Return the SPFCheckerDNSResponseListener which should called for the DNSRequest
+     * 
+     * @return listener
+     */
     public SPFCheckerDNSResponseListener getListener() {
         return listener;
     }

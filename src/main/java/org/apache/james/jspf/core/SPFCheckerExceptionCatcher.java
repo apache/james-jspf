@@ -24,8 +24,22 @@ import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 
+/**
+ * 
+ *
+ */
 public interface SPFCheckerExceptionCatcher {
     
+    /**
+     * Take some action on the given Exception
+     * 
+     * @param exception the exception
+     * @param session the SPFSession
+     * @throws PermErrorException
+     * @throws NoneException
+     * @throws TempErrorException
+     * @throws NeutralException
+     */
     public void onException(Exception exception, SPFSession session) throws PermErrorException, NoneException, TempErrorException, NeutralException;
 
 }
