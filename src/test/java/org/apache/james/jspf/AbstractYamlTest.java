@@ -22,6 +22,7 @@ package org.apache.james.jspf;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.IResponseQueue;
 import org.apache.james.jspf.core.Logger;
+import org.apache.james.jspf.core.IResponseImpl;
 import org.apache.james.jspf.core.SPFExecutor;
 import org.apache.james.jspf.core.SPFRecordParser;
 import org.apache.james.jspf.core.StagedMultipleSPFExecutor;
@@ -341,9 +342,9 @@ public abstract class AbstractYamlTest extends TestCase {
         public void getRecordsAsynch(String hostname, int recordType, Object id,
                 IResponseQueue responsePool) {
             try {
-                responsePool.insertResponse(new ResponseImpl(id, getRecords(hostname, recordType)));
+                responsePool.insertResponse(new IResponseImpl(id, getRecords(hostname, recordType)));
             } catch (TimeoutException e) {
-                responsePool.insertResponse(new ResponseImpl(id, e));
+                responsePool.insertResponse(new IResponseImpl(id, e));
             }
         }
     }

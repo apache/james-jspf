@@ -19,11 +19,11 @@
 
 package org.apache.james.jspf.impl;
 
-import org.apache.james.jspf.ResponseImpl;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.IResponseQueue;
+import org.apache.james.jspf.core.IResponseImpl;
 import org.xbill.DNS.AAAARecord;
 import org.xbill.DNS.ARecord;
 import org.xbill.DNS.Lookup;
@@ -197,9 +197,9 @@ public class DNSServiceXBillImpl implements DNSService {
     public void getRecordsAsynch(String hostname, int recordType, Object id,
             IResponseQueue responsePool) {
         try {
-            responsePool.insertResponse(new ResponseImpl(id, getRecords(hostname, recordType)));
+            responsePool.insertResponse(new IResponseImpl(id, getRecords(hostname, recordType)));
         } catch (TimeoutException e) {
-            responsePool.insertResponse(new ResponseImpl(id, e));
+            responsePool.insertResponse(new IResponseImpl(id, e));
         }
 
     }
