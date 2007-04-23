@@ -23,6 +23,7 @@ import org.apache.james.jspf.FutureSPFResult;
 import org.apache.james.jspf.core.DNSService.TimeoutException;
 import org.apache.james.jspf.exceptions.SPFResultException;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -80,7 +81,7 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
 
         this.responseQueue = new ResponseQueueImpl();
 
-        this.sessions = new HashMap();
+        this.sessions = Collections.synchronizedMap(new HashMap());
 
         this.worker = new Thread(this);
         this.worker.setDaemon(true);
