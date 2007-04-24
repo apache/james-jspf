@@ -47,13 +47,13 @@ import java.util.List;
 public class DNSServiceXBillImpl implements DNSService {
 
     // Set seconds after which we return and TempError
-    private int timeOut = 20;
+    protected int timeOut = 20;
 
     // The logger
-    private Logger log;
+    protected Logger log;
     
     // The record limit for lookups
-    private int recordLimit;
+    protected int recordLimit;
     
     /**
      * Default Constructor
@@ -195,12 +195,27 @@ public class DNSServiceXBillImpl implements DNSService {
      * @see org.apache.james.jspf.core.DNSService#getRecordsAsynch(java.lang.String, int, java.lang.Object, org.apache.james.jspf.core.IResponseQueue)
      */
     public void getRecordsAsynch(String hostname, int recordType, Object id,
-            IResponseQueue responsePool) {
+            final IResponseQueue responsePool) {
+        IResponseImpl response;
         try {
-            responsePool.insertResponse(new IResponseImpl(id, getRecords(hostname, recordType)));
+            response = new IResponseImpl(id, getRecords(hostname, recordType));
         } catch (TimeoutException e) {
-            responsePool.insertResponse(new IResponseImpl(id, e));
+            response = new IResponseImpl(id, e);
         }
+        new Thread() {
+
+            private IResponseImpl response;
+
+            public void run() {
+                responsePool.insertResponse(response);
+            }
+
+            public Thread setResponse(IResponseImpl response) {
+                this.response = response;
+                return this;
+            }
+            
+        }.setResponse(response).start();
 
     }
 
