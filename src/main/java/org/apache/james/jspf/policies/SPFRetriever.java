@@ -76,7 +76,7 @@ public class SPFRetriever implements SPFChecker {
             String currentDomain = spfData.getCurrentDomain();
             
             //TODO: Should we better used nested classes for better readablity ?
-            return new DNSLookupContinuation(new DNSRequest(currentDomain, DNSService.SPF), new SPFCheckerDNSResponseListener() {
+            return new DNSLookupContinuation(new DNSRequest(currentDomain, DNSRequest.SPF), new SPFCheckerDNSResponseListener() {
 
                 public DNSLookupContinuation onDNSResponse(
                         DNSResponse response, SPFSession session)
@@ -88,7 +88,7 @@ public class SPFRetriever implements SPFChecker {
                         if (spfR == null || spfR.isEmpty()) {
                             
                             String currentDomain = session.getCurrentDomain();
-                            return new DNSLookupContinuation(new DNSRequest(currentDomain, DNSService.TXT), new SPFCheckerDNSResponseListener() {
+                            return new DNSLookupContinuation(new DNSRequest(currentDomain, DNSRequest.TXT), new SPFCheckerDNSResponseListener() {
 
                                 public DNSLookupContinuation onDNSResponse(
                                         DNSResponse response, SPFSession session)

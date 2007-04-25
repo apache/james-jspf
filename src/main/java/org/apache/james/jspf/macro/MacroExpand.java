@@ -150,7 +150,7 @@ public class MacroExpand {
                             record);
 
                     return new DNSLookupContinuation(new DNSRequest(record,
-                            ip6 ? DNSService.AAAA : DNSService.A), 
+                            ip6 ? DNSRequest.AAAA : DNSRequest.A), 
                             new AResponseListener());
 
                 }
@@ -172,7 +172,7 @@ public class MacroExpand {
 
                 return new DNSLookupContinuation(new DNSRequest(IPAddr
                         .getAddress(session.getIpAddress()).getReverseIP(),
-                        DNSService.PTR), new PTRResponseListener());
+                        DNSRequest.PTR), new PTRResponseListener());
             }
         }
         return null;

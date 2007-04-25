@@ -19,9 +19,9 @@
 
 package org.apache.james.jspf;
 
+import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.Logger;
-import org.apache.james.jspf.core.IResponseQueue;
 
 import java.util.List;
 
@@ -68,11 +68,11 @@ public class LoggingDNSService implements DNSService {
         // MOCK
     }
 
-    public List getRecords(String hostname, int recordType) throws TimeoutException {
+    public List getRecords(DNSRequest request) throws TimeoutException {
         try {
-            List result = dnsService.getRecords(hostname, recordType);
+            List result = dnsService.getRecords(request);
             StringBuffer logBuff = new StringBuffer();
-            logBuff.append("getRecords(" + hostname + "," + recordType + ") = ");
+            logBuff.append("getRecords(" + request.getHostname() + "," + request.getRecordType() + ") = ");
             if (result != null) {
                 for (int i = 0; i < result.size(); i++) {
                     logBuff.append(result.get(i));
@@ -88,15 +88,10 @@ public class LoggingDNSService implements DNSService {
             logger.debug(logBuff.toString());
             return result;
         } catch (TimeoutException e) {
-            logger.debug("getRecords(" + hostname
+            logger.debug("getRecords(" + request.getHostname()
                     + ") = TempErrorException[" + e.getMessage() + "]");
             throw e;
         }
     }
 
-    public void getRecordsAsynch(String hostname, int recordType, Object id,
-            IResponseQueue responsePool) {
-        logger.debug("getRecordsAsynch("+hostname+","+recordType);
-        dnsService.getRecordsAsynch(hostname, recordType, id, responsePool);
-    }
 }

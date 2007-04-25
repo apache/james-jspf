@@ -19,6 +19,7 @@
 
 package org.apache.james.jspf;
 
+import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.IResponseQueue;
 import org.apache.james.jspf.core.Logger;
@@ -26,6 +27,7 @@ import org.apache.james.jspf.core.IResponseImpl;
 import org.apache.james.jspf.core.SPFExecutor;
 import org.apache.james.jspf.core.SPFRecordParser;
 import org.apache.james.jspf.core.StagedMultipleSPFExecutor;
+import org.apache.james.jspf.impl.DNSServiceAsynchSimulator;
 import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.parser.DefaultSPF1Parser;
 import org.apache.james.jspf.parser.DefaultTermsFactory;
@@ -168,7 +170,7 @@ public abstract class AbstractYamlTest extends TestCase {
         }
         dns = new LoggingDNSService(getDNSService(), log.getChildLogger("dns"));
         macroExpand = new MacroExpand(log.getChildLogger("macroExpand"), dns);
-        executor = new StagedMultipleSPFExecutor(log, dns); 
+        executor = new StagedMultipleSPFExecutor(log, new DNSServiceAsynchSimulator(dns)); 
         spf = new SPF(dns, parser, log.getChildLogger("spf"), macroExpand, executor);
         /* PREVIOUS SLOW WAY 
         // we add this after the creation because it is a loop reference
@@ -274,8 +276,8 @@ public abstract class AbstractYamlTest extends TestCase {
             this.recordLimit = recordLimit;
         }
 
-        public List getRecords(String hostname, int recordType) throws TimeoutException {
-            return getRecords(hostname, recordType, 6);
+        public List getRecords(DNSRequest request) throws TimeoutException {
+            return getRecords(request.getHostname(), request.getRecordType(), 6);
         }
 
         public List getRecords(String hostname, int recordType, int depth) throws TimeoutException {
@@ -298,7 +300,7 @@ public abstract class AbstractYamlTest extends TestCase {
                     if (o instanceof HashMap) {
                         HashMap hm = (HashMap) o;
                         if (hm.get(type) != null) {
-                            if (recordType == DNSService.MX) {
+                            if (recordType == DNSRequest.MX) {
                                 List mxList = (List) hm.get(type);
     
                                 // For MX records we overwrite the result ignoring the priority.
@@ -339,10 +341,10 @@ public abstract class AbstractYamlTest extends TestCase {
             return null;
         }
         
-        public void getRecordsAsynch(String hostname, int recordType, Object id,
+        public void getRecordsAsynch(DNSRequest request, Object id,
                 IResponseQueue responsePool) {
             try {
-                responsePool.insertResponse(new IResponseImpl(id, getRecords(hostname, recordType)));
+                responsePool.insertResponse(new IResponseImpl(id, getRecords(request)));
             } catch (TimeoutException e) {
                 responsePool.insertResponse(new IResponseImpl(id, e));
             }
@@ -358,12 +360,12 @@ public abstract class AbstractYamlTest extends TestCase {
      */
     public static String getRecordTypeDescription(int recordType) {
         switch (recordType) {
-            case DNSService.A: return "A";
-            case DNSService.AAAA: return "AAAA";
-            case DNSService.MX: return "MX";
-            case DNSService.PTR: return "PTR";
-            case DNSService.TXT: return "TXT";
-            case DNSService.SPF: return "SPF";
+            case DNSRequest.A: return "A";
+            case DNSRequest.AAAA: return "AAAA";
+            case DNSRequest.MX: return "MX";
+            case DNSRequest.PTR: return "PTR";
+            case DNSRequest.TXT: return "TXT";
+            case DNSRequest.SPF: return "SPF";
             default: return null;
         }
     }

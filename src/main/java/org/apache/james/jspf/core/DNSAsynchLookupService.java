@@ -19,47 +19,21 @@
 
 package org.apache.james.jspf.core;
 
-public final class DNSRequest {
 
-    /** The record types for the lookups */
-    public static final int A = 1;
-    public static final int AAAA = 2;
-    public static final int MX = 3;
-    public static final int PTR = 4;
-    public static final int TXT = 5;
-    public static final int SPF = 6;
+/**
+ * Interface which should be used to access all necassary DNS-Records
+ *  
+ */
+public interface DNSAsynchLookupService {
 
     /**
-     * The hostname to be resolved
-     */
-    private final String hostname;
-    
-    /**
-     * The record type to look for
-     */
-    private final int recordType;
-
-    public DNSRequest(String hostname, int recordType) {
-        this.hostname = hostname;
-        this.recordType = recordType;
-    }
-
-    /**
-     * Return the hostname to process the request for
+     * Retrieve dns records for the given host asynchronously
      * 
-     * @return the hostname
+     * @param request the dns request
+     * @param id the identification key for the response.
+     * @param responsePool the queue where the response will be appended.
      */
-    public final String getHostname() {
-        return hostname;
-    }
-
-    /**
-     * Return the RecordType which is use for this request
-     * 
-     * @return the RecordType
-     */
-    public final int getRecordType() {
-        return recordType;
-    }
+    public void getRecordsAsynch(DNSRequest request, Object id,
+            final IResponseQueue responsePool);
 
 }

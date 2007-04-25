@@ -19,11 +19,10 @@
 
 package org.apache.james.jspf.impl;
 
+import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.Logger;
-import org.apache.james.jspf.core.IResponseQueue;
-import org.apache.james.jspf.core.IResponseImpl;
 import org.xbill.DNS.AAAARecord;
 import org.xbill.DNS.ARecord;
 import org.xbill.DNS.Lookup;
@@ -111,30 +110,30 @@ public class DNSServiceXBillImpl implements DNSService {
     }
     
     /**
-     * @see org.apache.james.jspf.core.DNSService#getRecords(java.lang.String, int)
+     * @see org.apache.james.jspf.core.DNSService#getRecords(org.apache.james.jspf.core.DNSRequest)
      */
-    public List getRecords(String hostname, int recordType)
+    public List getRecords(DNSRequest request)
             throws TimeoutException {
         String recordTypeDescription;
         int dnsJavaType;
         int recordCount = 0;
-        switch (recordType) {
-            case A: recordTypeDescription = "A"; dnsJavaType = Type.A; break;
-            case AAAA: recordTypeDescription = "AAAA"; dnsJavaType = Type.AAAA; break;
-            case MX: recordTypeDescription = "MX"; dnsJavaType = Type.MX; break;
-            case PTR: recordTypeDescription = "PTR"; dnsJavaType = Type.PTR; break;
-            case TXT: recordTypeDescription = "TXT"; dnsJavaType = Type.TXT; break;
-            case SPF: recordTypeDescription= "SPF"; dnsJavaType = Type.SPF; break;
+        switch (request.getRecordType()) {
+            case DNSRequest.A: recordTypeDescription = "A"; dnsJavaType = Type.A; break;
+            case DNSRequest.AAAA: recordTypeDescription = "AAAA"; dnsJavaType = Type.AAAA; break;
+            case DNSRequest.MX: recordTypeDescription = "MX"; dnsJavaType = Type.MX; break;
+            case DNSRequest.PTR: recordTypeDescription = "PTR"; dnsJavaType = Type.PTR; break;
+            case DNSRequest.TXT: recordTypeDescription = "TXT"; dnsJavaType = Type.TXT; break;
+            case DNSRequest.SPF: recordTypeDescription= "SPF"; dnsJavaType = Type.SPF; break;
             default: // TODO fail!
                 return null;
         }
         List records;
         try {
 
-            log.debug("Start "+recordTypeDescription+"-Record lookup for : " + hostname);
+            log.debug("Start "+recordTypeDescription+"-Record lookup for : " + request.getHostname());
 
             Lookup.getDefaultResolver().setTimeout(timeOut);
-            Lookup query = new Lookup(hostname, dnsJavaType);
+            Lookup query = new Lookup(request.getHostname(), dnsJavaType);
 
             Record[] rr = query.run();
             int queryResult = query.getResult();
@@ -147,28 +146,28 @@ public class DNSServiceXBillImpl implements DNSService {
                 records = new ArrayList();
                 for (int i = 0; i < rr.length; i++) {
                     String res;
-                    switch (recordType) {
-                        case A:
+                    switch (request.getRecordType()) {
+                        case DNSRequest.A:
                             ARecord a = (ARecord) rr[i];
                             res = a.getAddress().getHostAddress();
                             break;
-                        case AAAA:
+                        case DNSRequest.AAAA:
                             AAAARecord aaaa = (AAAARecord) rr[i];
                             res = aaaa.getAddress().getHostAddress();
                             break;
-                        case MX:
+                        case DNSRequest.MX:
                             MXRecord mx = (MXRecord) rr[i];
                             res = mx.getTarget().toString();
                             break;
-                        case PTR:
+                        case DNSRequest.PTR:
                             PTRRecord ptr = (PTRRecord) rr[i];
                             res = IPAddr.stripDot(ptr.getTarget().toString());
                             break;
-                        case TXT:
+                        case DNSRequest.TXT:
                             TXTRecord txt = (TXTRecord) rr[i];
                             res = txt.rdataToString();
                             break;
-                        case SPF:
+                        case DNSRequest.SPF:
                             SPFRecord spf = (SPFRecord) rr[i];
                             res = spf.rdataToString();
                             break;
@@ -185,38 +184,10 @@ public class DNSServiceXBillImpl implements DNSService {
             log.debug("Found " + recordCount + " "+recordTypeDescription+"-Records");
         } catch (TextParseException e) {
             // i think this is the best we could do
-            log.debug("No "+recordTypeDescription+" Record found for host: " + hostname);
+            log.debug("No "+recordTypeDescription+" Record found for host: " + request.getHostname());
             records = null;
         }
         return records;
-    }
-
-    /**
-     * @see org.apache.james.jspf.core.DNSService#getRecordsAsynch(java.lang.String, int, java.lang.Object, org.apache.james.jspf.core.IResponseQueue)
-     */
-    public void getRecordsAsynch(String hostname, int recordType, Object id,
-            final IResponseQueue responsePool) {
-        IResponseImpl response;
-        try {
-            response = new IResponseImpl(id, getRecords(hostname, recordType));
-        } catch (TimeoutException e) {
-            response = new IResponseImpl(id, e);
-        }
-        new Thread() {
-
-            private IResponseImpl response;
-
-            public void run() {
-                responsePool.insertResponse(response);
-            }
-
-            public Thread setResponse(IResponseImpl response) {
-                this.response = response;
-                return this;
-            }
-            
-        }.setResponse(response).start();
-
     }
 
 }

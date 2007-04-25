@@ -78,7 +78,7 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled,
             
             spfData.pushChecker(cleanupChecker);
 
-            return new DNSLookupContinuation(new DNSRequest(ip.getReverseIP(), DNSService.PTR), PTRMechanism.this);
+            return new DNSLookupContinuation(new DNSRequest(ip.getReverseIP(), DNSRequest.PTR), PTRMechanism.this);
         }
     }
 
@@ -180,10 +180,10 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled,
             // check if the connecting ip is ip6. If so lookup AAAA record
             if (IPAddr.isIPV6(spfSession.getIpAddress())) {
                 // Get aaaa record for this
-                dnsRequest = new DNSRequest(currentDomain, DNSService.AAAA);
+                dnsRequest = new DNSRequest(currentDomain, DNSRequest.AAAA);
             } else {
                 // Get a record for this
-                dnsRequest = new DNSRequest(currentDomain, DNSService.A);
+                dnsRequest = new DNSRequest(currentDomain, DNSRequest.A);
             }
             
             spfSession.setAttribute(ATTRIBUTE_CURRENT_DOMAIN, currentDomain);

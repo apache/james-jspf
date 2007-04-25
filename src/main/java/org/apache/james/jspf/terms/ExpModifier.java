@@ -73,7 +73,7 @@ public class ExpModifier extends GenericModifier implements MacroExpandEnabled, 
                 NoneException, TempErrorException, NeutralException {
             String host = macroExpand.expand(getHost(), spfData, MacroExpand.DOMAIN);
 
-            return new DNSLookupContinuation(new DNSRequest(host, DNSService.TXT), ExpModifier.this);
+            return new DNSLookupContinuation(new DNSRequest(host, DNSRequest.TXT), ExpModifier.this);
         }
     }
 

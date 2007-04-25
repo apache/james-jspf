@@ -53,29 +53,22 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
          * @see org.apache.james.jspf.core.IResponseQueue#removeResponse()
          */
         public synchronized IResponse removeResponse() {
-            if ( isEmpty() ) {
+            if ( (size() - waitingThreads <= 0) ) {
                 try { waitingThreads++; wait();}
                 catch (InterruptedException e)  {Thread.interrupted();}
                 waitingThreads--;
             }
             return (IResponse)removeFirst();        }
 
-        /**
-         * @see java.util.AbstractCollection#isEmpty()
-         */
-        public boolean isEmpty() {
-            return  (size() - waitingThreads <= 0);
-        }
-
     }
 
     private Logger log;
-    private DNSService dnsProbe;
+    private DNSAsynchLookupService dnsProbe;
     private Thread worker;
     private Map sessions;
     private ResponseQueueImpl responseQueue;
 
-    public StagedMultipleSPFExecutor(Logger log, DNSService service) {
+    public StagedMultipleSPFExecutor(Logger log, DNSAsynchLookupService service) {
         this.log = log;
         this.dnsProbe = service;
 
@@ -102,9 +95,9 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
                 DNSLookupContinuation cont = checker.checkSPF(session);
                 // if the checker returns a continuation we return it
                 if (cont != null) {
-                    dnsProbe.getRecordsAsynch(cont.getRequest().getHostname(), cont.getRequest().getRecordType(), session, responseQueue);
-                    session.setAttribute(ATTRIBUTE_STAGED_EXECUTOR_CONTINUATION, cont);
                     sessions.put(session, result);
+                    session.setAttribute(ATTRIBUTE_STAGED_EXECUTOR_CONTINUATION, cont);
+                    dnsProbe.getRecordsAsynch(cont.getRequest(), session, responseQueue);
                     return;
                 } else {
                     sessions.remove(sessions);
@@ -122,13 +115,13 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
                 }
             }
         }
-        System.out.println("================> RESULT!!!!!");
         result.setSPFResult(session);
     }
 
     public void run() {
 
         while (true) {
+            
             IResponse resp = responseQueue.removeResponse();
             
             SPFSession session = (SPFSession) resp.getId();
@@ -148,7 +141,7 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
                 cont = cont.getListener().onDNSResponse(response, session);
                 
                 if (cont != null) {
-                    dnsProbe.getRecordsAsynch(cont.getRequest().getHostname(), cont.getRequest().getRecordType(), session, responseQueue);
+                    dnsProbe.getRecordsAsynch(cont.getRequest(), session, responseQueue);
                     session.setAttribute(ATTRIBUTE_STAGED_EXECUTOR_CONTINUATION, cont);
                     sessions.put(session, result);
                 } else {

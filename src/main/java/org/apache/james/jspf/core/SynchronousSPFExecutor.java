@@ -51,8 +51,7 @@ public class SynchronousSPFExecutor implements SPFExecutor {
                     DNSResponse response;
                     try {
                         response = new DNSResponse(dnsProbe.getRecords(cont
-                                .getRequest().getHostname(), cont.getRequest()
-                                .getRecordType()));
+                                .getRequest()));
                     } catch (TimeoutException e) {
                         response = new DNSResponse(e);
                     }

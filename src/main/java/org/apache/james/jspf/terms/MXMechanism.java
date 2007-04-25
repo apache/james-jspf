@@ -56,7 +56,7 @@ public class MXMechanism extends AMechanism implements SPFCheckerDNSResponseList
             // Get the right host.
             String host = expandHost(spfData);
             
-            return new DNSLookupContinuation(new DNSRequest(host, DNSService.MX), MXMechanism.this);
+            return new DNSLookupContinuation(new DNSRequest(host, DNSRequest.MX), MXMechanism.this);
         }
     }
 
@@ -127,7 +127,7 @@ public class MXMechanism extends AMechanism implements SPFCheckerDNSResponseList
             while (records.size() > 0 && (mx = (String) records.remove(0)) != null && mx.length() > 0) {
                 log.debug("Add MX-Record " + mx + " to list");
 
-                return new DNSLookupContinuation(new DNSRequest(mx, isIPv6 ? DNSService.AAAA : DNSService.A), MXMechanism.this);
+                return new DNSLookupContinuation(new DNSRequest(mx, isIPv6 ? DNSRequest.AAAA : DNSRequest.A), MXMechanism.this);
                 
             }
                 

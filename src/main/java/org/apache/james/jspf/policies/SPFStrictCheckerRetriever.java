@@ -35,7 +35,7 @@ public class SPFStrictCheckerRetriever extends SPFRetriever {
             String currentDomain = spfData.getCurrentDomain();
             
             //TODO: Should we use better a nested class ?
-            return new DNSLookupContinuation(new DNSRequest(currentDomain, DNSService.SPF), new SPFCheckerDNSResponseListener() {
+            return new DNSLookupContinuation(new DNSRequest(currentDomain, DNSRequest.SPF), new SPFCheckerDNSResponseListener() {
 
                 public DNSLookupContinuation onDNSResponse(
                         DNSResponse response, SPFSession session)
@@ -47,7 +47,7 @@ public class SPFStrictCheckerRetriever extends SPFRetriever {
                         session.setAttribute(ATTRIBUTE_SPFSTRICT_CHECK_SPFRECORDS, spfR);
                         
                         String currentDomain = session.getCurrentDomain();
-                        return new DNSLookupContinuation(new DNSRequest(currentDomain, DNSService.TXT), new SPFCheckerDNSResponseListener() {
+                        return new DNSLookupContinuation(new DNSRequest(currentDomain, DNSRequest.TXT), new SPFCheckerDNSResponseListener() {
 
                             public DNSLookupContinuation onDNSResponse(
                                     DNSResponse response, SPFSession session)

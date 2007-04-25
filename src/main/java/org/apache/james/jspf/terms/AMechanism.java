@@ -76,7 +76,7 @@ public class AMechanism extends GenericMechanism implements SPFCheckerDNSRespons
 
                     List aRecords = getARecords(host);
                     if (aRecords == null) {
-                        return new DNSLookupContinuation(new DNSRequest(host, DNSService.A), AMechanism.this);
+                        return new DNSLookupContinuation(new DNSRequest(host, DNSRequest.A), AMechanism.this);
                     } else {
                         return onDNSResponse(new DNSResponse(aRecords), spfData);
                     }
@@ -85,7 +85,7 @@ public class AMechanism extends GenericMechanism implements SPFCheckerDNSRespons
                     
                     List aaaaRecords = getAAAARecords(host);
                     if (aaaaRecords == null) {
-                        return new DNSLookupContinuation(new DNSRequest(host, DNSService.AAAA), AMechanism.this);
+                        return new DNSLookupContinuation(new DNSRequest(host, DNSRequest.AAAA), AMechanism.this);
                     } else {
                         return onDNSResponse(new DNSResponse(aaaaRecords), spfData);
                     }
