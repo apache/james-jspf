@@ -28,6 +28,10 @@ import org.apache.james.jspf.core.DNSService.TimeoutException;
 
 import java.util.LinkedList;
 
+/**
+ * Wrap a DNSService an excute the calls asynch in a new Thread
+ * 
+ */
 public class DNSServiceAsynchSimulator implements Runnable, DNSAsynchLookupService {
 
     private DNSService dnsService;
@@ -62,7 +66,7 @@ public class DNSServiceAsynchSimulator implements Runnable, DNSAsynchLookupServi
         this.queue = new LinkedList();
         this.worker = new Thread(this);
         this.worker.setDaemon(true);
-        this.worker.setName("SPFExecutor");
+        this.worker.setName("DNSServiceAsynchSimulator");
         this.worker.start();
 
     }
@@ -80,6 +84,9 @@ public class DNSServiceAsynchSimulator implements Runnable, DNSAsynchLookupServi
         
     }
 
+    /**
+     * Run the async dns call in a new thread
+     */
     public void run() {
         while (true) {
             Request req;

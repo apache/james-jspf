@@ -22,9 +22,58 @@ import java.util.List;
  */
 public class SPFStrictCheckerRetriever extends SPFRetriever {
 
-    
 
     private static final String ATTRIBUTE_SPFSTRICT_CHECK_SPFRECORDS = "SPFStrictCheck.SPFRecords";
+    
+    private static final class SPFStrictSPFRecordsDNSResponseListener implements SPFCheckerDNSResponseListener {
+
+        public DNSLookupContinuation onDNSResponse(
+                DNSResponse response, SPFSession session)
+                throws PermErrorException,
+                NoneException, TempErrorException,
+                NeutralException {
+            
+            List spfR = (List) session.getAttribute(ATTRIBUTE_SPFSTRICT_CHECK_SPFRECORDS);
+            List spfTxtR = null;
+            try {
+                spfTxtR = response.getResponse();
+            } catch (TimeoutException e) {
+                throw new TempErrorException("Timeout querying dns");
+            }
+
+            String record = calculateSpfRecord(spfR, spfTxtR);
+            if (record != null) {
+                session.setAttribute(SPF.ATTRIBUTE_SPF1_RECORD, new SPF1Record(record));
+            }
+
+            return null;
+            
+        }
+        
+    }
+    
+    
+    private static final class SPFStrictCheckDNSResponseListener implements SPFCheckerDNSResponseListener {
+
+        public DNSLookupContinuation onDNSResponse(
+                DNSResponse response, SPFSession session)
+                throws PermErrorException, NoneException,
+                TempErrorException, NeutralException {
+            try {
+                List spfR = response.getResponse();
+                
+                session.setAttribute(ATTRIBUTE_SPFSTRICT_CHECK_SPFRECORDS, spfR);
+                
+                String currentDomain = session.getCurrentDomain();
+                return new DNSLookupContinuation(new DNSRequest(currentDomain, DNSRequest.TXT), new SPFStrictSPFRecordsDNSResponseListener());
+                    
+            } catch (DNSService.TimeoutException e) {
+                throw new TempErrorException("Timeout querying dns");
+            }
+        }
+        
+        
+    }
 
 
     public DNSLookupContinuation checkSPF(SPFSession spfData)
@@ -33,60 +82,15 @@ public class SPFStrictCheckerRetriever extends SPFRetriever {
         SPF1Record res = (SPF1Record) spfData.getAttribute(SPF.ATTRIBUTE_SPF1_RECORD);
         if (res == null) {
             String currentDomain = spfData.getCurrentDomain();
-            
-            //TODO: Should we use better a nested class ?
-            return new DNSLookupContinuation(new DNSRequest(currentDomain, DNSRequest.SPF), new SPFCheckerDNSResponseListener() {
 
-                public DNSLookupContinuation onDNSResponse(
-                        DNSResponse response, SPFSession session)
-                        throws PermErrorException, NoneException,
-                        TempErrorException, NeutralException {
-                    try {
-                        List spfR = response.getResponse();
-                        
-                        session.setAttribute(ATTRIBUTE_SPFSTRICT_CHECK_SPFRECORDS, spfR);
-                        
-                        String currentDomain = session.getCurrentDomain();
-                        return new DNSLookupContinuation(new DNSRequest(currentDomain, DNSRequest.TXT), new SPFCheckerDNSResponseListener() {
-
-                            public DNSLookupContinuation onDNSResponse(
-                                    DNSResponse response, SPFSession session)
-                                    throws PermErrorException,
-                                    NoneException, TempErrorException,
-                                    NeutralException {
-                                
-                                List spfR = (List) session.getAttribute(ATTRIBUTE_SPFSTRICT_CHECK_SPFRECORDS);
-                                List spfTxtR = null;
-                                try {
-                                    spfTxtR = response.getResponse();
-                                } catch (TimeoutException e) {
-                                    throw new TempErrorException("Timeout querying dns");
-                                }
-
-                                String record = calculateSpfRecord(spfR, spfTxtR);
-                                if (record != null) {
-                                    session.setAttribute(SPF.ATTRIBUTE_SPF1_RECORD, new SPF1Record(record));
-                                }
-
-                                return null;
-                                
-                            }
-                            
-                        });
-                            
-                    } catch (DNSService.TimeoutException e) {
-                        throw new TempErrorException("Timeout querying dns");
-                    }
-                }
-                
-            });
+            return new DNSLookupContinuation(new DNSRequest(currentDomain, DNSRequest.SPF), new SPFStrictCheckDNSResponseListener());
             
         }
         return null;
     }
 
 
-    private String calculateSpfRecord(List spfR, List spfTxtR)
+    private static String calculateSpfRecord(List spfR, List spfTxtR)
             throws PermErrorException {
         String spfR1 = null;
         String spfR2 = null;

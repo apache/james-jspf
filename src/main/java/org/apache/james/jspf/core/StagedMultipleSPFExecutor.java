@@ -125,8 +125,8 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
             IResponse resp = responseQueue.removeResponse();
             
             SPFSession session = (SPFSession) resp.getId();
-            FutureSPFResult result = (FutureSPFResult) sessions.get(resp.getId());
-            sessions.remove(session);
+            FutureSPFResult result = (FutureSPFResult) sessions.remove(session);
+            
             DNSLookupContinuation cont = (DNSLookupContinuation) session.getAttribute(ATTRIBUTE_STAGED_EXECUTOR_CONTINUATION);
             
             DNSResponse response;

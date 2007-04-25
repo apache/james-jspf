@@ -23,7 +23,63 @@ import java.util.List;
  * Get the raw dns txt or spf entry which contains a spf entry
  */
 public class SPFRetriever implements SPFChecker {
+    
+    private static final class SPFRecordHandlerDNSResponseListener implements SPFCheckerDNSResponseListener {
 
+        public DNSLookupContinuation onDNSResponse(
+                DNSResponse response, SPFSession session)
+                throws PermErrorException,
+                NoneException, TempErrorException,
+                NeutralException {
+            
+            List spfR;
+            try {
+                spfR = response.getResponse();
+                String record = extractSPFRecord(spfR);
+                if (record != null) {
+                    session.setAttribute(SPF.ATTRIBUTE_SPF1_RECORD, new SPF1Record(record));
+                }
+            } catch (TimeoutException e) {
+                throw new TempErrorException("Timeout querying dns");
+            }
+            return null;
+            
+        }
+        
+    }
+
+    private static final class SPFRetrieverDNSResponseListener implements SPFCheckerDNSResponseListener {
+
+        public DNSLookupContinuation onDNSResponse(
+                DNSResponse response, SPFSession session)
+                throws PermErrorException, NoneException,
+                TempErrorException, NeutralException {
+            try {
+                List spfR = response.getResponse();
+                
+                if (spfR == null || spfR.isEmpty()) {
+                    
+                    String currentDomain = session.getCurrentDomain();
+                    return new DNSLookupContinuation(new DNSRequest(currentDomain, DNSRequest.TXT), new SPFRecordHandlerDNSResponseListener());
+
+                } else {
+                    
+                    String record = extractSPFRecord(spfR);
+                    if (record != null) {
+                        session.setAttribute(SPF.ATTRIBUTE_SPF1_RECORD, new SPF1Record(record));
+                    }
+                    
+                }
+                
+                return null;
+                
+            } catch (DNSService.TimeoutException e) {
+                throw new TempErrorException("Timeout querying dns");
+            }
+        }
+        
+    }
+    
     /**
      * Return the extracted SPF-Record 
      *  
@@ -32,7 +88,7 @@ public class SPFRetriever implements SPFChecker {
      * @throws PermErrorException if more then one SPF - Record was found in the 
      *                            given List.
      */
-    protected String extractSPFRecord(List spfR) throws PermErrorException {
+    protected static String extractSPFRecord(List spfR) throws PermErrorException {
         if (spfR == null || spfR.isEmpty()) return null;
         
         String returnValue = null;
@@ -74,61 +130,8 @@ public class SPFRetriever implements SPFChecker {
         SPF1Record res = (SPF1Record) spfData.getAttribute(SPF.ATTRIBUTE_SPF1_RECORD);
         if (res == null) {
             String currentDomain = spfData.getCurrentDomain();
-            
-            //TODO: Should we better used nested classes for better readablity ?
-            return new DNSLookupContinuation(new DNSRequest(currentDomain, DNSRequest.SPF), new SPFCheckerDNSResponseListener() {
 
-                public DNSLookupContinuation onDNSResponse(
-                        DNSResponse response, SPFSession session)
-                        throws PermErrorException, NoneException,
-                        TempErrorException, NeutralException {
-                    try {
-                        List spfR = response.getResponse();
-                        
-                        if (spfR == null || spfR.isEmpty()) {
-                            
-                            String currentDomain = session.getCurrentDomain();
-                            return new DNSLookupContinuation(new DNSRequest(currentDomain, DNSRequest.TXT), new SPFCheckerDNSResponseListener() {
-
-                                public DNSLookupContinuation onDNSResponse(
-                                        DNSResponse response, SPFSession session)
-                                        throws PermErrorException,
-                                        NoneException, TempErrorException,
-                                        NeutralException {
-                                    
-                                    List spfR;
-                                    try {
-                                        spfR = response.getResponse();
-                                        String record = extractSPFRecord(spfR);
-                                        if (record != null) {
-                                            session.setAttribute(SPF.ATTRIBUTE_SPF1_RECORD, new SPF1Record(record));
-                                        }
-                                    } catch (TimeoutException e) {
-                                        throw new TempErrorException("Timeout querying dns");
-                                    }
-                                    return null;
-                                    
-                                }
-                                
-                            });
-                            
-                        } else {
-                            
-                            String record = extractSPFRecord(spfR);
-                            if (record != null) {
-                                session.setAttribute(SPF.ATTRIBUTE_SPF1_RECORD, new SPF1Record(record));
-                            }
-                            
-                        }
-                        
-                        return null;
-                        
-                    } catch (DNSService.TimeoutException e) {
-                        throw new TempErrorException("Timeout querying dns");
-                    }
-                }
-                
-            });
+            return new DNSLookupContinuation(new DNSRequest(currentDomain, DNSRequest.SPF), new SPFRetrieverDNSResponseListener());
             
         }
         return null;

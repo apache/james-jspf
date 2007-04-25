@@ -26,20 +26,34 @@ public class IResponseImpl implements IResponse {
     private Exception exception = null;
     private List value = null;
     private Object id = null;
+    
     public IResponseImpl(Object id, Exception e) {
         this.exception = e;
         this.id = id;
     }
+    
     public IResponseImpl(Object id, List result) {
         this.value = result;
         this.id = id;
     }
+    
+    /**
+     * @see org.apache.james.jspf.core.IResponse#getException()
+     */
     public Exception getException() {
         return exception;
     }
+    
+    /**
+     * @see org.apache.james.jspf.core.IResponse#getId()
+     */
     public Object getId() {
         return id;
     }
+    
+    /**
+     * @see org.apache.james.jspf.core.IResponse#getValue()
+     */
     public Object getValue() {
         return value;
     }

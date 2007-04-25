@@ -359,6 +359,16 @@ public class SPFSession implements MacroData {
     public void setAttribute(String key, Object value) {
         this.attributes.put(key, value);
     }
+    
+    /**
+     * Remove the attribute stored under the given key
+     * 
+     * @param key the key of the attribute
+     * @return object the attribute which was stored with the key
+     */
+    public Object removeAttribute(String key) {
+        return this.attributes.remove(key);
+    }
 
     /**
      * Add the given SPFChecker on top of the stack
