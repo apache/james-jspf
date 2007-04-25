@@ -56,8 +56,8 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled,
             public DNSLookupContinuation checkSPF(SPFSession spfData)
                     throws PermErrorException, TempErrorException,
                     NeutralException, NoneException {
-                spfData.setAttribute(ATTRIBUTE_DOMAIN_LIST, null);
-                spfData.setAttribute(ATTRIBUTE_CURRENT_DOMAIN, null);
+                spfData.removeAttribute(ATTRIBUTE_DOMAIN_LIST);
+                spfData.removeAttribute(ATTRIBUTE_CURRENT_DOMAIN);
                 return null;
             }
         }

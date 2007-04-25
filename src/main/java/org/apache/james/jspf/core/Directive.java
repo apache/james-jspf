@@ -99,7 +99,7 @@ public class Directive implements SPFChecker {
         // if already have a current result we don't run this
         if (spfData.getCurrentResult() == null) {
 
-            spfData.setAttribute(ATTRIBUTE_MECHANISM_RESULT, null);
+            spfData.removeAttribute(ATTRIBUTE_MECHANISM_RESULT);
 
             spfData.pushChecker(resultChecker);
             

@@ -76,6 +76,9 @@ public class SPFStrictCheckerRetriever extends SPFRetriever {
     }
 
 
+    /**
+     * @see org.apache.james.jspf.policies.SPFRetriever#checkSPF(org.apache.james.jspf.core.SPFSession)
+     */
     public DNSLookupContinuation checkSPF(SPFSession spfData)
             throws PermErrorException, TempErrorException, NeutralException,
             NoneException {

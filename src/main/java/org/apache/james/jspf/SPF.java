@@ -110,7 +110,7 @@ public class SPF implements SPFChecker {
             
             SPF1Record spfRecord = (SPF1Record) spfData.getAttribute(ATTRIBUTE_SPF1_RECORD);
             // make sure we cleanup the record, for recursion support
-            spfData.setAttribute(ATTRIBUTE_SPF1_RECORD, null);
+            spfData.removeAttribute(ATTRIBUTE_SPF1_RECORD);
             
             LinkedList policyCheckers = new LinkedList();
             

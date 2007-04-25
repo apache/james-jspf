@@ -142,8 +142,8 @@ public class MXMechanism extends AMechanism implements SPFCheckerDNSResponseList
             checkAddress = IPAddr.getAddress(spfSession.getIpAddress(), isIPv6 ? getIp6cidr() : getIp4cidr());
             
             // clean up attributes
-            spfSession.setAttribute(ATTRIBUTE_CHECK_RECORDS, null);
-            spfSession.setAttribute(ATTRIBUTE_MX_RECORDS, null);
+            spfSession.removeAttribute(ATTRIBUTE_CHECK_RECORDS);
+            spfSession.removeAttribute(ATTRIBUTE_MX_RECORDS);
             spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.valueOf(checkAddressList(checkAddress, mxR, getIp4cidr())));
             return null;
             
