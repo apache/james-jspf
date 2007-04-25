@@ -52,6 +52,7 @@ import org.apache.james.jspf.policies.local.DefaultExplanationPolicy;
 import org.apache.james.jspf.policies.local.FallbackPolicy;
 import org.apache.james.jspf.policies.local.OverridePolicy;
 import org.apache.james.jspf.policies.local.TrustedForwarderPolicy;
+import org.apache.james.jspf.util.SPF1Utils;
 import org.apache.james.jspf.wiring.DNSServiceEnabled;
 import org.apache.james.jspf.wiring.LogEnabled;
 import org.apache.james.jspf.wiring.MacroExpandEnabled;
@@ -104,6 +105,10 @@ public class SPF implements SPFChecker {
     }
 
     private static final class SPFRecordChecker implements SPFChecker {
+        
+        /**
+         * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
+         */
         public DNSLookupContinuation checkSPF(SPFSession spfData)
                 throws PermErrorException, TempErrorException,
                 NeutralException, NoneException {
@@ -137,6 +142,9 @@ public class SPF implements SPFChecker {
             this.policies = policies;
         }
         
+        /**
+         * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
+         */
         public DNSLookupContinuation checkSPF(SPFSession spfData)
                 throws PermErrorException, TempErrorException,
                 NeutralException, NoneException {
@@ -160,6 +168,9 @@ public class SPF implements SPFChecker {
             this.policy = policy;
         }
 
+        /**
+         * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
+         */
         public DNSLookupContinuation checkSPF(SPFSession spfData)
                 throws PermErrorException, TempErrorException,
                 NeutralException, NoneException {
@@ -186,6 +197,9 @@ public class SPF implements SPFChecker {
             this.policy = policy;
         }
 
+        /**
+         * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
+         */
         public DNSLookupContinuation checkSPF(SPFSession spfData)
                 throws PermErrorException, TempErrorException,
                 NeutralException, NoneException {

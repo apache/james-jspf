@@ -21,6 +21,7 @@
 package org.apache.james.jspf;
 
 import org.apache.james.jspf.core.SPFSession;
+import org.apache.james.jspf.util.SPF1Utils;
 
 /**
  * This class is used to return the result of an SPF lookup.

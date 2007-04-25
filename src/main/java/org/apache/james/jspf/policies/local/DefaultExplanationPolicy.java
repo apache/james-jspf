@@ -19,7 +19,6 @@
 
 package org.apache.james.jspf.policies.local;
 
-import org.apache.james.jspf.SPF1Utils;
 import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPF1Constants;
@@ -32,6 +31,7 @@ import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.policies.PolicyPostFilter;
+import org.apache.james.jspf.util.SPF1Utils;
 
 /**
  * Policy to add a default explanation
