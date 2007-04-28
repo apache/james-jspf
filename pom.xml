@@ -125,7 +125,6 @@
     </pluginRepository>
   </pluginRepositories>
   
-  <!-- temporary to support simpler deploy -->
   <repositories>
     <repository>
       <id>local-jspf-stage-repository</id>
