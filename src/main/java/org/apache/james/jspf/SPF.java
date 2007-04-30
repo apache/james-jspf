@@ -323,8 +323,9 @@ public class SPF implements SPFChecker {
         
         executor.execute(spfData, ret);
 
-        log.info("[ipAddress=" + ipAddress + "] [mailFrom=" + mailFrom
-                + "] [helo=" + hostName + "] => " + ret.getResult());
+        // if we call ret.getResult it waits the result ;-)
+//        log.info("[ipAddress=" + ipAddress + "] [mailFrom=" + mailFrom
+//                + "] [helo=" + hostName + "] => " + ret.getResult());
 
         return ret;
 
@@ -356,14 +357,14 @@ public class SPF implements SPFChecker {
         if (override != null) {
             policies.add(new SPFPolicyChecker(override));
         }
-        
+
+        policies.add(new InitialChecksPolicy());
+
         if (mustEquals) {
             policies.add(new SPFStrictCheckerRetriever());
         } else {
             policies.add(new SPFRetriever());
         }
-
-        policies.add(new SPFPolicyChecker(new InitialChecksPolicy()));
 
         if (useBestGuess) {
             policies.add(new SPFPolicyPostFilterChecker(new BestGuessPolicy()));
