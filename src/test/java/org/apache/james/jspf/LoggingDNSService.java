@@ -65,7 +65,7 @@ public class LoggingDNSService implements DNSService {
     }
 
     public void setTimeOut(int timeOut) {
-        // MOCK
+        dnsService.setTimeOut(timeOut);
     }
 
     public List getRecords(DNSRequest request) throws TimeoutException {
