@@ -16,6 +16,9 @@
   written and copyright by Brian Wellington. The original software 
   is available from http://www.dnsjava.org/
   
+  Some of the DNS-aware tests have been inspired by DNSJava test code
+  written and copyrighted by Brian Wellington, too.
+  
   SPF Test (test*.txt) contains resources derived from the
   libspf2 library (http://www.libspf2.org/) and distributed under 
   the BSD license and copyright by Wayne Schlitt, Shevek.
