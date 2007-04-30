@@ -62,10 +62,18 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
 
     }
 
+    private static int id = 1;
+    
+    // TODO: sooner or later we have to avoid overflow and restart.
+    private synchronized int nextId() {
+        return id++;
+    }
+    
     private Logger log;
     private DNSAsynchLookupService dnsProbe;
     private Thread worker;
     private Map sessions;
+    private Map results;
     private ResponseQueueImpl responseQueue;
 
     public StagedMultipleSPFExecutor(Logger log, DNSAsynchLookupService service) {
@@ -75,6 +83,7 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
         this.responseQueue = new ResponseQueueImpl();
 
         this.sessions = Collections.synchronizedMap(new HashMap());
+        this.results = Collections.synchronizedMap(new HashMap());
 
         this.worker = new Thread(this);
         this.worker.setDaemon(true);
@@ -83,10 +92,17 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
     }
 
     /**
+     * Execute the non-blocking part of the processing and returns.
+     * If the working queue is full (50 pending responses) this method will not return
+     * until the queue is again not full.
+     * 
      * @see org.apache.james.jspf.core.SPFExecutor#execute(org.apache.james.jspf.core.SPFSession, org.apache.james.jspf.FutureSPFResult)
      */
     public void execute(SPFSession session, FutureSPFResult result) {
+        execute(session, result, true);
+    }
         
+    public void execute(SPFSession session, FutureSPFResult result, boolean throttle) {
         SPFChecker checker;
         while ((checker = session.popChecker()) != null) {
             // only execute checkers we added (better recursivity)
@@ -95,12 +111,8 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
                 DNSLookupContinuation cont = checker.checkSPF(session);
                 // if the checker returns a continuation we return it
                 if (cont != null) {
-                    sessions.put(session, result);
-                    session.setAttribute(ATTRIBUTE_STAGED_EXECUTOR_CONTINUATION, cont);
-                    dnsProbe.getRecordsAsynch(cont.getRequest(), session, responseQueue);
+                    invokeAsynchService(session, result, cont, throttle);
                     return;
-                } else {
-                    sessions.remove(sessions);
                 }
             } catch (Exception e) {
                 while (e != null) {
@@ -118,14 +130,36 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
         result.setSPFResult(session);
     }
 
+    /**
+     * throttle should be true only when the caller thread is the client and not the worker thread.
+     * We could even remove the throttle parameter and check the currentThread.
+     * This way the worker is never "blocked" while outside callers will be blocked if our
+     * queue is too big (so this is not fully "asynchronous").
+     */
+    private synchronized void invokeAsynchService(SPFSession session,
+            FutureSPFResult result, DNSLookupContinuation cont, boolean throttle) {
+        while (throttle && results.size() > 50) {
+            try {
+                this.wait(100);
+            } catch (InterruptedException e) {
+            }
+        }
+        int nextId = nextId();
+        sessions.put(new Integer(nextId), session);
+        results.put(new Integer(nextId), result);
+        session.setAttribute(ATTRIBUTE_STAGED_EXECUTOR_CONTINUATION, cont);
+        dnsProbe.getRecordsAsynch(cont.getRequest(), nextId, responseQueue);
+    }
+
     public void run() {
 
         while (true) {
             
             IResponse resp = responseQueue.removeResponse();
             
-            SPFSession session = (SPFSession) resp.getId();
-            FutureSPFResult result = (FutureSPFResult) sessions.remove(session);
+            Integer respId = (Integer) resp.getId();
+            SPFSession session = (SPFSession) sessions.remove(respId);
+            FutureSPFResult result = (FutureSPFResult) results.remove(respId);
             
             DNSLookupContinuation cont = (DNSLookupContinuation) session.getAttribute(ATTRIBUTE_STAGED_EXECUTOR_CONTINUATION);
             
@@ -141,11 +175,9 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
                 cont = cont.getListener().onDNSResponse(response, session);
                 
                 if (cont != null) {
-                    dnsProbe.getRecordsAsynch(cont.getRequest(), session, responseQueue);
-                    session.setAttribute(ATTRIBUTE_STAGED_EXECUTOR_CONTINUATION, cont);
-                    sessions.put(session, result);
+                    invokeAsynchService(session, result, cont, false);
                 } else {
-                    execute(session, result);
+                    execute(session, result, false);
                 }
 
             } catch (Exception e) {
@@ -159,7 +191,7 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
                         e = ex;
                     }
                 }
-                execute(session, result);
+                execute(session, result, false);
             }
         }
     }

@@ -33,7 +33,7 @@ public interface DNSAsynchLookupService {
      * @param id the identification key for the response.
      * @param responsePool the queue where the response will be appended.
      */
-    public void getRecordsAsynch(DNSRequest request, Object id,
+    public void getRecordsAsynch(DNSRequest request, int id,
             final IResponseQueue responsePool);
 
 }

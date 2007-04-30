@@ -38,6 +38,7 @@ public class DNSServiceAsynchSimulator implements Runnable, DNSAsynchLookupServi
     private Thread worker;
     private LinkedList queue;
     private int waitingThreads = 0;
+    private boolean multiThread;
     
     public static final class Request {
         private final DNSRequest value;
@@ -60,8 +61,9 @@ public class DNSServiceAsynchSimulator implements Runnable, DNSAsynchLookupServi
         
     }
 
-    public DNSServiceAsynchSimulator(DNSService service) {
+    public DNSServiceAsynchSimulator(DNSService service, boolean multiThread) {
         this.dnsService = service;
+        this.multiThread = multiThread;
 
         this.queue = new LinkedList();
         this.worker = new Thread(this);
@@ -74,11 +76,11 @@ public class DNSServiceAsynchSimulator implements Runnable, DNSAsynchLookupServi
     /**
      * @see org.apache.james.jspf.core.DNSService#getRecordsAsynch(java.lang.String, int, java.lang.Object, org.apache.james.jspf.core.IResponseQueue)
      */
-    public void getRecordsAsynch(DNSRequest request, Object id,
+    public void getRecordsAsynch(DNSRequest request, int id,
             final IResponseQueue responsePool) {
         
         synchronized (queue) {
-            queue.addLast(new Request(request, id, responsePool));
+            queue.addLast(new Request(request, new Integer(id), responsePool));
             queue.notify();
         }
         
@@ -102,14 +104,33 @@ public class DNSServiceAsynchSimulator implements Runnable, DNSAsynchLookupServi
                 req = (Request) queue.removeFirst();
             }
             
-            IResponseImpl response;
-            try {
-                response = new IResponseImpl(req.getId(), dnsService.getRecords(req.getValue()));
-            } catch (TimeoutException e) {
-                response = new IResponseImpl(req.getId(), e);
-            }
+            Runnable runnable = new Runnable() {
 
-            req.getResponseQueue().insertResponse(response);
+                private Request req;
+
+                public void run() {
+                    IResponseImpl response;
+                    try {
+                        response = new IResponseImpl(req.getId(), dnsService.getRecords(req.getValue()));
+                    } catch (TimeoutException e) {
+                        response = new IResponseImpl(req.getId(), e);
+                    }
+
+                    req.getResponseQueue().insertResponse(response);
+                }
+
+                public Runnable setRequest(Request req) {
+                    this.req = req;
+                    return this;
+                }
+                
+            }.setRequest(req);
+            
+            if (multiThread) {
+                new Thread(runnable).start();
+            } else {
+                runnable.run();
+            }
         }
     }
 
