@@ -165,7 +165,7 @@ public class MacroExpand {
 
     private static final String ATTRIBUTE_MACRO_EXPAND_CHECKED_RECORD = "MacroExpand.checkedRecord";
 
-    public DNSLookupContinuation checkExpand(String input, SPFSession session, boolean isExplanation) throws PermErrorException {
+    public DNSLookupContinuation checkExpand(String input, SPFSession session, boolean isExplanation) throws PermErrorException, NoneException {
         if (input != null) {
             String host = this.expand(input, session, isExplanation);
             if (host == null) {

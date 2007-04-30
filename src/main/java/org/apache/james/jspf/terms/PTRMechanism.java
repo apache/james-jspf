@@ -152,17 +152,17 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled,
     
                 List aList = response.getResponse();
     
-                        
+
                 if (aList != null) {
                     for (int j = 0; j < aList.size(); j++) {
-                        if (aList.get(j).equals(spfSession.getIpAddress())) {
+                        // Added the IPAddr parsing/toString to have matching in IPV6 multiple ways to 
+                        if (IPAddr.getAddress((String) aList.get(j)).getIPAddress().equals(IPAddr.getAddress(spfSession.getIpAddress()).getIPAddress())) {
                             
                             if (compareDomain.equals(host)
                                     || compareDomain.endsWith("." + host)) {
                                 spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.TRUE);
                                 return null;
                             }
-                            
                         }
                     }
                 }

@@ -19,6 +19,10 @@
 
 package org.apache.james.jspf.core;
 
+import org.apache.james.jspf.exceptions.NoneException;
+import org.xbill.DNS.Name;
+import org.xbill.DNS.TextParseException;
+
 public final class DNSRequest {
 
     /** The record types for the lookups */
@@ -39,7 +43,14 @@ public final class DNSRequest {
      */
     private final int recordType;
 
-    public DNSRequest(String hostname, int recordType) {
+    public DNSRequest(String hostname, int recordType) throws NoneException {
+        if (recordType == MX || recordType == A || recordType == AAAA) {
+            try {
+                Name.fromString(hostname);
+            } catch (TextParseException e) {
+                throw new NoneException(e.getMessage());
+            }
+        }
         this.hostname = hostname;
         this.recordType = recordType;
     }

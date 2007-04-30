@@ -168,6 +168,9 @@ public class ExpModifier extends GenericModifier implements MacroExpandEnabled, 
             } else {
                 
                 String exp = (String) records.get(0);
+                if (exp.length()>=2 && exp.charAt(0) == '"' && exp.charAt(exp.length() -1 ) == '"') {
+                    exp = exp.substring(1, exp.length() - 1);
+                }
 
                 spfData.setAttribute(ATTRIBUTE_EXPAND_EXPLANATION, exp);
                 
