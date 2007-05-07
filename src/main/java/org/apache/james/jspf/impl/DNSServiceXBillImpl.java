@@ -28,7 +28,6 @@ import org.xbill.DNS.ARecord;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.MXRecord;
 import org.xbill.DNS.PTRRecord;
-import org.xbill.DNS.RRset;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.SPFRecord;
 import org.xbill.DNS.TXTRecord;
@@ -142,8 +141,7 @@ public class DNSServiceXBillImpl implements DNSService {
                 throw new TimeoutException();
             }
             
-            List records;
-            records = convertRecordsToList(rr);
+            List records = convertRecordsToList(rr);
             
             log.debug("Found " + (rr != null ? rr.length : 0) + " "+recordTypeDescription+"-Records");
             return records;

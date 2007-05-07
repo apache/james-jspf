@@ -945,6 +945,8 @@ zonedata:
   52.spf1-test.mailzone.com:
     - TXT:  'v=spf1 include:53.spf1-test.mailzone.com                  -all'
   53.spf1-test.mailzone.com:
+    - CNAME:  54.spf1-test.mailzone.com.
+  54.spf1-test.mailzone.com:
     - TXT:  'v=spf1 include:42.spf1-test.mailzone.com                  -all'
   55.spf1-test.mailzone.com:
     - TXT:  'v=spf1 include:56.spf1-test.mailzone.com                  -all'

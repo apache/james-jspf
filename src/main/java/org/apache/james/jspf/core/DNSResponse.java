@@ -58,4 +58,16 @@ public class DNSResponse {
         }
     }
 
+    /**
+     * @see java.lang.Object#toString()
+     */
+    public String toString() {
+        if (exception != null) {
+            return "EXCEPTION!";
+        } else if (response != null) {
+            return response.toString();
+        } else {
+            return "NULL?";
+        }
+    }
 }

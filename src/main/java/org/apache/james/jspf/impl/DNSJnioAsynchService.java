@@ -25,25 +25,17 @@ import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.IResponse;
 import org.apache.james.jspf.core.IResponseQueue;
 import org.xbill.DNS.DClass;
+import org.xbill.DNS.ExtendedNonblockingResolver;
+import org.xbill.DNS.LookupAsynch;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.Name;
-import org.xbill.DNS.NonblockingResolver;
-import org.xbill.DNS.RRset;
 import org.xbill.DNS.Record;
-import org.xbill.DNS.Section;
+import org.xbill.DNS.Resolver;
 import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
 
-import uk.nominet.dnsjnio.Response;
-import uk.nominet.dnsjnio.ResponseQueue;
-
-import java.net.UnknownHostException;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-
 public class DNSJnioAsynchService implements DNSAsynchLookupService {
-
+/*
     private final class ResponseQueueAdaptor extends ResponseQueue {
 
         private IResponseQueue responsePool;
@@ -104,22 +96,19 @@ public class DNSJnioAsynchService implements DNSAsynchLookupService {
         
         
     }
+*/
+    private ExtendedNonblockingResolver resolver;
 
-    private NonblockingResolver resolver;
-
-    public DNSJnioAsynchService() {
-        try {
-            this.resolver = new NonblockingResolver("127.0.0.1");
-            this.resolver.setPort(35347);
-            this.resolver.setTCP(false);
-        } catch (UnknownHostException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+    public DNSJnioAsynchService(ExtendedNonblockingResolver resolver) {
+        this.resolver = resolver;
+        LookupAsynch.setDefaultResolver(resolver);
     }
     
     public void setTimeout(int timeout) {
-        this.resolver.setTimeout(timeout);
+        Resolver[] res = resolver.getResolvers();
+        for (int i = 0; i < res.length; i++) {
+            res[i].setTimeout(timeout);
+        }
     }
     
     /**
@@ -131,7 +120,46 @@ public class DNSJnioAsynchService implements DNSAsynchLookupService {
         Message message;
         try {
             message = makeQuery(request, id);
-            this.resolver.sendAsync(message, new Integer(id), new ResponseQueueAdaptor(responsePool));
+            LookupAsynch la = new LookupAsynch(message.getQuestion().getName(), message.getQuestion().getType());
+            la.runAsynch(new Runnable() {
+
+                private IResponseQueue responsePool;
+                private Integer id;
+                private LookupAsynch lookup;
+
+                public void run() {
+                    responsePool.insertResponse(new IResponse() {
+
+                        public Exception getException() {
+                            if (lookup.getResult() == LookupAsynch.TRY_AGAIN) {
+                                System.err.println("######## "+lookup.getErrorString());
+                                return new DNSService.TimeoutException();
+                            } else {
+                                return null;
+                            }
+                        }
+
+                        public Object getId() {
+                            return id;
+                        }
+
+                        public Object getValue() {
+                            return (DNSServiceXBillImpl.convertRecordsToList(lookup.getAnswers()));
+                        }
+                        
+                    });
+                }
+
+                public Runnable setResponsePool(LookupAsynch la, IResponseQueue responsePool,
+                        Integer integer) {
+                    this.lookup = la;
+                    this.responsePool = responsePool;
+                    this.id = integer;
+                    return this;
+                }
+                
+            }.setResponsePool(la, responsePool, new Integer(id)));
+            // this.resolver.sendAsync(message, new Integer(id), new ResponseQueueAdaptor(responsePool));
         } catch (TextParseException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

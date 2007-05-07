@@ -42,8 +42,10 @@ import org.jvyaml.Constructor;
 import org.jvyaml.DefaultYAMLFactory;
 import org.jvyaml.YAMLFactory;
 import org.xbill.DNS.DClass;
+import org.xbill.DNS.ExtendedNonblockingResolver;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Name;
+import org.xbill.DNS.NonblockingResolver;
 import org.xbill.DNS.Resolver;
 import org.xbill.DNS.SimpleResolver;
 import org.xbill.DNS.TextParseException;
@@ -69,6 +71,7 @@ public abstract class AbstractYamlTest extends TestCase {
     protected static final int TIMEOUT = 10;
     protected static final int MOCK_SERVICE = 2;
     protected static final int FAKE_SERVER = 1;
+    protected static final int REAL_SERVER = 3;
     private int dnsServiceMockStyle = MOCK_SERVICE;
 
     protected static final int SYNCHRONOUS_EXECUTOR = 1;
@@ -207,9 +210,34 @@ public abstract class AbstractYamlTest extends TestCase {
         } else if (getSpfExecutorType() == STAGED_EXECUTOR || getSpfExecutorType() == STAGED_EXECUTOR_MULTITHREADED){
             executor = new StagedMultipleSPFExecutor(log, new DNSServiceAsynchSimulator(dns, getSpfExecutorType() == STAGED_EXECUTOR_MULTITHREADED));
         } else if (getSpfExecutorType() == STAGED_EXECUTOR_DNSJNIO) {
-            DNSJnioAsynchService jnioAsynchService = new DNSJnioAsynchService();
-            jnioAsynchService.setTimeout(TIMEOUT);
-            executor = new StagedMultipleSPFExecutor(log, jnioAsynchService);
+            
+            try {
+                ExtendedNonblockingResolver resolver;
+                
+                if (getDnsServiceMockStyle() == FAKE_SERVER) {
+                    NonblockingResolver nonblockingResolver = new NonblockingResolver("127.0.0.1");
+                    resolver = new ExtendedNonblockingResolver(new Resolver[] {nonblockingResolver});
+                    nonblockingResolver.setPort(35347);
+                    nonblockingResolver.setTCP(false);
+                } else if (getDnsServiceMockStyle() == REAL_SERVER) {
+                    resolver = new ExtendedNonblockingResolver();
+                    Resolver[] resolvers = resolver.getResolvers();
+                    for (int i = 0; i < resolvers.length; i++) {
+                        resolvers[i].setTCP(false);
+                    }
+                } else {
+                    throw new IllegalStateException("DnsServiceMockStyle "+getDnsServiceMockStyle()+" is not supported when STAGED_EXECUTOR_DNSJNIO executor style is used");
+                }
+                
+                DNSJnioAsynchService jnioAsynchService = new DNSJnioAsynchService(resolver);
+                jnioAsynchService.setTimeout(TIMEOUT);
+                executor = new StagedMultipleSPFExecutor(log, jnioAsynchService);
+
+            } catch (UnknownHostException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
         } else {
             throw new UnsupportedOperationException("Unknown executor type");
         }
@@ -309,6 +337,7 @@ public abstract class AbstractYamlTest extends TestCase {
         switch (getDnsServiceMockStyle()) {
             case MOCK_SERVICE: return getDNSServiceMockedDNSService();
             case FAKE_SERVER: return getDNSServiceFakeServer();
+            case REAL_SERVER: return getDNSServiceReal();
             default: 
                 throw new UnsupportedOperationException("Unsupported mock style");
         }
@@ -357,6 +386,16 @@ public abstract class AbstractYamlTest extends TestCase {
             }
 
         };
+        // TIMEOUT 2 seconds
+        serviceXBillImpl.setTimeOut(TIMEOUT);
+        return serviceXBillImpl;
+    }
+    
+    /**
+     * @return
+     */
+    protected DNSService getDNSServiceReal() {
+        DNSServiceXBillImpl serviceXBillImpl = new DNSServiceXBillImpl(log);
         // TIMEOUT 2 seconds
         serviceXBillImpl.setTimeOut(TIMEOUT);
         return serviceXBillImpl;

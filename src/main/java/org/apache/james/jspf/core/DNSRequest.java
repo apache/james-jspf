@@ -73,4 +73,10 @@ public final class DNSRequest {
         return recordType;
     }
 
+    /**
+     * @see java.lang.Object#toString()
+     */
+    public String toString() {
+        return getHostname()+"#"+getRecordType();
+    }
 }
