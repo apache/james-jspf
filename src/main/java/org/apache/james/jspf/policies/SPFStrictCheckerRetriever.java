@@ -27,6 +27,9 @@ public class SPFStrictCheckerRetriever extends SPFRetriever {
     
     private static final class SPFStrictSPFRecordsDNSResponseListener implements SPFCheckerDNSResponseListener {
 
+        /**
+         * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
+         */
         public DNSLookupContinuation onDNSResponse(
                 DNSResponse response, SPFSession session)
                 throws PermErrorException,
@@ -55,6 +58,9 @@ public class SPFStrictCheckerRetriever extends SPFRetriever {
     
     private static final class SPFStrictCheckDNSResponseListener implements SPFCheckerDNSResponseListener {
 
+        /**
+         * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
+         */
         public DNSLookupContinuation onDNSResponse(
                 DNSResponse response, SPFSession session)
                 throws PermErrorException, NoneException,

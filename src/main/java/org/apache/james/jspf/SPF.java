@@ -277,6 +277,24 @@ public class SPF implements SPFChecker {
         this.executor = executor;
     }
 
+    
+    private static final class DefaultSPFChecker implements SPFChecker {
+
+        /**
+         * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
+         */
+        public DNSLookupContinuation checkSPF(SPFSession spfData)
+                throws PermErrorException, TempErrorException,
+                NeutralException, NoneException {
+            if (spfData.getCurrentResultExpanded() == null) {
+                String resultChar = spfData.getCurrentResult() != null ? spfData.getCurrentResult() : "";
+                String result = SPF1Utils.resultToName(resultChar);
+                spfData.setCurrentResultExpanded(result);
+            }
+            return null;
+        }
+    }
+    
     /**
      * Run check for SPF with the given values.
      * 
@@ -300,20 +318,7 @@ public class SPF implements SPFChecker {
             spfData.setCurrentResultExpanded(e1.getResult());
         }
 
-        SPFChecker resultHandler = new SPFChecker() {
-
-            public DNSLookupContinuation checkSPF(SPFSession spfData)
-                    throws PermErrorException, TempErrorException,
-                    NeutralException, NoneException {
-                if (spfData.getCurrentResultExpanded() == null) {
-                    String resultChar = spfData.getCurrentResult() != null ? spfData.getCurrentResult() : "";
-                    String result = SPF1Utils.resultToName(resultChar);
-                    spfData.setCurrentResultExpanded(result);
-                }
-                return null;
-            }
-
-        };
+        SPFChecker resultHandler = new DefaultSPFChecker();
         
         spfData.pushChecker(resultHandler);
         spfData.pushChecker(this);

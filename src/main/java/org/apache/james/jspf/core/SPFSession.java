@@ -79,7 +79,7 @@ public class SPFSession implements MacroData {
     private String currentResultExpanded;
     
     /**
-     * Build the SPF1Data from the given parameters
+     * Build the SPFSession from the given parameters
      * 
      * @param mailFrom
      *            The emailaddress of the sender

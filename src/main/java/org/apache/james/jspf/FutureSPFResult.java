@@ -29,6 +29,12 @@ public class FutureSPFResult extends SPFResult {
         isReady = false;
     }
     
+    /**
+     * Set SPFResult using the given SPFsession
+     * 
+     * @param session 
+     * 
+     */
     public synchronized void setSPFResult(SPFSession session) {
         setSPFSession(session);
         isReady = true;
@@ -45,31 +51,51 @@ public class FutureSPFResult extends SPFResult {
         }
     }
 
+    /**
+     * @see org.apache.james.jspf.SPFResult#getExplanation()
+     */
     public String getExplanation() {
         checkReady();
         return super.getExplanation();
     }
 
+    /**
+     * @see org.apache.james.jspf.SPFResult#getHeader()
+     */
     public String getHeader() {
         checkReady();
         return super.getHeader();
     }
 
+    /**
+     * @see org.apache.james.jspf.SPFResult#getHeaderName()
+     */
     public String getHeaderName() {
         checkReady();
         return super.getHeaderName();
     }
 
+    /**
+     * @see org.apache.james.jspf.SPFResult#getHeaderText()
+     */
     public String getHeaderText() {
         checkReady();
         return super.getHeaderText();
     }
 
+    /**
+     * @see org.apache.james.jspf.SPFResult#getResult()
+     */
     public String getResult() {
         checkReady();
         return super.getResult();
     }
 
+    /**
+     * Return true if the result was fully builded 
+     * 
+     * @return true or false
+     */
     public boolean isReady() {
         return isReady;
     }

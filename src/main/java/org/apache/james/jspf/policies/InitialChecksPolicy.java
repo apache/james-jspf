@@ -38,6 +38,9 @@ import org.xbill.DNS.TextParseException;
  */
 public final class InitialChecksPolicy implements SPFChecker {
     
+    /**
+     * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
+     */
     public DNSLookupContinuation checkSPF(SPFSession spfData)
             throws PermErrorException, TempErrorException, NeutralException,
             NoneException {
