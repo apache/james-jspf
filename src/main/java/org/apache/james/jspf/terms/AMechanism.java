@@ -21,14 +21,22 @@
 package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.Configuration;
+import org.apache.james.jspf.core.DNSLookupContinuation;
+import org.apache.james.jspf.core.DNSRequest;
+import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.DNSService;
+import org.apache.james.jspf.core.Directive;
 import org.apache.james.jspf.core.IPAddr;
-import org.apache.james.jspf.core.SPF1Data;
+import org.apache.james.jspf.core.SPFChecker;
+import org.apache.james.jspf.core.SPFCheckerDNSResponseListener;
+import org.apache.james.jspf.core.SPFSession;
+import org.apache.james.jspf.exceptions.NeutralException;
+import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
+import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.util.Inet6Util;
 import org.apache.james.jspf.util.SPFTermsRegexps;
-import org.apache.james.jspf.wiring.DNSServiceEnabled;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +45,9 @@ import java.util.List;
  * This class represent the a mechanism
  * 
  */
-public class AMechanism extends GenericMechanism implements DNSServiceEnabled {
+public class AMechanism extends GenericMechanism implements SPFCheckerDNSResponseListener {
+
+    private static final String ATTRIBUTE_AMECHANISM_IPV4CHECK = "AMechanism.ipv4check";
 
     /**
      * ABNF: A = "a" [ ":" domain-spec ] [ dual-cidr-length ]
@@ -50,62 +60,68 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled {
 
     private int ip6cidr;
 
-    protected DNSService dnsService;
+    private SPFChecker expandedChecker = new ExpandedChecker();
+
+    private final class ExpandedChecker implements SPFChecker {
+        public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
+                TempErrorException, NeutralException, NoneException {
+            // Get the right host.
+            String host = expandHost(spfData);
+
+            // get the ipAddress
+            try {
+                boolean validIPV4Address = Inet6Util.isValidIPV4Address(spfData.getIpAddress());
+                spfData.setAttribute(ATTRIBUTE_AMECHANISM_IPV4CHECK, Boolean.valueOf(validIPV4Address));
+                if (validIPV4Address) {
+
+                    List aRecords = getARecords(host);
+                    if (aRecords == null) {
+                        try {
+                            DNSRequest request = new DNSRequest(host, DNSRequest.A);
+                            return new DNSLookupContinuation(request, AMechanism.this);
+                        } catch (NoneException e) {
+                            return onDNSResponse(new DNSResponse(aRecords), spfData);
+                        }
+                    } else {
+                        return onDNSResponse(new DNSResponse(aRecords), spfData);
+                    }
+         
+                } else {
+                    
+                    List aaaaRecords = getAAAARecords(host);
+                    if (aaaaRecords == null) {
+                        try {
+                            DNSRequest request = new DNSRequest(host, DNSRequest.AAAA);
+                            return new DNSLookupContinuation(request, AMechanism.this);
+                        } catch (NoneException e) {
+                            return onDNSResponse(new DNSResponse(aaaaRecords), spfData);
+                        }
+                    } else {
+                        return onDNSResponse(new DNSResponse(aaaaRecords), spfData);
+                    }
+
+                }
+            // PermError / TempError
+            // TODO: Should we replace this with the "right" Exceptions ?
+            } catch (Exception e) {
+                log.debug("No valid ipAddress: ",e);
+                throw new PermErrorException("No valid ipAddress: "
+                        + spfData.getIpAddress());
+            }
+            
+        }
+    }
 
     /**
-     * 
-     * @see org.apache.james.jspf.core.GenericMechanism#run(org.apache.james.jspf.core.SPF1Data)
+     * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
      */
-    public boolean run(SPF1Data spfData) throws PermErrorException,
-            TempErrorException {
+    public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException, TempErrorException, NeutralException, NoneException {
         // update currentDepth
         spfData.increaseCurrentDepth();
 
-        // Get the right host.
-        String host = expandHost(spfData);
-
-        // get the ipAddress
-        try {
-            if (Inet6Util.isValidIPV4Address(spfData.getIpAddress())) {
-
-                IPAddr checkAddress = IPAddr.getAddress(spfData.getIpAddress(),
-                        getIp4cidr());
-
-                List aRecords = getARecords(dnsService,host);
-     
-                // no a records just return null
-                if (aRecords == null) {
-                    return false;
-                }
-
-                if (checkAddressList(checkAddress, aRecords, getIp4cidr())) {
-                    return true;
-                }
-            } else {
-                IPAddr checkAddress = IPAddr.getAddress(spfData.getIpAddress(),
-                        getIp6cidr());
-
-                List aaaaRecords = getAAAARecords(dnsService, host);
-                
-                // no aaaa records just return false
-                if (aaaaRecords == null) {
-                    return false;
-                }
-                
-                if (checkAddressList(checkAddress, aaaaRecords, getIp6cidr())) {
-                    return true;
-                }
-
-            }
-        // PermError / TempError
-        // TODO: Should we replace this with the "right" Exceptions ?
-        } catch (Exception e) {
-            log.debug("No valid ipAddress: ",e);
-            throw new PermErrorException("No valid ipAddress: "
-                    + spfData.getIpAddress());
-        }
-        // No match found
-        return false;
+        spfData.pushChecker(expandedChecker);
+        
+        return macroExpand.checkExpand(getDomain(), spfData, MacroExpand.DOMAIN);
     }
 
     /**
@@ -203,19 +219,12 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled {
     /**
      * Retrieve a list of AAAA records
      */
-    public List getAAAARecords(DNSService dns, String strServer)
-            throws PermErrorException, TempErrorException {
-        List listAAAAData;
+    public List getAAAARecords(String strServer) {
+        List listAAAAData = null;
         if (IPAddr.isIPV6(strServer)) {
             // Address is already an IP address, so add it to list
             listAAAAData = new ArrayList();
             listAAAAData.add(strServer);
-        } else {
-            try {
-                listAAAAData = dns.getRecords(strServer, DNSService.AAAA);
-            } catch (DNSService.TimeoutException e) {
-                throw new TempErrorException("Timeout querying dns server");
-            }
         }
         return listAAAAData;
     }
@@ -224,35 +233,61 @@ public class AMechanism extends GenericMechanism implements DNSServiceEnabled {
     /**
      * Get a list of IPAddr's for a server
      * 
-     * @params dns the DNSService to query
      * @param strServer
      *            The hostname or ipAddress whe should get the A-Records for
      * @return The ipAddresses
-     * @throws PermErrorException
-     *             if an PermError should be returned
-     * @throws TempErrorException
-     *             if the lookup result was "TRY_AGAIN"
      */
-    public List getARecords(DNSService dns, String strServer) throws PermErrorException, TempErrorException {
-        List listAData;
+    public List getARecords(String strServer) {
+        List listAData = null;
         if (IPAddr.isIPAddr(strServer)) {
             listAData = new ArrayList();
             listAData.add(strServer);
-        } else {
-            try {
-                listAData = dns.getRecords(strServer, DNSService.A);
-            } catch (DNSService.TimeoutException e) {
-                throw new TempErrorException("Timeout querying dns server");
-            }
         }
         return listAData;
     }
 
     /**
-     * @see org.apache.james.jspf.wiring.DNSServiceEnabled#enableDNSService(org.apache.james.jspf.core.DNSService)
+     * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
      */
-    public void enableDNSService(DNSService service) {
-        this.dnsService = service;
+    public DNSLookupContinuation onDNSResponse(DNSResponse response, SPFSession spfSession)
+        throws PermErrorException, TempErrorException, NoneException, NeutralException {
+        List listAData = null;
+        try {
+            listAData = response.getResponse();
+        } catch (DNSService.TimeoutException e) {
+            throw new TempErrorException("Timeout querying dns server");
+        }
+        // no a records just return null
+        if (listAData == null) {
+            spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
+            return null;
+        }
+
+        Boolean ipv4check = (Boolean) spfSession.getAttribute(ATTRIBUTE_AMECHANISM_IPV4CHECK);
+        if (ipv4check.booleanValue()) {
+
+            IPAddr checkAddress = IPAddr.getAddress(spfSession.getIpAddress(),
+                    getIp4cidr());
+
+            if (checkAddressList(checkAddress, listAData, getIp4cidr())) {
+                spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.TRUE);
+                return null;
+            }
+
+        } else {
+
+            IPAddr checkAddress = IPAddr.getAddress(spfSession.getIpAddress(),
+                    getIp6cidr());
+            
+            if (checkAddressList(checkAddress, listAData, getIp6cidr())) {
+                spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.TRUE);
+                return null;
+            }
+
+        }
+        
+        spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
+        return null;
     }
 
 }

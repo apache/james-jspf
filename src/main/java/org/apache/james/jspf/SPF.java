@@ -20,13 +20,17 @@
 
 package org.apache.james.jspf;
 
+import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPF1Constants;
-import org.apache.james.jspf.core.SPF1Data;
 import org.apache.james.jspf.core.SPF1Record;
 import org.apache.james.jspf.core.SPFChecker;
+import org.apache.james.jspf.core.SPFCheckerExceptionCatcher;
+import org.apache.james.jspf.core.SPFExecutor;
 import org.apache.james.jspf.core.SPFRecordParser;
+import org.apache.james.jspf.core.SPFSession;
+import org.apache.james.jspf.core.SynchronousSPFExecutor;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
@@ -35,12 +39,12 @@ import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.parser.DefaultSPF1Parser;
 import org.apache.james.jspf.parser.DefaultTermsFactory;
-import org.apache.james.jspf.policies.ChainPolicy;
 import org.apache.james.jspf.policies.InitialChecksPolicy;
 import org.apache.james.jspf.policies.NeutralIfNotMatchPolicy;
 import org.apache.james.jspf.policies.NoSPFRecordFoundPolicy;
-import org.apache.james.jspf.policies.Policy;
 import org.apache.james.jspf.policies.ParseRecordPolicy;
+import org.apache.james.jspf.policies.Policy;
+import org.apache.james.jspf.policies.PolicyPostFilter;
 import org.apache.james.jspf.policies.SPFRetriever;
 import org.apache.james.jspf.policies.SPFStrictCheckerRetriever;
 import org.apache.james.jspf.policies.local.BestGuessPolicy;
@@ -48,19 +52,170 @@ import org.apache.james.jspf.policies.local.DefaultExplanationPolicy;
 import org.apache.james.jspf.policies.local.FallbackPolicy;
 import org.apache.james.jspf.policies.local.OverridePolicy;
 import org.apache.james.jspf.policies.local.TrustedForwarderPolicy;
+import org.apache.james.jspf.util.SPF1Utils;
 import org.apache.james.jspf.wiring.DNSServiceEnabled;
 import org.apache.james.jspf.wiring.LogEnabled;
 import org.apache.james.jspf.wiring.MacroExpandEnabled;
 import org.apache.james.jspf.wiring.SPFCheckEnabled;
 import org.apache.james.jspf.wiring.WiringServiceTable;
 
-import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 /**
  * This class is used to generate a SPF-Test and provided all intressting data.
  */
 public class SPF implements SPFChecker {
+
+    private final class SPFCheckerExceptionCatcherImplementation implements
+            SPFCheckerExceptionCatcher {
+        private SPFChecker resultHandler;
+
+        public SPFCheckerExceptionCatcherImplementation(SPFChecker resultHandler) {
+            this.resultHandler = resultHandler;
+        }
+
+        /**
+         * @see org.apache.james.jspf.core.SPFCheckerExceptionCatcher#onException(java.lang.Exception, org.apache.james.jspf.core.SPFSession)
+         */
+        public void onException(Exception exception, SPFSession session)
+                throws PermErrorException, NoneException, TempErrorException,
+                NeutralException {
+
+            SPFChecker checker;
+            while ((checker = session.popChecker())!=resultHandler) {
+                log.debug("Redirect resulted in exception. Removing checker: "+checker);
+            }
+
+            String result;
+            if (exception instanceof SPFResultException) {
+                result = ((SPFResultException) exception).getResult();
+                if (!SPF1Utils.NEUTRAL_CONV.equals(result)) {
+                    log.warn(exception.getMessage(),exception);
+                }
+            } else {
+                // this should never happen at all. But anyway we will set the
+                // result to neutral. Safety first ..
+                log.error(exception.getMessage(),exception);
+                result = SPF1Constants.NEUTRAL;
+            }
+            session.setCurrentResultExpanded(result);
+            
+        }
+    }
+
+    private static final class SPFRecordChecker implements SPFChecker {
+        
+        /**
+         * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
+         */
+        public DNSLookupContinuation checkSPF(SPFSession spfData)
+                throws PermErrorException, TempErrorException,
+                NeutralException, NoneException {
+            
+            SPF1Record spfRecord = (SPF1Record) spfData.getAttribute(ATTRIBUTE_SPF1_RECORD);
+            // make sure we cleanup the record, for recursion support
+            spfData.removeAttribute(ATTRIBUTE_SPF1_RECORD);
+            
+            LinkedList policyCheckers = new LinkedList();
+            
+            Iterator i = spfRecord.iterator();
+            while (i.hasNext()) {
+                SPFChecker checker = (SPFChecker) i.next();
+                policyCheckers.add(checker);
+            }
+
+            while (policyCheckers.size() > 0) {
+                SPFChecker removeLast = (SPFChecker) policyCheckers.removeLast();
+                spfData.pushChecker(removeLast);
+            }
+
+            return null;
+        }
+    }
+
+    private static final class PolicyChecker implements SPFChecker {
+        
+        private LinkedList policies;
+        
+        public PolicyChecker(LinkedList policies) {
+            this.policies = policies;
+        }
+        
+        /**
+         * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
+         */
+        public DNSLookupContinuation checkSPF(SPFSession spfData)
+                throws PermErrorException, TempErrorException,
+                NeutralException, NoneException {
+            
+            while (policies.size() > 0) {
+                SPFChecker removeLast = (SPFChecker) policies.removeLast();
+                spfData.pushChecker(removeLast);
+            }
+            
+            return null;
+        }
+    }
+
+    private static final class SPFPolicyChecker implements SPFChecker {
+        private Policy policy;
+
+        /**
+         * @param policy
+         */
+        public SPFPolicyChecker(Policy policy) {
+            this.policy = policy;
+        }
+
+        /**
+         * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
+         */
+        public DNSLookupContinuation checkSPF(SPFSession spfData)
+                throws PermErrorException, TempErrorException,
+                NeutralException, NoneException {
+            SPF1Record res = (SPF1Record) spfData.getAttribute(ATTRIBUTE_SPF1_RECORD);
+            if (res == null) {
+                res = policy.getSPFRecord(spfData.getCurrentDomain());
+                spfData.setAttribute(ATTRIBUTE_SPF1_RECORD, res);
+            }
+            return null;
+        }
+        
+        public String toString() {
+            return "PC:"+policy.toString();
+        }
+    }
+
+    private static final class SPFPolicyPostFilterChecker implements SPFChecker {
+        private PolicyPostFilter policy;
+
+        /**
+         * @param policy
+         */
+        public SPFPolicyPostFilterChecker(PolicyPostFilter policy) {
+            this.policy = policy;
+        }
+
+        /**
+         * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
+         */
+        public DNSLookupContinuation checkSPF(SPFSession spfData)
+                throws PermErrorException, TempErrorException,
+                NeutralException, NoneException {
+            SPF1Record res = (SPF1Record) spfData.getAttribute(ATTRIBUTE_SPF1_RECORD);
+            res = policy.getSPFRecord(spfData.getCurrentDomain(), res);
+            spfData.setAttribute(ATTRIBUTE_SPF1_RECORD, res);
+            return null;
+        }
+        
+        public String toString() {
+            return "PFC:"+policy.toString();
+        }
+
+    }
+
+    public static final String ATTRIBUTE_SPF1_RECORD = "SPF.SPF1Record";
 
     DNSService dnsProbe;
 
@@ -82,6 +237,8 @@ public class SPF implements SPFChecker {
 
     private MacroExpand macroExpand;
 
+    private SPFExecutor executor;
+
     /**
      * Uses passed logger and passed dnsServicer
      * 
@@ -99,7 +256,8 @@ public class SPF implements SPFChecker {
         wiringService.put(MacroExpandEnabled.class, this.macroExpand);
         this.parser = new DefaultSPF1Parser(logger.getChildLogger("parser"), new DefaultTermsFactory(logger.getChildLogger("termsfactory"), wiringService));
         // We add this after the parser creation because services cannot be null
-        wiringService.put(SPFCheckEnabled.class, this.parser);
+        wiringService.put(SPFCheckEnabled.class, this);
+        this.executor = new SynchronousSPFExecutor(log, dnsProbe);
     }
     
     
@@ -110,14 +268,33 @@ public class SPF implements SPFChecker {
      * @param parser the parser to use
      * @param logger the logger to use
      */
-    public SPF(DNSService dnsProbe, SPFRecordParser parser, Logger logger, MacroExpand macroExpand) {
+    public SPF(DNSService dnsProbe, SPFRecordParser parser, Logger logger, MacroExpand macroExpand, SPFExecutor executor) {
         super();
         this.dnsProbe = dnsProbe;
         this.parser = parser;
         this.log = logger;
         this.macroExpand = macroExpand;
+        this.executor = executor;
     }
 
+    
+    private static final class DefaultSPFChecker implements SPFChecker {
+
+        /**
+         * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
+         */
+        public DNSLookupContinuation checkSPF(SPFSession spfData)
+                throws PermErrorException, TempErrorException,
+                NeutralException, NoneException {
+            if (spfData.getCurrentResultExpanded() == null) {
+                String resultChar = spfData.getCurrentResult() != null ? spfData.getCurrentResult() : "";
+                String result = SPF1Utils.resultToName(resultChar);
+                spfData.setCurrentResultExpanded(result);
+            }
+            return null;
+        }
+    }
+    
     /**
      * Run check for SPF with the given values.
      * 
@@ -130,110 +307,92 @@ public class SPF implements SPFChecker {
      * @return result The SPFResult
      */
     public SPFResult checkSPF(String ipAddress, String mailFrom, String hostName) {
-        SPF1Data spfData = null;
-        String result = null;
-        String explanation = null;
+        SPFSession spfData = null;
 
+        // Setup the data
         try {
-            // Setup the data
-            spfData = new SPF1Data(mailFrom, hostName, ipAddress);
-            checkSPF(spfData);
-            String resultChar = spfData.getCurrentResult() != null ? spfData.getCurrentResult() : "";
-            result = SPF1Utils.resultToName(resultChar);
-            explanation = spfData.getExplanation();
-        } catch (SPFResultException e) {
-            result = e.getResult();
-            if (!SPF1Utils.NEUTRAL_CONV.equals(result)) {
-                log.warn(e.getMessage(),e);
-            }
-        } catch (IllegalStateException e) {
-            // this should never happen at all. But anyway we will set the
-            // result to neutral. Safety first ..
-            log.error(e.getMessage(),e);
-            result = SPF1Constants.NEUTRAL;
+            spfData = new SPFSession(mailFrom, hostName, ipAddress);
+        } catch (PermErrorException e1) {
+            spfData.setCurrentResultExpanded(e1.getResult());
+        } catch (NoneException e1) {
+            spfData.setCurrentResultExpanded(e1.getResult());
         }
 
-        SPFResult ret = new SPFResult(result, explanation, spfData);
+        SPFChecker resultHandler = new DefaultSPFChecker();
         
-        log.info("[ipAddress=" + ipAddress + "] [mailFrom=" + mailFrom
-                + "] [helo=" + hostName + "] => " + ret.getResult());
+        spfData.pushChecker(resultHandler);
+        spfData.pushChecker(this);
+        spfData.pushExceptionCatcher(new SPFCheckerExceptionCatcherImplementation(resultHandler));
+        
+        FutureSPFResult ret = new FutureSPFResult();
+        
+        executor.execute(spfData, ret);
+
+        // if we call ret.getResult it waits the result ;-)
+//        log.info("[ipAddress=" + ipAddress + "] [mailFrom=" + mailFrom
+//                + "] [helo=" + hostName + "] => " + ret.getResult());
 
         return ret;
 
     }
-    
+
+
     /**
-     * @see org.apache.james.jspf.SPFChecker#checkSPF(org.apache.james.jspf.core.SPF1Data)
+     * @see org.apache.james.jspf.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
      */
-    public void checkSPF(SPF1Data spfData) throws PermErrorException,
+    public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
             NoneException, TempErrorException, NeutralException {
 
-        SPF1Record spfRecord = getPolicy().getSPFRecord(spfData.getCurrentDomain());
-        checkSPF(spfData, spfRecord);
-    }
-
-    /**
-     * Check a given spfData with the given spfRecord
-     * 
-     * @param spfData spf data
-     * @param spfRecord record
-     * @throws PermErrorException exception
-     * @throws NoneException exception
-     * @throws TempErrorException exception
-     * @throws NeutralException exception
-     */
-    public void checkSPF(SPF1Data spfData, SPF1Record spfRecord) throws PermErrorException, NoneException, TempErrorException, NeutralException {
-        Iterator i = spfRecord.iterator();
-        while (i.hasNext()) {
-            SPFChecker m = (SPFChecker) i.next();
-
-            m.checkSPF(spfData);
-
-        }
+        SPFChecker policyChecker = new PolicyChecker(getPolicies());
+        SPFChecker recordChecker = new SPFRecordChecker();
+        
+        spfData.pushChecker(recordChecker);
+        spfData.pushChecker(policyChecker);
+        
+        return null;
     }
 
     /**
      * Return a default policy for SPF
      */
-    public Policy getPolicy() {
+    public LinkedList getPolicies() {
 
-        ArrayList policies = new ArrayList();
-        ArrayList policyFilters = new ArrayList();
+        LinkedList policies = new LinkedList();
         
         if (override != null) {
-            policies.add(override);
-        }
-        
-        if (mustEquals) {
-            policies.add(new SPFStrictCheckerRetriever(dnsProbe));
-        } else {
-            policies.add(new SPFRetriever(dnsProbe));
-        }
-        
-        if (useBestGuess) {
-            policyFilters.add(new BestGuessPolicy());
-        }
-        
-        policyFilters.add(new ParseRecordPolicy(parser));
-        
-        if (fallBack != null) {
-            policyFilters.add(fallBack);
+            policies.add(new SPFPolicyChecker(override));
         }
 
-        policyFilters.add(new NoSPFRecordFoundPolicy());
+        policies.add(new InitialChecksPolicy());
+
+        if (mustEquals) {
+            policies.add(new SPFStrictCheckerRetriever());
+        } else {
+            policies.add(new SPFRetriever());
+        }
+
+        if (useBestGuess) {
+            policies.add(new SPFPolicyPostFilterChecker(new BestGuessPolicy()));
+        }
+        
+        policies.add(new SPFPolicyPostFilterChecker(new ParseRecordPolicy(parser)));
+        
+        if (fallBack != null) {
+            policies.add(new SPFPolicyPostFilterChecker(fallBack));
+        }
+
+        policies.add(new SPFPolicyPostFilterChecker(new NoSPFRecordFoundPolicy()));
         
         // trustedForwarder support is enabled
         if (useTrustedForwarder) {
-            policyFilters.add(new TrustedForwarderPolicy(log));
+            policies.add(new SPFPolicyPostFilterChecker(new TrustedForwarderPolicy(log)));
         }
 
-        policyFilters.add(new NeutralIfNotMatchPolicy());
+        policies.add(new SPFPolicyPostFilterChecker(new NeutralIfNotMatchPolicy()));
 
-        policyFilters.add(new DefaultExplanationPolicy(log, defaultExplanation, macroExpand));
+        policies.add(new SPFPolicyPostFilterChecker(new DefaultExplanationPolicy(log, defaultExplanation, macroExpand)));
         
-        policies.add(new InitialChecksPolicy());
-        
-        return new ChainPolicy(policies, policyFilters);
+        return policies;
     }
     
     /**
@@ -316,4 +475,6 @@ public class SPF implements SPFChecker {
     public synchronized void setSPFMustEqualsTXT(boolean mustEquals) {
         this.mustEquals = mustEquals;
     }
+
+
 }

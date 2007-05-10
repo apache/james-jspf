@@ -26,13 +26,20 @@ package org.apache.james.jspf.macro;
  * 
  */
 
-import org.apache.james.jspf.SPF1Utils;
+import org.apache.james.jspf.core.DNSLookupContinuation;
+import org.apache.james.jspf.core.DNSRequest;
+import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.Logger;
-import org.apache.james.jspf.core.SPF1Data;
+import org.apache.james.jspf.core.SPFCheckerDNSResponseListener;
+import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.core.DNSService.TimeoutException;
+import org.apache.james.jspf.exceptions.NeutralException;
+import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
+import org.apache.james.jspf.exceptions.TempErrorException;
+import org.apache.james.jspf.util.SPF1Utils;
 import org.apache.james.jspf.util.SPFTermsRegexps;
 
 import java.io.UnsupportedEncodingException;
@@ -62,6 +69,10 @@ public class MacroExpand {
     public static final boolean EXPLANATION = true;
     
     public static final boolean DOMAIN = false;
+    
+    public static class RequireClientDomain extends Exception {
+        
+    }
 
     /**
      * Construct MacroExpand
@@ -81,11 +92,101 @@ public class MacroExpand {
         this.dnsProbe = dnsProbe;
     }
     
+
+    private static final class AResponseListener implements
+            SPFCheckerDNSResponseListener {
+        
+        /**
+         * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
+         */
+        public DNSLookupContinuation onDNSResponse(DNSResponse response, SPFSession session)
+                throws PermErrorException, NoneException, TempErrorException,
+                NeutralException {
+            // just return the default "unknown" if we cannot find anything
+            // later
+            session.setClientDomain("unknown");
+            try {
+                List records = response.getResponse();
+                if (records != null && records.size() > 0) {
+                    Iterator i = records.iterator();
+                    while (i.hasNext()) {
+                        String next = (String) i.next();
+                        if (IPAddr.getAddress(session.getIpAddress())
+                                .toString().equals(
+                                        IPAddr.getAddress(next).toString())) {
+                            session
+                                    .setClientDomain((String) session
+                                            .getAttribute(ATTRIBUTE_MACRO_EXPAND_CHECKED_RECORD));
+                            break;
+                        }
+                    }
+                }
+            } catch (TimeoutException e) {
+                // just return the default "unknown".
+            } catch (PermErrorException e) {
+                // just return the default "unknown".
+            }
+            return null;
+        }
+    }
+
+    private static final class PTRResponseListener implements
+            SPFCheckerDNSResponseListener {
+
+        /**
+         * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
+         */
+        public DNSLookupContinuation onDNSResponse(DNSResponse response, SPFSession session)
+                throws PermErrorException, NoneException, TempErrorException,
+                NeutralException {
+
+            try {
+                boolean ip6 = IPAddr.isIPV6(session.getIpAddress());
+                List records = response.getResponse();
+
+                if (records != null && records.size() > 0) {
+                    String record = (String) records.get(0);
+                    session.setAttribute(ATTRIBUTE_MACRO_EXPAND_CHECKED_RECORD,
+                            record);
+
+                    return new DNSLookupContinuation(new DNSRequest(record,
+                            ip6 ? DNSRequest.AAAA : DNSRequest.A), 
+                            new AResponseListener());
+
+                }
+            } catch (TimeoutException e) {
+                // just return the default "unknown".
+                session.setClientDomain("unknown");
+            }
+            return null;
+
+        }
+    }
+
+    private static final String ATTRIBUTE_MACRO_EXPAND_CHECKED_RECORD = "MacroExpand.checkedRecord";
+
+    public DNSLookupContinuation checkExpand(String input, SPFSession session, boolean isExplanation) throws PermErrorException, NoneException {
+        if (input != null) {
+            String host = this.expand(input, session, isExplanation);
+            if (host == null) {
+
+                return new DNSLookupContinuation(new DNSRequest(IPAddr
+                        .getAddress(session.getIpAddress()).getReverseIP(),
+                        DNSRequest.PTR), new PTRResponseListener());
+            }
+        }
+        return null;
+    }
+    
     public String expand(String input, MacroData macroData, boolean isExplanation) throws PermErrorException {
-        if (isExplanation) {
-            return expandExplanation(input, macroData);
-        } else {
-            return expandDomain(input, macroData);
+        try {
+            if (isExplanation) {
+                return expandExplanation(input, macroData);
+            } else {
+                return expandDomain(input, macroData);
+            }
+        } catch (RequireClientDomain e) {
+            return null;
         }
     }
 
@@ -97,8 +198,9 @@ public class MacroExpand {
      * @return expanded The expanded explanation
      * @throws PermErrorException
      *             Get thrown if invalid macros are used
+     * @throws RequireClientDomain 
      */
-    private String expandExplanation(String input, MacroData macroData) throws PermErrorException {
+    private String expandExplanation(String input, MacroData macroData) throws PermErrorException, RequireClientDomain {
 
         log.debug("Start do expand explanation: " + input);
 
@@ -121,8 +223,9 @@ public class MacroExpand {
      * @return expanded The domain with replaced macros
      * @throws PermErrorException
      *             This get thrown if invalid macros are used
+     * @throws RequireClientDomain 
      */
-    private String expandDomain(String input, MacroData macroData) throws PermErrorException {
+    private String expandDomain(String input, MacroData macroData) throws PermErrorException, RequireClientDomain {
 
         log.debug("Start expand domain: " + input);
 
@@ -164,8 +267,9 @@ public class MacroExpand {
      * @return expanded The expanded given String
      * @throws PermErrorException
      *             This get thrown if invalid macros are used
+     * @throws RequireClientDomain 
      */
-    private String expandMacroString(String input, MacroData macroData, boolean isExplanation) throws PermErrorException {
+    private String expandMacroString(String input, MacroData macroData, boolean isExplanation) throws PermErrorException, RequireClientDomain {
 
         StringBuffer decodedValue = new StringBuffer();
         Matcher inputMatcher = macroStringPattern.matcher(input);
@@ -209,8 +313,9 @@ public class MacroExpand {
      * @return returnData The String with replaced macros
      * @throws PermErrorException
      *             Get thrown if an error in processing happen
+     * @throws RequireClientDomain 
      */
-    private String replaceCell(String replaceValue, MacroData macroData, boolean isExplanation) throws PermErrorException {
+    private String replaceCell(String replaceValue, MacroData macroData, boolean isExplanation) throws PermErrorException, RequireClientDomain {
 
         String variable = "";
         String domainNumber = "";
@@ -291,9 +396,10 @@ public class MacroExpand {
      * @return rValue The value for the given macro
      * @throws PermErrorException
      *             Get thrown if the given variable is an unknown macro
-     * 
+     * @throws RequireClientDomain requireClientDomain if the client domain is needed
+     *             and not yet resolved.
      */
-    private String matchMacro(String macro, MacroData macroData) throws PermErrorException {
+    private String matchMacro(String macro, MacroData macroData) throws PermErrorException, RequireClientDomain {
 
         String rValue = null;
 
@@ -317,34 +423,7 @@ public class MacroExpand {
         } else if (variable.equalsIgnoreCase("p")) {
             rValue = macroData.getClientDomain();
             if (rValue == null) {
-                rValue = "unknown";
-                if (macroData instanceof SPF1Data) {
-                    SPF1Data spf1data = (SPF1Data) macroData;
-                    try {
-                        boolean ip6 = IPAddr.isIPV6(spf1data.getIpAddress());
-                        List records = dnsProbe.getRecords(IPAddr.getAddress(spf1data.getIpAddress()).getReverseIP(), DNSService.PTR);
-    
-                        if (records != null && records.size() > 0) {
-                            String record = (String) records.get(0);
-                            records = dnsProbe.getRecords(record, ip6 ? DNSService.AAAA : DNSService.A);
-                            if (records != null && records.size() > 0) {
-                                Iterator i = records.iterator();
-                                while (i.hasNext()) {
-                                    String next = (String) i.next();
-                                    if (IPAddr.getAddress(spf1data.getIpAddress()).toString().equals(IPAddr.getAddress(next).toString())) {
-                                        rValue = record;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    } catch (TimeoutException e) {
-                        // just return the default "unknown".
-                    } catch (PermErrorException e) {
-                        // just return the default "unknown".
-                    }
-                    spf1data.setClientDomain(rValue);
-                }
+                throw new RequireClientDomain();
             }
         } else if (variable.equalsIgnoreCase("o")) {
             rValue = macroData.getSenderDomain();
@@ -358,8 +437,8 @@ public class MacroExpand {
                     // check if the domainname is a FQDN
                     if (SPF1Utils.checkFQDN(dNames.get(i).toString())) {
                         rValue = dNames.get(i).toString();
-                        if (macroData instanceof SPF1Data) {
-                            ((SPF1Data) macroData).setReceivingDomain(rValue);
+                        if (macroData instanceof SPFSession) {
+                            ((SPFSession) macroData).setReceivingDomain(rValue);
                         }
                         break;
                     }

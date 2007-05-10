@@ -1,6 +1,16 @@
 package org.apache.james.jspf.policies;
 
+import org.apache.james.jspf.SPF;
+import org.apache.james.jspf.core.DNSLookupContinuation;
+import org.apache.james.jspf.core.DNSRequest;
+import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.DNSService;
+import org.apache.james.jspf.core.SPF1Record;
+import org.apache.james.jspf.core.SPFCheckerDNSResponseListener;
+import org.apache.james.jspf.core.SPFSession;
+import org.apache.james.jspf.core.DNSService.TimeoutException;
+import org.apache.james.jspf.exceptions.NeutralException;
+import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 
@@ -12,57 +22,102 @@ import java.util.List;
  */
 public class SPFStrictCheckerRetriever extends SPFRetriever {
 
-    public SPFStrictCheckerRetriever(DNSService dns) {
-        super(dns);
+
+    private static final String ATTRIBUTE_SPFSTRICT_CHECK_SPFRECORDS = "SPFStrictCheck.SPFRecords";
+    
+    private static final class SPFStrictSPFRecordsDNSResponseListener implements SPFCheckerDNSResponseListener {
+
+        /**
+         * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
+         */
+        public DNSLookupContinuation onDNSResponse(
+                DNSResponse response, SPFSession session)
+                throws PermErrorException,
+                NoneException, TempErrorException,
+                NeutralException {
+            
+            List spfR = (List) session.getAttribute(ATTRIBUTE_SPFSTRICT_CHECK_SPFRECORDS);
+            List spfTxtR = null;
+            try {
+                spfTxtR = response.getResponse();
+            } catch (TimeoutException e) {
+                throw new TempErrorException("Timeout querying dns");
+            }
+
+            String record = calculateSpfRecord(spfR, spfTxtR);
+            if (record != null) {
+                session.setAttribute(SPF.ATTRIBUTE_SPF1_RECORD, new SPF1Record(record));
+            }
+
+            return null;
+            
+        }
+        
+    }
+    
+    
+    private static final class SPFStrictCheckDNSResponseListener implements SPFCheckerDNSResponseListener {
+
+        /**
+         * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
+         */
+        public DNSLookupContinuation onDNSResponse(
+                DNSResponse response, SPFSession session)
+                throws PermErrorException, NoneException,
+                TempErrorException, NeutralException {
+            try {
+                List spfR = response.getResponse();
+                
+                session.setAttribute(ATTRIBUTE_SPFSTRICT_CHECK_SPFRECORDS, spfR);
+                
+                String currentDomain = session.getCurrentDomain();
+                return new DNSLookupContinuation(new DNSRequest(currentDomain, DNSRequest.TXT), new SPFStrictSPFRecordsDNSResponseListener());
+                    
+            } catch (DNSService.TimeoutException e) {
+                throw new TempErrorException("Timeout querying dns");
+            }
+        }
+        
+        
     }
 
+
     /**
-     * Get the SPF-Record for a server
-     * 
-     * 
-     * @param dns
-     *            The dns service to query
-     * @param hostname
-     *            The hostname for which we want to retrieve the SPF-Record
-     * @param spfVersion
-     *            The SPF-Version which should used.
-     * @return The SPF-Record if one is found.
-     * @throws PermErrorException
-     *             if more then one SPF-Record was found, or one SPF-Type SPF-Record 
-     *             and one TXT-Type SPF-Record was published and these are not equals.
-     * @throws TempErrorException
-     *             if the lookup result was "TRY_AGAIN"
+     * @see org.apache.james.jspf.policies.SPFRetriever#checkSPF(org.apache.james.jspf.core.SPFSession)
      */
-    protected String retrieveSpfRecord(String hostname)
-            throws PermErrorException, TempErrorException {
+    public DNSLookupContinuation checkSPF(SPFSession spfData)
+            throws PermErrorException, TempErrorException, NeutralException,
+            NoneException {
+        SPF1Record res = (SPF1Record) spfData.getAttribute(SPF.ATTRIBUTE_SPF1_RECORD);
+        if (res == null) {
+            String currentDomain = spfData.getCurrentDomain();
 
-        try {
-            String spfR1 = null;
-            String spfR2 = null;
-            // do DNS lookup for SPF-Type
-            List spfR = getDNSService().getRecords(hostname, DNSService.SPF);
+            return new DNSLookupContinuation(new DNSRequest(currentDomain, DNSRequest.SPF), new SPFStrictCheckDNSResponseListener());
+            
+        }
+        return null;
+    }
 
-            // do DNS lookup for TXT-Type
-            List spfTxtR = getDNSService().getRecords(hostname, DNSService.TXT);
-            
-            if (spfR != null) spfR1 = extractSPFRecord(spfR);
-            if (spfTxtR != null) spfR2 = extractSPFRecord(spfTxtR);
-            
-            if (spfR1 != null && spfR2 == null) {
-                return spfR1;
-            } else if (spfR1 == null && spfR2 != null) {
-                return spfR2;
-            } else if (spfR1 != null && spfR2 != null) {
-                if (spfR1.toLowerCase().equals(spfR2.toLowerCase()) == false) {
-                    throw new PermErrorException("Published SPF records not equals");
-                } else {
-                    return spfR1;
-                }
+
+    private static String calculateSpfRecord(List spfR, List spfTxtR)
+            throws PermErrorException {
+        String spfR1 = null;
+        String spfR2 = null;
+        if (spfR != null) spfR1 = extractSPFRecord(spfR);
+        if (spfTxtR != null) spfR2 = extractSPFRecord(spfTxtR);
+        
+        if (spfR1 != null && spfR2 == null) {
+            return spfR1;
+        } else if (spfR1 == null && spfR2 != null) {
+            return spfR2;
+        } else if (spfR1 != null && spfR2 != null) {
+            if (spfR1.toLowerCase().equals(spfR2.toLowerCase()) == false) {
+                throw new PermErrorException("Published SPF records not equals");
             } else {
-                return null;
+                return spfR1;
             }
-        } catch (DNSService.TimeoutException e) {
-            throw new TempErrorException("Timeout querying dns");
+        } else {
+            return null;
         }
     }
 }

@@ -20,69 +20,84 @@
 
 package org.apache.james.jspf.terms;
 
+import org.apache.james.jspf.core.DNSLookupContinuation;
+import org.apache.james.jspf.core.DNSRequest;
+import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.DNSService;
-import org.apache.james.jspf.core.SPF1Data;
+import org.apache.james.jspf.core.Directive;
+import org.apache.james.jspf.core.SPFChecker;
+import org.apache.james.jspf.core.SPFCheckerDNSResponseListener;
+import org.apache.james.jspf.core.SPFSession;
+import org.apache.james.jspf.exceptions.NeutralException;
+import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
+import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.util.SPFTermsRegexps;
-import org.apache.james.jspf.wiring.DNSServiceEnabled;
 
 import java.util.List;
 
 /**
  * This class represent the exists mechanism
- * 
  */
-public class ExistsMechanism extends GenericMechanism implements DNSServiceEnabled {
+public class ExistsMechanism extends GenericMechanism implements SPFCheckerDNSResponseListener {
+
+    private final class ExpandedChecker implements SPFChecker {
+        public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
+                TempErrorException, NeutralException, NoneException {
+            String host = expandHost(spfData);
+            return new DNSLookupContinuation(new DNSRequest(host,DNSRequest.A), ExistsMechanism.this);
+        }
+    }
 
     /**
      * ABNF: exists = "exists" ":" domain-spec
      */
     public static final String REGEX = "[eE][xX][iI][sS][tT][sS]" + "\\:"
             + SPFTermsRegexps.DOMAIN_SPEC_REGEX;
-    
-    private DNSService dnsService;
+
+    private SPFChecker expandedChecker = new ExpandedChecker();
 
     /**
-     * 
-     * @see org.apache.james.jspf.core.GenericMechanism#run(org.apache.james.jspf.core.SPF1Data)
+     * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
      */
-    public boolean run(SPF1Data spfData) throws PermErrorException,
-            TempErrorException {
-        List aRecords;
-
+    public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
+            TempErrorException, NeutralException, NoneException {
         // update currentDepth
         spfData.increaseCurrentDepth();
 
-        String host = expandHost(spfData);
-
-        try {
-            aRecords = dnsService.getRecords(host,DNSService.A);
-        } catch (DNSService.TimeoutException e) {
-            return false;
-        }
-       
-        if (aRecords != null && aRecords.size() > 0) {
-            return true;
-        }
-
-        // No match found
-        return false;
+        spfData.pushChecker(expandedChecker);
+        return macroExpand.checkExpand(getDomain(), spfData, MacroExpand.DOMAIN);
     }
-    
+
+    /**
+     * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
+     */
+    public DNSLookupContinuation onDNSResponse(DNSResponse response, SPFSession spfSession) throws PermErrorException, TempErrorException {
+        List aRecords;
+        
+        try {
+            aRecords = response.getResponse();
+        } catch (DNSService.TimeoutException e) {
+            spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
+            return null;
+        }
+        
+        if (aRecords != null && aRecords.size() > 0) {
+            spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.TRUE);
+            return null;
+        }
+        
+        // No match found
+        spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
+        return null;
+    }
+
     /**
      * @see java.lang.Object#toString()
      */
     public String toString() {
         return "exists:"+getDomain();
     }
-
-    /**
-     * @see org.apache.james.jspf.wiring.DNSServiceEnabled#enableDNSService(org.apache.james.jspf.core.DNSService)
-     */
-    public void enableDNSService(DNSService service) {
-        this.dnsService = service;
-    }
-
 
 }

@@ -19,9 +19,17 @@
 
 package org.apache.james.jspf;
 
+import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.Logger;
+import org.apache.james.jspf.core.SPFExecutor;
 import org.apache.james.jspf.core.SPFRecordParser;
+import org.apache.james.jspf.core.StagedMultipleSPFExecutor;
+import org.apache.james.jspf.core.SynchronousSPFExecutor;
+import org.apache.james.jspf.dnsserver.DNSTestingServer;
+import org.apache.james.jspf.impl.DNSJnioAsynchService;
+import org.apache.james.jspf.impl.DNSServiceAsynchSimulator;
+import org.apache.james.jspf.impl.DNSServiceXBillImpl;
 import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.parser.DefaultSPF1Parser;
 import org.apache.james.jspf.parser.DefaultTermsFactory;
@@ -33,35 +41,66 @@ import org.apache.james.jspf.wiring.WiringService;
 import org.jvyaml.Constructor;
 import org.jvyaml.DefaultYAMLFactory;
 import org.jvyaml.YAMLFactory;
+import org.xbill.DNS.DClass;
+import org.xbill.DNS.ExtendedNonblockingResolver;
+import org.xbill.DNS.Lookup;
+import org.xbill.DNS.Name;
+import org.xbill.DNS.NonblockingResolver;
+import org.xbill.DNS.Resolver;
+import org.xbill.DNS.SimpleResolver;
+import org.xbill.DNS.TextParseException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 import junit.framework.TestCase;
 
 public abstract class AbstractYamlTest extends TestCase {
 
+    protected static final int TIMEOUT = 10;
+    protected static final int MOCK_SERVICE = 2;
+    protected static final int FAKE_SERVER = 1;
+    protected static final int REAL_SERVER = 3;
+    private int dnsServiceMockStyle = MOCK_SERVICE;
+
+    protected static final int SYNCHRONOUS_EXECUTOR = 1;
+    protected static final int STAGED_EXECUTOR = 2;
+    protected static final int STAGED_EXECUTOR_MULTITHREADED = 3;
+    protected static final int STAGED_EXECUTOR_DNSJNIO = 4;
+    private int spfExecutorType = SYNCHRONOUS_EXECUTOR;
+
     SPFYamlTestSuite data;
     String test;
     protected Logger log;
+    private SPFExecutor executor;
     protected static MacroExpand macroExpand;
     protected static SPF spf;
+    protected static SPFYamlTestSuite prevData;
     protected static SPFRecordParser parser;
     private static DNSService dns;
+    protected static DNSTestingServer dnsTestServer;
 
     protected AbstractYamlTest(SPFYamlTestSuite def, String test) {
         super(def.getComment()+" #"+test);
         this.data = def;
         this.test = test;
+    }
+
+    protected AbstractYamlTest(SPFYamlTestSuite def) {
+        super(def.getComment()+" #COMPLETE!");
+        this.data = def;
+        this.test = null;
     }
 
     protected abstract String getFilename();
@@ -76,17 +115,22 @@ public abstract class AbstractYamlTest extends TestCase {
         Iterator i = tests.iterator();
         while (i.hasNext() && data == null) {
             SPFYamlTestSuite def = (SPFYamlTestSuite) i.next();
-            Iterator j = def.getTests().keySet().iterator();
-            while (j.hasNext() && data == null) {
-                String test = (String) j.next();
-                if (name.equals(def.getComment()+ " #"+test)) {
-                    data = def;
-                    this.test = test;
+            if (name.equals(def.getComment()+" #COMPLETE!")) {
+                data = def;
+                this.test = null;
+            } else {
+                Iterator j = def.getTests().keySet().iterator();
+                while (j.hasNext() && data == null) {
+                    String test = (String) j.next();
+                    if (name.equals(def.getComment()+ " #"+test)) {
+                        data = def;
+                        this.test = test;
+                    }
                 }
             }
         }
         assertNotNull(data);
-        assertNotNull(test);
+        // assertNotNull(test);
     }
 
     public static List loadTests(String filename) throws IOException {
@@ -126,16 +170,11 @@ public abstract class AbstractYamlTest extends TestCase {
     }
 
     protected void runTest() throws Throwable {
-        String next = test;
-        HashMap currentTest = (HashMap) data.getTests().get(next);
 
         if (log == null) {
-                log = new ConsoleLogger();
+                log = new ConsoleLogger(ConsoleLogger.LEVEL_DEBUG, "root");
         }
 
-        Logger testLogger = log.getChildLogger("test");
-        testLogger.info("TESTING "+next+": "+currentTest.get("description"));
-    
         if (parser == null) {
             /* PREVIOUS SLOW WAY 
             enabledServices = new WiringServiceTable();
@@ -161,16 +200,72 @@ public abstract class AbstractYamlTest extends TestCase {
                 
             }));
         }
-        dns = new LoggingDNSService(getDNSService(), log.getChildLogger("dns"));
+        if (this.data != AbstractYamlTest.prevData) {
+            dns = new LoggingDNSService(getDNSService(), log.getChildLogger("dns"));
+            AbstractYamlTest.prevData = this.data;
+        }
         macroExpand = new MacroExpand(log.getChildLogger("macroExpand"), dns);
-        spf = new SPF(dns, parser, log.getChildLogger("spf"), macroExpand);
-        /* PREVIOUS SLOW WAY 
-        // we add this after the creation because it is a loop reference
-        enabledServices.remove(DNSServiceEnabled.class);
-        enabledServices.put(DNSServiceEnabled.class, getDNSService());
-        enabledServices.remove(SPFCheckEnabled.class);
-        enabledServices.put(SPFCheckEnabled.class, spf);
-        */
+        if (getSpfExecutorType() == SYNCHRONOUS_EXECUTOR) {  // synchronous
+            executor = new SynchronousSPFExecutor(log, dns);
+        } else if (getSpfExecutorType() == STAGED_EXECUTOR || getSpfExecutorType() == STAGED_EXECUTOR_MULTITHREADED){
+            executor = new StagedMultipleSPFExecutor(log, new DNSServiceAsynchSimulator(dns, getSpfExecutorType() == STAGED_EXECUTOR_MULTITHREADED));
+        } else if (getSpfExecutorType() == STAGED_EXECUTOR_DNSJNIO) {
+            
+            try {
+                ExtendedNonblockingResolver resolver;
+                
+                if (getDnsServiceMockStyle() == FAKE_SERVER) {
+                    NonblockingResolver nonblockingResolver = new NonblockingResolver("127.0.0.1");
+                    resolver = new ExtendedNonblockingResolver(new Resolver[] {nonblockingResolver});
+                    nonblockingResolver.setPort(35347);
+                    nonblockingResolver.setTCP(false);
+                } else if (getDnsServiceMockStyle() == REAL_SERVER) {
+                    resolver = new ExtendedNonblockingResolver();
+                    Resolver[] resolvers = resolver.getResolvers();
+                    for (int i = 0; i < resolvers.length; i++) {
+                        resolvers[i].setTCP(false);
+                    }
+                } else {
+                    throw new IllegalStateException("DnsServiceMockStyle "+getDnsServiceMockStyle()+" is not supported when STAGED_EXECUTOR_DNSJNIO executor style is used");
+                }
+                
+                DNSJnioAsynchService jnioAsynchService = new DNSJnioAsynchService(resolver);
+                jnioAsynchService.setTimeout(TIMEOUT);
+                executor = new StagedMultipleSPFExecutor(log, jnioAsynchService);
+
+            } catch (UnknownHostException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+        } else {
+            throw new UnsupportedOperationException("Unknown executor type");
+        }
+        spf = new SPF(dns, parser, log.getChildLogger("spf"), macroExpand, executor);
+
+        if (test != null) {
+            String next = test;
+            SPFResult res = runSingleTest(next);
+            verifyResult(next, res);
+        } else {
+            Map queries = new HashMap();
+            for (Iterator i = data.getTests().keySet().iterator(); i.hasNext(); ) {
+                String next = (String) i.next();
+                SPFResult res = runSingleTest(next);
+                queries.put(next, res);
+            }
+            for (Iterator i = queries.keySet().iterator(); i.hasNext(); ) {
+                String next = (String) i.next();
+                verifyResult(next, (SPFResult) queries.get(next));
+            }
+        }
+        
+    }
+
+    private SPFResult runSingleTest(String testName) {
+        HashMap currentTest = (HashMap) data.getTests().get(testName);
+        Logger testLogger = log.getChildLogger(testName);
+        testLogger.info("TESTING "+testName+": "+currentTest.get("description"));
 
         String ip = null;
         String sender = null;
@@ -189,10 +284,15 @@ public abstract class AbstractYamlTest extends TestCase {
         }
     
         SPFResult res = spf.checkSPF(ip, sender, helo);
+        return res;
+    }
+
+    private void verifyResult(String testName, SPFResult res) {
         String resultSPF = res.getResult();
-        
+        HashMap currentTest = (HashMap) data.getTests().get(testName);
+        Logger testLogger = log.getChildLogger(testName+"-verify");
         if (currentTest.get("result") instanceof String) {
-            assertEquals("Test "+next+" ("+currentTest.get("description")+") failed. Returned: "+res.getResult()+" Expected: "+currentTest.get("result")+" [["+res.getResult()+"||"+res.getHeaderText()+"]]", currentTest.get("result"), res.getResult());
+            assertEquals("Test "+testName+" ("+currentTest.get("description")+") failed. Returned: "+res.getResult()+" Expected: "+currentTest.get("result")+" [["+res.getResult()+"||"+res.getHeaderText()+"]]", currentTest.get("result"), res.getResult());
         } else {
             ArrayList results = (ArrayList) currentTest.get("result");
             boolean match = false;
@@ -220,15 +320,85 @@ public abstract class AbstractYamlTest extends TestCase {
         }
     
         testLogger.info("PASSED. Result="+res.getResult()+" Explanation="+res.getExplanation()+" Header="+res.getHeaderText());
-        
+    }
+
+    /**
+     * @return
+     */
+    protected DNSService getDNSServiceMockedDNSService() {
+        SPFYamlDNSService yamlDNSService = new SPFYamlDNSService(data.getZonedata());
+        return yamlDNSService;
     }
 
     /**
      * @return
      */
     protected DNSService getDNSService() {
-        SPFYamlDNSService yamlDNSService = new SPFYamlDNSService(data.getZonedata());
-        return yamlDNSService;
+        switch (getDnsServiceMockStyle()) {
+            case MOCK_SERVICE: return getDNSServiceMockedDNSService();
+            case FAKE_SERVER: return getDNSServiceFakeServer();
+            case REAL_SERVER: return getDNSServiceReal();
+            default: 
+                throw new UnsupportedOperationException("Unsupported mock style");
+        }
+    }
+
+    protected int getDnsServiceMockStyle() {
+        return dnsServiceMockStyle;
+    }
+
+    /**
+     * @return
+     */
+    protected DNSService getDNSServiceFakeServer() {
+        Resolver resolver = null;
+        try {
+            resolver = new SimpleResolver("127.0.0.1");
+        } catch (UnknownHostException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        resolver.setPort(35347);
+        Lookup.setDefaultResolver(resolver);
+        Lookup.setDefaultCache(null, DClass.IN);
+        Lookup.setDefaultSearchPath(new Name[] {});
+
+        if (dnsTestServer == null) {
+            try {
+                dnsTestServer = new DNSTestingServer("0.0.0.0", "35347");
+            } catch (TextParseException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        
+        dnsTestServer.setData(data.getZonedata());
+        
+        DNSServiceXBillImpl serviceXBillImpl = new DNSServiceXBillImpl(log) {
+
+            public List getLocalDomainNames() {
+                List l = new ArrayList();
+                l.add("localdomain.foo.bar");
+                return l; 
+            }
+
+        };
+        // TIMEOUT 2 seconds
+        serviceXBillImpl.setTimeOut(TIMEOUT);
+        return serviceXBillImpl;
+    }
+    
+    /**
+     * @return
+     */
+    protected DNSService getDNSServiceReal() {
+        DNSServiceXBillImpl serviceXBillImpl = new DNSServiceXBillImpl(log);
+        // TIMEOUT 2 seconds
+        serviceXBillImpl.setTimeOut(TIMEOUT);
+        return serviceXBillImpl;
     }
 
     public AbstractYamlTest() {
@@ -268,8 +438,8 @@ public abstract class AbstractYamlTest extends TestCase {
             this.recordLimit = recordLimit;
         }
 
-        public List getRecords(String hostname, int recordType) throws TimeoutException {
-            return getRecords(hostname, recordType, 6);
+        public List getRecords(DNSRequest request) throws TimeoutException {
+            return getRecords(request.getHostname(), request.getRecordType(), 6);
         }
 
         public List getRecords(String hostname, int recordType, int depth) throws TimeoutException {
@@ -292,7 +462,7 @@ public abstract class AbstractYamlTest extends TestCase {
                     if (o instanceof HashMap) {
                         HashMap hm = (HashMap) o;
                         if (hm.get(type) != null) {
-                            if (recordType == DNSService.MX) {
+                            if (recordType == DNSRequest.MX) {
                                 List mxList = (List) hm.get(type);
     
                                 // For MX records we overwrite the result ignoring the priority.
@@ -332,6 +502,7 @@ public abstract class AbstractYamlTest extends TestCase {
             }
             return null;
         }
+        
     }
 
     
@@ -343,14 +514,18 @@ public abstract class AbstractYamlTest extends TestCase {
      */
     public static String getRecordTypeDescription(int recordType) {
         switch (recordType) {
-            case DNSService.A: return "A";
-            case DNSService.AAAA: return "AAAA";
-            case DNSService.MX: return "MX";
-            case DNSService.PTR: return "PTR";
-            case DNSService.TXT: return "TXT";
-            case DNSService.SPF: return "SPF";
+            case DNSRequest.A: return "A";
+            case DNSRequest.AAAA: return "AAAA";
+            case DNSRequest.MX: return "MX";
+            case DNSRequest.PTR: return "PTR";
+            case DNSRequest.TXT: return "TXT";
+            case DNSRequest.SPF: return "SPF";
             default: return null;
         }
+    }
+
+    protected int getSpfExecutorType() {
+        return spfExecutorType;
     }
 
     protected static class SPFYamlTestSuite {

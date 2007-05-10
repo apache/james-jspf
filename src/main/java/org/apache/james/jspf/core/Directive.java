@@ -20,6 +20,7 @@
 
 package org.apache.james.jspf.core;
 
+import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
@@ -29,11 +30,37 @@ import org.apache.james.jspf.exceptions.TempErrorException;
  */
 public class Directive implements SPFChecker {
 
+    private final class MechanismResultChecker implements SPFChecker {
+
+        public DNSLookupContinuation checkSPF(SPFSession spfData)
+                throws PermErrorException, TempErrorException,
+                NeutralException, NoneException {
+            Boolean res = (Boolean) spfData.getAttribute(ATTRIBUTE_MECHANISM_RESULT);
+            if (res != null ? res.booleanValue() : true) {
+                if (qualifier.equals("")) {
+                    spfData.setCurrentResult(SPF1Constants.PASS);
+                } else {
+                    spfData.setCurrentResult(qualifier);
+                }
+                
+                log.info("Processed directive matched: " + Directive.this + " returned " + spfData.getCurrentResult());
+            } else {
+                log.debug("Processed directive NOT matched: " + this);
+            }
+            return null;
+        }
+        
+    }
+
+    public static final String ATTRIBUTE_MECHANISM_RESULT = "Mechanism.result";
+
     protected String qualifier = "+";
 
     private Mechanism mechanism = null;
 
     private Logger log;
+
+    private MechanismResultChecker resultChecker;
 
     /**
      * Construct Directive
@@ -46,12 +73,14 @@ public class Directive implements SPFChecker {
             throws PermErrorException {
         super();
         this.log = logger;
-        if (qualifier != null && qualifier.length() > 0) {
-            this.qualifier = qualifier;
+        if (qualifier == null) {
+            throw new PermErrorException("Qualifier cannot be null");
         }
+        this.qualifier = qualifier;
         if (mechanism == null) {
             throw new PermErrorException("Mechanism cannot be null");
         }
+        this.resultChecker  = new MechanismResultChecker();
         this.mechanism = mechanism;
     }
 
@@ -63,27 +92,21 @@ public class Directive implements SPFChecker {
      * @throws PermErrorException get thrown if a PermError should returned
      * @throws TempErrorException get thrown if a TempError should returned
      * @throws NoneException get thrown if a NoneException should returned;
+     * @throws NeutralException 
      */
-    public void checkSPF(SPF1Data spfData) throws PermErrorException,
-            TempErrorException, NoneException {
+    public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
+            TempErrorException, NoneException, NeutralException {
         // if already have a current result we don't run this
         if (spfData.getCurrentResult() == null) {
 
-            if (mechanism.run(spfData)) {
-                if (qualifier != null) {
-                    if (qualifier.equals("")) {
-                        spfData.setCurrentResult(SPF1Constants.PASS);
-                    } else {
-                        spfData.setCurrentResult(qualifier);
-                    }
-                }
-                
-                log.info("Processed directive matched: " + this + " returned " + spfData.getCurrentResult());
-            } else {
-                log.debug("Processed directive NOT matched: " + this);
-            }
+            spfData.removeAttribute(ATTRIBUTE_MECHANISM_RESULT);
+
+            spfData.pushChecker(resultChecker);
+            
+            spfData.pushChecker(mechanism);
 
         }
+        return null;
     }
 
     /**
@@ -106,6 +129,12 @@ public class Directive implements SPFChecker {
     
     public String toString() {
         return qualifier + mechanism;
+    }
+
+    public void onDNSResponse(DNSResponse response, SPFSession spfSession)
+            throws PermErrorException, NoneException, TempErrorException,
+            NeutralException {
+        throw new IllegalStateException("NOT USED YET");
     }
 
 }

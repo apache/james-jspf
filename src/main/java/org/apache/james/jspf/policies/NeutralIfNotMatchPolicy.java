@@ -19,8 +19,9 @@
 
 package org.apache.james.jspf.policies;
 
+import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.SPF1Constants;
-import org.apache.james.jspf.core.SPF1Data;
+import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.core.SPF1Record;
 import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.exceptions.NeutralException;
@@ -33,6 +34,24 @@ import org.apache.james.jspf.exceptions.TempErrorException;
  */
 public class NeutralIfNotMatchPolicy implements PolicyPostFilter {
     
+    private final class NeutralIfNotMatchModifier implements SPFChecker {
+        
+        /**
+         * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
+         */
+        public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException, TempErrorException, NeutralException {
+            // If no match was found set the result to neutral
+            if (spfData.getCurrentResult() == null) {
+                spfData.setCurrentResult(SPF1Constants.NEUTRAL);
+            }
+            return null;
+        }
+
+        public String toString() {
+            return "defaultresult";
+        }
+    }
+
     /**
      * @see org.apache.james.jspf.policies.PolicyPostFilter#getSPFRecord(java.lang.String, org.apache.james.jspf.core.SPF1Record)
      */
@@ -41,18 +60,7 @@ public class NeutralIfNotMatchPolicy implements PolicyPostFilter {
         // Set the result to NEUTRAL if at least a directive is present and it didn't match
         // Maybe we should simply append a "?all" at the end, as modifier
         if (spfRecord.getDirectives().size() > 0) {
-            spfRecord.getModifiers().add(new SPFChecker() {
-                public void checkSPF(SPF1Data spfData) throws PermErrorException, NoneException, TempErrorException, NeutralException {
-                    // If no match was found set the result to neutral
-                    if (spfData.getCurrentResult() == null) {
-                        spfData.setCurrentResult(SPF1Constants.NEUTRAL);
-                    }
-                }
-                
-                public String toString() {
-                    return "defaultresult";
-                }
-            });
+            spfRecord.getModifiers().add(new NeutralIfNotMatchModifier());
         }
         return spfRecord;
     }

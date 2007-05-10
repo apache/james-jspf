@@ -19,6 +19,7 @@
 
 package org.apache.james.jspf;
 
+import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.Logger;
 
@@ -64,14 +65,14 @@ public class LoggingDNSService implements DNSService {
     }
 
     public void setTimeOut(int timeOut) {
-        // MOCK
+        dnsService.setTimeOut(timeOut);
     }
 
-    public List getRecords(String hostname, int recordType) throws TimeoutException {
+    public List getRecords(DNSRequest request) throws TimeoutException {
         try {
-            List result = dnsService.getRecords(hostname, recordType);
+            List result = dnsService.getRecords(request);
             StringBuffer logBuff = new StringBuffer();
-            logBuff.append("getRecords(" + hostname + "," + recordType + ") = ");
+            logBuff.append("getRecords(" + request.getHostname() + "," + request.getRecordType() + ") = ");
             if (result != null) {
                 for (int i = 0; i < result.size(); i++) {
                     logBuff.append(result.get(i));
@@ -87,9 +88,10 @@ public class LoggingDNSService implements DNSService {
             logger.debug(logBuff.toString());
             return result;
         } catch (TimeoutException e) {
-            logger.debug("getRecords(" + hostname
+            logger.debug("getRecords(" + request.getHostname()
                     + ") = TempErrorException[" + e.getMessage() + "]");
             throw e;
         }
     }
+
 }

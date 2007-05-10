@@ -20,7 +20,7 @@
 
 package org.apache.james.jspf.exceptions;
 
-import org.apache.james.jspf.SPF1Utils;
+import org.apache.james.jspf.util.SPF1Utils;
 
 /**
  * This exception get thrown if the result should be TempError

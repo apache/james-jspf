@@ -18,7 +18,7 @@
  ****************************************************************/
 
 
-package org.apache.james.jspf;
+package org.apache.james.jspf.util;
 
 import org.apache.james.jspf.core.SPF1Constants;
 
@@ -55,7 +55,7 @@ public class SPF1Utils {
      * @param result The result which should converted
      * @return coverted result
      */
-    protected static String resultToName(String result) {
+    public static String resultToName(String result) {
 
         if (result.equals(SPF1Constants.PASS)) {
             return PASS_CONV;

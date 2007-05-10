@@ -20,19 +20,19 @@
 
 package org.apache.james.jspf;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Iterator;
-import java.util.regex.Pattern;
-
 import org.apache.james.jspf.core.SPFRecordParser;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.parser.DefaultSPF1Parser;
 import org.apache.james.jspf.parser.DefaultTermsFactory;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.regex.Pattern;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -146,14 +146,7 @@ public class SPF1ParserTest extends TestCase {
                                 if (def.recOutAuto == null)
                                     def.recOutAuto = "";
                             }
-//                        } else {
-//                            // System.err.println("Unknown token: " + tokens[0]);
                         }
-
-//                    } else {
-//                        System.err
-//                                .println("Ignored line for different implementation: "
-//                                        + tokens[1]);
                     }
 
                 } else {

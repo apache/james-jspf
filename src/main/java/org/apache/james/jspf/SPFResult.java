@@ -20,7 +20,8 @@
 
 package org.apache.james.jspf;
 
-import org.apache.james.jspf.core.SPF1Data;
+import org.apache.james.jspf.core.SPFSession;
+import org.apache.james.jspf.util.SPF1Utils;
 
 /**
  * This class is used to return the result of an SPF lookup.
@@ -28,13 +29,17 @@ import org.apache.james.jspf.core.SPF1Data;
  */
 public class SPFResult  {
 
-    private String headerTextAsString = "";
+    protected String headerTextAsString = "";
 
-    private String headerName = "Received-SPF";
+    protected String headerName = "Received-SPF";
     
-    private String result = null;
+    protected String result = null;
 
     protected String explanation = null;
+    
+    protected SPFResult() {
+        
+    }
     
     /**
      * Construct SPFResult
@@ -43,9 +48,17 @@ public class SPFResult  {
      * @param explanation the explanation
      * @param spf1data the SPF1Data
      */
-    public SPFResult(String result, String explanation, SPF1Data spf1data) {
-        this.explanation = explanation;
-        this.result = result;
+    public SPFResult(SPFSession spf1data) {
+        setSPFSession(spf1data);
+    }
+    
+    /**
+     * Initialize the result.
+     * @param spf1data
+     */
+    protected void setSPFSession(SPFSession spf1data) {
+        this.explanation = spf1data.getExplanation();
+        this.result = spf1data.getCurrentResultExpanded();
         this.headerTextAsString = generateHeader(result, spf1data);
     }
 
@@ -81,7 +94,7 @@ public class SPFResult  {
      * 
      * @param result The result we should use to generate the header
      */
-    private String generateHeader(String result, SPF1Data spfData) {
+    private String generateHeader(String result, SPFSession spfData) {
 
         StringBuffer headerText = new StringBuffer();
 

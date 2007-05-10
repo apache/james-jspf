@@ -19,19 +19,42 @@
 
 package org.apache.james.jspf.core;
 
-import org.apache.james.jspf.exceptions.NoneException;
-import org.apache.james.jspf.exceptions.PermErrorException;
 
-import junit.framework.TestCase;
+import java.util.List;
 
-public class SPF1DataTest extends TestCase {
-
-    /*
-     * Test method for 'org.apache.james.jspf.core.SPF1Data.getMacroIpAddress()'
-     */
-    public void testGetMacroIpAddress() throws PermErrorException, NoneException {
-        SPF1Data d = new SPF1Data("mailfrom@fromdomain.com","helodomain.com","2001:DB8::CB01");
-        assertEquals("2.0.0.1.0.D.B.8.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.C.B.0.1",d.getMacroIpAddress());
+public class IResponseImpl implements IResponse {
+    private Exception exception = null;
+    private List value = null;
+    private Object id = null;
+    
+    public IResponseImpl(Object id, Exception e) {
+        this.exception = e;
+        this.id = id;
     }
-
+    
+    public IResponseImpl(Object id, List result) {
+        this.value = result;
+        this.id = id;
+    }
+    
+    /**
+     * @see org.apache.james.jspf.core.IResponse#getException()
+     */
+    public Exception getException() {
+        return exception;
+    }
+    
+    /**
+     * @see org.apache.james.jspf.core.IResponse#getId()
+     */
+    public Object getId() {
+        return id;
+    }
+    
+    /**
+     * @see org.apache.james.jspf.core.IResponse#getValue()
+     */
+    public Object getValue() {
+        return value;
+    }
 }

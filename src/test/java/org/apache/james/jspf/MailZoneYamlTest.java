@@ -44,6 +44,10 @@ public class MailZoneYamlTest extends AbstractYamlTest {
         super(def, test);
     }
 
+    protected MailZoneYamlTest(SPFYamlTestSuite def) {
+        super(def);
+    }
+
     protected String getFilename() {
         return YAMLFILE2;
     }

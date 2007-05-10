@@ -33,25 +33,16 @@ public interface DNSService {
     public static class TimeoutException extends Exception {
         
     }
-    
-    /** The record types for the lookups */
-    public int A = 1;
-    public int AAAA = 2;
-    public int MX = 3;
-    public int PTR = 4;
-    public int TXT = 5;
-    public int SPF = 6;
 
     /**
      * Retrieve dns records for the given host
      * 
-     * @param hostname host to be queried
-     * @param recordType the record type: MX, A, AAAA, PTR, TXT, SPF 
+     * @param request the dns request
      * @return an array of Strings representing the records
      * @throws NoneException when no record is found or a textparse exception happen
      * @throws TempErrorException on timeout.
      */
-    public List getRecords(String hostname, int recordType) throws TimeoutException;
+    public List getRecords(DNSRequest request) throws TimeoutException;
 
     /**
      * Try to get all domain names for the running host

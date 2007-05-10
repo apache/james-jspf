@@ -24,6 +24,10 @@ import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.macro.MacroData;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Stack;
+
 /**
  * 
  * This Class is used as a container between the other classes. All necessary
@@ -31,7 +35,7 @@ import org.apache.james.jspf.macro.MacroData;
  * 
  */
 
-public class SPF1Data implements MacroData {
+public class SPFSession implements MacroData {
 
     private String ipAddress = ""; // also used for (i)<sending-host>
 
@@ -65,9 +69,17 @@ public class SPF1Data implements MacroData {
     private String currentResult = null;
 
     private boolean ignoreExplanation = false;
+    
+    private Map attributes = new HashMap();
+    
+    private Stack checkers = new Stack();
+    
+    private Stack catchers = new Stack();
 
+    private String currentResultExpanded;
+    
     /**
-     * Build the SPF1Data from the given parameters
+     * Build the SPFSession from the given parameters
      * 
      * @param mailFrom
      *            The emailaddress of the sender
@@ -82,7 +94,7 @@ public class SPF1Data implements MacroData {
      * @throws NoneException
      *             Get thrown if no valid emailaddress get passed
      */
-    public SPF1Data(String mailFrom, String heloDomain, String clientIP) throws PermErrorException, NoneException {
+    public SPFSession(String mailFrom, String heloDomain, String clientIP) throws PermErrorException, NoneException {
         super();
         this.mailFrom = mailFrom.trim();
         this.hostName = heloDomain.trim();
@@ -328,4 +340,109 @@ public class SPF1Data implements MacroData {
         return ignoreExplanation;
     }
     
+    /**
+     * Retrieve a stored attribute
+     * 
+     * @param key the attribute key
+     * @return the stored attribute
+     */
+    public Object getAttribute(String key) {
+        return attributes.get(key);
+    }
+    
+    /**
+     * Sets a new attribute in the session
+     * 
+     * @param key attribute key
+     * @param value the value for this attribute
+     */
+    public void setAttribute(String key, Object value) {
+        this.attributes.put(key, value);
+    }
+    
+    /**
+     * Remove the attribute stored under the given key
+     * 
+     * @param key the key of the attribute
+     * @return object the attribute which was stored with the key
+     */
+    public Object removeAttribute(String key) {
+        return this.attributes.remove(key);
+    }
+
+    /**
+     * Add the given SPFChecker on top of the stack
+     * 
+     * @param checker  
+     */
+    public void pushChecker(SPFChecker checker) {
+        checkers.push(checker);
+    }
+    
+    /**
+     * Remove the SPFChecker on the top and return it. If no SPFChecker is left
+     * null is returned
+     * 
+     * @return the last checker
+     */
+    public SPFChecker popChecker() {
+        if (checkers.isEmpty()) {
+            return null;
+        } else {
+            SPFChecker checker = (SPFChecker) checkers.pop();
+            return checker;
+        }
+    }
+
+    /**
+     * Add the given SPFCheckerExceptionCatcher on top of the stack
+     * 
+     * @param catcher
+     */
+    public void pushExceptionCatcher(SPFCheckerExceptionCatcher catcher) {
+        catchers.push(catcher);
+    }
+    
+    /**
+     * Remove the SPFCheckerExceptionCatcher on the top and return it. If no SPFCheckerExceptionCatcher is left
+     * null is returned
+     * 
+     * @return the last catcher
+     */
+    public SPFCheckerExceptionCatcher popExceptionCatcher() {
+        if (catchers.isEmpty()) {
+            return null;
+        } else {
+            return (SPFCheckerExceptionCatcher) catchers.pop();
+        }
+    }
+
+    /**
+     * Return the SPFCheckerExceptionCatcher on the top of the Stack, but not 
+     * remove it. If no SPFCheckerExceptionCatcher is left null is returned
+     * 
+     * @return the last catcher
+     */
+    public SPFCheckerExceptionCatcher getExceptionCatcher() {
+        if (catchers.isEmpty()) {
+            return null;
+        } else {
+            return (SPFCheckerExceptionCatcher) catchers.peek();
+        }
+    }
+
+    /**
+     * @param result
+     */
+    public void setCurrentResultExpanded(String result) {
+        this.currentResultExpanded = result;
+    }
+
+    /**
+     * @return current result converted/expanded
+     */
+    public String getCurrentResultExpanded() {
+        return currentResultExpanded;
+    }
+
 }

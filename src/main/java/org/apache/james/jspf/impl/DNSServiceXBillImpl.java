@@ -19,11 +19,7 @@
 
 package org.apache.james.jspf.impl;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
-
+import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.Logger;
@@ -38,6 +34,11 @@ import org.xbill.DNS.TXTRecord;
 import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * This class contains helper to get all neccassary DNS infos that are needed
  * for SPF
@@ -45,13 +46,13 @@ import org.xbill.DNS.Type;
 public class DNSServiceXBillImpl implements DNSService {
 
     // Set seconds after which we return and TempError
-    private int timeOut = 20;
+    protected int timeOut = 20;
 
     // The logger
-    private Logger log;
+    protected Logger log;
     
     // The record limit for lookups
-    private int recordLimit;
+    protected int recordLimit;
     
     /**
      * Default Constructor
@@ -109,81 +110,83 @@ public class DNSServiceXBillImpl implements DNSService {
     }
     
     /**
-     * @see org.apache.james.jspf.core.DNSService#getRecords(java.lang.String, int)
+     * @see org.apache.james.jspf.core.DNSService#getRecords(org.apache.james.jspf.core.DNSRequest)
      */
-    public List getRecords(String hostname, int recordType)
+    public List getRecords(DNSRequest request)
             throws TimeoutException {
         String recordTypeDescription;
         int dnsJavaType;
-        int recordCount = 0;
-        switch (recordType) {
-            case A: recordTypeDescription = "A"; dnsJavaType = Type.A; break;
-            case AAAA: recordTypeDescription = "AAAA"; dnsJavaType = Type.AAAA; break;
-            case MX: recordTypeDescription = "MX"; dnsJavaType = Type.MX; break;
-            case PTR: recordTypeDescription = "PTR"; dnsJavaType = Type.PTR; break;
-            case TXT: recordTypeDescription = "TXT"; dnsJavaType = Type.TXT; break;
-            case SPF: recordTypeDescription= "SPF"; dnsJavaType = Type.SPF; break;
+        switch (request.getRecordType()) {
+            case DNSRequest.A: recordTypeDescription = "A"; dnsJavaType = Type.A; break;
+            case DNSRequest.AAAA: recordTypeDescription = "AAAA"; dnsJavaType = Type.AAAA; break;
+            case DNSRequest.MX: recordTypeDescription = "MX"; dnsJavaType = Type.MX; break;
+            case DNSRequest.PTR: recordTypeDescription = "PTR"; dnsJavaType = Type.PTR; break;
+            case DNSRequest.TXT: recordTypeDescription = "TXT"; dnsJavaType = Type.TXT; break;
+            case DNSRequest.SPF: recordTypeDescription= "SPF"; dnsJavaType = Type.SPF; break;
             default: // TODO fail!
                 return null;
         }
-        List records;
         try {
 
-            log.debug("Start "+recordTypeDescription+"-Record lookup for : " + hostname);
+            log.debug("Start "+recordTypeDescription+"-Record lookup for : " + request.getHostname());
 
             Lookup.getDefaultResolver().setTimeout(timeOut);
-            Lookup query = new Lookup(hostname, dnsJavaType);
+            Lookup query = new Lookup(request.getHostname(), dnsJavaType);
 
             Record[] rr = query.run();
             int queryResult = query.getResult();
+            
 
             if (queryResult == Lookup.TRY_AGAIN) {
                 throw new TimeoutException();
             }
             
-            if (rr != null && rr.length > 0) {
-                records = new ArrayList();
-                for (int i = 0; i < rr.length; i++) {
-                    String res;
-                    switch (recordType) {
-                        case A:
-                            ARecord a = (ARecord) rr[i];
-                            res = a.getAddress().getHostAddress();
-                            break;
-                        case AAAA:
-                            AAAARecord aaaa = (AAAARecord) rr[i];
-                            res = aaaa.getAddress().getHostAddress();
-                            break;
-                        case MX:
-                            MXRecord mx = (MXRecord) rr[i];
-                            res = mx.getTarget().toString();
-                            break;
-                        case PTR:
-                            PTRRecord ptr = (PTRRecord) rr[i];
-                            res = IPAddr.stripDot(ptr.getTarget().toString());
-                            break;
-                        case TXT:
-                            TXTRecord txt = (TXTRecord) rr[i];
-                            res = txt.rdataToString();
-                            break;
-                        case SPF:
-                            SPFRecord spf = (SPFRecord) rr[i];
-                            res = spf.rdataToString();
-                            break;
-                        default:
-                            return null;
-                    }
-                    records.add(res);
-                }
-                recordCount = rr.length;
-            } else {
-                records = null;
-            }
+            List records = convertRecordsToList(rr);
             
-            log.debug("Found " + recordCount + " "+recordTypeDescription+"-Records");
+            log.debug("Found " + (rr != null ? rr.length : 0) + " "+recordTypeDescription+"-Records");
+            return records;
         } catch (TextParseException e) {
             // i think this is the best we could do
-            log.debug("No "+recordTypeDescription+" Record found for host: " + hostname);
+            log.debug("No "+recordTypeDescription+" Record found for host: " + request.getHostname());
+            return null;
+        }
+    }
+
+    public static List convertRecordsToList(Record[] rr) {
+        List records;
+        if (rr != null && rr.length > 0) {
+            records = new ArrayList();
+            for (int i = 0; i < rr.length; i++) {
+                switch (rr[i].getType()) {
+                    case Type.A:
+                        ARecord a = (ARecord) rr[i];
+                        records.add(a.getAddress().getHostAddress());
+                        break;
+                    case Type.AAAA:
+                        AAAARecord aaaa = (AAAARecord) rr[i];
+                        records.add(aaaa.getAddress().getHostAddress());
+                        break;
+                    case Type.MX:
+                        MXRecord mx = (MXRecord) rr[i];
+                        records.add(mx.getTarget().toString());
+                        break;
+                    case Type.PTR:
+                        PTRRecord ptr = (PTRRecord) rr[i];
+                        records.add(IPAddr.stripDot(ptr.getTarget().toString()));
+                        break;
+                    case Type.TXT:
+                        TXTRecord txt = (TXTRecord) rr[i];
+                        records.add(txt.rdataToString());
+                        break;
+                    case Type.SPF:
+                        SPFRecord spf = (SPFRecord) rr[i];
+                        records.add(spf.rdataToString());
+                        break;
+                    default:
+                        return null;
+                }
+            }
+        } else {
             records = null;
         }
         return records;

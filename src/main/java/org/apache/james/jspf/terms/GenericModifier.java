@@ -22,9 +22,12 @@ package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.Configurable;
 import org.apache.james.jspf.core.Configuration;
+import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.Modifier;
-import org.apache.james.jspf.core.SPF1Data;
+import org.apache.james.jspf.core.SPFSession;
+import org.apache.james.jspf.exceptions.NeutralException;
+import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.wiring.LogEnabled;
@@ -40,19 +43,22 @@ public abstract class GenericModifier implements Modifier, Configurable, LogEnab
     protected Logger log;
 
     /**
-     * @see org.apache.james.jspf.core.Modifier#run(SPF1Data)
+     * @throws NoneException 
+     * @throws NeutralException 
+     * @see org.apache.james.jspf.core.Modifier#run(SPFSession)
      * 
      */
-    public void checkSPF(SPF1Data spfData) throws PermErrorException,
-            TempErrorException {
+    public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
+            TempErrorException, NeutralException, NoneException {
         log.debug("Processing modifier: " + this);
-        checkSPFLogged(spfData);
+        DNSLookupContinuation res = checkSPFLogged(spfData);
         log.debug("Processed modifier: " + this + " resulted in "
-                + spfData.getCurrentResult());
+                + res == null ? spfData.getCurrentResult() : " dns continuation...");
+        return res;
     }
     
-    protected abstract void checkSPFLogged(SPF1Data spfData) throws PermErrorException,
-        TempErrorException;
+    protected abstract DNSLookupContinuation checkSPFLogged(SPFSession spfData) throws PermErrorException,
+        TempErrorException, NeutralException, NoneException;
 
 
     /**

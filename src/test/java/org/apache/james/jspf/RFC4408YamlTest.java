@@ -42,6 +42,10 @@ public class RFC4408YamlTest extends AbstractYamlTest {
         super(name);
     }
 
+    protected RFC4408YamlTest(SPFYamlTestSuite def) {
+        super(def);
+    }
+
     protected RFC4408YamlTest(SPFYamlTestSuite def, String test) {
         super(def, test);
     }

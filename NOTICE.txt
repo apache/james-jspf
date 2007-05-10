@@ -3,7 +3,7 @@
   =================================================================
   
   Apache James jSPF
-  Copyright 2006 The Apache Software Foundation
+  Copyright 2007 The Apache Software Foundation
   
   This product includes software developed at
   The Apache Software Foundation (http://www.apache.org/).
@@ -15,6 +15,9 @@
   which is open source software licensed under the BSD license,
   written and copyright by Brian Wellington. The original software 
   is available from http://www.dnsjava.org/
+  
+  Some of the DNS-aware tests have been inspired by DNSJava test code
+  written and copyrighted by Brian Wellington, too.
   
   SPF Test (test*.txt) contains resources derived from the
   libspf2 library (http://www.libspf2.org/) and distributed under 

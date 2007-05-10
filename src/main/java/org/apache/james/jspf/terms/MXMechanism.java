@@ -20,12 +20,20 @@
 
 package org.apache.james.jspf.terms;
 
+import org.apache.james.jspf.core.DNSLookupContinuation;
+import org.apache.james.jspf.core.DNSRequest;
+import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.DNSService;
+import org.apache.james.jspf.core.Directive;
 import org.apache.james.jspf.core.IPAddr;
-import org.apache.james.jspf.core.SPF1Data;
+import org.apache.james.jspf.core.SPFChecker;
+import org.apache.james.jspf.core.SPFCheckerDNSResponseListener;
+import org.apache.james.jspf.core.SPFSession;
+import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
+import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.util.SPFTermsRegexps;
 
 import java.util.ArrayList;
@@ -35,87 +43,117 @@ import java.util.List;
  * This class represent the mx mechanism
  * 
  */
-public class MXMechanism extends AMechanism {
+public class MXMechanism extends AMechanism implements SPFCheckerDNSResponseListener {
 
+    private final class ExpandedChecker implements SPFChecker {
+        
+        /**
+         * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
+         */
+        public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
+                TempErrorException, NeutralException, NoneException {
+
+            // Get the right host.
+            String host = expandHost(spfData);
+            
+            return new DNSLookupContinuation(new DNSRequest(host, DNSRequest.MX), MXMechanism.this);
+        }
+    }
+
+    private static final String ATTRIBUTE_MX_RECORDS = "MXMechanism.mxRecords";
+    private static final String ATTRIBUTE_CHECK_RECORDS = "MXMechanism.checkRecords";
     /**
      * ABNF: MX = "mx" [ ":" domain-spec ] [ dual-cidr-length ]
      */
     public static final String REGEX = "[mM][xX]" + "(?:\\:"
             + SPFTermsRegexps.DOMAIN_SPEC_REGEX + ")?" + "(?:"
             + DUAL_CIDR_LENGTH_REGEX + ")?";
-
+    
+    private SPFChecker expandedChecker = new ExpandedChecker();
+    
     /**
-     * 
-     * @throws NoneException 
-     * @see org.apache.james.jspf.core.GenericMechanism#run(org.apache.james.jspf.core.SPF1Data)
+     * @see org.apache.james.jspf.terms.AMechanism#checkSPF(org.apache.james.jspf.core.SPFSession)
      */
-    public boolean run(SPF1Data spfData) throws PermErrorException,
-            TempErrorException{
-        IPAddr checkAddress;
+    public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
+            TempErrorException, NeutralException, NoneException{
 
         // update currentDepth
         spfData.increaseCurrentDepth();
 
-        // Get the right host.
-        String host = expandHost(spfData);
-
-        // if the remote IP is an ipv6 we check ipv6 addresses, otherwise ip4
-        boolean isIPv6 = IPAddr.isIPV6(spfData.getIpAddress());
-        
-        // get the ipAddress
-        checkAddress = IPAddr.getAddress(spfData.getIpAddress(), isIPv6 ? getIp6cidr() : getIp4cidr());
-        
-        List mxRecords = getMXRecords(dnsService, host, isIPv6 ? DNSService.AAAA : DNSService.A);
-
-        // no mx record found
-        if (mxRecords == null) return false;
-          
-        if (checkAddressList(checkAddress, mxRecords, getIp4cidr())) {
-            return true;
-        }
-
-        // No match found
-        return false;
+        spfData.pushChecker(expandedChecker);
+        return macroExpand.checkExpand(getDomain(), spfData, MacroExpand.DOMAIN);
     }
 
-
     /**
-     * @param type 
-     * @see org.apache.james.jspf.core.DNSService#getMXRecords(java.lang.String,
-     *      int)
+     * @see org.apache.james.jspf.terms.AMechanism#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
      */
-    private List getMXRecords(DNSService dnsProbe, String domainName, int type)
-            throws PermErrorException, TempErrorException {
+    public DNSLookupContinuation onDNSResponse(DNSResponse response, SPFSession spfSession)
+        throws PermErrorException, TempErrorException, NoneException, NeutralException {
         try {
-            List mxR = null;
-            List records = dnsProbe.getRecords(domainName, DNSService.MX);
-    
+            
+            List records = (List) spfSession.getAttribute(ATTRIBUTE_CHECK_RECORDS);
+            List mxR = (List) spfSession.getAttribute(ATTRIBUTE_MX_RECORDS);
+
             if (records == null) {
+            
+                records = response.getResponse();
+
+                if (records == null) {
+                    // no mx record found
+                    spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
+                    return null;
+                }
+                
+                spfSession.setAttribute(ATTRIBUTE_CHECK_RECORDS, records);
+                
+            } else {
+                
+                List res = response.getResponse();
+
+                if (res != null) {
+                    if (mxR == null) {
+                        mxR = new ArrayList();
+                        spfSession.setAttribute(ATTRIBUTE_MX_RECORDS, mxR);
+                    }
+                    mxR.addAll(res);
+                }
+                
+            }
+
+            // if the remote IP is an ipv6 we check ipv6 addresses, otherwise ip4
+            boolean isIPv6 = IPAddr.isIPV6(spfSession.getIpAddress());
+
+            String mx;
+            while (records.size() > 0 && (mx = (String) records.remove(0)) != null && mx.length() > 0) {
+                log.debug("Add MX-Record " + mx + " to list");
+
+                return new DNSLookupContinuation(new DNSRequest(mx, isIPv6 ? DNSRequest.AAAA : DNSRequest.A), MXMechanism.this);
+                
+            }
+                
+            // no mx record found
+            if (mxR == null || mxR.size() == 0) {
+                spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
                 return null;
             }
+
+            // get the ipAddress
+            IPAddr checkAddress;
+            checkAddress = IPAddr.getAddress(spfSession.getIpAddress(), isIPv6 ? getIp6cidr() : getIp4cidr());
             
-            for (int i = 0; i < records.size(); i++) {
-                String mx = (String) records.get(i);
-                
-                if (mx != null && mx.length() > 0) {
-                    log.debug("Add MX-Record " + mx + " to list");
-        
-                    List res = dnsProbe.getRecords(mx, type);
-                    if (res != null) {
-                        if (mxR == null) {
-                            mxR = new ArrayList();
-                        }
-                        mxR.addAll(res);
-                    }
-                }
-            }
+            // clean up attributes
+            spfSession.removeAttribute(ATTRIBUTE_CHECK_RECORDS);
+            spfSession.removeAttribute(ATTRIBUTE_MX_RECORDS);
+            spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.valueOf(checkAddressList(checkAddress, mxR, getIp4cidr())));
+            return null;
             
-            return mxR != null && mxR.size() > 0 ? mxR : null;
         } catch (DNSService.TimeoutException e) {
+            spfSession.setAttribute(ATTRIBUTE_CHECK_RECORDS, null);
+            spfSession.setAttribute(ATTRIBUTE_MX_RECORDS, null);
             throw new TempErrorException("Timeout querying the dns server");
         }
     }
-    
+
     /**
      * @see org.apache.james.jspf.terms.AMechanism#toString()
      */

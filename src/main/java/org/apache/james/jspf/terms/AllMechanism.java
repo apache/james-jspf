@@ -22,8 +22,9 @@ package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.Configurable;
 import org.apache.james.jspf.core.Configuration;
+import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.Mechanism;
-import org.apache.james.jspf.core.SPF1Data;
+import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.exceptions.PermErrorException;
 
 /**
@@ -35,10 +36,10 @@ public class AllMechanism implements Mechanism, Configurable {
     public static final String REGEX = "[aA][lL][lL]";
 
     /**
-     * @see org.apache.james.jspf.core.Mechanism#run(SPF1Data)
+     * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
      */
-    public boolean run(SPF1Data spfData) throws PermErrorException {
-        return true;
+    public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException {
+        return null;
     }
 
     /**
@@ -55,5 +56,5 @@ public class AllMechanism implements Mechanism, Configurable {
     public String toString() {
         return "all";
     }
-
+    
 }
