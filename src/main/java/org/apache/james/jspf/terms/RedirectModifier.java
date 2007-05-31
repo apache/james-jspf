@@ -80,7 +80,7 @@ public class RedirectModifier extends GenericModifier implements
             } else if (exception instanceof RuntimeException){
                 throw (RuntimeException) exception;
             } else {
-                throw new IllegalStateException(exception);
+                throw new IllegalStateException(exception.getMessage());
             }
         }
 

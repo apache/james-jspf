@@ -78,7 +78,7 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
             } else if (exception instanceof RuntimeException){
                 throw (RuntimeException) exception;
             } else {
-                throw new IllegalStateException(exception);
+                throw new IllegalStateException(exception.getMessage());
             }
         }
 
