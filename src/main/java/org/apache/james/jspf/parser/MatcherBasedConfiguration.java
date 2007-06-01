@@ -51,14 +51,14 @@ public class MatcherBasedConfiguration implements Configuration {
         this.start = start;
     }
 
-    /* (non-Javadoc)
+    /**
      * @see org.apache.james.jspf.core.Configuration#group(int)
      */
     public String group(int arg0) {
         return wrapped.group(arg0 + start);
     }
 
-    /* (non-Javadoc)
+    /**
      * @see org.apache.james.jspf.core.Configuration#groupCount()
      */
     public int groupCount() {

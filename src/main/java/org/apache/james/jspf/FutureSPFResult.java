@@ -21,6 +21,10 @@ package org.apache.james.jspf;
 
 import org.apache.james.jspf.core.SPFSession;
 
+/**
+ * A Blocking version of SPFResult which block until the SPFResult is fully set
+ *
+ */
 public class FutureSPFResult extends SPFResult {
     
     boolean isReady;
@@ -41,6 +45,10 @@ public class FutureSPFResult extends SPFResult {
         notify();
     }
 
+    /**
+     * Waits until the SPFResult is set 
+     *
+     */
     private synchronized void checkReady() {
         while (!isReady) {
             try {
@@ -99,6 +107,4 @@ public class FutureSPFResult extends SPFResult {
     public boolean isReady() {
         return isReady;
     }
-    
-
 }

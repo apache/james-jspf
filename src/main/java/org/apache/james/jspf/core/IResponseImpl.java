@@ -22,6 +22,10 @@ package org.apache.james.jspf.core;
 
 import java.util.List;
 
+/**
+ * Implementation of an IRespone Object
+ *
+ */
 public class IResponseImpl implements IResponse {
     private Exception exception = null;
     private List value = null;

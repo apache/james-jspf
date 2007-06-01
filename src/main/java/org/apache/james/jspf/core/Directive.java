@@ -32,6 +32,9 @@ public class Directive implements SPFChecker {
 
     private final class MechanismResultChecker implements SPFChecker {
 
+        /**
+         * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
+         */
         public DNSLookupContinuation checkSPF(SPFSession spfData)
                 throws PermErrorException, TempErrorException,
                 NeutralException, NoneException {
@@ -87,23 +90,23 @@ public class Directive implements SPFChecker {
     /**
      * Run the Directive
      * 
-     * @param spfData The SPF1Data to use
+     * @param spfSession The SPFSession to use
      * @return The qualifier which was returned
      * @throws PermErrorException get thrown if a PermError should returned
      * @throws TempErrorException get thrown if a TempError should returned
      * @throws NoneException get thrown if a NoneException should returned;
      * @throws NeutralException 
      */
-    public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
+    public DNSLookupContinuation checkSPF(SPFSession spfSession) throws PermErrorException,
             TempErrorException, NoneException, NeutralException {
         // if already have a current result we don't run this
-        if (spfData.getCurrentResult() == null) {
+        if (spfSession.getCurrentResult() == null) {
 
-            spfData.removeAttribute(ATTRIBUTE_MECHANISM_RESULT);
+            spfSession.removeAttribute(ATTRIBUTE_MECHANISM_RESULT);
 
-            spfData.pushChecker(resultChecker);
+            spfSession.pushChecker(resultChecker);
             
-            spfData.pushChecker(mechanism);
+            spfSession.pushChecker(mechanism);
 
         }
         return null;
@@ -131,10 +134,14 @@ public class Directive implements SPFChecker {
         return qualifier + mechanism;
     }
 
+    /*
+     * TODO: Can we remove this ?
+     * 
     public void onDNSResponse(DNSResponse response, SPFSession spfSession)
             throws PermErrorException, NoneException, TempErrorException,
             NeutralException {
         throw new IllegalStateException("NOT USED YET");
     }
+    */
 
 }

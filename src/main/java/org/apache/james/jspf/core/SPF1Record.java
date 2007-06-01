@@ -81,6 +81,9 @@ public class SPF1Record {
             boolean first = true;
             Iterator current = getDirectives().iterator();
 
+            /**
+             * @see java.util.Iterator#hasNext()
+             */
             public boolean hasNext() {
                 if (current.hasNext()) { 
                     return true;
@@ -91,10 +94,16 @@ public class SPF1Record {
                 } else return false;
             }
 
+            /**
+             * @see java.util.Iterator#next()
+             */
             public Object next() {
                 return current.next();
             }
 
+            /**
+             * @see java.util.Iterator#remove()
+             */
             public void remove() {
                 throw new UnsupportedOperationException("Readonly iterator");
             }

@@ -46,20 +46,21 @@ public class SPFResult  {
      * 
      * @param result the result 
      * @param explanation the explanation
-     * @param spf1data the SPF1Data
+     * @param spfSession the SPFSession
      */
-    public SPFResult(SPFSession spf1data) {
-        setSPFSession(spf1data);
+    public SPFResult(SPFSession spfSession) {
+        setSPFSession(spfSession);
     }
     
     /**
      * Initialize the result.
-     * @param spf1data
+     * 
+     * @param spfSession
      */
-    protected void setSPFSession(SPFSession spf1data) {
-        this.explanation = spf1data.getExplanation();
-        this.result = spf1data.getCurrentResultExpanded();
-        this.headerTextAsString = generateHeader(result, spf1data);
+    protected void setSPFSession(SPFSession spfSession) {
+        this.explanation = spfSession.getExplanation();
+        this.result = spfSession.getCurrentResultExpanded();
+        this.headerTextAsString = generateHeader(result, spfSession);
     }
 
     /**
