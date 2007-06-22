@@ -55,7 +55,7 @@
     <dependency>
       <groupId>uk.nominet</groupId>
       <artifactId>dnsjnio</artifactId>
-      <version>0.9.7-SNAPSHOT</version>
+      <version>0.9.7</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -110,7 +110,7 @@
       <!-- If you don't have james-project checked out in ../james-project -->
       <!-- you will have to place your absolute path to the project instead -->
       <!-- of ${basedir}, or, otherwise, manually install the parent poms -->
-      <!-- 
+      <!--
            #windows:
            mvn -fignorepom.xml install:install-file 
               -Dfile=stage\org.apache.james\poms\james-parent-1.1.pom 

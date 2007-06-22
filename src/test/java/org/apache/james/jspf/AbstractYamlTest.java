@@ -216,11 +216,11 @@ public abstract class AbstractYamlTest extends TestCase {
                 
                 if (getDnsServiceMockStyle() == FAKE_SERVER) {
                     NonblockingResolver nonblockingResolver = new NonblockingResolver("127.0.0.1");
-                    resolver = new ExtendedNonblockingResolver(new Resolver[] {nonblockingResolver});
+                    resolver = ExtendedNonblockingResolver.newInstance(new NonblockingResolver[] {nonblockingResolver});
                     nonblockingResolver.setPort(35347);
                     nonblockingResolver.setTCP(false);
                 } else if (getDnsServiceMockStyle() == REAL_SERVER) {
-                    resolver = new ExtendedNonblockingResolver();
+                    resolver = ExtendedNonblockingResolver.newInstance();
                     Resolver[] resolvers = resolver.getResolvers();
                     for (int i = 0; i < resolvers.length; i++) {
                         resolvers[i].setTCP(false);
