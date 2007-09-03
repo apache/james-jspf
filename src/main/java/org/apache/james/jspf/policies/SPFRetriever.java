@@ -85,6 +85,12 @@ public class SPFRetriever implements SPFChecker {
         }
         
     }
+
+		/**
+		 * This is used for testing purpose. Setting this to true will skip the initial
+		 * lookups for SPF records and instead will simply check the TXT records.
+		 */
+		private static final boolean CHECK_ONLY_TXT_RECORDS = false;
     
     /**
      * Return the extracted SPF-Record 
@@ -136,8 +142,11 @@ public class SPFRetriever implements SPFChecker {
         SPF1Record res = (SPF1Record) spfData.getAttribute(SPF.ATTRIBUTE_SPF1_RECORD);
         if (res == null) {
             String currentDomain = spfData.getCurrentDomain();
-
-            return new DNSLookupContinuation(new DNSRequest(currentDomain, DNSRequest.SPF), new SPFRetrieverDNSResponseListener());
+            if (CHECK_ONLY_TXT_RECORDS) {
+                return new DNSLookupContinuation(new DNSRequest(currentDomain, DNSRequest.TXT), new SPFRecordHandlerDNSResponseListener());
+            } else {
+                return new DNSLookupContinuation(new DNSRequest(currentDomain, DNSRequest.SPF), new SPFRetrieverDNSResponseListener());
+            }
             
         }
         return null;
