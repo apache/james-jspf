@@ -140,15 +140,7 @@ public abstract class AbstractYamlTest extends TestCase {
         InputStream is = SPFYamlTest.class.getResourceAsStream(filename);
         
         if (is != null) {
-            Reader br = new BufferedReader(new InputStreamReader(is)) {
-        
-                public int read(char[] arg0) throws IOException {
-                    int rl = super.read(arg0);
-                    return rl;
-                }
-                
-            };
-            
+            Reader br = new BufferedReader(new InputStreamReader(is));
             YAMLFactory fact = new DefaultYAMLFactory();
             
             Constructor ctor = fact.createConstructor(fact.createComposer(fact.createParser(fact.createScanner(br)),fact.createResolver()));
