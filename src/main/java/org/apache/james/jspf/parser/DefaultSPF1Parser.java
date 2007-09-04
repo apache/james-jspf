@@ -258,15 +258,15 @@ public class DefaultSPF1Parser implements SPFRecordParser {
         SPF1Record result = new SPF1Record();
 
         // check the version "header"
-        if (spfRecord.toLowerCase().startsWith(SPF1Constants.SPF_VERSION + " ") || spfRecord.equalsIgnoreCase(SPF1Constants.SPF_VERSION)) {
-            if (!spfRecord.toLowerCase().startsWith(SPF1Constants.SPF_VERSION + " ")) throw new NeutralException("Empty SPF Record");
+        if (spfRecord.toLowerCase().startsWith(SPF1Constants.SPF_VERSION1 + " ") || spfRecord.equalsIgnoreCase(SPF1Constants.SPF_VERSION1)) {
+            if (!spfRecord.toLowerCase().startsWith(SPF1Constants.SPF_VERSION1 + " ")) throw new NeutralException("Empty SPF Record");
         } else {
             throw new NoneException("No valid SPF Record: " + spfRecord);
         }
 
         // extract terms
         String[] terms = termsSeparatorPattern.split(spfRecord.replaceFirst(
-                SPF1Constants.SPF_VERSION, ""));
+                SPF1Constants.SPF_VERSION1, ""));
 
         // cycle terms
         for (int i = 0; i < terms.length; i++) {

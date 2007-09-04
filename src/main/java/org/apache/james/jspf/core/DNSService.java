@@ -39,8 +39,7 @@ public interface DNSService {
      * 
      * @param request the dns request
      * @return an array of Strings representing the records
-     * @throws NoneException when no record is found or a textparse exception happen
-     * @throws TempErrorException on timeout.
+     * @throws TimeoutException
      */
     public List getRecords(DNSRequest request) throws TimeoutException;
 
@@ -54,8 +53,7 @@ public interface DNSService {
     /**
      * Set the timeout for DNS-Requests
      * 
-     * @param timeOut
-     *            The timeout in seconds
+     * @param timeOut The timeout in seconds
      */
     public void setTimeOut(int timeOut);
     
@@ -66,6 +64,7 @@ public interface DNSService {
 
     /**
      * Sets a new limit for the number of records for MX and PTR lookups.
+     * 
      * @param recordLimit the new limit (0 => unlimited)
      */
     public void setRecordLimit(int recordLimit);

@@ -255,13 +255,4 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
     public void enableMacroExpand(MacroExpand macroExpand) {
         this.macroExpand = macroExpand;
     }
-
-    /**
-     * @see org.apache.james.jspf.core.Mechanism#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
-     */
-    public boolean onDNSResponse(DNSResponse response, SPFSession spfSession)
-            throws PermErrorException, TempErrorException, NoneException {
-        // not called yet.
-        return false;
-    }
 }

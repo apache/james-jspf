@@ -27,6 +27,12 @@ import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.policies.PolicyPostFilter;
 import org.apache.james.jspf.util.SPF1Utils;
 
+/**
+ * PolicyPostFilter which handles best guess. 
+ * See http://www.openspf.org/FAQ/Best_guess_record for more informations 
+ * 
+ *
+ */
 public class BestGuessPolicy implements PolicyPostFilter {
 
     /**

@@ -119,7 +119,7 @@ public class SPFRetriever implements SPFChecker {
             }
 
             // We trim the compare value only for the comparison
-            if (compare.toLowerCase().trim().startsWith(SPF1Constants.SPF_VERSION + " ") || compare.trim().equalsIgnoreCase(SPF1Constants.SPF_VERSION)) {
+            if (compare.toLowerCase().trim().startsWith(SPF1Constants.SPF_VERSION1 + " ") || compare.trim().equalsIgnoreCase(SPF1Constants.SPF_VERSION1)) {
                 if (returnValue == null) {
                     returnValue = compare;
                 } else {

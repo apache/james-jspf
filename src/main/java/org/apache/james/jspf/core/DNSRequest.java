@@ -23,6 +23,9 @@ import org.apache.james.jspf.exceptions.NoneException;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.TextParseException;
 
+/**
+ * Represent a DNSRequest
+ */
 public final class DNSRequest {
 
     /** The record types for the lookups */

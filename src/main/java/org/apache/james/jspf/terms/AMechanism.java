@@ -63,7 +63,11 @@ public class AMechanism extends GenericMechanism implements SPFCheckerDNSRespons
     private SPFChecker expandedChecker = new ExpandedChecker();
 
     private final class ExpandedChecker implements SPFChecker {
-        public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
+       /*
+        * (non-Javadoc)
+        * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
+        */
+    	public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
                 TempErrorException, NeutralException, NoneException {
             // Get the right host.
             String host = expandHost(spfData);

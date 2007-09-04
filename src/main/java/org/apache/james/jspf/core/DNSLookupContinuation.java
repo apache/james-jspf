@@ -19,6 +19,10 @@
 
 package org.apache.james.jspf.core;
 
+/**
+ * 
+ *
+ */
 public class DNSLookupContinuation {
     
     private DNSRequest request;

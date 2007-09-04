@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
  * This implementation try to retrieve the definition looking up a
  * static REGEX field in the term class.
  */
-class DefaultTermDefinition implements TermDefinition {
+public class DefaultTermDefinition implements TermDefinition {
 
     private Pattern pattern;
 

@@ -27,6 +27,10 @@ import java.util.Iterator;
 
 public class WiringServiceTable extends Hashtable implements WiringService {
 
+    /*
+     * (non-Javadoc)
+     * @see org.apache.james.jspf.wiring.WiringService#wire(java.lang.Object)
+     */
     public void wire(Object component) throws WiringServiceException {
         Iterator i = keySet().iterator();
         while (i.hasNext()) {

@@ -29,6 +29,11 @@ import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.policies.PolicyPostFilter;
 import org.apache.james.jspf.terms.IncludeMechanism;
 
+/**
+ * PolicyPostFilter which implements trusted forwared. 
+ * See http://www.trusted-forwarder.org for more informations
+ *
+ */
 public class TrustedForwarderPolicy implements PolicyPostFilter {
 
     /**

@@ -43,7 +43,12 @@ import java.util.List;
 public class ExistsMechanism extends GenericMechanism implements SPFCheckerDNSResponseListener {
 
     private final class ExpandedChecker implements SPFChecker {
-        public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
+       
+    	/*
+    	 * (non-Javadoc)
+    	 * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
+    	 */
+    	public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
                 TempErrorException, NeutralException, NoneException {
             String host = expandHost(spfData);
             return new DNSLookupContinuation(new DNSRequest(host,DNSRequest.A), ExistsMechanism.this);

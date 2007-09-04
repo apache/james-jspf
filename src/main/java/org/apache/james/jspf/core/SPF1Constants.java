@@ -48,6 +48,6 @@ public interface SPF1Constants {
     /**
      * The valid SPF_VERSION identifier
      */
-    public static final String SPF_VERSION = "v=spf1";
+    public static final String SPF_VERSION1 = "v=spf1";
 
 }
