@@ -19,7 +19,7 @@
 
 package org.apache.james.jspf.policies;
 
-import org.apache.james.jspf.dns.DNSLookupContinuation;
+import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.core.SPF1Record;

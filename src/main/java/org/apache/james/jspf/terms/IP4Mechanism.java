@@ -21,7 +21,7 @@
 package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.Configuration;
-import org.apache.james.jspf.dns.DNSLookupContinuation;
+import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.Directive;
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.SPFSession;

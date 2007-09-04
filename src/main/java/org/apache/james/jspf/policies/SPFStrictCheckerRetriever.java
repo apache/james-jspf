@@ -1,13 +1,13 @@
 package org.apache.james.jspf.policies;
 
-import org.apache.james.jspf.dns.DNSLookupContinuation;
+import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.SPF1Record;
 import org.apache.james.jspf.core.SPF1Utils;
+import org.apache.james.jspf.core.SPFCheckerDNSResponseListener;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.dns.DNSRequest;
 import org.apache.james.jspf.dns.DNSResponse;
 import org.apache.james.jspf.dns.DNSService;
-import org.apache.james.jspf.dns.SPFCheckerDNSResponseListener;
 import org.apache.james.jspf.dns.DNSService.TimeoutException;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
@@ -28,7 +28,7 @@ public class SPFStrictCheckerRetriever extends SPFRetriever {
     private static final class SPFStrictSPFRecordsDNSResponseListener implements SPFCheckerDNSResponseListener {
 
         /**
-         * @see org.apache.james.jspf.dns.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.dns.DNSResponse, org.apache.james.jspf.core.SPFSession)
+         * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.dns.DNSResponse, org.apache.james.jspf.core.SPFSession)
          */
         public DNSLookupContinuation onDNSResponse(
                 DNSResponse response, SPFSession session)
@@ -59,7 +59,7 @@ public class SPFStrictCheckerRetriever extends SPFRetriever {
     private static final class SPFStrictCheckDNSResponseListener implements SPFCheckerDNSResponseListener {
 
         /**
-         * @see org.apache.james.jspf.dns.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.dns.DNSResponse, org.apache.james.jspf.core.SPFSession)
+         * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.dns.DNSResponse, org.apache.james.jspf.core.SPFSession)
          */
         public DNSLookupContinuation onDNSResponse(
                 DNSResponse response, SPFSession session)

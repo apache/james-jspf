@@ -19,7 +19,7 @@
 
 package org.apache.james.jspf.executor;
 
-import org.apache.james.jspf.dns.DNSLookupContinuation;
+import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.FutureSPFResult;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPFChecker;

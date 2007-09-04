@@ -26,16 +26,16 @@ package org.apache.james.jspf.macro;
  * 
  */
 
-import org.apache.james.jspf.dns.DNSLookupContinuation;
+import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.MacroData;
 import org.apache.james.jspf.core.SPF1Utils;
+import org.apache.james.jspf.core.SPFCheckerDNSResponseListener;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.dns.DNSRequest;
 import org.apache.james.jspf.dns.DNSResponse;
 import org.apache.james.jspf.dns.DNSService;
-import org.apache.james.jspf.dns.SPFCheckerDNSResponseListener;
 import org.apache.james.jspf.dns.DNSService.TimeoutException;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
@@ -98,7 +98,7 @@ public class MacroExpand {
             SPFCheckerDNSResponseListener {
         
         /**
-         * @see org.apache.james.jspf.dns.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.dns.DNSResponse, org.apache.james.jspf.core.SPFSession)
+         * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.dns.DNSResponse, org.apache.james.jspf.core.SPFSession)
          */
         public DNSLookupContinuation onDNSResponse(DNSResponse response, SPFSession session)
                 throws PermErrorException, NoneException, TempErrorException,
@@ -135,7 +135,7 @@ public class MacroExpand {
             SPFCheckerDNSResponseListener {
 
         /**
-         * @see org.apache.james.jspf.dns.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.dns.DNSResponse, org.apache.james.jspf.core.SPFSession)
+         * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.dns.DNSResponse, org.apache.james.jspf.core.SPFSession)
          */
         public DNSLookupContinuation onDNSResponse(DNSResponse response, SPFSession session)
                 throws PermErrorException, NoneException, TempErrorException,
