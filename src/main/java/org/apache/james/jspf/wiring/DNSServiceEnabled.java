@@ -19,7 +19,7 @@
 
 package org.apache.james.jspf.wiring;
 
-import org.apache.james.jspf.core.DNSService;
+import org.apache.james.jspf.dns.DNSService;
 
 /**
  * Components that need to log can implement this interface so that

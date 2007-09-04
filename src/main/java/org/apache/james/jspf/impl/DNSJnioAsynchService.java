@@ -19,11 +19,11 @@
 
 package org.apache.james.jspf.impl;
 
-import org.apache.james.jspf.core.DNSAsynchLookupService;
-import org.apache.james.jspf.core.DNSRequest;
-import org.apache.james.jspf.core.DNSService;
-import org.apache.james.jspf.core.IResponse;
-import org.apache.james.jspf.core.IResponseQueue;
+import org.apache.james.jspf.dns.DNSAsynchLookupService;
+import org.apache.james.jspf.dns.DNSRequest;
+import org.apache.james.jspf.dns.DNSService;
+import org.apache.james.jspf.dns.IResponse;
+import org.apache.james.jspf.dns.IResponseQueue;
 import org.xbill.DNS.DClass;
 import org.xbill.DNS.ExtendedNonblockingResolver;
 import org.xbill.DNS.LookupAsynch;
@@ -112,7 +112,7 @@ public class DNSJnioAsynchService implements DNSAsynchLookupService {
     }
     
     /**
-     * @see org.apache.james.jspf.core.DNSAsynchLookupService#getRecordsAsynch(org.apache.james.jspf.core.DNSRequest, java.lang.Object, org.apache.james.jspf.core.IResponseQueue)
+     * @see org.apache.james.jspf.dns.DNSAsynchLookupService#getRecordsAsynch(org.apache.james.jspf.dns.DNSRequest, java.lang.Object, org.apache.james.jspf.dns.IResponseQueue)
      */
     public void getRecordsAsynch(DNSRequest request, int id,
             IResponseQueue responsePool) {

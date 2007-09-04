@@ -17,31 +17,19 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.core;
+package org.apache.james.jspf.executor;
 
-import org.apache.james.jspf.exceptions.NeutralException;
-import org.apache.james.jspf.exceptions.NoneException;
-import org.apache.james.jspf.exceptions.PermErrorException;
-import org.apache.james.jspf.exceptions.TempErrorException;
+import org.apache.james.jspf.core.FutureSPFResult;
+import org.apache.james.jspf.core.SPFSession;
 
-public interface SPFCheckerDNSResponseListener {
-    
+public interface SPFExecutor {
+
     /**
-     * Continue the check for SPF with the given values and the given DNSResponse
+     * Execute SPF queries
      * 
-     * @param response
-     *             The DNSResponse which should be used to run the check
-     * @param session
-     *             The SPFSession which should be used to run the check
-     * @throws PermErrorException
-     *             Get thrown if an error was detected
-     * @throws NoneException
-     *             Get thrown if no Record was found
-     * @throws TempErrorException
-     *             Get thrown if a DNS problem was detected
-     * @throws NeutralException  
-     *             Get thrown if the result should be neutral
+     * @param session 
+     * @param result
      */
-    public DNSLookupContinuation onDNSResponse(DNSResponse response, SPFSession session) throws PermErrorException, NoneException, TempErrorException, NeutralException;
-
+    public void execute(SPFSession session, FutureSPFResult result);
+    
 }

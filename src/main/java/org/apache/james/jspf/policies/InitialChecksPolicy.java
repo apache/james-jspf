@@ -19,9 +19,9 @@
 
 package org.apache.james.jspf.policies;
 
-import org.apache.james.jspf.SPF;
-import org.apache.james.jspf.core.DNSLookupContinuation;
+import org.apache.james.jspf.dns.DNSLookupContinuation;
 import org.apache.james.jspf.core.SPF1Record;
+import org.apache.james.jspf.core.SPF1Utils;
 import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.exceptions.NeutralException;
@@ -44,7 +44,7 @@ public final class InitialChecksPolicy implements SPFChecker {
     public DNSLookupContinuation checkSPF(SPFSession spfData)
             throws PermErrorException, TempErrorException, NeutralException,
             NoneException {
-        SPF1Record res = (SPF1Record) spfData.getAttribute(SPF.ATTRIBUTE_SPF1_RECORD);
+        SPF1Record res = (SPF1Record) spfData.getAttribute(SPF1Utils.ATTRIBUTE_SPF1_RECORD);
         if (res == null) {
 
             // Initial checks (spec 4.3)

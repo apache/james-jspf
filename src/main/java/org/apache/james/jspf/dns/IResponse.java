@@ -17,57 +17,29 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.core;
+package org.apache.james.jspf.dns;
 
-import org.apache.james.jspf.core.DNSService.TimeoutException;
-
-import java.util.List;
-
-/**
- * Represent a DNSResponse
- *
- */
-public class DNSResponse {
-    
-    private List response;
-    
-    private TimeoutException exception;
-    
-    public DNSResponse(TimeoutException exception) {
-        this.exception = exception;
-        this.response = null;
-    }
-    
-    public DNSResponse(List response) {
-        this.exception = null;
-        this.response = response;
-    }
+public interface IResponse {
     
     /**
-     * Returns the DNS response
+     * Get id of the IResponse object
      * 
-     * @return the dns repsonse
-     * @throws TimeoutException get thrown if an timeout was returned while tried to 
-     *         process a dns request
+     * @return id
      */
-    public List getResponse() throws TimeoutException {
-        if (exception != null) {
-            throw exception;
-        } else {
-            return response;
-        }
-    }
-
+    public Object getId();
+    
     /**
-     * @see java.lang.Object#toString()
+     * Get the value which is stored in the IResponse object
+     * 
+     * @return object
      */
-    public String toString() {
-        if (exception != null) {
-            return "EXCEPTION!";
-        } else if (response != null) {
-            return response.toString();
-        } else {
-            return "NULL?";
-        }
-    }
+    public Object getValue();
+    
+    /**
+     * Return the exception which was stored for the IResponse object
+     * 
+     * @return exception
+     */
+    public Exception getException();
+
 }

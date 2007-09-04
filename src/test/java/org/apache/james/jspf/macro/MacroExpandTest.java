@@ -20,6 +20,7 @@
 package org.apache.james.jspf.macro;
 
 import org.apache.james.jspf.ConsoleLogger;
+import org.apache.james.jspf.core.MacroData;
 import org.apache.james.jspf.exceptions.PermErrorException;
 
 import junit.framework.TestCase;

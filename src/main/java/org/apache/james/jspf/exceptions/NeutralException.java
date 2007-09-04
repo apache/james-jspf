@@ -20,7 +20,6 @@
 
 package org.apache.james.jspf.exceptions;
 
-import org.apache.james.jspf.util.SPF1Utils;
 
 /**
  * This exception get thrown if the result should be neutral
@@ -36,7 +35,7 @@ public class NeutralException extends SPFResultException {
      * @see org.apache.james.jspf.exceptions.SPFResultException#getResult()
      */
     public String getResult() {
-        return SPF1Utils.NEUTRAL_CONV;
+        return SPFErrorConstants.NEUTRAL_CONV;
     }
 
 }

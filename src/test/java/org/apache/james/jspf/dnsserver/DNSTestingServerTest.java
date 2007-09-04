@@ -20,7 +20,7 @@
 package org.apache.james.jspf.dnsserver;
 
 import org.apache.james.jspf.ConsoleLogger;
-import org.apache.james.jspf.core.DNSService;
+import org.apache.james.jspf.dns.DNSService;
 import org.apache.james.jspf.impl.DNSServiceXBillImpl;
 import org.xbill.DNS.Cache;
 import org.xbill.DNS.DClass;

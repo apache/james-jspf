@@ -20,22 +20,26 @@
 
 package org.apache.james.jspf;
 
-import org.apache.james.jspf.core.DNSLookupContinuation;
-import org.apache.james.jspf.core.DNSService;
+import org.apache.james.jspf.dns.DNSLookupContinuation;
+import org.apache.james.jspf.core.FutureSPFResult;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPF1Record;
+import org.apache.james.jspf.core.SPF1Utils;
 import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.core.SPFCheckerExceptionCatcher;
-import org.apache.james.jspf.core.SPFExecutor;
 import org.apache.james.jspf.core.SPFRecordParser;
+import org.apache.james.jspf.core.SPFResult;
 import org.apache.james.jspf.core.SPFSession;
-import org.apache.james.jspf.core.SynchronousSPFExecutor;
+import org.apache.james.jspf.dns.DNSService;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
+import org.apache.james.jspf.exceptions.SPFErrorConstants;
 import org.apache.james.jspf.exceptions.SPFResultException;
 import org.apache.james.jspf.exceptions.TempErrorException;
+import org.apache.james.jspf.executor.SPFExecutor;
+import org.apache.james.jspf.executor.SynchronousSPFExecutor;
 import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.parser.DefaultSPF1Parser;
 import org.apache.james.jspf.parser.DefaultTermsFactory;
@@ -52,7 +56,6 @@ import org.apache.james.jspf.policies.local.DefaultExplanationPolicy;
 import org.apache.james.jspf.policies.local.FallbackPolicy;
 import org.apache.james.jspf.policies.local.OverridePolicy;
 import org.apache.james.jspf.policies.local.TrustedForwarderPolicy;
-import org.apache.james.jspf.util.SPF1Utils;
 import org.apache.james.jspf.wiring.DNSServiceEnabled;
 import org.apache.james.jspf.wiring.LogEnabled;
 import org.apache.james.jspf.wiring.MacroExpandEnabled;
@@ -90,7 +93,7 @@ public class SPF implements SPFChecker {
             String result;
             if (exception instanceof SPFResultException) {
                 result = ((SPFResultException) exception).getResult();
-                if (!SPF1Utils.NEUTRAL_CONV.equals(result)) {
+                if (!SPFErrorConstants.NEUTRAL_CONV.equals(result)) {
                     log.warn(exception.getMessage(),exception);
                 }
             } else {
@@ -113,9 +116,9 @@ public class SPF implements SPFChecker {
                 throws PermErrorException, TempErrorException,
                 NeutralException, NoneException {
             
-            SPF1Record spfRecord = (SPF1Record) spfData.getAttribute(ATTRIBUTE_SPF1_RECORD);
+            SPF1Record spfRecord = (SPF1Record) spfData.getAttribute(SPF1Utils.ATTRIBUTE_SPF1_RECORD);
             // make sure we cleanup the record, for recursion support
-            spfData.removeAttribute(ATTRIBUTE_SPF1_RECORD);
+            spfData.removeAttribute(SPF1Utils.ATTRIBUTE_SPF1_RECORD);
             
             LinkedList policyCheckers = new LinkedList();
             
@@ -174,10 +177,10 @@ public class SPF implements SPFChecker {
         public DNSLookupContinuation checkSPF(SPFSession spfData)
                 throws PermErrorException, TempErrorException,
                 NeutralException, NoneException {
-            SPF1Record res = (SPF1Record) spfData.getAttribute(ATTRIBUTE_SPF1_RECORD);
+            SPF1Record res = (SPF1Record) spfData.getAttribute(SPF1Utils.ATTRIBUTE_SPF1_RECORD);
             if (res == null) {
                 res = policy.getSPFRecord(spfData.getCurrentDomain());
-                spfData.setAttribute(ATTRIBUTE_SPF1_RECORD, res);
+                spfData.setAttribute(SPF1Utils.ATTRIBUTE_SPF1_RECORD, res);
             }
             return null;
         }
@@ -203,9 +206,9 @@ public class SPF implements SPFChecker {
         public DNSLookupContinuation checkSPF(SPFSession spfData)
                 throws PermErrorException, TempErrorException,
                 NeutralException, NoneException {
-            SPF1Record res = (SPF1Record) spfData.getAttribute(ATTRIBUTE_SPF1_RECORD);
+            SPF1Record res = (SPF1Record) spfData.getAttribute(SPF1Utils.ATTRIBUTE_SPF1_RECORD);
             res = policy.getSPFRecord(spfData.getCurrentDomain(), res);
-            spfData.setAttribute(ATTRIBUTE_SPF1_RECORD, res);
+            spfData.setAttribute(SPF1Utils.ATTRIBUTE_SPF1_RECORD, res);
             return null;
         }
         
@@ -214,8 +217,6 @@ public class SPF implements SPFChecker {
         }
 
     }
-
-    public static final String ATTRIBUTE_SPF1_RECORD = "SPF.SPF1Record";
 
     DNSService dnsProbe;
 

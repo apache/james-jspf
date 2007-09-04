@@ -17,56 +17,48 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.core;
+package org.apache.james.jspf.dns;
+
 
 import java.util.List;
 
 /**
- * Interface which should be used to access all necassary DNS-Records
- *  
+ * Implementation of an IRespone Object
+ *
  */
-public interface DNSService {
+public class IResponseImpl implements IResponse {
+    private Exception exception = null;
+    private List value = null;
+    private Object id = null;
     
-    /**
-     * The exception thrown on timeout.
-     */
-    public static class TimeoutException extends Exception {
-        
+    public IResponseImpl(Object id, Exception e) {
+        this.exception = e;
+        this.id = id;
     }
-
-    /**
-     * Retrieve dns records for the given host
-     * 
-     * @param request the dns request
-     * @return an array of Strings representing the records
-     * @throws TimeoutException
-     */
-    public List getRecords(DNSRequest request) throws TimeoutException;
-
-    /**
-     * Try to get all domain names for the running host
-     * 
-     * @return names A List contains all domain names which could resolved
-     */
-    public List getLocalDomainNames();
-
-    /**
-     * Set the timeout for DNS-Requests
-     * 
-     * @param timeOut The timeout in seconds
-     */
-    public void setTimeOut(int timeOut);
+    
+    public IResponseImpl(Object id, List result) {
+        this.value = result;
+        this.id = id;
+    }
     
     /**
-     * @return the current record limit
+     * @see org.apache.james.jspf.dns.IResponse#getException()
      */
-    public int getRecordLimit();
-
+    public Exception getException() {
+        return exception;
+    }
+    
     /**
-     * Sets a new limit for the number of records for MX and PTR lookups.
-     * 
-     * @param recordLimit the new limit (0 => unlimited)
+     * @see org.apache.james.jspf.dns.IResponse#getId()
      */
-    public void setRecordLimit(int recordLimit);
-
+    public Object getId() {
+        return id;
+    }
+    
+    /**
+     * @see org.apache.james.jspf.dns.IResponse#getValue()
+     */
+    public Object getValue() {
+        return value;
+    }
 }

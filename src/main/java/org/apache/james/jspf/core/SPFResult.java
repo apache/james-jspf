@@ -18,10 +18,10 @@
  ****************************************************************/
 
 
-package org.apache.james.jspf;
+package org.apache.james.jspf.core;
 
-import org.apache.james.jspf.core.SPFSession;
-import org.apache.james.jspf.util.SPF1Utils;
+import org.apache.james.jspf.exceptions.SPFErrorConstants;
+
 
 /**
  * This class is used to return the result of an SPF lookup.
@@ -99,29 +99,29 @@ public class SPFResult  {
 
         StringBuffer headerText = new StringBuffer();
 
-        if (result.equals(SPF1Utils.PASS_CONV)) {
+        if (result.equals(SPFErrorConstants.PASS_CONV)) {
             headerText.append(result + " (spfCheck: domain of "
                     + spfData.getCurrentDomain() + " designates "
                     + spfData.getIpAddress() + " as permitted sender) ");
-        } else if (result.equals(SPF1Utils.FAIL_CONV)) {
+        } else if (result.equals(SPFErrorConstants.FAIL_CONV)) {
             headerText.append(result + " (spfCheck: domain of "
                     + spfData.getCurrentDomain() + " does not designate "
                     + spfData.getIpAddress() + " as permitted sender) ");
-        } else if (result.equals(SPF1Utils.NEUTRAL_CONV)
-                || result.equals(SPF1Utils.NONE_CONV)) {
+        } else if (result.equals(SPFErrorConstants.NEUTRAL_CONV)
+                || result.equals(SPFErrorConstants.NONE_CONV)) {
             headerText.append(result + " (spfCheck: " + spfData.getIpAddress()
                     + " is neither permitted nor denied by domain of "
                     + spfData.getCurrentDomain() + ") ");
 
-        } else if (result.equals(SPF1Utils.SOFTFAIL_CONV)) {
+        } else if (result.equals(SPFErrorConstants.SOFTFAIL_CONV)) {
             headerText.append(result + " (spfCheck: transitioning domain of "
                     + spfData.getCurrentDomain() + " does not designate "
                     + spfData.getIpAddress() + " as permitted sender) ");
-        } else if (result.equals(SPF1Utils.PERM_ERROR_CONV)) {
+        } else if (result.equals(SPFErrorConstants.PERM_ERROR_CONV)) {
             headerText.append(result
                     + " (spfCheck: Error in processing SPF Record) ");
 
-        } else if (result.equals(SPF1Utils.TEMP_ERROR_CONV)) {
+        } else if (result.equals(SPFErrorConstants.TEMP_ERROR_CONV)) {
             headerText.append(result
                     + " (spfCheck: Error in retrieving data from DNS) ");
 

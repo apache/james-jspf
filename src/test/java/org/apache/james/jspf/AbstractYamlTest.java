@@ -19,14 +19,15 @@
 
 package org.apache.james.jspf;
 
-import org.apache.james.jspf.core.DNSRequest;
-import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.Logger;
-import org.apache.james.jspf.core.SPFExecutor;
 import org.apache.james.jspf.core.SPFRecordParser;
-import org.apache.james.jspf.core.StagedMultipleSPFExecutor;
-import org.apache.james.jspf.core.SynchronousSPFExecutor;
+import org.apache.james.jspf.core.SPFResult;
+import org.apache.james.jspf.dns.DNSRequest;
+import org.apache.james.jspf.dns.DNSService;
 import org.apache.james.jspf.dnsserver.DNSTestingServer;
+import org.apache.james.jspf.executor.SPFExecutor;
+import org.apache.james.jspf.executor.StagedMultipleSPFExecutor;
+import org.apache.james.jspf.executor.SynchronousSPFExecutor;
 import org.apache.james.jspf.impl.DNSJnioAsynchService;
 import org.apache.james.jspf.impl.DNSServiceAsynchSimulator;
 import org.apache.james.jspf.impl.DNSServiceXBillImpl;

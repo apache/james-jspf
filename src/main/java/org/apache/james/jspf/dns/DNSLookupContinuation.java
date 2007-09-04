@@ -17,18 +17,45 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.core;
+package org.apache.james.jspf.dns;
 
-import org.apache.james.jspf.FutureSPFResult;
+import org.apache.james.jspf.dns.DNSRequest;
+import org.apache.james.jspf.dns.SPFCheckerDNSResponseListener;
 
-public interface SPFExecutor {
+
+/**
+ * This object is used as the return value for spf resolving tasks.
+ * Every time a DNS resolution is needed the task should simply return
+ * this one including the DNSRequest and a listener to be invoked
+ * when the answer will be available.
+ */
+public class DNSLookupContinuation {
+    
+    private DNSRequest request;
+    private SPFCheckerDNSResponseListener listener;
+
+    public DNSLookupContinuation(DNSRequest request, SPFCheckerDNSResponseListener listener) {
+        this.request = request;
+        this.listener = listener;
+    }
 
     /**
-     * Execute SPF queries
+     * Return the DNSRequest which was used
      * 
-     * @param session 
-     * @param result
+     * @return request
      */
-    public void execute(SPFSession session, FutureSPFResult result);
+    public DNSRequest getRequest() {
+        return request;
+    }
+
+    /**
+     * Return the SPFCheckerDNSResponseListener which should called for the DNSRequest
+     * 
+     * @return listener
+     */
+    public SPFCheckerDNSResponseListener getListener() {
+        return listener;
+    }
+
     
 }

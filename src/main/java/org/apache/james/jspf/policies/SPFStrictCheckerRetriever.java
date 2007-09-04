@@ -1,14 +1,14 @@
 package org.apache.james.jspf.policies;
 
-import org.apache.james.jspf.SPF;
-import org.apache.james.jspf.core.DNSLookupContinuation;
-import org.apache.james.jspf.core.DNSRequest;
-import org.apache.james.jspf.core.DNSResponse;
-import org.apache.james.jspf.core.DNSService;
+import org.apache.james.jspf.dns.DNSLookupContinuation;
 import org.apache.james.jspf.core.SPF1Record;
-import org.apache.james.jspf.core.SPFCheckerDNSResponseListener;
+import org.apache.james.jspf.core.SPF1Utils;
 import org.apache.james.jspf.core.SPFSession;
-import org.apache.james.jspf.core.DNSService.TimeoutException;
+import org.apache.james.jspf.dns.DNSRequest;
+import org.apache.james.jspf.dns.DNSResponse;
+import org.apache.james.jspf.dns.DNSService;
+import org.apache.james.jspf.dns.SPFCheckerDNSResponseListener;
+import org.apache.james.jspf.dns.DNSService.TimeoutException;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
@@ -28,7 +28,7 @@ public class SPFStrictCheckerRetriever extends SPFRetriever {
     private static final class SPFStrictSPFRecordsDNSResponseListener implements SPFCheckerDNSResponseListener {
 
         /**
-         * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
+         * @see org.apache.james.jspf.dns.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.dns.DNSResponse, org.apache.james.jspf.core.SPFSession)
          */
         public DNSLookupContinuation onDNSResponse(
                 DNSResponse response, SPFSession session)
@@ -46,7 +46,7 @@ public class SPFStrictCheckerRetriever extends SPFRetriever {
 
             String record = calculateSpfRecord(spfR, spfTxtR);
             if (record != null) {
-                session.setAttribute(SPF.ATTRIBUTE_SPF1_RECORD, new SPF1Record(record));
+                session.setAttribute(SPF1Utils.ATTRIBUTE_SPF1_RECORD, new SPF1Record(record));
             }
 
             return null;
@@ -59,7 +59,7 @@ public class SPFStrictCheckerRetriever extends SPFRetriever {
     private static final class SPFStrictCheckDNSResponseListener implements SPFCheckerDNSResponseListener {
 
         /**
-         * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
+         * @see org.apache.james.jspf.dns.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.dns.DNSResponse, org.apache.james.jspf.core.SPFSession)
          */
         public DNSLookupContinuation onDNSResponse(
                 DNSResponse response, SPFSession session)
@@ -88,7 +88,7 @@ public class SPFStrictCheckerRetriever extends SPFRetriever {
     public DNSLookupContinuation checkSPF(SPFSession spfData)
             throws PermErrorException, TempErrorException, NeutralException,
             NoneException {
-        SPF1Record res = (SPF1Record) spfData.getAttribute(SPF.ATTRIBUTE_SPF1_RECORD);
+        SPF1Record res = (SPF1Record) spfData.getAttribute(SPF1Utils.ATTRIBUTE_SPF1_RECORD);
         if (res == null) {
             String currentDomain = spfData.getCurrentDomain();
 

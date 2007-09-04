@@ -17,10 +17,17 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.core;
+package org.apache.james.jspf.executor;
 
-import org.apache.james.jspf.FutureSPFResult;
-import org.apache.james.jspf.core.DNSService.TimeoutException;
+import org.apache.james.jspf.dns.DNSLookupContinuation;
+import org.apache.james.jspf.core.FutureSPFResult;
+import org.apache.james.jspf.core.Logger;
+import org.apache.james.jspf.core.SPFChecker;
+import org.apache.james.jspf.core.SPFCheckerExceptionCatcher;
+import org.apache.james.jspf.core.SPFSession;
+import org.apache.james.jspf.dns.DNSResponse;
+import org.apache.james.jspf.dns.DNSService;
+import org.apache.james.jspf.dns.DNSService.TimeoutException;
 import org.apache.james.jspf.exceptions.SPFResultException;
 
 /**
@@ -37,7 +44,7 @@ public class SynchronousSPFExecutor implements SPFExecutor {
     }
 
     /**
-     * @see org.apache.james.jspf.core.SPFExecutor#execute(org.apache.james.jspf.core.SPFSession, org.apache.james.jspf.FutureSPFResult)
+     * @see org.apache.james.jspf.executor.SPFExecutor#execute(org.apache.james.jspf.core.SPFSession, org.apache.james.jspf.core.FutureSPFResult)
      */
     public void execute(SPFSession session, FutureSPFResult result) {
         SPFChecker checker;

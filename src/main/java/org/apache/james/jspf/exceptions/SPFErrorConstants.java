@@ -17,30 +17,17 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.core;
 
-import java.util.List;
+package org.apache.james.jspf.exceptions;
 
+public interface SPFErrorConstants {
 
-/**
- * Queue implementation which is used to manage IResponse
- *
- */
-public interface IResponseQueue extends List {
-    
-    /**
-     * Return the last IResponse in the queue. If the queue is empty it will
-     * wait until a IResponse was added
-     * 
-     * @return response
-     */
-    public IResponse removeResponse();
-    
-    /**
-     *  Add the given Response to the end of the queue. 
-     *  
-     * @param r
-     */
-    public void insertResponse(IResponse r);
+    public static final String PERM_ERROR_CONV = "permerror";
+    public static final String TEMP_ERROR_CONV = "temperror";
+    public static final String NONE_CONV = "none";
+    public static final String PASS_CONV = "pass";
+    public static final String NEUTRAL_CONV = "neutral";
+    public static final String FAIL_CONV = "fail";
+    public static final String SOFTFAIL_CONV = "softfail";
 
 }

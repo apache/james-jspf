@@ -17,48 +17,56 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.core;
-
+package org.apache.james.jspf.dns;
 
 import java.util.List;
 
 /**
- * Implementation of an IRespone Object
- *
+ * Interface which should be used to access all necassary DNS-Records
+ *  
  */
-public class IResponseImpl implements IResponse {
-    private Exception exception = null;
-    private List value = null;
-    private Object id = null;
-    
-    public IResponseImpl(Object id, Exception e) {
-        this.exception = e;
-        this.id = id;
-    }
-    
-    public IResponseImpl(Object id, List result) {
-        this.value = result;
-        this.id = id;
-    }
+public interface DNSService {
     
     /**
-     * @see org.apache.james.jspf.core.IResponse#getException()
+     * The exception thrown on timeout.
      */
-    public Exception getException() {
-        return exception;
+    public static class TimeoutException extends Exception {
+        
     }
+
+    /**
+     * Retrieve dns records for the given host
+     * 
+     * @param request the dns request
+     * @return an array of Strings representing the records
+     * @throws TimeoutException
+     */
+    public List getRecords(DNSRequest request) throws TimeoutException;
+
+    /**
+     * Try to get all domain names for the running host
+     * 
+     * @return names A List contains all domain names which could resolved
+     */
+    public List getLocalDomainNames();
+
+    /**
+     * Set the timeout for DNS-Requests
+     * 
+     * @param timeOut The timeout in seconds
+     */
+    public void setTimeOut(int timeOut);
     
     /**
-     * @see org.apache.james.jspf.core.IResponse#getId()
+     * @return the current record limit
      */
-    public Object getId() {
-        return id;
-    }
-    
+    public int getRecordLimit();
+
     /**
-     * @see org.apache.james.jspf.core.IResponse#getValue()
+     * Sets a new limit for the number of records for MX and PTR lookups.
+     * 
+     * @param recordLimit the new limit (0 => unlimited)
      */
-    public Object getValue() {
-        return value;
-    }
+    public void setRecordLimit(int recordLimit);
+
 }

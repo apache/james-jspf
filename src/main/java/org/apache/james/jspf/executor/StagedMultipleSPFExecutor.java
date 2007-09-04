@@ -17,10 +17,19 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.core;
+package org.apache.james.jspf.executor;
 
-import org.apache.james.jspf.FutureSPFResult;
-import org.apache.james.jspf.core.DNSService.TimeoutException;
+import org.apache.james.jspf.dns.DNSLookupContinuation;
+import org.apache.james.jspf.core.FutureSPFResult;
+import org.apache.james.jspf.core.Logger;
+import org.apache.james.jspf.core.SPFChecker;
+import org.apache.james.jspf.core.SPFCheckerExceptionCatcher;
+import org.apache.james.jspf.core.SPFSession;
+import org.apache.james.jspf.dns.DNSAsynchLookupService;
+import org.apache.james.jspf.dns.DNSResponse;
+import org.apache.james.jspf.dns.IResponse;
+import org.apache.james.jspf.dns.IResponseQueue;
+import org.apache.james.jspf.dns.DNSService.TimeoutException;
 import org.apache.james.jspf.exceptions.SPFResultException;
 
 import java.util.Collections;
@@ -42,7 +51,7 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
         private int waitingThreads = 0;
 
         /**
-         * @see org.apache.james.jspf.core.IResponseQueue#insertResponse(org.apache.james.jspf.core.IResponse)
+         * @see org.apache.james.jspf.dns.IResponseQueue#insertResponse(org.apache.james.jspf.dns.IResponse)
          */
         public synchronized void insertResponse(IResponse r) {
             addLast(r);
@@ -50,7 +59,7 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
         }
 
         /**
-         * @see org.apache.james.jspf.core.IResponseQueue#removeResponse()
+         * @see org.apache.james.jspf.dns.IResponseQueue#removeResponse()
          */
         public synchronized IResponse removeResponse() {
             if ( (size() - waitingThreads <= 0) ) {
@@ -103,7 +112,7 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
      * If the working queue is full (50 pending responses) this method will not return
      * until the queue is again not full.
      * 
-     * @see org.apache.james.jspf.core.SPFExecutor#execute(org.apache.james.jspf.core.SPFSession, org.apache.james.jspf.FutureSPFResult)
+     * @see org.apache.james.jspf.executor.SPFExecutor#execute(org.apache.james.jspf.core.SPFSession, org.apache.james.jspf.core.FutureSPFResult)
      */
     public void execute(SPFSession session, FutureSPFResult result) {
         execute(session, result, true);

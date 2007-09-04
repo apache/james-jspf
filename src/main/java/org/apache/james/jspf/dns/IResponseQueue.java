@@ -17,29 +17,30 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.core;
+package org.apache.james.jspf.dns;
 
-public interface IResponse {
+import java.util.List;
+
+
+/**
+ * Queue implementation which is used to manage IResponse
+ *
+ */
+public interface IResponseQueue extends List {
     
     /**
-     * Get id of the IResponse object
+     * Return the last IResponse in the queue. If the queue is empty it will
+     * wait until a IResponse was added
      * 
-     * @return id
+     * @return response
      */
-    public Object getId();
+    public IResponse removeResponse();
     
     /**
-     * Get the value which is stored in the IResponse object
-     * 
-     * @return object
+     *  Add the given Response to the end of the queue. 
+     *  
+     * @param r
      */
-    public Object getValue();
-    
-    /**
-     * Return the exception which was stored for the IResponse object
-     * 
-     * @return exception
-     */
-    public Exception getException();
+    public void insertResponse(IResponse r);
 
 }

@@ -20,7 +20,6 @@
 
 package org.apache.james.jspf.exceptions;
 
-import org.apache.james.jspf.util.SPF1Utils;
 
 /**
  * This exception get thrown if the result should be TempError
@@ -36,7 +35,7 @@ public class TempErrorException extends SPFResultException {
      * @see org.apache.james.jspf.exceptions.SPFResultException#getResult()
      */
     public String getResult() {
-        return SPF1Utils.TEMP_ERROR_CONV;
+        return SPFErrorConstants.TEMP_ERROR_CONV;
     }
 
 }

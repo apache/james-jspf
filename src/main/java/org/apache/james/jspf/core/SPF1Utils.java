@@ -18,9 +18,10 @@
  ****************************************************************/
 
 
-package org.apache.james.jspf.util;
+package org.apache.james.jspf.core;
 
-import org.apache.james.jspf.core.SPF1Constants;
+import org.apache.james.jspf.exceptions.SPFErrorConstants;
+
 
 /**
  * 
@@ -31,20 +32,6 @@ import org.apache.james.jspf.core.SPF1Constants;
 
 public class SPF1Utils {
 
-    public static final String PERM_ERROR_CONV = "permerror";
-
-    public static final String NONE_CONV = "none";
-
-    public static final String TEMP_ERROR_CONV = "temperror";
-
-    public static final String PASS_CONV = "pass";
-
-    public static final String NEUTRAL_CONV = "neutral";
-
-    public static final String FAIL_CONV = "fail";
-
-    public static final String SOFTFAIL_CONV = "softfail";
-    
     public static final String DEFAULT_EXPLANATION = "http://www.openspf.org/why.html?sender=%{S}&ip=%{I}";
     
     public static final String BEST_GUESS_RECORD = "v=spf1 a/24 mx/24 ptr ?all";
@@ -58,15 +45,15 @@ public class SPF1Utils {
     public static String resultToName(String result) {
 
         if (result.equals(SPF1Constants.PASS)) {
-            return PASS_CONV;
+            return SPFErrorConstants.PASS_CONV;
         } else if (result.equals(SPF1Constants.FAIL)) {
-            return FAIL_CONV;
+            return SPFErrorConstants.FAIL_CONV;
         } else if (result.equals(SPF1Constants.NEUTRAL)) {
-            return NEUTRAL_CONV;
+            return SPFErrorConstants.NEUTRAL_CONV;
         } else if (result.equals(SPF1Constants.SOFTFAIL)) {
-            return SOFTFAIL_CONV;
+            return SPFErrorConstants.SOFTFAIL_CONV;
         } else {
-            return NEUTRAL_CONV;
+            return SPFErrorConstants.NEUTRAL_CONV;
         }
 
     }
@@ -85,5 +72,7 @@ public class SPF1Utils {
             return false;
         }
     }
+
+    public static final String ATTRIBUTE_SPF1_RECORD = "SPF.SPF1Record";
 
 }

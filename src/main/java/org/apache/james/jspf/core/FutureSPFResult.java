@@ -17,9 +17,8 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf;
+package org.apache.james.jspf.core;
 
-import org.apache.james.jspf.core.SPFSession;
 
 /**
  * A Blocking version of SPFResult which block until the SPFResult is fully set
@@ -60,7 +59,7 @@ public class FutureSPFResult extends SPFResult {
     }
 
     /**
-     * @see org.apache.james.jspf.SPFResult#getExplanation()
+     * @see org.apache.james.jspf.core.SPFResult#getExplanation()
      */
     public String getExplanation() {
         checkReady();
@@ -68,7 +67,7 @@ public class FutureSPFResult extends SPFResult {
     }
 
     /**
-     * @see org.apache.james.jspf.SPFResult#getHeader()
+     * @see org.apache.james.jspf.core.SPFResult#getHeader()
      */
     public String getHeader() {
         checkReady();
@@ -76,7 +75,7 @@ public class FutureSPFResult extends SPFResult {
     }
 
     /**
-     * @see org.apache.james.jspf.SPFResult#getHeaderName()
+     * @see org.apache.james.jspf.core.SPFResult#getHeaderName()
      */
     public String getHeaderName() {
         checkReady();
@@ -84,7 +83,7 @@ public class FutureSPFResult extends SPFResult {
     }
 
     /**
-     * @see org.apache.james.jspf.SPFResult#getHeaderText()
+     * @see org.apache.james.jspf.core.SPFResult#getHeaderText()
      */
     public String getHeaderText() {
         checkReady();
@@ -92,7 +91,7 @@ public class FutureSPFResult extends SPFResult {
     }
 
     /**
-     * @see org.apache.james.jspf.SPFResult#getResult()
+     * @see org.apache.james.jspf.core.SPFResult#getResult()
      */
     public String getResult() {
         checkReady();

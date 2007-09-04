@@ -18,7 +18,7 @@
  ****************************************************************/
 
 
-package org.apache.james.jspf.macro;
+package org.apache.james.jspf.core;
 
 /**
  * This interface represent all the macros which can be used in SPF-Records.

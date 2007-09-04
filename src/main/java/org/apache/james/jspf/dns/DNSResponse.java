@@ -17,39 +17,57 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.core;
+package org.apache.james.jspf.dns;
+
+import org.apache.james.jspf.dns.DNSService.TimeoutException;
+
+import java.util.List;
 
 /**
- * 
+ * Represent a DNSResponse
  *
  */
-public class DNSLookupContinuation {
+public class DNSResponse {
     
-    private DNSRequest request;
-    private SPFCheckerDNSResponseListener listener;
-
-    public DNSLookupContinuation(DNSRequest request, SPFCheckerDNSResponseListener listener) {
-        this.request = request;
-        this.listener = listener;
+    private List response;
+    
+    private TimeoutException exception;
+    
+    public DNSResponse(TimeoutException exception) {
+        this.exception = exception;
+        this.response = null;
+    }
+    
+    public DNSResponse(List response) {
+        this.exception = null;
+        this.response = response;
+    }
+    
+    /**
+     * Returns the DNS response
+     * 
+     * @return the dns repsonse
+     * @throws TimeoutException get thrown if an timeout was returned while tried to 
+     *         process a dns request
+     */
+    public List getResponse() throws TimeoutException {
+        if (exception != null) {
+            throw exception;
+        } else {
+            return response;
+        }
     }
 
     /**
-     * Return the DNSRequest which was used
-     * 
-     * @return request
+     * @see java.lang.Object#toString()
      */
-    public DNSRequest getRequest() {
-        return request;
+    public String toString() {
+        if (exception != null) {
+            return "EXCEPTION!";
+        } else if (response != null) {
+            return response.toString();
+        } else {
+            return "NULL?";
+        }
     }
-
-    /**
-     * Return the SPFCheckerDNSResponseListener which should called for the DNSRequest
-     * 
-     * @return listener
-     */
-    public SPFCheckerDNSResponseListener getListener() {
-        return listener;
-    }
-
-    
 }

@@ -26,8 +26,8 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.apache.james.jspf.SPF;
-import org.apache.james.jspf.SPFResult;
-import org.apache.james.jspf.util.SPF1Utils;
+import org.apache.james.jspf.core.SPFResult;
+import org.apache.james.jspf.exceptions.SPFErrorConstants;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -185,19 +185,19 @@ public class SPFQuery {
      */
     private static int getReturnCode(String result) {
 
-        if (result.equals(SPF1Utils.PASS_CONV)) {
+        if (result.equals(SPFErrorConstants.PASS_CONV)) {
             return PASS_RCODE;
-        } else if (result.equals(SPF1Utils.FAIL_CONV)) {
+        } else if (result.equals(SPFErrorConstants.FAIL_CONV)) {
             return FAIL_RCODE;
-        } else if (result.equals(SPF1Utils.SOFTFAIL_CONV)) {
+        } else if (result.equals(SPFErrorConstants.SOFTFAIL_CONV)) {
             return SOFTFAIL_RCODE;
-        } else if (result.equals(SPF1Utils.NEUTRAL_CONV)) {
+        } else if (result.equals(SPFErrorConstants.NEUTRAL_CONV)) {
             return NEUTRAL_RCODE;
-        } else if (result.equals(SPF1Utils.TEMP_ERROR_CONV)) {
+        } else if (result.equals(SPFErrorConstants.TEMP_ERROR_CONV)) {
             return TEMP_ERROR_RCODE;
-        } else if (result.equals(SPF1Utils.PERM_ERROR_CONV)) {
+        } else if (result.equals(SPFErrorConstants.PERM_ERROR_CONV)) {
             return PERM_ERROR_RCODE;
-        } else if (result.equals(SPF1Utils.NONE_CONV)) {
+        } else if (result.equals(SPFErrorConstants.NONE_CONV)) {
             return NONE_RCODE;
         }
 

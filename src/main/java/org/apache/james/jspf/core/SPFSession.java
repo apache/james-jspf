@@ -22,7 +22,6 @@ package org.apache.james.jspf.core;
 
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
-import org.apache.james.jspf.macro.MacroData;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -147,42 +146,42 @@ public class SPFSession implements MacroData {
     }
 
     /**
-     * @see org.apache.james.jspf.macro.MacroData#getCurrentSenderPart()
+     * @see org.apache.james.jspf.core.MacroData#getCurrentSenderPart()
      */
     public String getCurrentSenderPart() {
         return currentSenderPart;
     }
 
     /**
-     * @see org.apache.james.jspf.macro.MacroData#getMailFrom()
+     * @see org.apache.james.jspf.core.MacroData#getMailFrom()
      */
     public String getMailFrom() {
         return mailFrom;
     }
 
     /**
-     * @see org.apache.james.jspf.macro.MacroData#getHostName()
+     * @see org.apache.james.jspf.core.MacroData#getHostName()
      */
     public String getHostName() {
         return hostName;
     }
 
     /**
-     * @see org.apache.james.jspf.macro.MacroData#getCurrentDomain()
+     * @see org.apache.james.jspf.core.MacroData#getCurrentDomain()
      */
     public String getCurrentDomain() {
         return currentDomain;
     }
 
     /**
-     * @see org.apache.james.jspf.macro.MacroData#getInAddress()
+     * @see org.apache.james.jspf.core.MacroData#getInAddress()
      */
     public String getInAddress() {
         return inAddress;
     }
 
     /**
-     * @see org.apache.james.jspf.macro.MacroData#getClientDomain()
+     * @see org.apache.james.jspf.core.MacroData#getClientDomain()
      */
     public String getClientDomain() {
         return clientDomain;
@@ -197,7 +196,7 @@ public class SPFSession implements MacroData {
     }
 
     /**
-     * @see org.apache.james.jspf.macro.MacroData#getSenderDomain()
+     * @see org.apache.james.jspf.core.MacroData#getSenderDomain()
      */
     public String getSenderDomain() {
         return senderDomain;
@@ -213,7 +212,7 @@ public class SPFSession implements MacroData {
     }
     
     /**
-     * @see org.apache.james.jspf.macro.MacroData#getMacroIpAddress()
+     * @see org.apache.james.jspf.core.MacroData#getMacroIpAddress()
      */
     public String getMacroIpAddress() {
         
@@ -229,14 +228,14 @@ public class SPFSession implements MacroData {
     }
 
     /**
-     * @see org.apache.james.jspf.macro.MacroData#getTimeStamp()
+     * @see org.apache.james.jspf.core.MacroData#getTimeStamp()
      */
     public long getTimeStamp() {
         return System.currentTimeMillis();
     }
 
     /**
-     * @see org.apache.james.jspf.macro.MacroData#getReadableIP()
+     * @see org.apache.james.jspf.core.MacroData#getReadableIP()
      */
     public String getReadableIP() {
         if (readableIP == null) {
@@ -246,7 +245,7 @@ public class SPFSession implements MacroData {
     }
 
     /**
-     * @see org.apache.james.jspf.macro.MacroData#getReceivingDomain()
+     * @see org.apache.james.jspf.core.MacroData#getReceivingDomain()
      */
     public String getReceivingDomain() {
         return receivingDomain;

@@ -22,8 +22,7 @@ package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.Configurable;
 import org.apache.james.jspf.core.Configuration;
-import org.apache.james.jspf.core.DNSLookupContinuation;
-import org.apache.james.jspf.core.DNSResponse;
+import org.apache.james.jspf.dns.DNSLookupContinuation;
 import org.apache.james.jspf.core.Directive;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.Mechanism;
@@ -31,6 +30,7 @@ import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.core.SPFCheckerExceptionCatcher;
 import org.apache.james.jspf.core.SPFSession;
+import org.apache.james.jspf.dns.DNSResponse;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;

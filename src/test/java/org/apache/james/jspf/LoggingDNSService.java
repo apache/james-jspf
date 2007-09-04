@@ -19,9 +19,9 @@
 
 package org.apache.james.jspf;
 
-import org.apache.james.jspf.core.DNSRequest;
-import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.Logger;
+import org.apache.james.jspf.dns.DNSRequest;
+import org.apache.james.jspf.dns.DNSService;
 
 import java.util.List;
 
