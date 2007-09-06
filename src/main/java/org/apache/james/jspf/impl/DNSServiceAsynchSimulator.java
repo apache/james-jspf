@@ -29,7 +29,7 @@ import org.apache.james.jspf.dns.DNSService.TimeoutException;
 import java.util.LinkedList;
 
 /**
- * Wrap a DNSService an excute the calls asynch in a new Thread
+ * Wrap a DNSService an execute the calls asynch in a new Thread
  * 
  */
 public class DNSServiceAsynchSimulator implements Runnable, DNSAsynchLookupService {

@@ -218,13 +218,13 @@ public class SPF implements SPFChecker {
 
     }
 
-    DNSService dnsProbe;
+    private DNSService dnsProbe;
 
     public SPFRecordParser parser;
 
-    Logger log;
+    private Logger log;
     
-    String defaultExplanation = null;
+    private String defaultExplanation = null;
     
     public boolean useBestGuess = false;
 

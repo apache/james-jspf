@@ -31,7 +31,7 @@ public interface Logger {
      * @param message
      *            the message
      */
-    void debug(String message);
+    public void debug(String message);
 
     /**
      * Log a debug message.
@@ -41,14 +41,14 @@ public interface Logger {
      * @param throwable
      *            the throwable
      */
-    void debug(String message, Throwable throwable);
+    public void debug(String message, Throwable throwable);
 
     /**
      * Determine if messages of priority "debug" will be logged.
      * 
      * @return true if "debug" messages will be logged
      */
-    boolean isDebugEnabled();
+    public boolean isDebugEnabled();
 
     /**
      * Log a info message.
@@ -56,7 +56,7 @@ public interface Logger {
      * @param message
      *            the message
      */
-    void info(String message);
+    public void info(String message);
 
     /**
      * Log a info message.
@@ -66,14 +66,14 @@ public interface Logger {
      * @param throwable
      *            the throwable
      */
-    void info(String message, Throwable throwable);
+    public void info(String message, Throwable throwable);
 
     /**
      * Determine if messages of priority "info" will be logged.
      * 
      * @return true if "info" messages will be logged
      */
-    boolean isInfoEnabled();
+    public boolean isInfoEnabled();
 
     /**
      * Log a warn message.
@@ -81,7 +81,7 @@ public interface Logger {
      * @param message
      *            the message
      */
-    void warn(String message);
+    public void warn(String message);
 
     /**
      * Log a warn message.
@@ -91,14 +91,14 @@ public interface Logger {
      * @param throwable
      *            the throwable
      */
-    void warn(String message, Throwable throwable);
+    public void warn(String message, Throwable throwable);
 
     /**
      * Determine if messages of priority "warn" will be logged.
      * 
      * @return true if "warn" messages will be logged
      */
-    boolean isWarnEnabled();
+    public boolean isWarnEnabled();
 
     /**
      * Log a error message.
@@ -106,7 +106,7 @@ public interface Logger {
      * @param message
      *            the message
      */
-    void error(String message);
+    public void error(String message);
 
     /**
      * Log a error message.
@@ -116,14 +116,14 @@ public interface Logger {
      * @param throwable
      *            the throwable
      */
-    void error(String message, Throwable throwable);
+    public void error(String message, Throwable throwable);
 
     /**
      * Determine if messages of priority "error" will be logged.
      * 
      * @return true if "error" messages will be logged
      */
-    boolean isErrorEnabled();
+    public boolean isErrorEnabled();
 
     /**
      * Log a fatalError message.
@@ -131,7 +131,7 @@ public interface Logger {
      * @param message
      *            the message
      */
-    void fatalError(String message);
+    public void fatalError(String message);
 
     /**
      * Log a fatalError message.
@@ -141,14 +141,14 @@ public interface Logger {
      * @param throwable
      *            the throwable
      */
-    void fatalError(String message, Throwable throwable);
+    public void fatalError(String message, Throwable throwable);
 
     /**
      * Determine if messages of priority "fatalError" will be logged.
      * 
      * @return true if "fatalError" messages will be logged
      */
-    boolean isFatalErrorEnabled();
+    public boolean isFatalErrorEnabled();
 
     /**
      * Create a new child logger. The name of the child logger is
@@ -159,5 +159,5 @@ public interface Logger {
      *            the subname of this logger
      * @return the new logger
      */
-    Logger getChildLogger(String name);
+    public Logger getChildLogger(String name);
 }

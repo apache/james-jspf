@@ -33,6 +33,6 @@ public interface Configurable {
      * @param params the ConfigurationMatch which should used
      * @throws PermErrorException get thrown if a PermError should returned
      */
-    void config(Configuration params) throws PermErrorException;
+    public void config(Configuration params) throws PermErrorException;
 
 }

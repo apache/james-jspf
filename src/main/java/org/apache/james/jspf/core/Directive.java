@@ -134,14 +134,4 @@ public class Directive implements SPFChecker {
         return qualifier + mechanism;
     }
 
-    /*
-     * TODO: Can we remove this ?
-     * 
-    public void onDNSResponse(DNSResponse response, SPFSession spfSession)
-            throws PermErrorException, NoneException, TempErrorException,
-            NeutralException {
-        throw new IllegalStateException("NOT USED YET");
-    }
-    */
-
 }

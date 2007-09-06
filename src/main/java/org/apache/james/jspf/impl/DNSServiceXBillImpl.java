@@ -151,7 +151,13 @@ public class DNSServiceXBillImpl implements DNSService {
             return null;
         }
     }
-
+    
+    /**
+     * Convert the given Record array to a List
+     * 
+     * @param rr Record array
+     * @return list
+     */
     public static List convertRecordsToList(Record[] rr) {
         List records;
         if (rr != null && rr.length > 0) {
@@ -191,5 +197,4 @@ public class DNSServiceXBillImpl implements DNSService {
         }
         return records;
     }
-
 }

@@ -26,9 +26,8 @@ import org.apache.james.jspf.core.Logger;
  * This is mainly for the cases when you have a utility that
  * does not have a logger to supply.
  */
-public final class ConsoleLogger
-    implements Logger
-{
+public final class ConsoleLogger implements Logger {
+    
     /** Typecode for debugging messages. */
     public static final int LEVEL_DEBUG = 0;
 

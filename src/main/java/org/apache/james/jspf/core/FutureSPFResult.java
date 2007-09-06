@@ -26,7 +26,7 @@ package org.apache.james.jspf.core;
  */
 public class FutureSPFResult extends SPFResult {
     
-    boolean isReady;
+    private boolean isReady;
     
     public FutureSPFResult() {
         isReady = false;
