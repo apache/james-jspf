@@ -41,7 +41,7 @@ import org.apache.james.jspf.exceptions.TempErrorException;
 import org.apache.james.jspf.executor.SPFExecutor;
 import org.apache.james.jspf.executor.SynchronousSPFExecutor;
 import org.apache.james.jspf.macro.MacroExpand;
-import org.apache.james.jspf.parser.DefaultSPF1Parser;
+import org.apache.james.jspf.parser.RFC4408SPF1Parser;
 import org.apache.james.jspf.parser.DefaultTermsFactory;
 import org.apache.james.jspf.policies.InitialChecksPolicy;
 import org.apache.james.jspf.policies.NeutralIfNotMatchPolicy;
@@ -255,7 +255,7 @@ public class SPF implements SPFChecker {
         wiringService.put(DNSServiceEnabled.class, this.dnsProbe);
         this.macroExpand = new MacroExpand(logger.getChildLogger("macroExpand"), this.dnsProbe);
         wiringService.put(MacroExpandEnabled.class, this.macroExpand);
-        this.parser = new DefaultSPF1Parser(logger.getChildLogger("parser"), new DefaultTermsFactory(logger.getChildLogger("termsfactory"), wiringService));
+        this.parser = new RFC4408SPF1Parser(logger.getChildLogger("parser"), new DefaultTermsFactory(logger.getChildLogger("termsfactory"), wiringService));
         // We add this after the parser creation because services cannot be null
         wiringService.put(SPFCheckEnabled.class, this);
         this.executor = new SynchronousSPFExecutor(log, dnsProbe);

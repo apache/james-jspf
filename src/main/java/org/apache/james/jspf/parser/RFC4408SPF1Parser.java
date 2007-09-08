@@ -76,7 +76,7 @@ import java.util.regex.Pattern;
  * @see org.apache.james.jspf.core.SPF1Record
  * 
  */
-public class DefaultSPF1Parser implements SPFRecordParser {
+public final class RFC4408SPF1Parser implements SPFRecordParser {
 
     /**
      * Regex based on http://www.ietf.org/rfc/rfc4408.txt.
@@ -116,7 +116,7 @@ public class DefaultSPF1Parser implements SPFRecordParser {
      * 
      * @param loggerThe logger to use
      */
-    public DefaultSPF1Parser(Logger logger, TermsFactory termsFactory) {
+    public RFC4408SPF1Parser(Logger logger, TermsFactory termsFactory) {
         this.log = logger;
         this.termsFactory = termsFactory;
         

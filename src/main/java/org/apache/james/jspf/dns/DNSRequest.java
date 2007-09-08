@@ -46,7 +46,7 @@ public final class DNSRequest {
      */
     private final int recordType;
 
-    public DNSRequest(String hostname, int recordType) throws NoneException {
+    public DNSRequest(final String hostname, final int recordType) throws NoneException {
         if (recordType == MX || recordType == A || recordType == AAAA) {
             try {
                 Name.fromString(hostname);

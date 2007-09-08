@@ -23,7 +23,7 @@ package org.apache.james.jspf;
 import org.apache.james.jspf.core.SPFRecordParser;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
-import org.apache.james.jspf.parser.DefaultSPF1Parser;
+import org.apache.james.jspf.parser.RFC4408SPF1Parser;
 import org.apache.james.jspf.parser.DefaultTermsFactory;
 
 import java.io.BufferedReader;
@@ -52,7 +52,7 @@ public class SPF1ParserTest extends TestCase {
             }
         }
         assertNotNull(data);
-        parser = new DefaultSPF1Parser(new ConsoleLogger(), new DefaultTermsFactory(new ConsoleLogger()));
+        parser = new RFC4408SPF1Parser(new ConsoleLogger(), new DefaultTermsFactory(new ConsoleLogger()));
     }
 
     public static Test suite() throws IOException {
@@ -171,7 +171,7 @@ public class SPF1ParserTest extends TestCase {
             super();
             List tests = loadTests();
             Iterator i = tests.iterator();
-            SPFRecordParser parser = new DefaultSPF1Parser(new ConsoleLogger(), new DefaultTermsFactory(new ConsoleLogger()));
+            SPFRecordParser parser = new RFC4408SPF1Parser(new ConsoleLogger(), new DefaultTermsFactory(new ConsoleLogger()));
             while (i.hasNext()) {
                 addTest(new SPF1ParserTest((SPF1RecordTestDef) i.next(), parser));
             }

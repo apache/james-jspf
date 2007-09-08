@@ -26,7 +26,7 @@ import org.apache.james.jspf.exceptions.TempErrorException;
 
 /**
  * 
- *
+ * Implementations get called when a SPFChecker throws an Exception
  */
 public interface SPFCheckerExceptionCatcher {
     

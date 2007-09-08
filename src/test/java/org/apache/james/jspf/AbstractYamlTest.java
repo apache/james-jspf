@@ -32,7 +32,7 @@ import org.apache.james.jspf.impl.DNSJnioAsynchService;
 import org.apache.james.jspf.impl.DNSServiceAsynchSimulator;
 import org.apache.james.jspf.impl.DNSServiceXBillImpl;
 import org.apache.james.jspf.macro.MacroExpand;
-import org.apache.james.jspf.parser.DefaultSPF1Parser;
+import org.apache.james.jspf.parser.RFC4408SPF1Parser;
 import org.apache.james.jspf.parser.DefaultTermsFactory;
 import org.apache.james.jspf.wiring.DNSServiceEnabled;
 import org.apache.james.jspf.wiring.LogEnabled;
@@ -173,7 +173,7 @@ public abstract class AbstractYamlTest extends TestCase {
             enabledServices = new WiringServiceTable();
             enabledServices.put(LogEnabled.class, log);
             */
-            parser = new DefaultSPF1Parser(log.getChildLogger("parser"), new DefaultTermsFactory(log.getChildLogger("termsfactory"), new WiringService() {
+            parser = new RFC4408SPF1Parser(log.getChildLogger("parser"), new DefaultTermsFactory(log.getChildLogger("termsfactory"), new WiringService() {
 
                 public void wire(Object component) throws WiringServiceException {
                     if (component instanceof LogEnabled) {

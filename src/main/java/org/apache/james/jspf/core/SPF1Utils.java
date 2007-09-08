@@ -33,8 +33,8 @@ import org.apache.james.jspf.exceptions.SPFErrorConstants;
 public class SPF1Utils {
 
     public static final String DEFAULT_EXPLANATION = "http://www.openspf.org/why.html?sender=%{S}&ip=%{I}";
-    
     public static final String BEST_GUESS_RECORD = "v=spf1 a/24 mx/24 ptr ?all";
+    public static final String ATTRIBUTE_SPF1_RECORD = "SPF.SPF1Record";
 
     /**
      * Convert raw SPF results to SPF names
@@ -72,7 +72,4 @@ public class SPF1Utils {
             return false;
         }
     }
-
-    public static final String ATTRIBUTE_SPF1_RECORD = "SPF.SPF1Record";
-
 }

@@ -31,7 +31,7 @@ public class SPFResult  {
 
     protected String headerTextAsString = "";
 
-    protected String headerName = "Received-SPF";
+    protected final static String HEADER_NAME = "Received-SPF";
     
     protected String result = null;
 
@@ -69,7 +69,7 @@ public class SPFResult  {
      * @return SPF-Header
      */
     public String getHeader() {
-        return headerName+": "+getHeaderText();
+        return HEADER_NAME+": "+getHeaderText();
     }
 
     /**
@@ -78,7 +78,7 @@ public class SPFResult  {
      * @return headername
      */
     public String getHeaderName() {
-        return headerName;
+        return HEADER_NAME;
     }
 
     /**

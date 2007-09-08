@@ -23,6 +23,10 @@ import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 
+/**
+ * 
+ * Implementations of this interface should handle parsing of SPFRecords
+ */
 public interface SPFRecordParser {
 
     /**

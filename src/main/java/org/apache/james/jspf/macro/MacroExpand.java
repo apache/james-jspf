@@ -71,7 +71,7 @@ public class MacroExpand {
     
     public static final boolean DOMAIN = false;
     
-    public static class RequireClientDomain extends Exception {
+    public static class RequireClientDomainException extends Exception {
         
     }
 
@@ -186,7 +186,7 @@ public class MacroExpand {
             } else {
                 return expandDomain(input, macroData);
             }
-        } catch (RequireClientDomain e) {
+        } catch (RequireClientDomainException e) {
             return null;
         }
     }
@@ -201,7 +201,7 @@ public class MacroExpand {
      *             Get thrown if invalid macros are used
      * @throws RequireClientDomain 
      */
-    private String expandExplanation(String input, MacroData macroData) throws PermErrorException, RequireClientDomain {
+    private String expandExplanation(String input, MacroData macroData) throws PermErrorException, RequireClientDomainException {
 
         log.debug("Start do expand explanation: " + input);
 
@@ -226,7 +226,7 @@ public class MacroExpand {
      *             This get thrown if invalid macros are used
      * @throws RequireClientDomain 
      */
-    private String expandDomain(String input, MacroData macroData) throws PermErrorException, RequireClientDomain {
+    private String expandDomain(String input, MacroData macroData) throws PermErrorException, RequireClientDomainException {
 
         log.debug("Start expand domain: " + input);
 
@@ -270,7 +270,7 @@ public class MacroExpand {
      *             This get thrown if invalid macros are used
      * @throws RequireClientDomain 
      */
-    private String expandMacroString(String input, MacroData macroData, boolean isExplanation) throws PermErrorException, RequireClientDomain {
+    private String expandMacroString(String input, MacroData macroData, boolean isExplanation) throws PermErrorException, RequireClientDomainException {
 
         StringBuffer decodedValue = new StringBuffer();
         Matcher inputMatcher = macroStringPattern.matcher(input);
@@ -316,7 +316,7 @@ public class MacroExpand {
      *             Get thrown if an error in processing happen
      * @throws RequireClientDomain 
      */
-    private String replaceCell(String replaceValue, MacroData macroData, boolean isExplanation) throws PermErrorException, RequireClientDomain {
+    private String replaceCell(String replaceValue, MacroData macroData, boolean isExplanation) throws PermErrorException, RequireClientDomainException {
 
         String variable = "";
         String domainNumber = "";
@@ -400,7 +400,7 @@ public class MacroExpand {
      * @throws RequireClientDomain requireClientDomain if the client domain is needed
      *             and not yet resolved.
      */
-    private String matchMacro(String macro, MacroData macroData) throws PermErrorException, RequireClientDomain {
+    private String matchMacro(String macro, MacroData macroData) throws PermErrorException, RequireClientDomainException {
 
         String rValue = null;
 
@@ -424,7 +424,7 @@ public class MacroExpand {
         } else if (variable.equalsIgnoreCase("p")) {
             rValue = macroData.getClientDomain();
             if (rValue == null) {
-                throw new RequireClientDomain();
+                throw new RequireClientDomainException();
             }
         } else if (variable.equalsIgnoreCase("o")) {
             rValue = macroData.getSenderDomain();

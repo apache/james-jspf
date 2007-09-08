@@ -104,7 +104,11 @@ public class DNSJnioAsynchService implements DNSAsynchLookupService {
         LookupAsynch.setDefaultResolver(resolver);
     }
     
-    public void setTimeout(int timeout) {
+    /**
+     * Set the timeout for the resolvers
+     * @param timeout
+     */
+    public synchronized void setTimeout(int timeout) {
         Resolver[] res = resolver.getResolvers();
         for (int i = 0; i < res.length; i++) {
             res[i].setTimeout(timeout);

@@ -25,6 +25,11 @@ import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
 
+/**
+ * 
+ * Listeners which should get called for a SPFCheck when the DNSResponse is aviable should implement 
+ * this interface.
+ */
 public interface SPFCheckerDNSResponseListener {
     
     /**

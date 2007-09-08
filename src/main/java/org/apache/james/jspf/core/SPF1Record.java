@@ -32,6 +32,8 @@ import java.util.List;
 public class SPF1Record {
     
     private String record;
+    private List directives = new ArrayList();
+    private List modifiers = new ArrayList();
 
     public SPF1Record() {
         this.record = null;
@@ -40,10 +42,6 @@ public class SPF1Record {
     public SPF1Record(String record) {
         this.record = record;
     }
-
-    private List directives = new ArrayList();
-
-    private List modifiers = new ArrayList();
 
     /**
      * Return the directives as Collection
