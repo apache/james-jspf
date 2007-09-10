@@ -25,6 +25,7 @@ import org.apache.james.jspf.core.Configuration;
 import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.Directive;
 import org.apache.james.jspf.core.Logger;
+import org.apache.james.jspf.core.MacroExpand;
 import org.apache.james.jspf.core.Mechanism;
 import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPFChecker;
@@ -34,7 +35,6 @@ import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
-import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.util.SPFTermsRegexps;
 import org.apache.james.jspf.wiring.LogEnabled;
 import org.apache.james.jspf.wiring.MacroExpandEnabled;
@@ -249,7 +249,7 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
     }
 
     /**
-     * @see org.apache.james.jspf.wiring.MacroExpandEnabled#enableMacroExpand(org.apache.james.jspf.macro.MacroExpand)
+     * @see org.apache.james.jspf.wiring.MacroExpandEnabled#enableMacroExpand(org.apache.james.jspf.core.MacroExpand)
      */
     public void enableMacroExpand(MacroExpand macroExpand) {
         this.macroExpand = macroExpand;

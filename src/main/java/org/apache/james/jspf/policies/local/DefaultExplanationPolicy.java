@@ -21,6 +21,7 @@ package org.apache.james.jspf.policies.local;
 
 import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.Logger;
+import org.apache.james.jspf.core.MacroExpand;
 import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPF1Record;
 import org.apache.james.jspf.core.SPF1Utils;
@@ -30,7 +31,6 @@ import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
-import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.policies.PolicyPostFilter;
 
 /**

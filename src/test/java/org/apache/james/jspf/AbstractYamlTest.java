@@ -20,6 +20,7 @@
 package org.apache.james.jspf;
 
 import org.apache.james.jspf.core.Logger;
+import org.apache.james.jspf.core.MacroExpand;
 import org.apache.james.jspf.core.SPFRecordParser;
 import org.apache.james.jspf.core.SPFResult;
 import org.apache.james.jspf.dns.DNSRequest;
@@ -32,7 +33,6 @@ import org.apache.james.jspf.executor.SynchronousSPFExecutor;
 import org.apache.james.jspf.impl.DNSJnioAsynchService;
 import org.apache.james.jspf.impl.DNSServiceAsynchSimulator;
 import org.apache.james.jspf.impl.DNSServiceXBillImpl;
-import org.apache.james.jspf.macro.MacroExpand;
 import org.apache.james.jspf.parser.RFC4408SPF1Parser;
 import org.apache.james.jspf.parser.DefaultTermsFactory;
 import org.apache.james.jspf.wiring.DNSServiceEnabled;
