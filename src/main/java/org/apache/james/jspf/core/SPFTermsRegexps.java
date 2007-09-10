@@ -17,7 +17,7 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.util;
+package org.apache.james.jspf.core;
 
 /**
  * This constants are used by Terms to define their matching rules.

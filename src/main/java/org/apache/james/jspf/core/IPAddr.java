@@ -22,7 +22,6 @@ package org.apache.james.jspf.core;
 import java.net.UnknownHostException;
 
 import org.apache.james.jspf.exceptions.PermErrorException;
-import org.apache.james.jspf.util.Inet6Util;
 import org.xbill.DNS.Address;
 
 public class IPAddr {

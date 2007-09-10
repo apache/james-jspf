@@ -25,8 +25,8 @@ import org.apache.james.jspf.core.Configuration;
 import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.Modifier;
 import org.apache.james.jspf.core.SPFSession;
+import org.apache.james.jspf.core.SPFTermsRegexps;
 import org.apache.james.jspf.exceptions.PermErrorException;
-import org.apache.james.jspf.util.SPFTermsRegexps;
 
 /**
  * This Class represent an Unknown Modifier

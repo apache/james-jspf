@@ -27,6 +27,7 @@ import org.apache.james.jspf.core.MacroExpand;
 import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.core.SPFCheckerDNSResponseListener;
 import org.apache.james.jspf.core.SPFSession;
+import org.apache.james.jspf.core.SPFTermsRegexps;
 import org.apache.james.jspf.dns.DNSRequest;
 import org.apache.james.jspf.dns.DNSResponse;
 import org.apache.james.jspf.dns.TimeoutException;
@@ -34,7 +35,6 @@ import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
-import org.apache.james.jspf.util.SPFTermsRegexps;
 
 import java.util.ArrayList;
 import java.util.List;

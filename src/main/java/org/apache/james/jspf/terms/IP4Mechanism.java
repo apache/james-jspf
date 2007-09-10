@@ -24,9 +24,9 @@ import org.apache.james.jspf.core.Configuration;
 import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.Directive;
 import org.apache.james.jspf.core.IPAddr;
+import org.apache.james.jspf.core.Inet6Util;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.exceptions.PermErrorException;
-import org.apache.james.jspf.util.Inet6Util;
 
 /**
  * This class represent the ip4 mechanism
@@ -81,7 +81,7 @@ public class IP4Mechanism extends GenericMechanism {
     }
 
     /**
-     * @see org.apache.james.jspf.util.Inet6Util#isValidIPV4Address(String)
+     * @see org.apache.james.jspf.core.Inet6Util#isValidIPV4Address(String)
      */
     protected boolean isValidAddress(String ipString) {
         return Inet6Util.isValidIPV4Address(ipString);

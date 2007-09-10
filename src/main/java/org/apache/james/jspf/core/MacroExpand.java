@@ -34,7 +34,6 @@ import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
-import org.apache.james.jspf.util.SPFTermsRegexps;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;

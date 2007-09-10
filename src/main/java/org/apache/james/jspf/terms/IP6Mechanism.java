@@ -20,7 +20,7 @@
 
 package org.apache.james.jspf.terms;
 
-import org.apache.james.jspf.util.Inet6Util;
+import org.apache.james.jspf.core.Inet6Util;
 
 /**
  * This class represent the ip6 mechanism

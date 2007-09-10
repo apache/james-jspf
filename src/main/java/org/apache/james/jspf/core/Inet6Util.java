@@ -17,7 +17,7 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.util;
+package org.apache.james.jspf.core;
 
 import java.util.ArrayList;
 import java.util.StringTokenizer;
@@ -30,6 +30,10 @@ import java.util.StringTokenizer;
  * @see org.apache.harmony.util.Inet6Util
  */
 public class Inet6Util {
+    
+    private Inet6Util() {
+        // make this class a an utility class non-instantiable
+    }
 
     /**
      * Creates an byte[] based on an ipAddressString. No error handling is
