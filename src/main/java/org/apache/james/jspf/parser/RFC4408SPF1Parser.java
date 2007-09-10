@@ -76,7 +76,7 @@ import java.util.regex.Pattern;
  * @see org.apache.james.jspf.core.SPF1Record
  * 
  */
-public final class RFC4408SPF1Parser implements SPFRecordParser {
+public class RFC4408SPF1Parser implements SPFRecordParser {
 
     /**
      * Regex based on http://www.ietf.org/rfc/rfc4408.txt.
