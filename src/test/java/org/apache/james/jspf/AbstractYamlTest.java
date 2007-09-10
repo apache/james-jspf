@@ -24,6 +24,7 @@ import org.apache.james.jspf.core.SPFRecordParser;
 import org.apache.james.jspf.core.SPFResult;
 import org.apache.james.jspf.dns.DNSRequest;
 import org.apache.james.jspf.dns.DNSService;
+import org.apache.james.jspf.dns.TimeoutException;
 import org.apache.james.jspf.dnsserver.DNSTestingServer;
 import org.apache.james.jspf.executor.SPFExecutor;
 import org.apache.james.jspf.executor.StagedMultipleSPFExecutor;
@@ -39,6 +40,7 @@ import org.apache.james.jspf.wiring.LogEnabled;
 import org.apache.james.jspf.wiring.MacroExpandEnabled;
 import org.apache.james.jspf.wiring.SPFCheckEnabled;
 import org.apache.james.jspf.wiring.WiringService;
+import org.apache.james.jspf.wiring.WiringServiceException;
 import org.jvyaml.Constructor;
 import org.jvyaml.DefaultYAMLFactory;
 import org.jvyaml.YAMLFactory;
@@ -486,7 +488,7 @@ public abstract class AbstractYamlTest extends TestCase {
                             return getRecords((String) hm.get("CNAME"), recordType, depth - 1);
                         }
                     } else if ("TIMEOUT".equals(o)) {
-                        throw new TimeoutException();
+                        throw new TimeoutException("TIMEOUT");
                     } else {
                         throw new IllegalStateException("getRecord found an unexpected data");
                     }

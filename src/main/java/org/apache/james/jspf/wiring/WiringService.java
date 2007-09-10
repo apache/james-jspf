@@ -25,14 +25,6 @@ package org.apache.james.jspf.wiring;
  */
 public interface WiringService {
     
-    public static class WiringServiceException extends Exception {
-
-        public WiringServiceException(String string) {
-            super(string);
-        }
-
-    }
-
     /**
      * Called to wire a component
      * 

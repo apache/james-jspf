@@ -28,13 +28,6 @@ import java.util.List;
 public interface DNSService {
     
     /**
-     * The exception thrown on timeout.
-     */
-    public static class TimeoutException extends Exception {
-        
-    }
-
-    /**
      * Retrieve dns records for the given host
      * 
      * @param request the dns request

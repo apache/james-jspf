@@ -29,7 +29,7 @@ import org.apache.james.jspf.dns.DNSAsynchLookupService;
 import org.apache.james.jspf.dns.DNSResponse;
 import org.apache.james.jspf.dns.IResponse;
 import org.apache.james.jspf.dns.IResponseQueue;
-import org.apache.james.jspf.dns.DNSService.TimeoutException;
+import org.apache.james.jspf.dns.TimeoutException;
 import org.apache.james.jspf.exceptions.SPFResultException;
 
 import java.util.Collections;

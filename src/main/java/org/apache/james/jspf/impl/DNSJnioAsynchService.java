@@ -21,9 +21,9 @@ package org.apache.james.jspf.impl;
 
 import org.apache.james.jspf.dns.DNSAsynchLookupService;
 import org.apache.james.jspf.dns.DNSRequest;
-import org.apache.james.jspf.dns.DNSService;
 import org.apache.james.jspf.dns.IResponse;
 import org.apache.james.jspf.dns.IResponseQueue;
+import org.apache.james.jspf.dns.TimeoutException;
 import org.xbill.DNS.DClass;
 import org.xbill.DNS.ExtendedNonblockingResolver;
 import org.xbill.DNS.LookupAsynch;
@@ -136,8 +136,7 @@ public class DNSJnioAsynchService implements DNSAsynchLookupService {
 
                         public Exception getException() {
                             if (lookup.getResult() == LookupAsynch.TRY_AGAIN) {
-                                System.err.println("######## "+lookup.getErrorString());
-                                return new DNSService.TimeoutException();
+                                return new TimeoutException(lookup.getErrorString());
                             } else {
                                 return null;
                             }

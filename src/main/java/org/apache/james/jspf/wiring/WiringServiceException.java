@@ -17,56 +17,19 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.dns;
-
-
-import java.util.List;
+package org.apache.james.jspf.wiring;
 
 /**
- * Represent a DNSResponse
- *
+ * Exception raised when something goes wrong with wiring
  */
-public class DNSResponse {
-    
-    private List response;
-    
-    private TimeoutException exception;
-    
-    public DNSResponse(TimeoutException exception) {
-        this.exception = exception;
-        this.response = null;
-    }
-    
-    public DNSResponse(List response) {
-        this.exception = null;
-        this.response = response;
-    }
-    
-    /**
-     * Returns the DNS response
-     * 
-     * @return the dns repsonse
-     * @throws TimeoutException get thrown if an timeout was returned while tried to 
-     *         process a dns request
-     */
-    public List getResponse() throws TimeoutException {
-        if (exception != null) {
-            throw exception;
-        } else {
-            return response;
-        }
+public class WiringServiceException extends Exception {
+
+    public WiringServiceException(String string) {
+        super(string);
     }
 
-    /**
-     * @see java.lang.Object#toString()
-     */
-    public String toString() {
-        if (exception != null) {
-            return "EXCEPTION!";
-        } else if (response != null) {
-            return response.toString();
-        } else {
-            return "NULL?";
-        }
+    public WiringServiceException(String string, Exception nested) {
+        super(string, nested);
     }
+
 }

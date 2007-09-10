@@ -29,6 +29,7 @@ import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.dns.DNSRequest;
 import org.apache.james.jspf.dns.DNSResponse;
 import org.apache.james.jspf.dns.DNSService;
+import org.apache.james.jspf.dns.TimeoutException;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
@@ -168,7 +169,7 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled,
                 }
             
             }
-        } catch (DNSService.TimeoutException e) {
+        } catch (TimeoutException e) {
             throw new TempErrorException("Timeout querying the dns server");
         }
         

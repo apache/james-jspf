@@ -24,7 +24,7 @@ import org.apache.james.jspf.dns.DNSRequest;
 import org.apache.james.jspf.dns.DNSService;
 import org.apache.james.jspf.dns.IResponseImpl;
 import org.apache.james.jspf.dns.IResponseQueue;
-import org.apache.james.jspf.dns.DNSService.TimeoutException;
+import org.apache.james.jspf.dns.TimeoutException;
 
 import java.util.LinkedList;
 

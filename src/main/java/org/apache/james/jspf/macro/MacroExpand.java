@@ -36,7 +36,7 @@ import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.dns.DNSRequest;
 import org.apache.james.jspf.dns.DNSResponse;
 import org.apache.james.jspf.dns.DNSService;
-import org.apache.james.jspf.dns.DNSService.TimeoutException;
+import org.apache.james.jspf.dns.TimeoutException;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;

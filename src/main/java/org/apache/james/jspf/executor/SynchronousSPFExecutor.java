@@ -27,7 +27,7 @@ import org.apache.james.jspf.core.SPFCheckerExceptionCatcher;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.dns.DNSResponse;
 import org.apache.james.jspf.dns.DNSService;
-import org.apache.james.jspf.dns.DNSService.TimeoutException;
+import org.apache.james.jspf.dns.TimeoutException;
 import org.apache.james.jspf.exceptions.SPFResultException;
 
 /**

@@ -23,6 +23,7 @@ import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.dns.DNSRequest;
 import org.apache.james.jspf.dns.DNSService;
+import org.apache.james.jspf.dns.TimeoutException;
 import org.xbill.DNS.AAAARecord;
 import org.xbill.DNS.ARecord;
 import org.xbill.DNS.Lookup;
@@ -138,7 +139,7 @@ public class DNSServiceXBillImpl implements DNSService {
             
 
             if (queryResult == Lookup.TRY_AGAIN) {
-                throw new TimeoutException();
+                throw new TimeoutException(query.getErrorString());
             }
             
             List records = convertRecordsToList(rr);

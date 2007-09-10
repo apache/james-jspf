@@ -9,8 +9,7 @@ import org.apache.james.jspf.core.SPFCheckerDNSResponseListener;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.dns.DNSRequest;
 import org.apache.james.jspf.dns.DNSResponse;
-import org.apache.james.jspf.dns.DNSService;
-import org.apache.james.jspf.dns.DNSService.TimeoutException;
+import org.apache.james.jspf.dns.TimeoutException;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
@@ -79,7 +78,7 @@ public class SPFRetriever implements SPFChecker {
                 
                 return null;
                 
-            } catch (DNSService.TimeoutException e) {
+            } catch (TimeoutException e) {
                 throw new TempErrorException("Timeout querying dns");
             }
         }

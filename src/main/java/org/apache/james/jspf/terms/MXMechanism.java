@@ -28,7 +28,7 @@ import org.apache.james.jspf.core.SPFCheckerDNSResponseListener;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.dns.DNSRequest;
 import org.apache.james.jspf.dns.DNSResponse;
-import org.apache.james.jspf.dns.DNSService;
+import org.apache.james.jspf.dns.TimeoutException;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
@@ -147,7 +147,7 @@ public class MXMechanism extends AMechanism implements SPFCheckerDNSResponseList
             spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.valueOf(checkAddressList(checkAddress, mxR, getIp4cidr())));
             return null;
             
-        } catch (DNSService.TimeoutException e) {
+        } catch (TimeoutException e) {
             spfSession.setAttribute(ATTRIBUTE_CHECK_RECORDS, null);
             spfSession.setAttribute(ATTRIBUTE_MX_RECORDS, null);
             throw new TempErrorException("Timeout querying the dns server");

@@ -19,54 +19,16 @@
 
 package org.apache.james.jspf.dns;
 
-
-import java.util.List;
-
 /**
- * Represent a DNSResponse
- *
+ * The exception thrown on lookup timeout
  */
-public class DNSResponse {
-    
-    private List response;
-    
-    private TimeoutException exception;
-    
-    public DNSResponse(TimeoutException exception) {
-        this.exception = exception;
-        this.response = null;
-    }
-    
-    public DNSResponse(List response) {
-        this.exception = null;
-        this.response = response;
-    }
-    
-    /**
-     * Returns the DNS response
-     * 
-     * @return the dns repsonse
-     * @throws TimeoutException get thrown if an timeout was returned while tried to 
-     *         process a dns request
-     */
-    public List getResponse() throws TimeoutException {
-        if (exception != null) {
-            throw exception;
-        } else {
-            return response;
-        }
-    }
+public class TimeoutException extends Exception {
 
     /**
-     * @see java.lang.Object#toString()
+     * @param message cause
      */
-    public String toString() {
-        if (exception != null) {
-            return "EXCEPTION!";
-        } else if (response != null) {
-            return response.toString();
-        } else {
-            return "NULL?";
-        }
+    public TimeoutException(String message) {
+        super(message);
     }
+   
 }

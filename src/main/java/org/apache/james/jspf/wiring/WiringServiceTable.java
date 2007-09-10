@@ -25,10 +25,13 @@ import java.lang.reflect.Method;
 import java.util.Hashtable;
 import java.util.Iterator;
 
+/**
+ * This class associates "Enabling interfaces" to the service that provides the
+ * dependency.
+ */
 public class WiringServiceTable extends Hashtable implements WiringService {
 
-    /*
-     * (non-Javadoc)
+    /**
      * @see org.apache.james.jspf.wiring.WiringService#wire(java.lang.Object)
      */
     public void wire(Object component) throws WiringServiceException {
@@ -41,11 +44,11 @@ public class WiringServiceTable extends Hashtable implements WiringService {
                     try {
                         m[0].invoke(component, new Object[] {get(enablingClass)});
                     } catch (IllegalArgumentException e) {
-                        throw new WiringServiceException("Illegal argument invoking enabled service: "+enablingClass.toString());
+                        throw new WiringServiceException("Illegal argument invoking enabled service: "+enablingClass.toString(), e);
                     } catch (InvocationTargetException e) {
-                        throw new WiringServiceException("Unable to invoke enabled service: "+enablingClass.toString());
+                        throw new WiringServiceException("Unable to invoke enabled service: "+enablingClass.toString(), e);
                     } catch (IllegalAccessException e) {
-                        throw new WiringServiceException("Unable to invoke enabled service: "+enablingClass.toString());
+                        throw new WiringServiceException("Unable to invoke enabled service: "+enablingClass.toString(), e);
                     }
                 }
             }

@@ -25,6 +25,7 @@ import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.wiring.LogEnabled;
 import org.apache.james.jspf.wiring.WiringService;
+import org.apache.james.jspf.wiring.WiringServiceException;
 import org.apache.james.jspf.wiring.WiringServiceTable;
 
 import java.io.IOException;
@@ -136,7 +137,7 @@ public class DefaultTermsFactory implements TermsFactory {
             
             try {
                 wiringService.wire(term);
-            } catch (WiringService.WiringServiceException e) {
+            } catch (WiringServiceException e) {
                 throw new InstantiationException(
                         "Unexpected error adding dependencies to term: " + e.getMessage());
             }
