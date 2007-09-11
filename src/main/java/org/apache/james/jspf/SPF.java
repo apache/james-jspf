@@ -226,7 +226,7 @@ public class SPF implements SPFChecker {
     
     private String defaultExplanation = null;
     
-    public boolean useBestGuess = false;
+    private boolean useBestGuess = false;
 
     private FallbackPolicy fallBack;
     

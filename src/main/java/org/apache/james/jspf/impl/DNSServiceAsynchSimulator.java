@@ -40,7 +40,7 @@ public class DNSServiceAsynchSimulator implements Runnable, DNSAsynchLookupServi
     private int waitingThreads = 0;
     private boolean multiThread;
     
-    public static final class Request {
+    private static final class Request {
         private final DNSRequest value;
         private final Object id;
         private final IResponseQueue responseQueue;
