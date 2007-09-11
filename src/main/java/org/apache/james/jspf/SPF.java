@@ -220,7 +220,7 @@ public class SPF implements SPFChecker {
 
     private DNSService dnsProbe;
 
-    public SPFRecordParser parser;
+    private SPFRecordParser parser;
 
     private Logger log;
     
