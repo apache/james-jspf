@@ -19,7 +19,7 @@ SPF
 ---
 Here is a simple usage of the library:
 
-SPF spf = new SPF(new DNSServiceXBillImpl ());
+DefaultSPF spf = new DefaultSPF();
 SPFResult res = spf.checkSPF("192.168.0.1", "from@example.com", "example.com");
 if (res.getResult().equals(SPF1Utils.FAIL_CONV)) {
  ... do something ...
@@ -39,7 +39,7 @@ SOFTFAIL_CONV = "softfail";
 
 Links
 -----
-http://new.openspf.org/ for the latest informations about SPF
+http://www.openspf.org/ for the latest informations about SPF
 http://james.apache.org/jspf/ for the jSPF website, javadocs, xdocs and more.
 
 
