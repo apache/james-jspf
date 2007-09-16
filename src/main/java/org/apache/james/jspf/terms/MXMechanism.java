@@ -21,20 +21,19 @@
 package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.DNSLookupContinuation;
-import org.apache.james.jspf.core.Directive;
+import org.apache.james.jspf.core.DNSRequest;
+import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.MacroExpand;
 import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.core.SPFCheckerDNSResponseListener;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.core.SPFTermsRegexps;
-import org.apache.james.jspf.dns.DNSRequest;
-import org.apache.james.jspf.dns.DNSResponse;
-import org.apache.james.jspf.dns.TimeoutException;
-import org.apache.james.jspf.exceptions.NeutralException;
-import org.apache.james.jspf.exceptions.NoneException;
-import org.apache.james.jspf.exceptions.PermErrorException;
-import org.apache.james.jspf.exceptions.TempErrorException;
+import org.apache.james.jspf.core.TimeoutException;
+import org.apache.james.jspf.core.exceptions.NeutralException;
+import org.apache.james.jspf.core.exceptions.NoneException;
+import org.apache.james.jspf.core.exceptions.PermErrorException;
+import org.apache.james.jspf.core.exceptions.TempErrorException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,7 +84,7 @@ public class MXMechanism extends AMechanism implements SPFCheckerDNSResponseList
     }
 
     /**
-     * @see org.apache.james.jspf.terms.AMechanism#onDNSResponse(org.apache.james.jspf.dns.DNSResponse, org.apache.james.jspf.core.SPFSession)
+     * @see org.apache.james.jspf.terms.AMechanism#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
      */
     public DNSLookupContinuation onDNSResponse(DNSResponse response, SPFSession spfSession)
         throws PermErrorException, TempErrorException, NoneException, NeutralException {

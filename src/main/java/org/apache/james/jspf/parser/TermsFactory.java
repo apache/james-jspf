@@ -20,7 +20,7 @@
 package org.apache.james.jspf.parser;
 
 import org.apache.james.jspf.core.Configuration;
-import org.apache.james.jspf.exceptions.PermErrorException;
+import org.apache.james.jspf.core.exceptions.PermErrorException;
 
 import java.util.Collection;
 

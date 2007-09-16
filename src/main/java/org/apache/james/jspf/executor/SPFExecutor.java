@@ -19,7 +19,6 @@
 
 package org.apache.james.jspf.executor;
 
-import org.apache.james.jspf.core.FutureSPFResult;
 import org.apache.james.jspf.core.SPFSession;
 
 public interface SPFExecutor {

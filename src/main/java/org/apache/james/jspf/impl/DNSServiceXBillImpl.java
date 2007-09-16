@@ -19,11 +19,11 @@
 
 package org.apache.james.jspf.impl;
 
+import org.apache.james.jspf.core.DNSRequest;
+import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.Logger;
-import org.apache.james.jspf.dns.DNSRequest;
-import org.apache.james.jspf.dns.DNSService;
-import org.apache.james.jspf.dns.TimeoutException;
+import org.apache.james.jspf.core.TimeoutException;
 import org.xbill.DNS.AAAARecord;
 import org.xbill.DNS.ARecord;
 import org.xbill.DNS.Lookup;
@@ -65,7 +65,7 @@ public class DNSServiceXBillImpl implements DNSService {
     }
 
     /**
-     * @see org.apache.james.jspf.dns.DNSService#setTimeOut(int)
+     * @see org.apache.james.jspf.core.DNSService#setTimeOut(int)
      */
     public synchronized void setTimeOut(int timeOut) {
         this.timeOut = timeOut;
@@ -111,7 +111,7 @@ public class DNSServiceXBillImpl implements DNSService {
     }
     
     /**
-     * @see org.apache.james.jspf.dns.DNSService#getRecords(org.apache.james.jspf.dns.DNSRequest)
+     * @see org.apache.james.jspf.core.DNSService#getRecords(org.apache.james.jspf.core.DNSRequest)
      */
     public List getRecords(DNSRequest request)
             throws TimeoutException {

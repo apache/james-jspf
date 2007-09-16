@@ -17,30 +17,18 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.dns;
-
-import java.util.List;
-
+package org.apache.james.jspf.core;
 
 /**
- * Queue implementation which is used to manage IResponse
- *
+ * The exception thrown on lookup timeout
  */
-public interface IResponseQueue extends List {
-    
-    /**
-     * Return the last IResponse in the queue. If the queue is empty it will
-     * wait until a IResponse was added
-     * 
-     * @return response
-     */
-    public IResponse removeResponse();
-    
-    /**
-     *  Add the given Response to the end of the queue. 
-     *  
-     * @param r
-     */
-    public void insertResponse(IResponse r);
+public class TimeoutException extends Exception {
 
+    /**
+     * @param message cause
+     */
+    public TimeoutException(String message) {
+        super(message);
+    }
+   
 }

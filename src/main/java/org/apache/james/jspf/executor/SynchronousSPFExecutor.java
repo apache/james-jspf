@@ -20,15 +20,14 @@
 package org.apache.james.jspf.executor;
 
 import org.apache.james.jspf.core.DNSLookupContinuation;
-import org.apache.james.jspf.core.FutureSPFResult;
+import org.apache.james.jspf.core.DNSResponse;
+import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.core.SPFCheckerExceptionCatcher;
 import org.apache.james.jspf.core.SPFSession;
-import org.apache.james.jspf.dns.DNSResponse;
-import org.apache.james.jspf.dns.DNSService;
-import org.apache.james.jspf.dns.TimeoutException;
-import org.apache.james.jspf.exceptions.SPFResultException;
+import org.apache.james.jspf.core.TimeoutException;
+import org.apache.james.jspf.core.exceptions.SPFResultException;
 
 /**
  * Synchronous implementation of SPFExecuter. All queries will get executed synchronously
@@ -44,7 +43,7 @@ public class SynchronousSPFExecutor implements SPFExecutor {
     }
 
     /**
-     * @see org.apache.james.jspf.executor.SPFExecutor#execute(org.apache.james.jspf.core.SPFSession, org.apache.james.jspf.core.FutureSPFResult)
+     * @see org.apache.james.jspf.executor.SPFExecutor#execute(org.apache.james.jspf.core.SPFSession, org.apache.james.jspf.executor.FutureSPFResult)
      */
     public void execute(SPFSession session, FutureSPFResult result) {
         SPFChecker checker;

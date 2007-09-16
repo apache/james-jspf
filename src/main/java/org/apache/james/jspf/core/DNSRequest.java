@@ -17,9 +17,9 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.dns;
+package org.apache.james.jspf.core;
 
-import org.apache.james.jspf.exceptions.NoneException;
+import org.apache.james.jspf.core.exceptions.NoneException;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.TextParseException;
 

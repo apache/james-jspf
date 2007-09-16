@@ -19,8 +19,8 @@
 
 package org.apache.james.jspf.core;
 
-import org.apache.james.jspf.exceptions.NoneException;
-import org.apache.james.jspf.exceptions.PermErrorException;
+import org.apache.james.jspf.core.exceptions.NoneException;
+import org.apache.james.jspf.core.exceptions.PermErrorException;
 
 import junit.framework.TestCase;
 

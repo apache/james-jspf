@@ -18,9 +18,11 @@
  ****************************************************************/
 
 
-package org.apache.james.jspf.core;
+package org.apache.james.jspf.executor;
 
-import org.apache.james.jspf.exceptions.SPFErrorConstants;
+import org.apache.james.jspf.core.SPF1Utils;
+import org.apache.james.jspf.core.SPFSession;
+import org.apache.james.jspf.core.exceptions.SPFErrorConstants;
 
 
 /**

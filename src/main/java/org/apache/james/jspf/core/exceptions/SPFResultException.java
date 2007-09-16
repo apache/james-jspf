@@ -17,25 +17,26 @@
  * under the License.                                           *
  ****************************************************************/
 
-
-package org.apache.james.jspf.exceptions;
-
+package org.apache.james.jspf.core.exceptions;
 
 /**
- * This exception get thrown if the result should be none
- * 
+ * Root exception for SPF methods
  */
-public class NoneException extends SPFResultException {
+public abstract class SPFResultException extends Exception {
 
-    public NoneException(String strErrorMessage) {
+    /**
+     * Exception
+     * 
+     * @param strErrorMessage string
+     */
+    public SPFResultException(String strErrorMessage) {
         super(strErrorMessage);
     }
 
     /**
-     * @see org.apache.james.jspf.exceptions.SPFResultException#getResult()
+     * The result for this exception
+     * 
+     * @return the spf result for this exception
      */
-    public String getResult() {
-        return SPFErrorConstants.NONE_CONV;
-    }
-
+    public abstract String getResult();
 }

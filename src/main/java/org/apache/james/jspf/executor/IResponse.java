@@ -17,18 +17,29 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.dns;
+package org.apache.james.jspf.executor;
 
-/**
- * The exception thrown on lookup timeout
- */
-public class TimeoutException extends Exception {
-
+public interface IResponse {
+    
     /**
-     * @param message cause
+     * Get id of the IResponse object
+     * 
+     * @return id
      */
-    public TimeoutException(String message) {
-        super(message);
-    }
-   
+    public Object getId();
+    
+    /**
+     * Get the value which is stored in the IResponse object
+     * 
+     * @return object
+     */
+    public Object getValue();
+    
+    /**
+     * Return the exception which was stored for the IResponse object
+     * 
+     * @return exception
+     */
+    public Exception getException();
+
 }

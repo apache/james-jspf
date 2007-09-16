@@ -22,7 +22,7 @@ package org.apache.james.jspf.core;
 import org.apache.james.jspf.ConsoleLogger;
 import org.apache.james.jspf.core.MacroData;
 import org.apache.james.jspf.core.MacroExpand;
-import org.apache.james.jspf.exceptions.PermErrorException;
+import org.apache.james.jspf.core.exceptions.PermErrorException;
 
 import junit.framework.TestCase;
 

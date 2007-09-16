@@ -18,7 +18,7 @@
  ****************************************************************/
 
 
-package org.apache.james.jspf.exceptions;
+package org.apache.james.jspf.core.exceptions;
 
 public interface SPFErrorConstants {
 

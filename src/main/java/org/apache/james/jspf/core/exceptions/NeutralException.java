@@ -18,18 +18,24 @@
  ****************************************************************/
 
 
-package org.apache.james.jspf.core;
+package org.apache.james.jspf.core.exceptions;
+
 
 /**
- * This Interface represent a modifier
+ * This exception get thrown if the result should be neutral
  * 
  */
-public interface Modifier extends SPFChecker {
+public class NeutralException extends SPFResultException {
+
+    public NeutralException(String strErrorMessage) {
+        super(strErrorMessage);
+    }
 
     /**
-     * Return true if the Modifier is only allowed once 
-     * 
-     * @return true if only one instance of this modifier is allowed
+     * @see org.apache.james.jspf.core.exceptions.SPFResultException#getResult()
      */
-    public boolean enforceSingleInstance();
+    public String getResult() {
+        return SPFErrorConstants.NEUTRAL_CONV;
+    }
+
 }

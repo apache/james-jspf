@@ -21,22 +21,21 @@
 package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.DNSLookupContinuation;
-import org.apache.james.jspf.core.Directive;
+import org.apache.james.jspf.core.DNSRequest;
+import org.apache.james.jspf.core.DNSResponse;
+import org.apache.james.jspf.core.DNSService;
+import org.apache.james.jspf.core.DNSServiceEnabled;
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.MacroExpand;
 import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.core.SPFCheckerDNSResponseListener;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.core.SPFTermsRegexps;
-import org.apache.james.jspf.dns.DNSRequest;
-import org.apache.james.jspf.dns.DNSResponse;
-import org.apache.james.jspf.dns.DNSService;
-import org.apache.james.jspf.dns.DNSServiceEnabled;
-import org.apache.james.jspf.dns.TimeoutException;
-import org.apache.james.jspf.exceptions.NeutralException;
-import org.apache.james.jspf.exceptions.NoneException;
-import org.apache.james.jspf.exceptions.PermErrorException;
-import org.apache.james.jspf.exceptions.TempErrorException;
+import org.apache.james.jspf.core.TimeoutException;
+import org.apache.james.jspf.core.exceptions.NeutralException;
+import org.apache.james.jspf.core.exceptions.NoneException;
+import org.apache.james.jspf.core.exceptions.PermErrorException;
+import org.apache.james.jspf.core.exceptions.TempErrorException;
 
 import java.util.List;
 
@@ -112,14 +111,14 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled,
     }
 
     /**
-     * @see org.apache.james.jspf.dns.DNSServiceEnabled#enableDNSService(org.apache.james.jspf.dns.DNSService)
+     * @see org.apache.james.jspf.core.DNSServiceEnabled#enableDNSService(org.apache.james.jspf.core.DNSService)
      */
     public void enableDNSService(DNSService service) {
         this.dnsService = service;
     }
 
     /**
-     * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.dns.DNSResponse, org.apache.james.jspf.core.SPFSession)
+     * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
      */
     public DNSLookupContinuation onDNSResponse(DNSResponse response, SPFSession spfSession)
             throws PermErrorException, TempErrorException, NoneException, NeutralException {

@@ -23,7 +23,7 @@ import org.apache.james.jspf.core.Configurable;
 import org.apache.james.jspf.core.Configuration;
 import org.apache.james.jspf.core.LogEnabled;
 import org.apache.james.jspf.core.Logger;
-import org.apache.james.jspf.exceptions.PermErrorException;
+import org.apache.james.jspf.core.exceptions.PermErrorException;
 import org.apache.james.jspf.wiring.WiringService;
 import org.apache.james.jspf.wiring.WiringServiceException;
 import org.apache.james.jspf.wiring.WiringServiceTable;

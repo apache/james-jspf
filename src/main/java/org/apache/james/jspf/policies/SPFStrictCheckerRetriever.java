@@ -1,17 +1,17 @@
 package org.apache.james.jspf.policies;
 
 import org.apache.james.jspf.core.DNSLookupContinuation;
+import org.apache.james.jspf.core.DNSRequest;
+import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.SPF1Record;
 import org.apache.james.jspf.core.SPF1Utils;
 import org.apache.james.jspf.core.SPFCheckerDNSResponseListener;
 import org.apache.james.jspf.core.SPFSession;
-import org.apache.james.jspf.dns.DNSRequest;
-import org.apache.james.jspf.dns.DNSResponse;
-import org.apache.james.jspf.dns.TimeoutException;
-import org.apache.james.jspf.exceptions.NeutralException;
-import org.apache.james.jspf.exceptions.NoneException;
-import org.apache.james.jspf.exceptions.PermErrorException;
-import org.apache.james.jspf.exceptions.TempErrorException;
+import org.apache.james.jspf.core.TimeoutException;
+import org.apache.james.jspf.core.exceptions.NeutralException;
+import org.apache.james.jspf.core.exceptions.NoneException;
+import org.apache.james.jspf.core.exceptions.PermErrorException;
+import org.apache.james.jspf.core.exceptions.TempErrorException;
 
 import java.util.List;
 
@@ -27,7 +27,7 @@ public class SPFStrictCheckerRetriever extends SPFRetriever {
     private static final class SPFStrictSPFRecordsDNSResponseListener implements SPFCheckerDNSResponseListener {
 
         /**
-         * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.dns.DNSResponse, org.apache.james.jspf.core.SPFSession)
+         * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
          */
         public DNSLookupContinuation onDNSResponse(
                 DNSResponse response, SPFSession session)
@@ -58,7 +58,7 @@ public class SPFStrictCheckerRetriever extends SPFRetriever {
     private static final class SPFStrictCheckDNSResponseListener implements SPFCheckerDNSResponseListener {
 
         /**
-         * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.dns.DNSResponse, org.apache.james.jspf.core.SPFSession)
+         * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
          */
         public DNSLookupContinuation onDNSResponse(
                 DNSResponse response, SPFSession session)

@@ -19,12 +19,12 @@
 
 package org.apache.james.jspf.impl;
 
-import org.apache.james.jspf.dns.DNSAsynchLookupService;
-import org.apache.james.jspf.dns.DNSRequest;
-import org.apache.james.jspf.dns.DNSService;
-import org.apache.james.jspf.dns.IResponseImpl;
-import org.apache.james.jspf.dns.IResponseQueue;
-import org.apache.james.jspf.dns.TimeoutException;
+import org.apache.james.jspf.core.DNSRequest;
+import org.apache.james.jspf.core.DNSService;
+import org.apache.james.jspf.core.TimeoutException;
+import org.apache.james.jspf.executor.DNSAsynchLookupService;
+import org.apache.james.jspf.executor.IResponseImpl;
+import org.apache.james.jspf.executor.IResponseQueue;
 
 import java.util.LinkedList;
 
@@ -74,7 +74,7 @@ public class DNSServiceAsynchSimulator implements Runnable, DNSAsynchLookupServi
     }
 
     /**
-     * @see org.apache.james.jspf.dns.DNSService#getRecordsAsynch(java.lang.String, int, java.lang.Object, org.apache.james.jspf.dns.IResponseQueue)
+     * @see org.apache.james.jspf.core.DNSService#getRecordsAsynch(java.lang.String, int, java.lang.Object, org.apache.james.jspf.executor.IResponseQueue)
      */
     public void getRecordsAsynch(DNSRequest request, int id,
             final IResponseQueue responsePool) {

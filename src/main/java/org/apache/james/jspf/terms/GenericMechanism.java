@@ -26,9 +26,8 @@ import org.apache.james.jspf.core.LogEnabled;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.MacroExpand;
 import org.apache.james.jspf.core.MacroExpandEnabled;
-import org.apache.james.jspf.core.Mechanism;
 import org.apache.james.jspf.core.SPFSession;
-import org.apache.james.jspf.exceptions.PermErrorException;
+import org.apache.james.jspf.core.exceptions.PermErrorException;
 
 /**
  * This abstract class represent a gerneric mechanism

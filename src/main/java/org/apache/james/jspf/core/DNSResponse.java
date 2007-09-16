@@ -17,24 +17,56 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.dns;
+package org.apache.james.jspf.core;
 
 
+import java.util.List;
 
 /**
- * Interface which should be used to access all necassary DNS-Records
- *  
+ * Represent a DNSResponse
+ *
  */
-public interface DNSAsynchLookupService {
+public class DNSResponse {
+    
+    private List response;
+    
+    private TimeoutException exception;
+    
+    public DNSResponse(TimeoutException exception) {
+        this.exception = exception;
+        this.response = null;
+    }
+    
+    public DNSResponse(List response) {
+        this.exception = null;
+        this.response = response;
+    }
+    
+    /**
+     * Returns the DNS response
+     * 
+     * @return the dns repsonse
+     * @throws TimeoutException get thrown if an timeout was returned while tried to 
+     *         process a dns request
+     */
+    public List getResponse() throws TimeoutException {
+        if (exception != null) {
+            throw exception;
+        } else {
+            return response;
+        }
+    }
 
     /**
-     * Retrieve dns records for the given host asynchronously
-     * 
-     * @param request the dns request
-     * @param id the identification key for the response.
-     * @param responsePool the queue where the response will be appended.
+     * @see java.lang.Object#toString()
      */
-    public void getRecordsAsynch(DNSRequest request, int id,
-            final IResponseQueue responsePool);
-
+    public String toString() {
+        if (exception != null) {
+            return "EXCEPTION!";
+        } else if (response != null) {
+            return response.toString();
+        } else {
+            return "NULL?";
+        }
+    }
 }

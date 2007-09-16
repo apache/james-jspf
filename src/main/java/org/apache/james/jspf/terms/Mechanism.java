@@ -17,48 +17,16 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.dns;
 
+package org.apache.james.jspf.terms;
 
-import java.util.List;
+import org.apache.james.jspf.core.SPFChecker;
+
 
 /**
- * Implementation of an IRespone Object
- *
+ * This Interface represent a mechanismn
+ * 
  */
-public class IResponseImpl implements IResponse {
-    private Exception exception = null;
-    private List value = null;
-    private Object id = null;
-    
-    public IResponseImpl(Object id, Exception e) {
-        this.exception = e;
-        this.id = id;
-    }
-    
-    public IResponseImpl(Object id, List result) {
-        this.value = result;
-        this.id = id;
-    }
-    
-    /**
-     * @see org.apache.james.jspf.dns.IResponse#getException()
-     */
-    public Exception getException() {
-        return exception;
-    }
-    
-    /**
-     * @see org.apache.james.jspf.dns.IResponse#getId()
-     */
-    public Object getId() {
-        return id;
-    }
-    
-    /**
-     * @see org.apache.james.jspf.dns.IResponse#getValue()
-     */
-    public Object getValue() {
-        return value;
-    }
+public interface Mechanism extends SPFChecker {
+
 }

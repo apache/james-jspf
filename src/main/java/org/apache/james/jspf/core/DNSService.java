@@ -17,26 +17,49 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.exceptions;
+package org.apache.james.jspf.core;
+
+import java.util.List;
 
 /**
- * Root exception for SPF methods
+ * Interface which should be used to access all necassary DNS-Records
+ *  
  */
-public abstract class SPFResultException extends Exception {
+public interface DNSService {
+    
+    /**
+     * Retrieve dns records for the given host
+     * 
+     * @param request the dns request
+     * @return an array of Strings representing the records
+     * @throws TimeoutException
+     */
+    public List getRecords(DNSRequest request) throws TimeoutException;
 
     /**
-     * Exception
+     * Try to get all domain names for the running host
      * 
-     * @param strErrorMessage string
+     * @return names A List contains all domain names which could resolved
      */
-    public SPFResultException(String strErrorMessage) {
-        super(strErrorMessage);
-    }
+    public List getLocalDomainNames();
 
     /**
-     * The result for this exception
+     * Set the timeout for DNS-Requests
      * 
-     * @return the spf result for this exception
+     * @param timeOut The timeout in seconds
      */
-    public abstract String getResult();
+    public void setTimeOut(int timeOut);
+    
+    /**
+     * @return the current record limit
+     */
+    public int getRecordLimit();
+
+    /**
+     * Sets a new limit for the number of records for MX and PTR lookups.
+     * 
+     * @param recordLimit the new limit (0 => unlimited)
+     */
+    public void setRecordLimit(int recordLimit);
+
 }

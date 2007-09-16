@@ -19,11 +19,11 @@
 
 package org.apache.james.jspf.impl;
 
-import org.apache.james.jspf.dns.DNSAsynchLookupService;
-import org.apache.james.jspf.dns.DNSRequest;
-import org.apache.james.jspf.dns.IResponse;
-import org.apache.james.jspf.dns.IResponseQueue;
-import org.apache.james.jspf.dns.TimeoutException;
+import org.apache.james.jspf.core.DNSRequest;
+import org.apache.james.jspf.core.TimeoutException;
+import org.apache.james.jspf.executor.DNSAsynchLookupService;
+import org.apache.james.jspf.executor.IResponse;
+import org.apache.james.jspf.executor.IResponseQueue;
 import org.xbill.DNS.DClass;
 import org.xbill.DNS.ExtendedNonblockingResolver;
 import org.xbill.DNS.LookupAsynch;
@@ -116,7 +116,7 @@ public class DNSJnioAsynchService implements DNSAsynchLookupService {
     }
     
     /**
-     * @see org.apache.james.jspf.dns.DNSAsynchLookupService#getRecordsAsynch(org.apache.james.jspf.dns.DNSRequest, java.lang.Object, org.apache.james.jspf.dns.IResponseQueue)
+     * @see org.apache.james.jspf.executor.DNSAsynchLookupService#getRecordsAsynch(org.apache.james.jspf.core.DNSRequest, java.lang.Object, org.apache.james.jspf.executor.IResponseQueue)
      */
     public void getRecordsAsynch(DNSRequest request, int id,
             IResponseQueue responsePool) {

@@ -25,12 +25,11 @@ import org.apache.james.jspf.core.Configuration;
 import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.LogEnabled;
 import org.apache.james.jspf.core.Logger;
-import org.apache.james.jspf.core.Modifier;
 import org.apache.james.jspf.core.SPFSession;
-import org.apache.james.jspf.exceptions.NeutralException;
-import org.apache.james.jspf.exceptions.NoneException;
-import org.apache.james.jspf.exceptions.PermErrorException;
-import org.apache.james.jspf.exceptions.TempErrorException;
+import org.apache.james.jspf.core.exceptions.NeutralException;
+import org.apache.james.jspf.core.exceptions.NoneException;
+import org.apache.james.jspf.core.exceptions.PermErrorException;
+import org.apache.james.jspf.core.exceptions.TempErrorException;
 
 /**
  * This abstract class represent a gerneric modifier
@@ -45,7 +44,7 @@ public abstract class GenericModifier implements Modifier, Configurable, LogEnab
     /**
      * @throws NoneException 
      * @throws NeutralException 
-     * @see org.apache.james.jspf.core.Modifier#run(SPFSession)
+     * @see org.apache.james.jspf.terms.Modifier#run(SPFSession)
      * 
      */
     public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
@@ -62,7 +61,7 @@ public abstract class GenericModifier implements Modifier, Configurable, LogEnab
 
 
     /**
-     * @see org.apache.james.jspf.core.Modifier#enforceSingleInstance()
+     * @see org.apache.james.jspf.terms.Modifier#enforceSingleInstance()
      */
     public boolean enforceSingleInstance() {
         return true;

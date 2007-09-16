@@ -21,9 +21,9 @@ package org.apache.james.jspf.policies;
 
 import org.apache.james.jspf.core.SPF1Record;
 import org.apache.james.jspf.core.SPFRecordParser;
-import org.apache.james.jspf.exceptions.NeutralException;
-import org.apache.james.jspf.exceptions.NoneException;
-import org.apache.james.jspf.exceptions.PermErrorException;
+import org.apache.james.jspf.core.exceptions.NeutralException;
+import org.apache.james.jspf.core.exceptions.NoneException;
+import org.apache.james.jspf.core.exceptions.PermErrorException;
 
 /**
  * Parse the record

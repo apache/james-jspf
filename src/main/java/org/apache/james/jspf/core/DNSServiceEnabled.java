@@ -17,7 +17,7 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.dns;
+package org.apache.james.jspf.core;
 
 
 /**

@@ -23,10 +23,9 @@ package org.apache.james.jspf.terms;
 import org.apache.james.jspf.core.Configurable;
 import org.apache.james.jspf.core.Configuration;
 import org.apache.james.jspf.core.DNSLookupContinuation;
-import org.apache.james.jspf.core.Modifier;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.core.SPFTermsRegexps;
-import org.apache.james.jspf.exceptions.PermErrorException;
+import org.apache.james.jspf.core.exceptions.PermErrorException;
 
 /**
  * This Class represent an Unknown Modifier
@@ -43,14 +42,14 @@ public class UnknownModifier implements Modifier, Configurable {
             + SPFTermsRegexps.MACRO_STRING_REGEX + ")";
 
     /**
-     * @see org.apache.james.jspf.core.Modifier#run(org.apache.james.jspf.core.SPFSession)
+     * @see org.apache.james.jspf.terms.Modifier#run(org.apache.james.jspf.core.SPFSession)
      */
     public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException {
         return null;
     }
 
     /**
-     * @see org.apache.james.jspf.core.Modifier#enforceSingleInstance()
+     * @see org.apache.james.jspf.terms.Modifier#enforceSingleInstance()
      */
     public boolean enforceSingleInstance() {
         return false;

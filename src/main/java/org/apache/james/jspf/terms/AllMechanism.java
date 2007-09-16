@@ -23,9 +23,8 @@ package org.apache.james.jspf.terms;
 import org.apache.james.jspf.core.Configurable;
 import org.apache.james.jspf.core.Configuration;
 import org.apache.james.jspf.core.DNSLookupContinuation;
-import org.apache.james.jspf.core.Mechanism;
 import org.apache.james.jspf.core.SPFSession;
-import org.apache.james.jspf.exceptions.PermErrorException;
+import org.apache.james.jspf.core.exceptions.PermErrorException;
 
 /**
  * This class represent the all mechanism

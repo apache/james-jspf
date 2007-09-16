@@ -24,10 +24,10 @@ import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.core.SPF1Record;
 import org.apache.james.jspf.core.SPFChecker;
-import org.apache.james.jspf.exceptions.NeutralException;
-import org.apache.james.jspf.exceptions.NoneException;
-import org.apache.james.jspf.exceptions.PermErrorException;
-import org.apache.james.jspf.exceptions.TempErrorException;
+import org.apache.james.jspf.core.exceptions.NeutralException;
+import org.apache.james.jspf.core.exceptions.NoneException;
+import org.apache.james.jspf.core.exceptions.PermErrorException;
+import org.apache.james.jspf.core.exceptions.TempErrorException;
 
 /**
  * Sets the result to NEUTRAL if no directive is found 

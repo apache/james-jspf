@@ -18,7 +18,7 @@
  ****************************************************************/
 
 
-package org.apache.james.jspf.exceptions;
+package org.apache.james.jspf.core.exceptions;
 
 
 /**
@@ -32,7 +32,7 @@ public class PermErrorException extends SPFResultException {
     }
 
     /**
-     * @see org.apache.james.jspf.exceptions.SPFResultException#getResult()
+     * @see org.apache.james.jspf.core.exceptions.SPFResultException#getResult()
      */
     public String getResult() {
         return SPFErrorConstants.PERM_ERROR_CONV;
