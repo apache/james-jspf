@@ -20,7 +20,6 @@
 
 package org.apache.james.jspf.parser;
 
-import org.apache.james.jspf.core.Configuration;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPF1Record;
@@ -28,6 +27,7 @@ import org.apache.james.jspf.core.SPFRecordParser;
 import org.apache.james.jspf.core.exceptions.NeutralException;
 import org.apache.james.jspf.core.exceptions.NoneException;
 import org.apache.james.jspf.core.exceptions.PermErrorException;
+import org.apache.james.jspf.terms.Configuration;
 import org.apache.james.jspf.terms.Directive;
 import org.apache.james.jspf.terms.Mechanism;
 import org.apache.james.jspf.terms.Modifier;

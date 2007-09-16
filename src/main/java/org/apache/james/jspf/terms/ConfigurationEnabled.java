@@ -18,7 +18,7 @@
  ****************************************************************/
 
 
-package org.apache.james.jspf.core;
+package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.exceptions.PermErrorException;
 

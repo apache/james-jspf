@@ -17,7 +17,7 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.core;
+package org.apache.james.jspf.terms;
 
 public interface Configuration {
 

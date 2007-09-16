@@ -19,7 +19,7 @@
 
 package org.apache.james.jspf.parser;
 
-import org.apache.james.jspf.core.Configuration;
+import org.apache.james.jspf.terms.Configuration;
 
 import java.util.regex.Matcher;
 
@@ -52,14 +52,14 @@ public class MatcherBasedConfiguration implements Configuration {
     }
 
     /**
-     * @see org.apache.james.jspf.core.Configuration#group(int)
+     * @see org.apache.james.jspf.terms.Configuration#group(int)
      */
     public String group(int arg0) {
         return wrapped.group(arg0 + start);
     }
 
     /**
-     * @see org.apache.james.jspf.core.Configuration#groupCount()
+     * @see org.apache.james.jspf.terms.Configuration#groupCount()
      */
     public int groupCount() {
         return count;

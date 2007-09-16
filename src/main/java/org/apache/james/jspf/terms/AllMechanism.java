@@ -20,8 +20,6 @@
 
 package org.apache.james.jspf.terms;
 
-import org.apache.james.jspf.core.ConfigurationEnabled;
-import org.apache.james.jspf.core.Configuration;
 import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.core.exceptions.PermErrorException;
@@ -42,7 +40,7 @@ public class AllMechanism implements Mechanism, ConfigurationEnabled {
     }
 
     /**
-     * @see org.apache.james.jspf.core.ConfigurationEnabled#config(Configuration)
+     * @see org.apache.james.jspf.terms.ConfigurationEnabled#config(Configuration)
      */
     public void config(Configuration params) throws PermErrorException {
         // no checks needed

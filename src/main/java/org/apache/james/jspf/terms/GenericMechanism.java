@@ -20,8 +20,6 @@
 
 package org.apache.james.jspf.terms;
 
-import org.apache.james.jspf.core.ConfigurationEnabled;
-import org.apache.james.jspf.core.Configuration;
 import org.apache.james.jspf.core.LogEnabled;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.MacroExpand;
@@ -76,7 +74,7 @@ public abstract class GenericMechanism implements Mechanism, ConfigurationEnable
     }
 
     /**
-     * @see org.apache.james.jspf.core.ConfigurationEnabled#config(Configuration)
+     * @see org.apache.james.jspf.terms.ConfigurationEnabled#config(Configuration)
      */
     public synchronized void config(Configuration params) throws PermErrorException {
         if (params.groupCount() >= 1 && params.group(1) != null) {
