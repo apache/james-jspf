@@ -17,20 +17,19 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.wiring;
+package org.apache.james.jspf.core;
 
-import org.apache.james.jspf.dns.DNSService;
 
 /**
- * Components that need to log can implement this interface so that
- * the container will provide the DNSService
+ * Components that need to log can implement this interface to be provided
+ * Loggers.
  */
-public interface DNSServiceEnabled {
+public interface LogEnabled {
     /**
-     * Provide component with a DNSService.
+     * Provide component with a logger.
      * 
-     * @param service
-     *            the dns service. Must not be <code>null</code>.
+     * @param logger
+     *            the logger. Must not be <code>null</code>.
      */
-    void enableDNSService(DNSService service);
+    void enableLogging(Logger logger);
 }

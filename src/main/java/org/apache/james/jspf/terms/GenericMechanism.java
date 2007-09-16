@@ -22,13 +22,13 @@ package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.Configurable;
 import org.apache.james.jspf.core.Configuration;
+import org.apache.james.jspf.core.LogEnabled;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.MacroExpand;
+import org.apache.james.jspf.core.MacroExpandEnabled;
 import org.apache.james.jspf.core.Mechanism;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.exceptions.PermErrorException;
-import org.apache.james.jspf.wiring.LogEnabled;
-import org.apache.james.jspf.wiring.MacroExpandEnabled;
 
 /**
  * This abstract class represent a gerneric mechanism
@@ -95,14 +95,14 @@ public abstract class GenericMechanism implements Mechanism, Configurable, LogEn
     }
 
     /**
-     * @see org.apache.james.jspf.wiring.LogEnabled#enableLogging(org.apache.james.jspf.core.Logger)
+     * @see org.apache.james.jspf.core.LogEnabled#enableLogging(org.apache.james.jspf.core.Logger)
      */
     public void enableLogging(Logger logger) {
         this.log = logger;
     }
 
     /**
-     * @see org.apache.james.jspf.wiring.MacroExpandEnabled#enableMacroExpand(org.apache.james.jspf.core.MacroExpand)
+     * @see org.apache.james.jspf.core.MacroExpandEnabled#enableMacroExpand(org.apache.james.jspf.core.MacroExpand)
      */
     public void enableMacroExpand(MacroExpand macroExpand) {
         this.macroExpand = macroExpand;

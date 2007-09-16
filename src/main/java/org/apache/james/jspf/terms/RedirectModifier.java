@@ -21,6 +21,8 @@ package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.MacroExpand;
+import org.apache.james.jspf.core.MacroExpandEnabled;
+import org.apache.james.jspf.core.SPFCheckEnabled;
 import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.core.SPFCheckerExceptionCatcher;
 import org.apache.james.jspf.core.SPFSession;
@@ -29,8 +31,6 @@ import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
-import org.apache.james.jspf.wiring.MacroExpandEnabled;
-import org.apache.james.jspf.wiring.SPFCheckEnabled;
 
 /**
  * This class represent the redirect modifier
@@ -182,14 +182,14 @@ public class RedirectModifier extends GenericModifier implements
     }
 
     /**
-     * @see org.apache.james.jspf.wiring.SPFCheckEnabled#enableSPFChecking(org.apache.james.jspf.core.SPFChecker)
+     * @see org.apache.james.jspf.core.SPFCheckEnabled#enableSPFChecking(org.apache.james.jspf.core.SPFChecker)
      */
     public void enableSPFChecking(SPFChecker checker) {
         this.spfChecker = checker;
     }
 
     /**
-     * @see org.apache.james.jspf.wiring.MacroExpandEnabled#enableMacroExpand(org.apache.james.jspf.core.MacroExpand)
+     * @see org.apache.james.jspf.core.MacroExpandEnabled#enableMacroExpand(org.apache.james.jspf.core.MacroExpand)
      */
     public void enableMacroExpand(MacroExpand macroExpand) {
         this.macroExpand = macroExpand;

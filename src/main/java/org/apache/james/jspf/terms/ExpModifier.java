@@ -22,6 +22,7 @@ package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.MacroExpand;
+import org.apache.james.jspf.core.MacroExpandEnabled;
 import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.core.SPFCheckerDNSResponseListener;
@@ -34,7 +35,6 @@ import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
-import org.apache.james.jspf.wiring.MacroExpandEnabled;
 
 import java.util.List;
 
@@ -201,7 +201,7 @@ public class ExpModifier extends GenericModifier implements MacroExpandEnabled, 
     }
 
     /**
-     * @see org.apache.james.jspf.wiring.MacroExpandEnabled#enableMacroExpand(org.apache.james.jspf.core.MacroExpand)
+     * @see org.apache.james.jspf.core.MacroExpandEnabled#enableMacroExpand(org.apache.james.jspf.core.MacroExpand)
      */
     public void enableMacroExpand(MacroExpand macroExpand) {
         this.macroExpand = macroExpand;

@@ -23,6 +23,7 @@ package org.apache.james.jspf.terms;
 import org.apache.james.jspf.core.Configurable;
 import org.apache.james.jspf.core.Configuration;
 import org.apache.james.jspf.core.DNSLookupContinuation;
+import org.apache.james.jspf.core.LogEnabled;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.Modifier;
 import org.apache.james.jspf.core.SPFSession;
@@ -30,7 +31,6 @@ import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
-import org.apache.james.jspf.wiring.LogEnabled;
 
 /**
  * This abstract class represent a gerneric modifier
@@ -86,7 +86,7 @@ public abstract class GenericModifier implements Modifier, Configurable, LogEnab
     
 
     /**
-     * @see org.apache.james.jspf.wiring.LogEnabled#enableLogging(org.apache.james.jspf.core.Logger)
+     * @see org.apache.james.jspf.core.LogEnabled#enableLogging(org.apache.james.jspf.core.Logger)
      */
     public void enableLogging(Logger logger) {
         this.log = logger;

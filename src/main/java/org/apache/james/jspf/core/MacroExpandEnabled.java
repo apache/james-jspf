@@ -17,9 +17,8 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.wiring;
+package org.apache.james.jspf.core;
 
-import org.apache.james.jspf.core.MacroExpand;
 
 /**
  * Components that need to log can implement this interface so that

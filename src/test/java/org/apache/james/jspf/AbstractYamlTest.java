@@ -19,12 +19,16 @@
 
 package org.apache.james.jspf;
 
+import org.apache.james.jspf.core.LogEnabled;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.MacroExpand;
+import org.apache.james.jspf.core.MacroExpandEnabled;
+import org.apache.james.jspf.core.SPFCheckEnabled;
 import org.apache.james.jspf.core.SPFRecordParser;
 import org.apache.james.jspf.core.SPFResult;
 import org.apache.james.jspf.dns.DNSRequest;
 import org.apache.james.jspf.dns.DNSService;
+import org.apache.james.jspf.dns.DNSServiceEnabled;
 import org.apache.james.jspf.dns.TimeoutException;
 import org.apache.james.jspf.dnsserver.DNSTestingServer;
 import org.apache.james.jspf.executor.SPFExecutor;
@@ -33,12 +37,9 @@ import org.apache.james.jspf.executor.SynchronousSPFExecutor;
 import org.apache.james.jspf.impl.DNSJnioAsynchService;
 import org.apache.james.jspf.impl.DNSServiceAsynchSimulator;
 import org.apache.james.jspf.impl.DNSServiceXBillImpl;
+import org.apache.james.jspf.impl.SPF;
 import org.apache.james.jspf.parser.RFC4408SPF1Parser;
 import org.apache.james.jspf.parser.DefaultTermsFactory;
-import org.apache.james.jspf.wiring.DNSServiceEnabled;
-import org.apache.james.jspf.wiring.LogEnabled;
-import org.apache.james.jspf.wiring.MacroExpandEnabled;
-import org.apache.james.jspf.wiring.SPFCheckEnabled;
 import org.apache.james.jspf.wiring.WiringService;
 import org.apache.james.jspf.wiring.WiringServiceException;
 import org.jvyaml.Constructor;

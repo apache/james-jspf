@@ -24,10 +24,13 @@ import org.apache.james.jspf.core.Configurable;
 import org.apache.james.jspf.core.Configuration;
 import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.Directive;
+import org.apache.james.jspf.core.LogEnabled;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.MacroExpand;
+import org.apache.james.jspf.core.MacroExpandEnabled;
 import org.apache.james.jspf.core.Mechanism;
 import org.apache.james.jspf.core.SPF1Constants;
+import org.apache.james.jspf.core.SPFCheckEnabled;
 import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.core.SPFCheckerExceptionCatcher;
 import org.apache.james.jspf.core.SPFSession;
@@ -36,9 +39,6 @@ import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
-import org.apache.james.jspf.wiring.LogEnabled;
-import org.apache.james.jspf.wiring.MacroExpandEnabled;
-import org.apache.james.jspf.wiring.SPFCheckEnabled;
 
 /**
  * This class represent the incude mechanism
@@ -228,7 +228,7 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
     }
 
     /**
-     * @see org.apache.james.jspf.wiring.LogEnabled#enableLogging(org.apache.james.jspf.core.Logger)
+     * @see org.apache.james.jspf.core.LogEnabled#enableLogging(org.apache.james.jspf.core.Logger)
      */
     public void enableLogging(Logger logger) {
         this.log = logger;
@@ -242,14 +242,14 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
     }
 
     /**
-     * @see org.apache.james.jspf.wiring.SPFCheckEnabled#enableSPFChecking(org.apache.james.jspf.core.SPFChecker)
+     * @see org.apache.james.jspf.core.SPFCheckEnabled#enableSPFChecking(org.apache.james.jspf.core.SPFChecker)
      */
     public void enableSPFChecking(SPFChecker checker) {
         this.spfChecker = checker;
     }
 
     /**
-     * @see org.apache.james.jspf.wiring.MacroExpandEnabled#enableMacroExpand(org.apache.james.jspf.core.MacroExpand)
+     * @see org.apache.james.jspf.core.MacroExpandEnabled#enableMacroExpand(org.apache.james.jspf.core.MacroExpand)
      */
     public void enableMacroExpand(MacroExpand macroExpand) {
         this.macroExpand = macroExpand;

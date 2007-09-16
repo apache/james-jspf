@@ -31,12 +31,12 @@ import org.apache.james.jspf.core.SPFTermsRegexps;
 import org.apache.james.jspf.dns.DNSRequest;
 import org.apache.james.jspf.dns.DNSResponse;
 import org.apache.james.jspf.dns.DNSService;
+import org.apache.james.jspf.dns.DNSServiceEnabled;
 import org.apache.james.jspf.dns.TimeoutException;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
 import org.apache.james.jspf.exceptions.TempErrorException;
-import org.apache.james.jspf.wiring.DNSServiceEnabled;
 
 import java.util.List;
 
@@ -112,7 +112,7 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled,
     }
 
     /**
-     * @see org.apache.james.jspf.wiring.DNSServiceEnabled#enableDNSService(org.apache.james.jspf.dns.DNSService)
+     * @see org.apache.james.jspf.dns.DNSServiceEnabled#enableDNSService(org.apache.james.jspf.dns.DNSService)
      */
     public void enableDNSService(DNSService service) {
         this.dnsService = service;

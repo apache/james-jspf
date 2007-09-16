@@ -18,21 +18,25 @@
  ****************************************************************/
 
 
-package org.apache.james.jspf;
+package org.apache.james.jspf.impl;
 
 import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.FutureSPFResult;
+import org.apache.james.jspf.core.LogEnabled;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.MacroExpand;
+import org.apache.james.jspf.core.MacroExpandEnabled;
 import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPF1Record;
 import org.apache.james.jspf.core.SPF1Utils;
+import org.apache.james.jspf.core.SPFCheckEnabled;
 import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.core.SPFCheckerExceptionCatcher;
 import org.apache.james.jspf.core.SPFRecordParser;
 import org.apache.james.jspf.core.SPFResult;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.dns.DNSService;
+import org.apache.james.jspf.dns.DNSServiceEnabled;
 import org.apache.james.jspf.exceptions.NeutralException;
 import org.apache.james.jspf.exceptions.NoneException;
 import org.apache.james.jspf.exceptions.PermErrorException;
@@ -56,10 +60,6 @@ import org.apache.james.jspf.policies.local.DefaultExplanationPolicy;
 import org.apache.james.jspf.policies.local.FallbackPolicy;
 import org.apache.james.jspf.policies.local.OverridePolicy;
 import org.apache.james.jspf.policies.local.TrustedForwarderPolicy;
-import org.apache.james.jspf.wiring.DNSServiceEnabled;
-import org.apache.james.jspf.wiring.LogEnabled;
-import org.apache.james.jspf.wiring.MacroExpandEnabled;
-import org.apache.james.jspf.wiring.SPFCheckEnabled;
 import org.apache.james.jspf.wiring.WiringServiceTable;
 
 import java.util.Iterator;
@@ -70,11 +70,12 @@ import java.util.LinkedList;
  */
 public class SPF implements SPFChecker {
 
-    private final class SPFCheckerExceptionCatcherImplementation implements
+    private final static class SPFCheckerExceptionCatcherImplementation implements
             SPFCheckerExceptionCatcher {
         private SPFChecker resultHandler;
+        private Logger log;
 
-        public SPFCheckerExceptionCatcherImplementation(SPFChecker resultHandler) {
+        public SPFCheckerExceptionCatcherImplementation(SPFChecker resultHandler, Logger log) {
             this.resultHandler = resultHandler;
         }
 
@@ -105,6 +106,7 @@ public class SPF implements SPFChecker {
             session.setCurrentResultExpanded(result);
             
         }
+
     }
 
     private static final class SPFRecordChecker implements SPFChecker {
@@ -323,7 +325,7 @@ public class SPF implements SPFChecker {
         
         spfData.pushChecker(resultHandler);
         spfData.pushChecker(this);
-        spfData.pushExceptionCatcher(new SPFCheckerExceptionCatcherImplementation(resultHandler));
+        spfData.pushExceptionCatcher(new SPFCheckerExceptionCatcherImplementation(resultHandler, log));
         
         FutureSPFResult ret = new FutureSPFResult();
         

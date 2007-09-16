@@ -25,7 +25,6 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
-import org.apache.james.jspf.SPF;
 import org.apache.james.jspf.core.SPFResult;
 import org.apache.james.jspf.exceptions.SPFErrorConstants;
 import org.apache.log4j.ConsoleAppender;

@@ -17,20 +17,19 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.wiring;
+package org.apache.james.jspf.dns;
 
-import org.apache.james.jspf.core.SPFChecker;
 
 /**
  * Components that need to log can implement this interface so that
- * the container will provide the SPFChecker
+ * the container will provide the DNSService
  */
-public interface SPFCheckEnabled {
+public interface DNSServiceEnabled {
     /**
-     * Provide component with an SPF Checker.
+     * Provide component with a DNSService.
      * 
-     * @param checker
-     *            the checker. Must not be <code>null</code>.
+     * @param service
+     *            the dns service. Must not be <code>null</code>.
      */
-    void enableSPFChecking(SPFChecker checker);
+    void enableDNSService(DNSService service);
 }

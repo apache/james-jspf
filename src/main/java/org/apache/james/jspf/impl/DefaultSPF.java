@@ -19,7 +19,6 @@
 
 package org.apache.james.jspf.impl;
 
-import org.apache.james.jspf.SPF;
 import org.apache.james.jspf.core.Logger;
 
 public class DefaultSPF extends SPF {

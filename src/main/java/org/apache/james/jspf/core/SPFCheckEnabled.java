@@ -17,20 +17,19 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.wiring;
+package org.apache.james.jspf.core;
 
-import org.apache.james.jspf.core.Logger;
 
 /**
- * Components that need to log can implement this interface to be provided
- * Loggers.
+ * Components that need to log can implement this interface so that
+ * the container will provide the SPFChecker
  */
-public interface LogEnabled {
+public interface SPFCheckEnabled {
     /**
-     * Provide component with a logger.
+     * Provide component with an SPF Checker.
      * 
-     * @param logger
-     *            the logger. Must not be <code>null</code>.
+     * @param checker
+     *            the checker. Must not be <code>null</code>.
      */
-    void enableLogging(Logger logger);
+    void enableSPFChecking(SPFChecker checker);
 }
