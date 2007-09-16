@@ -28,7 +28,7 @@ import org.apache.james.jspf.core.MacroExpand;
 import org.apache.james.jspf.core.MacroExpandEnabled;
 import org.apache.james.jspf.core.SPFCheckEnabled;
 import org.apache.james.jspf.core.SPFRecordParser;
-import org.apache.james.jspf.core.TimeoutException;
+import org.apache.james.jspf.core.exceptions.TimeoutException;
 import org.apache.james.jspf.dnsserver.DNSTestingServer;
 import org.apache.james.jspf.executor.SPFExecutor;
 import org.apache.james.jspf.executor.SPFResult;

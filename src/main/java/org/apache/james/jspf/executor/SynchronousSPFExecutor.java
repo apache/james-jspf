@@ -26,8 +26,8 @@ import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.core.SPFCheckerExceptionCatcher;
 import org.apache.james.jspf.core.SPFSession;
-import org.apache.james.jspf.core.TimeoutException;
 import org.apache.james.jspf.core.exceptions.SPFResultException;
+import org.apache.james.jspf.core.exceptions.TimeoutException;
 
 /**
  * Synchronous implementation of SPFExecuter. All queries will get executed synchronously

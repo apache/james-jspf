@@ -30,6 +30,7 @@ import org.apache.james.jspf.core.exceptions.NeutralException;
 import org.apache.james.jspf.core.exceptions.NoneException;
 import org.apache.james.jspf.core.exceptions.PermErrorException;
 import org.apache.james.jspf.core.exceptions.TempErrorException;
+import org.apache.james.jspf.core.exceptions.TimeoutException;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;

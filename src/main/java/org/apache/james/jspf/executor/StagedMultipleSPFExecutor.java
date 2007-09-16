@@ -25,8 +25,8 @@ import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.core.SPFCheckerExceptionCatcher;
 import org.apache.james.jspf.core.SPFSession;
-import org.apache.james.jspf.core.TimeoutException;
 import org.apache.james.jspf.core.exceptions.SPFResultException;
+import org.apache.james.jspf.core.exceptions.TimeoutException;
 
 import java.util.Collections;
 import java.util.HashMap;

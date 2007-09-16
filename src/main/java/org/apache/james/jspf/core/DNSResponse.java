@@ -20,6 +20,8 @@
 package org.apache.james.jspf.core;
 
 
+import org.apache.james.jspf.core.exceptions.TimeoutException;
+
 import java.util.List;
 
 /**

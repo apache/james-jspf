@@ -20,7 +20,7 @@
 package org.apache.james.jspf.impl;
 
 import org.apache.james.jspf.core.DNSRequest;
-import org.apache.james.jspf.core.TimeoutException;
+import org.apache.james.jspf.core.exceptions.TimeoutException;
 import org.apache.james.jspf.executor.DNSAsynchLookupService;
 import org.apache.james.jspf.executor.IResponse;
 import org.apache.james.jspf.executor.IResponseQueue;

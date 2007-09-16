@@ -17,7 +17,7 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.core;
+package org.apache.james.jspf.core.exceptions;
 
 /**
  * The exception thrown on lookup timeout

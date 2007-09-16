@@ -22,7 +22,7 @@ package org.apache.james.jspf;
 import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.Logger;
-import org.apache.james.jspf.core.TimeoutException;
+import org.apache.james.jspf.core.exceptions.TimeoutException;
 
 import java.util.List;
 

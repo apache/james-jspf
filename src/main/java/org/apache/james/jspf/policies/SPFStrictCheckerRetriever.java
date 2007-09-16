@@ -7,11 +7,11 @@ import org.apache.james.jspf.core.SPF1Record;
 import org.apache.james.jspf.core.SPF1Utils;
 import org.apache.james.jspf.core.SPFCheckerDNSResponseListener;
 import org.apache.james.jspf.core.SPFSession;
-import org.apache.james.jspf.core.TimeoutException;
 import org.apache.james.jspf.core.exceptions.NeutralException;
 import org.apache.james.jspf.core.exceptions.NoneException;
 import org.apache.james.jspf.core.exceptions.PermErrorException;
 import org.apache.james.jspf.core.exceptions.TempErrorException;
+import org.apache.james.jspf.core.exceptions.TimeoutException;
 
 import java.util.List;
 
