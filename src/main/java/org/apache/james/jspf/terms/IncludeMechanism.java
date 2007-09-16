@@ -20,7 +20,7 @@
 
 package org.apache.james.jspf.terms;
 
-import org.apache.james.jspf.core.Configurable;
+import org.apache.james.jspf.core.ConfigurationEnabled;
 import org.apache.james.jspf.core.Configuration;
 import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.LogEnabled;
@@ -42,7 +42,7 @@ import org.apache.james.jspf.core.exceptions.TempErrorException;
  * This class represent the incude mechanism
  * 
  */
-public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SPFCheckEnabled, MacroExpandEnabled {
+public class IncludeMechanism implements Mechanism, ConfigurationEnabled, LogEnabled, SPFCheckEnabled, MacroExpandEnabled {
 
     private final class ExceptionCatcher implements SPFCheckerExceptionCatcher {
         private SPFChecker spfChecker;
@@ -209,7 +209,7 @@ public class IncludeMechanism implements Mechanism, Configurable, LogEnabled, SP
     }
 
     /**
-     * @see org.apache.james.jspf.core.Configurable#config(Configuration)
+     * @see org.apache.james.jspf.core.ConfigurationEnabled#config(Configuration)
      */
     public synchronized void config(Configuration params) throws PermErrorException {
         if (params.groupCount() == 0) {

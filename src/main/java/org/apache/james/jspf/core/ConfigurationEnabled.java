@@ -25,7 +25,7 @@ import org.apache.james.jspf.core.exceptions.PermErrorException;
 /**
  * 
  */
-public interface Configurable {
+public interface ConfigurationEnabled {
 
     /**
      * Configuration

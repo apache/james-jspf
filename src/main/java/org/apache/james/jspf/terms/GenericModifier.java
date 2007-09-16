@@ -20,7 +20,7 @@
 
 package org.apache.james.jspf.terms;
 
-import org.apache.james.jspf.core.Configurable;
+import org.apache.james.jspf.core.ConfigurationEnabled;
 import org.apache.james.jspf.core.Configuration;
 import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.LogEnabled;
@@ -35,7 +35,7 @@ import org.apache.james.jspf.core.exceptions.TempErrorException;
  * This abstract class represent a gerneric modifier
  * 
  */
-public abstract class GenericModifier implements Modifier, Configurable, LogEnabled {
+public abstract class GenericModifier implements Modifier, ConfigurationEnabled, LogEnabled {
 
     private String host;
 
@@ -68,7 +68,7 @@ public abstract class GenericModifier implements Modifier, Configurable, LogEnab
     }
 
     /**
-     * @see org.apache.james.jspf.core.Configurable#config(Configuration)
+     * @see org.apache.james.jspf.core.ConfigurationEnabled#config(Configuration)
      */
     public synchronized void config(Configuration params) throws PermErrorException {
         if (params.groupCount() > 0) {

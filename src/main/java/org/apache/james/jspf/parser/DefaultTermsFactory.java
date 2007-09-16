@@ -19,7 +19,7 @@
 
 package org.apache.james.jspf.parser;
 
-import org.apache.james.jspf.core.Configurable;
+import org.apache.james.jspf.core.ConfigurationEnabled;
 import org.apache.james.jspf.core.Configuration;
 import org.apache.james.jspf.core.LogEnabled;
 import org.apache.james.jspf.core.Logger;
@@ -142,11 +142,11 @@ public class DefaultTermsFactory implements TermsFactory {
                         "Unexpected error adding dependencies to term: " + e.getMessage());
             }
 
-            if (term instanceof Configurable) {
+            if (term instanceof ConfigurationEnabled) {
                 if (subres == null || subres.groupCount() == 0) {
-                    ((Configurable) term).config(null);
+                    ((ConfigurationEnabled) term).config(null);
                 } else {
-                    ((Configurable) term).config(subres);
+                    ((ConfigurationEnabled) term).config(subres);
                 }
             }
             return term;

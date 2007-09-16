@@ -20,7 +20,7 @@
 
 package org.apache.james.jspf.terms;
 
-import org.apache.james.jspf.core.Configurable;
+import org.apache.james.jspf.core.ConfigurationEnabled;
 import org.apache.james.jspf.core.Configuration;
 import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.SPFSession;
@@ -30,7 +30,7 @@ import org.apache.james.jspf.core.exceptions.PermErrorException;
  * This class represent the all mechanism
  * 
  */
-public class AllMechanism implements Mechanism, Configurable {
+public class AllMechanism implements Mechanism, ConfigurationEnabled {
 
     public static final String REGEX = "[aA][lL][lL]";
 
@@ -42,7 +42,7 @@ public class AllMechanism implements Mechanism, Configurable {
     }
 
     /**
-     * @see org.apache.james.jspf.core.Configurable#config(Configuration)
+     * @see org.apache.james.jspf.core.ConfigurationEnabled#config(Configuration)
      */
     public void config(Configuration params) throws PermErrorException {
         // no checks needed

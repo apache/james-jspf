@@ -20,7 +20,7 @@
 
 package org.apache.james.jspf.terms;
 
-import org.apache.james.jspf.core.Configurable;
+import org.apache.james.jspf.core.ConfigurationEnabled;
 import org.apache.james.jspf.core.Configuration;
 import org.apache.james.jspf.core.LogEnabled;
 import org.apache.james.jspf.core.Logger;
@@ -33,7 +33,7 @@ import org.apache.james.jspf.core.exceptions.PermErrorException;
  * This abstract class represent a gerneric mechanism
  *  
  */
-public abstract class GenericMechanism implements Mechanism, Configurable, LogEnabled, MacroExpandEnabled {
+public abstract class GenericMechanism implements Mechanism, ConfigurationEnabled, LogEnabled, MacroExpandEnabled {
 
     /**
      * ABNF: ip4-cidr-length = "/" 1*DIGIT
@@ -76,7 +76,7 @@ public abstract class GenericMechanism implements Mechanism, Configurable, LogEn
     }
 
     /**
-     * @see org.apache.james.jspf.core.Configurable#config(Configuration)
+     * @see org.apache.james.jspf.core.ConfigurationEnabled#config(Configuration)
      */
     public synchronized void config(Configuration params) throws PermErrorException {
         if (params.groupCount() >= 1 && params.group(1) != null) {

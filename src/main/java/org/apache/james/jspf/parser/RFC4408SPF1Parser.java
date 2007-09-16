@@ -61,7 +61,7 @@ import java.util.regex.Pattern;
  * regex.
  * 
  * With this informations it creates a new instance of the term and, if the term
- * is Configurable it calls the config() method passing to it only the specific
+ * is ConfigurationEnabled it calls the config() method passing to it only the specific
  * subset of the MatchResult (using the MatchResultSubset).
  * 
  * TODO doubts about the specification - redirect or exp with no domain-spec are
