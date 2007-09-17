@@ -40,10 +40,7 @@ public abstract class GenericModifier implements Modifier, ConfigurationEnabled,
     protected Logger log;
 
     /**
-     * @throws NoneException 
-     * @throws NeutralException 
-     * @see org.apache.james.jspf.terms.Modifier#run(SPFSession)
-     * 
+     * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
      */
     public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
             TempErrorException, NeutralException, NoneException {

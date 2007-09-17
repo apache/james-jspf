@@ -27,7 +27,7 @@ import java.util.StringTokenizer;
  * 
  * see Inet6Util from the Apache Harmony project
  * 
- * @see org.apache.harmony.util.Inet6Util
+ * see org.apache.harmony.util.Inet6Util
  */
 public class Inet6Util {
     

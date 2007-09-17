@@ -114,7 +114,8 @@ public class RFC4408SPF1Parser implements SPFRecordParser {
     /**
      * Constructor. Creates all the values needed to run the parsing
      * 
-     * @param loggerThe logger to use
+     * @param logger the logger to use
+     * @param termsFactory the TermsFactory implementation
      */
     public RFC4408SPF1Parser(Logger logger, TermsFactory termsFactory) {
         this.log = logger;
@@ -248,7 +249,7 @@ public class RFC4408SPF1Parser implements SPFRecordParser {
     }
 
     /**
-     * @see org.apache.james.jspf.parser.SPFRecordParser#parse(java.lang.String)
+     * @see org.apache.james.jspf.core.SPFRecordParser#parse(java.lang.String)
      */
     public SPF1Record parse(String spfRecord) throws PermErrorException,
             NoneException, NeutralException {

@@ -35,7 +35,7 @@ public interface PolicyPostFilter {
      * Filter or replace a record for the given domain
      * 
      * @param currentDomain the domain to retrieve the SPFRecord for
-     * @params record the previous record
+     * @param record the previous record
      * @return the SPFRecord found
      * @throws PermErrorException exception
      * @throws TempErrorException exception

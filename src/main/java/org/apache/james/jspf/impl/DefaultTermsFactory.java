@@ -130,7 +130,7 @@ public class DefaultTermsFactory implements TermsFactory {
 
 
     /**
-     * @see org.apache.james.jspf.parser.TermsFactory#createTerm(org.apache.james.jspf.parser.TermDefinition, org.apache.james.jspf.core.MatcherBasedConfiguration)
+     * @see org.apache.james.jspf.parser.TermsFactory#createTerm(java.lang.Class, org.apache.james.jspf.terms.Configuration)
      */
     public Object createTerm(Class termDef, Configuration subres) throws PermErrorException, InstantiationException {
         try {

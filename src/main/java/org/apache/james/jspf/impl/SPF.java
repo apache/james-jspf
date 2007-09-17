@@ -341,7 +341,7 @@ public class SPF implements SPFChecker {
 
 
     /**
-     * @see org.apache.james.jspf.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
+     * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
      */
     public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
             NoneException, TempErrorException, NeutralException {

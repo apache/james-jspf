@@ -28,8 +28,8 @@ public interface MacroExpandEnabled {
     /**
      * Provide component with a DNSService.
      * 
-     * @param service
-     *            the dns service. Must not be <code>null</code>.
+     * @param macroExpand
+     *            the macroExpand service. Must not be <code>null</code>.
      */
     void enableMacroExpand(MacroExpand macroExpand);
 }

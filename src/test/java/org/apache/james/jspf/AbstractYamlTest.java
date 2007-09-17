@@ -320,7 +320,7 @@ public abstract class AbstractYamlTest extends TestCase {
     }
 
     /**
-     * @return
+     * @return a Mocked DNSService
      */
     protected DNSService getDNSServiceMockedDNSService() {
         SPFYamlDNSService yamlDNSService = new SPFYamlDNSService(data.getZonedata());
@@ -328,7 +328,7 @@ public abstract class AbstractYamlTest extends TestCase {
     }
 
     /**
-     * @return
+     * @return the right dnsservice according to what the test specialization declares
      */
     protected DNSService getDNSService() {
         switch (getDnsServiceMockStyle()) {
@@ -345,7 +345,7 @@ public abstract class AbstractYamlTest extends TestCase {
     }
 
     /**
-     * @return
+     * @return a dns resolver pointing to the local fake server
      */
     protected DNSService getDNSServiceFakeServer() {
         Resolver resolver = null;
@@ -389,7 +389,7 @@ public abstract class AbstractYamlTest extends TestCase {
     }
     
     /**
-     * @return
+     * @return a real dns resolver
      */
     protected DNSService getDNSServiceReal() {
         DNSServiceXBillImpl serviceXBillImpl = new DNSServiceXBillImpl(log);

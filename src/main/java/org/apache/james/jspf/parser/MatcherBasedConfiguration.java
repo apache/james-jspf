@@ -38,8 +38,6 @@ public class MatcherBasedConfiguration implements Configuration {
     /**
      * @param w
      *            Original MatchResult
-     * @param zero
-     *            The original index returned when group(0) is requested
      * @param start
      *            the position where the subresult start
      * @param count

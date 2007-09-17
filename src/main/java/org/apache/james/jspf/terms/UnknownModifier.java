@@ -40,7 +40,7 @@ public class UnknownModifier implements Modifier, ConfigurationEnabled {
             + SPFTermsRegexps.MACRO_STRING_REGEX + ")";
 
     /**
-     * @see org.apache.james.jspf.terms.Modifier#run(org.apache.james.jspf.core.SPFSession)
+     * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
      */
     public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException {
         return null;
@@ -54,7 +54,7 @@ public class UnknownModifier implements Modifier, ConfigurationEnabled {
     }
 
     /**
-     * @see org.apache.james.jspf.terms.ConfigurationEnabled#config(Configuration)
+     * @see org.apache.james.jspf.terms.ConfigurationEnabled#config(org.apache.james.jspf.terms.Configuration)
      */
     public synchronized void config(Configuration params) throws PermErrorException {
         if (params.groupCount() >= 2 && params.group(1) != null) {

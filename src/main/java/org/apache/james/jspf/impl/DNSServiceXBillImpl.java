@@ -72,7 +72,7 @@ public class DNSServiceXBillImpl implements DNSService {
     }
 
     /**
-     * @see org.apache.james.jspf.core.DNSService#getLocalDomainNames();
+     * @see org.apache.james.jspf.core.DNSService#getLocalDomainNames()
      */
     public List getLocalDomainNames() {
         List names = new ArrayList();

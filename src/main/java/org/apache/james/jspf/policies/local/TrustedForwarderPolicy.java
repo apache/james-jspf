@@ -45,7 +45,7 @@ public class TrustedForwarderPolicy implements PolicyPostFilter {
     private Logger log;
 
     /**
-     * @param spf
+     * @param log the logger
      */
     public TrustedForwarderPolicy(Logger log) {
         this.log = log;

@@ -41,8 +41,7 @@ public class IP4Mechanism extends GenericMechanism {
     private IPAddr ip = null;
 
     /**
-     * 
-     * @see org.apache.james.jspf.core.GenericMechanism#run(org.apache.james.jspf.core.SPFSession)
+     * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
      */
     public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException {
         IPAddr originalIP;
@@ -56,7 +55,7 @@ public class IP4Mechanism extends GenericMechanism {
     }
 
     /**
-     * @see org.apache.james.jspf.terms.GenericMechanism#config(Configuration)
+     * @see org.apache.james.jspf.terms.GenericMechanism#config(org.apache.james.jspf.terms.Configuration)
      */
     public synchronized void config(Configuration params) throws PermErrorException {
         if (params.groupCount() == 0) {

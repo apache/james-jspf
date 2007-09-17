@@ -35,68 +35,7 @@ import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
 
 public class DNSJnioAsynchService implements DNSAsynchLookupService {
-/*
-    private final class ResponseQueueAdaptor extends ResponseQueue {
 
-        private IResponseQueue responsePool;
-
-        public ResponseQueueAdaptor(IResponseQueue responsePool) {
-            this.responsePool = responsePool;
-        }
-
-        public void insert(final Response arg0) {
-            IResponse resp = new IResponse() {
-
-                public Exception getException() {
-                    if (arg0.getException() != null) {
-                        return new DNSService.TimeoutException();
-                    } else {
-                        return null;
-                    }
-                }
-
-                public Object getId() {
-                    return arg0.getId();
-                }
-
-                public Object getValue() {
-                    Message response = arg0.getMessage();
-                    RRset[] rrs = response.getSectionRRsets(Section.ANSWER);
-                    List records = new LinkedList();
-                    for (int i = 0; i < rrs.length; i++) {
-                        for (Iterator it = rrs[i].rrs(); it.hasNext(); ) {
-                            records.add(it.next());
-                        }
-                    }
-                    return DNSServiceXBillImpl.convertRecordsToList((Record[]) records.toArray(new Record[]{}));
-                    
-                }
-                
-            };
-            responsePool.insertResponse(resp);
-        }
-
-        public boolean isEmpty() {
-            return responsePool.isEmpty();
-        }
-        
-        public Response getItem() {
-            IResponse found = responsePool.removeResponse();
-            Response resp = new Response();
-            if (found.getException() != null) {
-                resp.setException(true);
-                resp.setException(found.getException());
-            } else {
-                resp.setException(false);
-                resp.setMessage((Message) found.getValue());
-            }
-            resp.setId(found.getId());
-            return resp;
-        }
-        
-        
-    }
-*/
     private ExtendedNonblockingResolver resolver;
 
     public DNSJnioAsynchService(ExtendedNonblockingResolver resolver) {
@@ -116,7 +55,7 @@ public class DNSJnioAsynchService implements DNSAsynchLookupService {
     }
     
     /**
-     * @see org.apache.james.jspf.executor.DNSAsynchLookupService#getRecordsAsynch(org.apache.james.jspf.core.DNSRequest, java.lang.Object, org.apache.james.jspf.executor.IResponseQueue)
+     * @see org.apache.james.jspf.executor.DNSAsynchLookupService#getRecordsAsynch(org.apache.james.jspf.core.DNSRequest, int, org.apache.james.jspf.executor.IResponseQueue)
      */
     public void getRecordsAsynch(DNSRequest request, int id,
             IResponseQueue responsePool) {

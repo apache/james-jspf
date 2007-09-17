@@ -30,7 +30,6 @@ import java.util.LinkedList;
 
 /**
  * Wrap a DNSService an execute the calls asynch in a new Thread
- * 
  */
 public class DNSServiceAsynchSimulator implements Runnable, DNSAsynchLookupService {
 
@@ -74,7 +73,7 @@ public class DNSServiceAsynchSimulator implements Runnable, DNSAsynchLookupServi
     }
 
     /**
-     * @see org.apache.james.jspf.core.DNSService#getRecordsAsynch(java.lang.String, int, java.lang.Object, org.apache.james.jspf.executor.IResponseQueue)
+     * @see org.apache.james.jspf.executor.DNSAsynchLookupService#getRecordsAsynch(org.apache.james.jspf.core.DNSRequest, int, org.apache.james.jspf.executor.IResponseQueue)
      */
     public void getRecordsAsynch(DNSRequest request, int id,
             final IResponseQueue responsePool) {

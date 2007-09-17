@@ -46,8 +46,6 @@ public class SPFResult  {
     /**
      * Construct SPFResult
      * 
-     * @param result the result 
-     * @param explanation the explanation
      * @param spfSession the SPFSession
      */
     public SPFResult(SPFSession spfSession) {

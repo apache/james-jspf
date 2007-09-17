@@ -110,8 +110,9 @@ public final class DefaultExplanationPolicy implements PolicyPostFilter {
     private MacroExpand macroExpand;
     
     /**
-     * @param macroExpand 
-     * @param spf
+     * @param log the logger
+     * @param explanation the default explanation
+     * @param macroExpand the MacroExpand service
      */
     public DefaultExplanationPolicy(Logger log, String explanation, MacroExpand macroExpand) {
         this.log = log;

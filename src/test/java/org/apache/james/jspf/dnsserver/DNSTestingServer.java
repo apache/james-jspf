@@ -452,9 +452,6 @@ public class DNSTestingServer implements ResponseGenerator {
         return response.toWire();
     }
 
-    /**
-     * @see org.apache.james.jspf.MessageGenerator#formerrMessage(byte[])
-     */
     public byte[] formerrMessage(byte[] in) {
         Header header;
         try {

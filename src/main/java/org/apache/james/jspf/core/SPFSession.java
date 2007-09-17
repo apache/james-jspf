@@ -86,8 +86,6 @@ public class SPFSession implements MacroData {
      *            The helo provided by the sender
      * @param clientIP
      *            The ipaddress of the client
-     * @param dnsProbe
-     *            The DNSService
      * @throws PermErrorException
      *             Get thrown if invalid data get passed
      * @throws NoneException

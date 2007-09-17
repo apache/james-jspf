@@ -67,8 +67,8 @@ public class MacroExpand {
     /**
      * Construct MacroExpand
      * 
-     * @param spfData the MacroData to use
      * @param logger the logget to use
+     * @param dnsProbe the dns service to use
      */
     public MacroExpand(Logger logger, DNSService dnsProbe) {
         // This matches 2 groups
