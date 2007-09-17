@@ -17,8 +17,10 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.parser;
+package org.apache.james.jspf.impl;
 
+
+import org.apache.james.jspf.parser.TermDefinition;
 
 import java.util.regex.Pattern;
 

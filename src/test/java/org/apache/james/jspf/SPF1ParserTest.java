@@ -23,8 +23,8 @@ package org.apache.james.jspf;
 import org.apache.james.jspf.core.SPFRecordParser;
 import org.apache.james.jspf.core.exceptions.NoneException;
 import org.apache.james.jspf.core.exceptions.PermErrorException;
+import org.apache.james.jspf.impl.DefaultTermsFactory;
 import org.apache.james.jspf.parser.RFC4408SPF1Parser;
-import org.apache.james.jspf.parser.DefaultTermsFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;

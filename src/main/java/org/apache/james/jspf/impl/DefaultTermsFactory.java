@@ -17,11 +17,12 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.parser;
+package org.apache.james.jspf.impl;
 
 import org.apache.james.jspf.core.LogEnabled;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.exceptions.PermErrorException;
+import org.apache.james.jspf.parser.TermsFactory;
 import org.apache.james.jspf.terms.Configuration;
 import org.apache.james.jspf.terms.ConfigurationEnabled;
 import org.apache.james.jspf.wiring.WiringService;

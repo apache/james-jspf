@@ -46,7 +46,6 @@ import org.apache.james.jspf.executor.SPFExecutor;
 import org.apache.james.jspf.executor.SPFResult;
 import org.apache.james.jspf.executor.SynchronousSPFExecutor;
 import org.apache.james.jspf.parser.RFC4408SPF1Parser;
-import org.apache.james.jspf.parser.DefaultTermsFactory;
 import org.apache.james.jspf.policies.InitialChecksPolicy;
 import org.apache.james.jspf.policies.NeutralIfNotMatchPolicy;
 import org.apache.james.jspf.policies.NoSPFRecordFoundPolicy;
