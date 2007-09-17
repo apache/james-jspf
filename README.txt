@@ -46,5 +46,70 @@ http://james.apache.org/jspf/ for the jSPF website, javadocs, xdocs and more.
 Please help us make jSPF better - we appreciate any feedback you may have.
 Enjoy!
 
+
+Developer notes
+===============
+
+*Module Dependencies Layers*
+----------------------------
+
+jSPF source code is structured in 4 layers. The topmost layer is the org.apache.james.jspf.impl
+package and it depends on every other package in the sources.
+
+Then we have a second layer including the "executor" package, the "policy"+"policy.local" packages, 
+the "parser" package and the "wiring" package. "executor", having no dependencies in the third 
+layer could be included in both the second and the third layer. "wiring" does not have dependencies.
+
+The third layer includes only the "terms" package. It depends on "core" (the fourth layer).
+
+The fourth layer includes "core"+"core.exceptions" packages. They have no dependencies on other
+packages. Instead every other package depends on this code.
+
+*Mixed Synchronous/Asynchronous Implementation*
+-----------------------------------------------
+
+jSPF born as a synchronous implementation, but soon introduced asynchronous support via dnsjnio
+asynchronous dns resolver library. The "Continuation" pattern has been used to support asynchronous
+operations.
+
+The whole processing is defined by "SPFChecker"s. An SPFChecker is an object that takes an SPFSession and 
+applies the needed transformations. Whenever a DNS lookup is needed an SPFChecker is allowed to return 
+a DNSLookupContinuation. A DNSLookupContinuation simply tells the executor that a given DNSRequest should  
+be resolved and the DNSResponse should be returned to the given SPFCheckerDNSResponseListener (that in  
+turn is allowed to return DNSLookupContinuation if it needs DNS lookups). When an SPFChecker (or the 
+SPFCheckerDNSResponseListener) completed the processing it will return null.
+
+The SPFSession includes 2 stacks: the "checkers" Stack and the "catchers" Stack. The former contains
+the "to be processed" SPFChecker, the latter contains SPFCheckerExceptionCatcher.
+The SPFExecutor role is to pop an SPFChecker from the SPFSession and execute it, by processing the
+DNSRequests included in the returned DNSLookupContinuations until a null is returned. If an exception
+is thrown by the current checker then an SPFCheckerExceptionCatcher is retrieved from the catcher
+stack and executed to handle the exception.
+
+Terms, Policies and the Parser are all implementations of the SPFChecker interface. An SPFChecker
+implementation can do every processing in the checkSPF method or can simply push more fine grained
+SPFCheckers to the checkers Stack in the SPFSession.
+
+*Packages*
+----------
+
+core: includes the core classes for the jSPF library.
+
+wiring: an utility package used to "wire" components for the runtime. It has no dependencies.
+
+terms: depends on core and defines basic Mechanism and Modifiers (Directive) terms. The terms simply
+  implements one of the Mechanism / Modifier interfaces and contain a static property to define
+  the regular expression used to parse the term from the record. 
+
+parser: the RFC4408SPF1Parser is the core class and it creates an SPF1Record by parsing the spf record.
+  the "grammar" is automatically created by reading the jspf.default.terms file that define the known
+  Modifiers and the known Mechanisms. At startup every modifier/mechanism is analyzed and a big
+  regexp is built to parse the records. Every time a record is parser the TermsFactory is used to
+  obtain a Service-Wired instance of the term.
+
+executor: an SPFExecutor (defined in the core package) is an object that process an SPFSession and 
+  returns an SPFResult (when asynchronous executors are used the SPFResult returned will be a 
+  FutureSPFResult). The executor 
+
 ---------------------
 The Apache James team
