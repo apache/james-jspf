@@ -25,8 +25,8 @@
   <body>
     <section name="Usefull RFC's">
       <p>
-        The actual SPF-RFC: 
-        <a href="http://new.openspf.org/svn/project/specs/rfc4408.html"> Actual RFC </a>
+        The actual SPF-RFC:<br />
+        <a href="http://www.openspf.org/svn/project/specs/rfc4408.html"> RFC4408 </a> - Sender Policy Framework (SPF) for Authorizing Use of Domains in E-Mail, Version 1
       </p>
     </section>
   </body>
