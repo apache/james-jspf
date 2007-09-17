@@ -72,6 +72,7 @@ import junit.framework.TestCase;
 
 public abstract class AbstractYamlTest extends TestCase {
 
+    private static final int FAKE_SERVER_PORT = 31347;
     protected static final int TIMEOUT = 10;
     protected static final int MOCK_SERVICE = 2;
     protected static final int FAKE_SERVER = 1;
@@ -213,7 +214,7 @@ public abstract class AbstractYamlTest extends TestCase {
                 if (getDnsServiceMockStyle() == FAKE_SERVER) {
                     NonblockingResolver nonblockingResolver = new NonblockingResolver("127.0.0.1");
                     resolver = ExtendedNonblockingResolver.newInstance(new NonblockingResolver[] {nonblockingResolver});
-                    nonblockingResolver.setPort(35347);
+                    nonblockingResolver.setPort(FAKE_SERVER_PORT);
                     nonblockingResolver.setTCP(false);
                 } else if (getDnsServiceMockStyle() == REAL_SERVER) {
                     resolver = ExtendedNonblockingResolver.newInstance();
@@ -354,14 +355,14 @@ public abstract class AbstractYamlTest extends TestCase {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        resolver.setPort(35347);
+        resolver.setPort(FAKE_SERVER_PORT);
         Lookup.setDefaultResolver(resolver);
         Lookup.setDefaultCache(null, DClass.IN);
         Lookup.setDefaultSearchPath(new Name[] {});
 
         if (dnsTestServer == null) {
             try {
-                dnsTestServer = new DNSTestingServer("0.0.0.0", "35347");
+                dnsTestServer = new DNSTestingServer("0.0.0.0", ""+FAKE_SERVER_PORT);
             } catch (TextParseException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
