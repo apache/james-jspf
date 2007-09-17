@@ -76,6 +76,7 @@ public class SPF implements SPFChecker {
 
         public SPFCheckerExceptionCatcherImplementation(SPFChecker resultHandler, Logger log) {
             this.resultHandler = resultHandler;
+            this.log = log;
         }
 
         /**
