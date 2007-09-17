@@ -2,24 +2,23 @@
 # BUILDING JSPF
 #############################################################################
 
-You will need to install maven2 as well as acquire jSPF
-source from subversion or a source tarball.
+You will need to install maven2 as well as acquire jSPF source from subversion 
+or a source tarball.
 
 Steps:
 
-1) Install maven2 (v2.0.6 as of the time of this writing)
+1) Install maven2 (v2.0.7 as of the time of this writing)
 
 2) Add maven2 to your path.  For me, I do the following:
-   $ tar zxvf maven-2.0.6.tar.gz
-   $ mv maven-2.0.6 /usr/local
-   $ ln -sf /usr/local/maven-2.0.6/bin/mvn /usr/local/bin/mvn
+   $ tar zxvf maven-2.0.7.tar.gz
+   $ mv maven-2.0.7 /usr/local
+   $ ln -sf /usr/local/maven-2.0.7/bin/mvn /usr/local/bin/mvn
 
- 3) Change directory to jspf source dir
+3) Change directory to jspf source dir
    $ cd jspf-x/
    
- 4) Run the build
-   $ mvn assembly:assembly
+4) Run the build (the "-P local" restrict maven to use bundled dependencies)
+   $ mvn -P local package
 
 That's it.  Please contact server-dev@james.apache.org if you have any
 problems.
-
