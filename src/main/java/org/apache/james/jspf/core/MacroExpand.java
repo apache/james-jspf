@@ -61,6 +61,8 @@ public class MacroExpand {
     public static final boolean DOMAIN = false;
     
     public static class RequireClientDomainException extends Exception {
+
+        private static final long serialVersionUID = 3834282981657676530L;
         
     }
 

@@ -27,6 +27,8 @@ package org.apache.james.jspf.core.exceptions;
  */
 public class PermErrorException extends SPFResultException {
 
+    private static final long serialVersionUID = 2244218535480311682L;
+
     public PermErrorException(String strErrorMessage) {
         super(strErrorMessage);
     }

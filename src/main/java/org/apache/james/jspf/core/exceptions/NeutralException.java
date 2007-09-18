@@ -27,6 +27,8 @@ package org.apache.james.jspf.core.exceptions;
  */
 public class NeutralException extends SPFResultException {
 
+    private static final long serialVersionUID = -3042159503967082131L;
+
     public NeutralException(String strErrorMessage) {
         super(strErrorMessage);
     }

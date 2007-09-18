@@ -44,6 +44,8 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
 
     private static class ResponseQueueImpl extends LinkedList implements IResponseQueue {
 
+        private static final long serialVersionUID = 5714025260393791651L;
+        
         private int waitingThreads = 0;
 
         /**

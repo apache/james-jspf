@@ -24,6 +24,8 @@ package org.apache.james.jspf.core.exceptions;
  */
 public class TimeoutException extends Exception {
 
+    private static final long serialVersionUID = -780967296047865457L;
+
     /**
      * @param message cause
      */

@@ -27,6 +27,8 @@ package org.apache.james.jspf.core.exceptions;
  */
 public class TempErrorException extends SPFResultException {
 
+    private static final long serialVersionUID = -325898188953342837L;
+
     public TempErrorException(String strErrorMessage) {
         super(strErrorMessage);
     }

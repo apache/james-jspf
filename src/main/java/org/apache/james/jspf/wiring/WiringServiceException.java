@@ -24,6 +24,8 @@ package org.apache.james.jspf.wiring;
  */
 public class WiringServiceException extends Exception {
 
+    private static final long serialVersionUID = -3964282365275100901L;
+
     public WiringServiceException(String string) {
         super(string);
     }

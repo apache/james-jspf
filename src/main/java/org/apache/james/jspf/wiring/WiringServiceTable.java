@@ -31,6 +31,8 @@ import java.util.Iterator;
  */
 public class WiringServiceTable extends Hashtable implements WiringService {
 
+    private static final long serialVersionUID = -9151935136150279119L;
+
     /**
      * @see org.apache.james.jspf.wiring.WiringService#wire(java.lang.Object)
      */

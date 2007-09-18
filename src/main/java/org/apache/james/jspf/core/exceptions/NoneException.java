@@ -27,6 +27,8 @@ package org.apache.james.jspf.core.exceptions;
  */
 public class NoneException extends SPFResultException {
 
+    private static final long serialVersionUID = 3009434152870626458L;
+
     public NoneException(String strErrorMessage) {
         super(strErrorMessage);
     }
