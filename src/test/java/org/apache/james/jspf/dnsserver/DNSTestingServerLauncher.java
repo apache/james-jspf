@@ -162,7 +162,7 @@ public class DNSTestingServerLauncher {
     private static void usage() {
         HelpFormatter hf = new HelpFormatter();
         hf.printHelp("DNSTestingServerLauncher", generateOptions(), true);
-        System.exit(0);
+        System.exit(255);
     }
 
     /**

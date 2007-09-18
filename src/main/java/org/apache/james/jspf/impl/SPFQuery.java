@@ -21,6 +21,7 @@ package org.apache.james.jspf.impl;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -55,20 +56,28 @@ public class SPFQuery {
     private final static int UNKNOWN_RCODE = 255;
 
     private final static String CMD_IP = "ip";
+    private final static char CHAR_IP = 'i';
 
     private final static String CMD_SENDER = "sender";
+    private final static char CHAR_SENDER = 's';
 
     private final static String CMD_HELO = "helo";
+    private final static char CHAR_HELO = 'h';
 
     private final static String CMD_DEBUG = "debug";
+    private final static char CHAR_DEBUG = 'd';
 
     private final static String CMD_VERBOSE = "verbose";
+    private final static char CHAR_VERBOSE = 'v';
 
     private final static String CMD_DEFAULT_EXP = "defaultexplanation";
+    private final static char CHAR_DEFAULT_EXP = 'e';
 
     private final static String CMD_BEST_GUESS = "usebestguess";
+    private final static char CHAR_BEST_GUESS = 'b';
     
     private final static String CMD_TRUSTED_FORWARDER = "usetrusted";
+    private final static char CHAR_TRUSTED_FORWARDER = 't';
 
     private static Logger logger = Logger.getRootLogger();
 
@@ -97,18 +106,18 @@ public class SPFQuery {
         try {
             CommandLine line = parser.parse(options, args);
 
-            ip = line.getOptionValue(CMD_IP);
-            sender = line.getOptionValue(CMD_SENDER);
-            helo = line.getOptionValue(CMD_HELO);
-            defaultExplanation = line.getOptionValue(CMD_DEFAULT_EXP);
-            useBestGuess = line.hasOption(CMD_BEST_GUESS);
-            useTrustedForwarder = line.hasOption(CMD_TRUSTED_FORWARDER);
+            ip = line.getOptionValue(CHAR_IP);
+            sender = line.getOptionValue(CHAR_SENDER);
+            helo = line.getOptionValue(CHAR_HELO);
+            defaultExplanation = line.getOptionValue(CHAR_DEFAULT_EXP);
+            useBestGuess = line.hasOption(CHAR_BEST_GUESS);
+            useTrustedForwarder = line.hasOption(CHAR_TRUSTED_FORWARDER);
             // check if all needed values was set
             if (ip != null && sender != null && helo != null) {
 
-                if (line.hasOption(CMD_DEBUG))
+                if (line.hasOption(CHAR_DEBUG))
                     logger.setLevel(Level.DEBUG);
-                if (line.hasOption(CMD_VERBOSE))
+                if (line.hasOption(CHAR_VERBOSE))
                     logger.setLevel(Level.TRACE);
 
                 SPF spf = new DefaultSPF(new Log4JLogger(logger));
@@ -147,18 +156,57 @@ public class SPFQuery {
      */
     private static Options generateOptions() {
         Options options = new Options();
-        options.addOption(OptionBuilder.withLongOpt(CMD_IP).withValueSeparator(
-                '=').hasArg().create());
-        options.addOption(OptionBuilder.withLongOpt(CMD_SENDER)
-                .withValueSeparator('=').hasArg().create());
-        options.addOption(OptionBuilder.withLongOpt(CMD_HELO)
-                .withValueSeparator('=').hasArg().create());
-        options.addOption(OptionBuilder.withLongOpt(CMD_DEFAULT_EXP)
-                .withValueSeparator('=').hasArg().create());
-        options.addOption(OptionBuilder.withLongOpt(CMD_BEST_GUESS).create());
-        options.addOption(OptionBuilder.withLongOpt(CMD_TRUSTED_FORWARDER).create());
-        options.addOption(OptionBuilder.withLongOpt(CMD_DEBUG).create());
-        options.addOption(OptionBuilder.withLongOpt(CMD_VERBOSE).create());
+        options.addOption(OptionBuilder
+                .withLongOpt(CMD_IP)
+                .withValueSeparator('=')
+                .withArgName("ip")
+                .withDescription("Sender IP address")
+                .isRequired()
+                .hasArg()
+                .create(CHAR_IP));
+        options.addOption(OptionBuilder
+                .withLongOpt(CMD_SENDER)
+                .withValueSeparator('=')
+                .withArgName("sender")
+                .withDescription("Sender address")
+                .isRequired()
+                .hasArg()
+                .create(CHAR_SENDER));
+        options.addOption(OptionBuilder
+                .withLongOpt(CMD_HELO)
+                .withValueSeparator('=')
+                .withArgName("helo")
+                .withDescription("Helo name")
+                .isRequired()
+                .hasArg()
+                .create(CHAR_HELO));
+        options.addOption(OptionBuilder
+                .withLongOpt(CMD_DEFAULT_EXP)
+                .withValueSeparator('=')
+                .withArgName("expl")
+                .withDescription("Default explanation")
+                .hasArg()
+                .create(CHAR_DEFAULT_EXP));
+        options.addOption(OptionBuilder
+                .withLongOpt(CMD_BEST_GUESS)
+                .withArgName("bestguess")
+                .withDescription("Enable 'best guess' rule")
+                .create(CHAR_BEST_GUESS));
+        options.addOption(OptionBuilder
+                .withLongOpt(CMD_TRUSTED_FORWARDER)
+                .withArgName("trustedfwd")
+                .withDescription("Enable 'trusted forwarder' rule")
+                .create(CHAR_TRUSTED_FORWARDER));
+        options.addOption(OptionBuilder
+                .withLongOpt(CMD_DEBUG)
+                .withArgName("debug")
+                .withDescription("Enable debug")
+                .create(CHAR_DEBUG));
+        options.addOption(OptionBuilder
+                .withLongOpt(CMD_VERBOSE)
+                .withArgName("verbose")
+                .withDescription("Enable verbose mode")
+                .create(CHAR_VERBOSE));
         return options;
     }
 
@@ -166,12 +214,8 @@ public class SPFQuery {
      * Print out the usage
      */
     private static void usage() {
-        // TODO: Use HelpFormatter for printing usage
-        System.out.println("Usage: java -jar jspf-x.jar --" + CMD_IP
-                + "=192.168.100.1 --" + CMD_SENDER + "=postmaster@foo.bar --"
-                + CMD_HELO + "=foo.bar [--" + CMD_DEFAULT_EXP
-                + "=\"explanation String\"] [--" + CMD_BEST_GUESS + "] [--"+ CMD_TRUSTED_FORWARDER +"]"
-                + CMD_DEBUG + "] [--" + CMD_VERBOSE + "]");
+        HelpFormatter hf = new HelpFormatter();
+        hf.printHelp("SPFQuery", generateOptions(), true);
         System.exit(UNKNOWN_RCODE);
     }
 
