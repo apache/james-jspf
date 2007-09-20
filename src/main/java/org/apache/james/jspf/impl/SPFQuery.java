@@ -70,13 +70,13 @@ public class SPFQuery {
     private final static String CMD_VERBOSE = "verbose";
     private final static char CHAR_VERBOSE = 'v';
 
-    private final static String CMD_DEFAULT_EXP = "defaultexplanation";
+    private final static String CMD_DEFAULT_EXP = "default-explanation";
     private final static char CHAR_DEFAULT_EXP = 'e';
 
-    private final static String CMD_BEST_GUESS = "usebestguess";
+    private final static String CMD_BEST_GUESS = "enable-best-guess";
     private final static char CHAR_BEST_GUESS = 'b';
     
-    private final static String CMD_TRUSTED_FORWARDER = "usetrusted";
+    private final static String CMD_TRUSTED_FORWARDER = "enable-trusted-forwarder";
     private final static char CHAR_TRUSTED_FORWARDER = 't';
 
     private static Logger logger = Logger.getRootLogger();
