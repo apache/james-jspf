@@ -117,7 +117,7 @@
               -DartifactId=james-parent 
               -Dversion=1.1
            mvn -fignorepom.xml install:install-file 
-              -Dfile=stage\org.apache.james\poms\james-project-1.1.pom 
+              -Dfile=stage\org.apache.james\poms\james-project-1.2.pom 
               -Dpackaging=pom 
               -DgroupId=org.apache.james 
               -DartifactId=james-project 
@@ -131,7 +131,7 @@
               -DartifactId=james-parent 
               -Dversion=1.1
            mvn -fignorepom.xml install:install-file 
-              -Dfile=stage/org.apache.james/poms/james-project-1.1.pom 
+              -Dfile=stage/org.apache.james/poms/james-project-1.2.pom 
               -Dpackaging=pom 
               -DgroupId=org.apache.james 
               -DartifactId=james-project 
