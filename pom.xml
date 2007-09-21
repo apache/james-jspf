@@ -121,7 +121,7 @@
               -Dpackaging=pom 
               -DgroupId=org.apache.james 
               -DartifactId=james-project 
-              -Dversion=1.1
+              -Dversion=1.2
 
            #linux:
            mvn -fignorepom.xml install:install-file 
@@ -135,7 +135,7 @@
               -Dpackaging=pom 
               -DgroupId=org.apache.james 
               -DartifactId=james-project 
-              -Dversion=1.1
+              -Dversion=1.2
        -->
       <url>file://${basedir}/stage</url>
       <layout>legacy</layout>
