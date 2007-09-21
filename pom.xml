@@ -24,7 +24,7 @@
   <parent>
     <groupId>org.apache.james</groupId>
     <artifactId>james-project</artifactId>
-    <version>1.1</version>
+    <version>1.2</version>
     <!-- Either this really points to the james-project/pom.xml or you
          will have to tune the local repository, later, in this file -->
     <relativePath>../james-project/project/pom.xml</relativePath>
