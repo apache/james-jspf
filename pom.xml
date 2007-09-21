@@ -30,7 +30,7 @@
     <relativePath>../james-project/project/pom.xml</relativePath>
   </parent>
   <name>Apache JAMES jSPF</name>
-  <version>0.9.5-SNAPSHOT</version>
+  <version>0.9.5</version>
   <description>
     Apache James jSPF is an SPF spec implementation written in Java
   </description>
@@ -95,9 +95,9 @@
   </issueManagement>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/james/jspf/trunk</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/james/jspf/trunk</developerConnection>
-    <url>http://svn.apache.org/viewvc/james/jspf/trunk/</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/james/jspf/tags/apache-jspf-0.9.5</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/james/jspf/tags/apache-jspf-0.9.5</developerConnection>
+    <url>http://svn.apache.org/viewvc/james/jspf/tags/apache-jspf-0.9.5</url>
   </scm>
 
   <repositories>
