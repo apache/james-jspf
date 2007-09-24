@@ -56,6 +56,9 @@
       </licenses>
     </project>
   </supplement>
+  <!-- Also added manually in pom.xml appeneded text because test
+       dependencies are not automatically included by the NOTICE 
+       generator -->
   <supplement>
     <project>
       <groupId>junit</groupId>
