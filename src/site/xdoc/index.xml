@@ -33,7 +33,11 @@
       </p>
     </section>
     <section name="News">
+    
     <subsection name="2007">
+      <h4>Sept/2007 - jSPF-0.9b5 released</h4>
+      <p>We proud to announce the <a href="../downloadunstable.cgi">release</a> 
+      of jSPF-0.9b5. This release supports asynchron processing and is fully RFC4408 conform </p>
 
       <h4>Feb/2007 - jSPF-0.9b4 released</h4>
       <p>After some more work was done, we proud to announce the <a href="../downloadunstable.cgi">release</a> 
@@ -55,9 +59,9 @@
     
     <section name="releases">
       <p>
-        <b>Latest: jSPF v0.9b4</b>
+        <b>Latest: jSPF v0.9b5</b>
         <br/>
-jSPF v0.9b4 is the current release.
+jSPF v0.9b5 is the current release.
 Both <a href="../downloadunstable.cgi">binary and source</a> distributions are available.</p>
       <p>This release passes all YAML tests published by openspf.org (still under development). So it should be fully RFC4408 compliant.</p>
       <!-- 
