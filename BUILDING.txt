@@ -17,8 +17,42 @@ Steps:
 3) Change directory to jspf source dir
    $ cd jspf-x/
    
-4) Run the build (the "-P local" restrict maven to use bundled dependencies)
-   $ mvn -P local package
+4) Run the build (the "-Plocal" restrict maven to use bundled dependencies)
+   $ mvn -Plocal package
+
+Please note that due to http://jira.codehaus.org/browse/MNG-2896
+if you don't have james-project checked out in ../james-project
+you will have to alter the local stage repository url in the pom.xml
+file to use your absolute path to the project instead of ${basedir}, 
+or, otherwise, manually install the parent poms
+
+#windows:
+mvn -fignorepom.xml install:install-file \ 
+    -Dfile=stage\org.apache.james\poms\james-parent-1.1.pom \ 
+    -Dpackaging=pom \
+    -DgroupId=org.apache.james \
+    -DartifactId=james-parent \
+    -Dversion=1.1
+mvn -fignorepom.xml install:install-file \ 
+    -Dfile=stage\org.apache.james\poms\james-project-1.2.pom \ 
+    -Dpackaging=pom \
+    -DgroupId=org.apache.james \ 
+    -DartifactId=james-project \
+    -Dversion=1.2
+
+#linux:
+mvn -fignorepom.xml install:install-file \ 
+    -Dfile=stage/org.apache.james/poms/james-parent-1.1.pom \ 
+    -Dpackaging=pom \
+    -DgroupId=org.apache.james \ 
+    -DartifactId=james-parent \
+    -Dversion=1.1
+mvn -fignorepom.xml install:install-file \ 
+    -Dfile=stage/org.apache.james/poms/james-project-1.2.pom \ 
+    -Dpackaging=pom \
+    -DgroupId=org.apache.james \ 
+    -DartifactId=james-project \
+    -Dversion=1.2
 
 That's it.  Please contact server-dev@james.apache.org if you have any
 problems.
