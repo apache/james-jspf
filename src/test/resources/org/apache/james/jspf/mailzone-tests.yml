@@ -822,7 +822,9 @@ tests:
     helo: 118.spf1-test.mailzone.com
     host: 192.0.2.200
     mailfrom: 118.spf1-test.mailzone.com
-    result: fail
+    # this has been changed to permerror because of the latest openspf updates
+    # result: fail
+    result: permerror
 zonedata:
   01.spf1-test.mailzone.com:
     - TXT:  v=spf1                                                             

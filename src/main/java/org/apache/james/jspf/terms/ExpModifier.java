@@ -86,9 +86,12 @@ public class ExpModifier extends GenericModifier implements MacroExpandEnabled, 
      * NOTE: the last +"?" has been added to support RFC4408 ERRATA for the EXP modifier.
      * An "exp=" should not result in a perm error but should be ignored.
      * Errata: http://www.openspf.org/RFC_4408/Errata#empty-exp
+     * 
+     * NOTE: the last +"?" has been then removed because OpenSPF released a new testsuite
+     * requiring a PermError on "exp=" (see JSPF-56).
      */
     public static final String REGEX = "[eE][xX][pP]" + "\\="
-            + SPFTermsRegexps.DOMAIN_SPEC_REGEX+"?";
+            + SPFTermsRegexps.DOMAIN_SPEC_REGEX;
 
     private MacroExpand macroExpand;
 
