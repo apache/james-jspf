@@ -127,7 +127,7 @@ public class DNSTestingServer implements ResponseGenerator {
         zone = null;
     }
 
-    public void setData(HashMap zonedata) {
+    public synchronized void setData(HashMap zonedata) {
         try {
             this.timeoutServers = new HashSet();
             List records = new LinkedList();

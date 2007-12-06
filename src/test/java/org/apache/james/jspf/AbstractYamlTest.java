@@ -45,9 +45,11 @@ import org.apache.james.jspf.wiring.WiringServiceException;
 import org.jvyaml.Constructor;
 import org.jvyaml.DefaultYAMLFactory;
 import org.jvyaml.YAMLFactory;
+import org.xbill.DNS.Cache;
 import org.xbill.DNS.DClass;
 import org.xbill.DNS.ExtendedNonblockingResolver;
 import org.xbill.DNS.Lookup;
+import org.xbill.DNS.LookupAsynch;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.NonblockingResolver;
 import org.xbill.DNS.Resolver;
@@ -208,6 +210,11 @@ public abstract class AbstractYamlTest extends TestCase {
             executor = new StagedMultipleSPFExecutor(log, new DNSServiceAsynchSimulator(dns, getSpfExecutorType() == STAGED_EXECUTOR_MULTITHREADED));
         } else if (getSpfExecutorType() == STAGED_EXECUTOR_DNSJNIO) {
             
+            // reset cache between usages of the asynchronous lookuper
+            LookupAsynch.setDefaultCache(new Cache(), DClass.IN);
+            // reset cache between usages of the asynchronous lookuper
+            LookupAsynch.getDefaultCache(DClass.IN).clearCache();
+
             try {
                 ExtendedNonblockingResolver resolver;
                 
