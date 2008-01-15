@@ -3,7 +3,7 @@
   <groupId>uk.nominet</groupId>
   <artifactId>dnsjnio</artifactId>
   <name>dnsjnio</name>
-  <version>0.9.8</version>
+  <version>0.9.9</version>
   <packaging>jar</packaging>
   <url>http://sourceforge.net/projects/dnsjnio</url>
   <licenses>
