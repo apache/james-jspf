@@ -86,23 +86,22 @@ public class SPFSession implements MacroData {
      *            The helo provided by the sender
      * @param clientIP
      *            The ipaddress of the client
-     * @throws PermErrorException
+     * @throws IllegalArgumentException 
      *             Get thrown if invalid data get passed
-     * @throws NoneException
-     *             Get thrown if no valid emailaddress get passed
+     * 
      */
-    public SPFSession(String mailFrom, String heloDomain, String clientIP) throws PermErrorException, NoneException {
+    public SPFSession(String mailFrom, String heloDomain, String clientIP) {
         super();
         this.mailFrom = mailFrom.trim();
         this.hostName = heloDomain.trim();
-        this.ipAddress = IPAddr.getProperIpAddress(clientIP.trim());
-
+       
         try {
+        	this.ipAddress = IPAddr.getProperIpAddress(clientIP.trim());
             // get the in Address
             this.inAddress = IPAddr.getInAddress(clientIP);
         } catch (PermErrorException e) {
             // throw an exception cause the ip was not rfc conform
-            throw new PermErrorException(e.getMessage());
+            throw new IllegalArgumentException(e.getMessage());
         }
 
         // setup the data!
@@ -119,7 +118,7 @@ public class SPFSession implements MacroData {
      * @throws NoneException
      *             Get thrown if an invalid emailaddress get passed
      */
-    private void setupData(String mailFrom, String helo) throws NoneException {
+    private void setupData(String mailFrom, String helo) {
 
         // if nullsender is used postmaster@helo will be used as email
         if (mailFrom.equals("")) {
@@ -131,7 +130,7 @@ public class SPFSession implements MacroData {
 
             // should never be bigger as 2 !
             if (fromParts.length > 2) {
-                throw new NoneException("Not a valid email address " + mailFrom);
+                throw new IllegalArgumentException("Not a valid email address " + mailFrom);
             } else if (fromParts.length == 2) {
                 this.currentSenderPart = fromParts[0];
                 this.senderDomain = fromParts[1];

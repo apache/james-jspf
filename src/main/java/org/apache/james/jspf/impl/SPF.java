@@ -313,13 +313,8 @@ public class SPF implements SPFChecker {
         SPFSession spfData = null;
 
         // Setup the data
-        try {
-            spfData = new SPFSession(mailFrom, hostName, ipAddress);
-        } catch (PermErrorException e1) {
-            spfData.setCurrentResultExpanded(e1.getResult());
-        } catch (NoneException e1) {
-            spfData.setCurrentResultExpanded(e1.getResult());
-        }
+        spfData = new SPFSession(mailFrom, hostName, ipAddress);
+      
 
         SPFChecker resultHandler = new DefaultSPFChecker();
         
