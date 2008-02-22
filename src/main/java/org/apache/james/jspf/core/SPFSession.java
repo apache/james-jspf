@@ -96,7 +96,7 @@ public class SPFSession implements MacroData {
         this.hostName = heloDomain.trim();
        
         try {
-        	this.ipAddress = IPAddr.getProperIpAddress(clientIP.trim());
+            this.ipAddress = IPAddr.getProperIpAddress(clientIP.trim());
             // get the in Address
             this.inAddress = IPAddr.getInAddress(clientIP);
         } catch (PermErrorException e) {
