@@ -99,14 +99,14 @@ public class SPFSession implements MacroData {
             this.inAddress = IPAddr.getInAddress(clientIP);
         } catch (PermErrorException e) {
             // ip was not rfc conform
-        	this.setCurrentResultExpanded(e.getResult());
+            this.setCurrentResultExpanded(e.getResult());
         }
 
         // setup the data!
         try {
-			setupData(mailFrom, hostName);
+            setupData(mailFrom, hostName);
 		} catch (NoneException e) {
-			this.setCurrentResultExpanded(e.getResult());
+            this.setCurrentResultExpanded(e.getResult());
 		}
     }
 
@@ -133,7 +133,7 @@ public class SPFSession implements MacroData {
             
             if (fromParts.length > 1) {
                 this.senderDomain = fromParts[fromParts.length -1];
-                this.currentSenderPart = mailFrom.substring(0, mailFrom.length() - senderDomain.length() + 1);
+                this.currentSenderPart = mailFrom.substring(0, mailFrom.length() - senderDomain.length() - 1);
             } else {
                 this.currentSenderPart = "postmaster";
                 this.senderDomain = mailFrom;
