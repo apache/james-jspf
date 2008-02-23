@@ -86,8 +86,6 @@ public class SPFSession implements MacroData {
      *            The helo provided by the sender
      * @param clientIP
      *            The ipaddress of the client
-     * @throws IllegalArgumentException 
-     *             Get thrown if invalid data get passed
      * 
      */
     public SPFSession(String mailFrom, String heloDomain, String clientIP) {
@@ -100,12 +98,16 @@ public class SPFSession implements MacroData {
             // get the in Address
             this.inAddress = IPAddr.getInAddress(clientIP);
         } catch (PermErrorException e) {
-            // throw an exception cause the ip was not rfc conform
-            throw new IllegalArgumentException(e.getMessage());
+            // ip was not rfc conform
+        	this.setCurrentResultExpanded(e.getResult());
         }
 
         // setup the data!
-        setupData(mailFrom, hostName);
+        try {
+			setupData(mailFrom, hostName);
+		} catch (NoneException e) {
+			this.setCurrentResultExpanded(e.getResult());
+		}
     }
 
     /**
@@ -115,10 +117,11 @@ public class SPFSession implements MacroData {
      *            The emailaddress of the sender
      * @param helo
      *            The provided helo
+     * @throws NoneException 
      * @throws NoneException
      *             Get thrown if an invalid emailaddress get passed
      */
-    private void setupData(String mailFrom, String helo) {
+    private void setupData(String mailFrom, String helo) throws NoneException {
 
         // if nullsender is used postmaster@helo will be used as email
         if (mailFrom.equals("")) {
@@ -127,13 +130,10 @@ public class SPFSession implements MacroData {
             this.mailFrom = currentSenderPart + "@" + helo;
         } else {
             String[] fromParts = mailFrom.split("@");
-
-            // should never be bigger as 2 !
-            if (fromParts.length > 2) {
-                throw new IllegalArgumentException("Not a valid email address " + mailFrom);
-            } else if (fromParts.length == 2) {
-                this.currentSenderPart = fromParts[0];
-                this.senderDomain = fromParts[1];
+            
+            if (fromParts.length > 1) {
+                this.senderDomain = fromParts[fromParts.length -1];
+                this.currentSenderPart = mailFrom.substring(0, mailFrom.length() - senderDomain.length() + 1);
             } else {
                 this.currentSenderPart = "postmaster";
                 this.senderDomain = mailFrom;
