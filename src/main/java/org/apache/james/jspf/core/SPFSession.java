@@ -105,9 +105,9 @@ public class SPFSession implements MacroData {
         // setup the data!
         try {
             setupData(mailFrom, hostName);
-		} catch (NoneException e) {
+        } catch (NoneException e) {
             this.setCurrentResultExpanded(e.getResult());
-		}
+        }
     }
 
     /**
