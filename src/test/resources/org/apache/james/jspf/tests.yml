@@ -1,6 +1,18 @@
 ---
 description: Converted tests
 tests:
+  test-#double@:
+    helo: spf1-test.foo.bar
+    host: 192.0.2.200
+    mailfrom: '"a@test"@spf1-test.foo.bar'
+    result: pass
+    explanation: 
+  test-#malformedip:
+    helo: spf1-test.foo.bar
+    host: 192.0.2.
+    mailfrom: 'spf1-test.foo.bar'
+    result: permerror
+    explanation:
   test-#1:
     helo: spf1-test.foo.bar
     host: 192.0.2.200

@@ -112,6 +112,9 @@ public class SPFSession implements MacroData {
             if (fromParts.length > 1) {
                 this.senderDomain = fromParts[fromParts.length -1];
                 this.currentSenderPart = mailFrom.substring(0, mailFrom.length() - senderDomain.length() - 1);
+                if (this.currentSenderPart.length() == 0) {
+                    this.currentSenderPart = "postmaster";
+                }
             } else {
                 this.currentSenderPart = "postmaster";
                 this.senderDomain = mailFrom;

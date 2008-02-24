@@ -310,7 +310,7 @@ public abstract class AbstractYamlTest extends TestCase {
         if (currentTest.get("explanation") != null) {
             
             // Check for our default explanation!
-            if (currentTest.get("explanation").equals("DEFAULT") || currentTest.get("explanation").equals("postmaster") ) {
+            if (currentTest.get("explanation").equals("DEFAULT")) {
                 assertTrue(res.getExplanation().startsWith("http://www.openspf.org/why.html?sender="));
             } else if (currentTest.get("explanation").equals("cafe:babe::1 is queried as 1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.E.B.A.B.E.F.A.C.ip6.arpa")) {
                 // See http://java.sun.com/j2se/1.4.2/docs/api/java/net/Inet6Address.html    

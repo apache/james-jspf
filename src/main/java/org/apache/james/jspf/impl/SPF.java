@@ -341,11 +341,14 @@ public class SPF implements SPFChecker {
     public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
             NoneException, TempErrorException, NeutralException {
 
-        SPFChecker policyChecker = new PolicyChecker(getPolicies());
-        SPFChecker recordChecker = new SPFRecordChecker();
-        
-        spfData.pushChecker(recordChecker);
-        spfData.pushChecker(policyChecker);
+        // if we already have a result we don't need to add further processing.
+        if (spfData.getCurrentResultExpanded() == null) {
+            SPFChecker policyChecker = new PolicyChecker(getPolicies());
+            SPFChecker recordChecker = new SPFRecordChecker();
+            
+            spfData.pushChecker(recordChecker);
+            spfData.pushChecker(policyChecker);
+        }
         
         return null;
     }
