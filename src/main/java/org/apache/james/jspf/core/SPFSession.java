@@ -20,7 +20,6 @@
 
 package org.apache.james.jspf.core;
 
-import org.apache.james.jspf.core.exceptions.NoneException;
 import org.apache.james.jspf.core.exceptions.PermErrorException;
 
 import java.util.HashMap;
@@ -102,35 +101,14 @@ public class SPFSession implements MacroData {
             this.setCurrentResultExpanded(e.getResult());
         }
 
-        // setup the data!
-        try {
-            setupData(mailFrom, hostName);
-        } catch (NoneException e) {
-            this.setCurrentResultExpanded(e.getResult());
-        }
-    }
-
-    /**
-     * Setup the data which used to retrieve the SPF-Record
-     * 
-     * @param mailFrom
-     *            The emailaddress of the sender
-     * @param helo
-     *            The provided helo
-     * @throws NoneException 
-     * @throws NoneException
-     *             Get thrown if an invalid emailaddress get passed
-     */
-    private void setupData(String mailFrom, String helo) throws NoneException {
-
         // if nullsender is used postmaster@helo will be used as email
         if (mailFrom.equals("")) {
             this.currentSenderPart = "postmaster";
-            this.senderDomain = helo;
-            this.mailFrom = currentSenderPart + "@" + helo;
+            this.senderDomain = hostName;
+            this.mailFrom = currentSenderPart + "@" + hostName;
         } else {
             String[] fromParts = mailFrom.split("@");
-            
+            // What to do when mailFrom is "@example.com" ?
             if (fromParts.length > 1) {
                 this.senderDomain = fromParts[fromParts.length -1];
                 this.currentSenderPart = mailFrom.substring(0, mailFrom.length() - senderDomain.length() - 1);
