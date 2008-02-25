@@ -73,21 +73,11 @@ public class RFC4408AsynchronousYamlTest extends RFC4408YamlTest {
 
         public RFC4408AsynchronousSuite() throws IOException {
             super();
-            try {
-                List tests = loadTests(YAMLFILE2);
-                Iterator i = tests.iterator();
-                while (i.hasNext()) {
-                    SPFYamlTestSuite o = (SPFYamlTestSuite) i.next();
-                    addTest(new RFC4408AsynchronousYamlTest(o));
-                }
-            } catch (RuntimeException e) {
-                if ("Unable to load the file".equals(e.getMessage())) {
-                    System.err.println("WARNING: RFC4408 tests disabled.");
-                    System.err.println("The RFC4408 test-suite is not bundled with jspf due to licensing issues.");
-                    System.err.println("You can download the yaml testsuite at the following url:");
-                    System.err.println("  http://www.openspf.org/source/project/test-suite/");
-                    System.err.println("and place an rfc4408-tests.yml file in the /src/test/resources/org/apache/james/jspf folder.");
-                }
+            List tests = loadTests(YAMLFILE2);
+            Iterator i = tests.iterator();
+            while (i.hasNext()) {
+                SPFYamlTestSuite o = (SPFYamlTestSuite) i.next();
+                addTest(new RFC4408AsynchronousYamlTest(o));
             }
         }
 

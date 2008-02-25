@@ -57,6 +57,7 @@ import org.xbill.DNS.SimpleResolver;
 import org.xbill.DNS.TextParseException;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -164,7 +165,7 @@ public abstract class AbstractYamlTest extends TestCase {
         
             return tests;
         } else {
-            throw new RuntimeException("Unable to load the file");
+            throw new FileNotFoundException("Unable to load the file");
         }
     }
 
