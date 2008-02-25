@@ -351,7 +351,6 @@ public class SPFSession implements MacroData {
      * @param checker  
      */
     public void pushChecker(SPFChecker checker) {
-        System.out.println(System.identityHashCode(this)+"/pushChecker: "+checker+" "+System.identityHashCode(checker));
         checkers.push(checker);
     }
     
@@ -366,7 +365,6 @@ public class SPFSession implements MacroData {
             return null;
         } else {
             SPFChecker checker = (SPFChecker) checkers.pop();
-            System.out.println(System.identityHashCode(this)+"/popChecker: "+checker+" "+System.identityHashCode(checker));
             return checker;
         }
     }
