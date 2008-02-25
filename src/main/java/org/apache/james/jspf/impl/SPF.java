@@ -27,7 +27,6 @@ import org.apache.james.jspf.core.LogEnabled;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.MacroExpand;
 import org.apache.james.jspf.core.MacroExpandEnabled;
-import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPF1Record;
 import org.apache.james.jspf.core.SPF1Utils;
 import org.apache.james.jspf.core.SPFCheckEnabled;
@@ -101,7 +100,7 @@ public class SPF implements SPFChecker {
                 // this should never happen at all. But anyway we will set the
                 // result to neutral. Safety first ..
                 log.error(exception.getMessage(),exception);
-                result = SPF1Constants.NEUTRAL;
+                result = SPFErrorConstants.NEUTRAL_CONV;
             }
             session.setCurrentResultExpanded(result);
             
@@ -343,11 +342,11 @@ public class SPF implements SPFChecker {
 
         // if we already have a result we don't need to add further processing.
         if (spfData.getCurrentResultExpanded() == null) {
-            SPFChecker policyChecker = new PolicyChecker(getPolicies());
-            SPFChecker recordChecker = new SPFRecordChecker();
-            
-            spfData.pushChecker(recordChecker);
-            spfData.pushChecker(policyChecker);
+        SPFChecker policyChecker = new PolicyChecker(getPolicies());
+        SPFChecker recordChecker = new SPFRecordChecker();
+        
+        spfData.pushChecker(recordChecker);
+        spfData.pushChecker(policyChecker);
         }
         
         return null;
