@@ -42,49 +42,6 @@ import org.apache.james.jspf.core.exceptions.TempErrorException;
  */
 public class IncludeMechanism implements Mechanism, ConfigurationEnabled, LogEnabled, SPFCheckEnabled, MacroExpandEnabled {
 
-    private final class ExceptionCatcher implements SPFCheckerExceptionCatcher {
-        private SPFChecker spfChecker;
-
-        private SPFChecker finallyChecker;
-
-        /**
-         * @see org.apache.james.jspf.core.SPFCheckerExceptionCatcher#onException(java.lang.Exception, org.apache.james.jspf.core.SPFSession)
-         */
-        public void onException(Exception exception, SPFSession session)
-                throws PermErrorException, NoneException,
-                TempErrorException, NeutralException {
-            
-            // remove every checker until the initialized one
-            SPFChecker checker;
-            while ((checker = session.popChecker())!=spfChecker) {
-                log.debug("Include resulted in exception. Removing checker: "+checker);
-            }
-            
-            finallyChecker.checkSPF(session);
-            
-            if (exception instanceof NeutralException) {
-                throw new PermErrorException("included checkSPF returned NeutralException");
-            } else if (exception instanceof NoneException) {
-                throw new PermErrorException("included checkSPF returned NoneException");
-            } else if (exception instanceof PermErrorException){
-                throw (PermErrorException) exception;
-            } else if (exception instanceof TempErrorException){
-                throw (TempErrorException) exception;
-            } else if (exception instanceof RuntimeException){
-                throw (RuntimeException) exception;
-            } else {
-                throw new IllegalStateException(exception.getMessage());
-            }
-        }
-
-        public SPFCheckerExceptionCatcher setExceptionHandlerChecker(
-                SPFChecker checker, SPFChecker finallyChecker) {
-            this.spfChecker = checker;
-            this.finallyChecker = finallyChecker;
-            return this;
-        }
-    }
-
     private final class ExpandedChecker implements SPFChecker {
       
         /**
@@ -109,41 +66,16 @@ public class IncludeMechanism implements Mechanism, ConfigurationEnabled, LogEna
         }
     }
 
-    private final class FinallyChecker implements SPFChecker {
+    private final class CleanupAndResultChecker implements SPFChecker, SPFCheckerExceptionCatcher {
         private String previousResult;
-
         private String previousDomain;
 
-        /**
-         * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
-         */
-        public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
-                TempErrorException, NeutralException, NoneException {
-            
+        private void restoreSession(SPFSession spfData) {
             spfData.setIgnoreExplanation(false);
             spfData.setCurrentDomain(previousDomain);
             spfData.setCurrentResult(previousResult);
-
-            spfData.popExceptionCatcher();
-            
-            return null;
         }
-
-        public SPFChecker init(SPFSession spfSession) {
-
-            // TODO understand what exactly we have to do now that spfData is a session
-            // and contains much more than the input data.
-            // do we need to create a new session at all?
-            // do we need to backup the session attributes and restore them?
-            this.previousResult = spfSession.getCurrentResult();
-            this.previousDomain = spfSession.getCurrentDomain();
-            return this;
-        }
-    }
-
-    private final class CleanupAndResultChecker implements SPFChecker {
-        private SPFChecker finallyChecker;
-
+        
         /**
          * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
          */
@@ -152,7 +84,7 @@ public class IncludeMechanism implements Mechanism, ConfigurationEnabled, LogEna
             
             String currentResult = spfData.getCurrentResult();
             
-            finallyChecker.checkSPF(spfData);
+            restoreSession(spfData);
             
             if (currentResult == null) {
                 throw new TempErrorException("included checkSPF returned null");
@@ -169,8 +101,37 @@ public class IncludeMechanism implements Mechanism, ConfigurationEnabled, LogEna
             return null;
         }
 
-        public SPFChecker init(SPFChecker finallyChecker) {
-            this.finallyChecker = finallyChecker;
+        /**
+         * @see org.apache.james.jspf.core.SPFCheckerExceptionCatcher#onException(java.lang.Exception, org.apache.james.jspf.core.SPFSession)
+         */
+        public void onException(Exception exception, SPFSession session)
+                throws PermErrorException, NoneException,
+                TempErrorException, NeutralException {
+            
+            restoreSession(session);
+            
+            if (exception instanceof NeutralException) {
+                throw new PermErrorException("included checkSPF returned NeutralException");
+            } else if (exception instanceof NoneException) {
+                throw new PermErrorException("included checkSPF returned NoneException");
+            } else if (exception instanceof PermErrorException){
+                throw (PermErrorException) exception;
+            } else if (exception instanceof TempErrorException){
+                throw (TempErrorException) exception;
+            } else if (exception instanceof RuntimeException){
+                throw (RuntimeException) exception;
+            } else {
+                throw new IllegalStateException(exception.getMessage());
+            }
+        }
+
+        public SPFChecker init(SPFSession spfSession) {
+            // TODO understand what exactly we have to do now that spfData is a session
+            // and contains much more than the input data.
+            // do we need to create a new session at all?
+            // do we need to backup the session attributes and restore them?
+            this.previousResult = spfSession.getCurrentResult();
+            this.previousDomain = spfSession.getCurrentDomain();
             return this;
         }
     }
@@ -196,11 +157,8 @@ public class IncludeMechanism implements Mechanism, ConfigurationEnabled, LogEna
         // update currentDepth
         spfData.increaseCurrentDepth();
         
-        SPFChecker finallyChecker = new FinallyChecker().init(spfData);
-        
-        SPFChecker cleanupAndResultHandler = new CleanupAndResultChecker().init(finallyChecker);
+        SPFChecker cleanupAndResultHandler = new CleanupAndResultChecker().init(spfData);
         spfData.pushChecker(cleanupAndResultHandler);
-        spfData.pushExceptionCatcher(new ExceptionCatcher().setExceptionHandlerChecker(cleanupAndResultHandler, finallyChecker));
         
         spfData.pushChecker(new ExpandedChecker());
         return macroExpand.checkExpand(getHost(), spfData, MacroExpand.DOMAIN);

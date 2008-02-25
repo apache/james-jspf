@@ -68,46 +68,6 @@ import java.util.LinkedList;
  */
 public class SPF implements SPFChecker {
 
-    private final static class SPFCheckerExceptionCatcherImplementation implements
-            SPFCheckerExceptionCatcher {
-        private SPFChecker resultHandler;
-        private Logger log;
-
-        public SPFCheckerExceptionCatcherImplementation(SPFChecker resultHandler, Logger log) {
-            this.resultHandler = resultHandler;
-            this.log = log;
-        }
-
-        /**
-         * @see org.apache.james.jspf.core.SPFCheckerExceptionCatcher#onException(java.lang.Exception, org.apache.james.jspf.core.SPFSession)
-         */
-        public void onException(Exception exception, SPFSession session)
-                throws PermErrorException, NoneException, TempErrorException,
-                NeutralException {
-
-            SPFChecker checker;
-            while ((checker = session.popChecker())!=resultHandler) {
-                log.debug("Redirect resulted in exception. Removing checker: "+checker);
-            }
-
-            String result;
-            if (exception instanceof SPFResultException) {
-                result = ((SPFResultException) exception).getResult();
-                if (!SPFErrorConstants.NEUTRAL_CONV.equals(result)) {
-                    log.warn(exception.getMessage(),exception);
-                }
-            } else {
-                // this should never happen at all. But anyway we will set the
-                // result to neutral. Safety first ..
-                log.error(exception.getMessage(),exception);
-                result = SPFErrorConstants.NEUTRAL_CONV;
-            }
-            session.setCurrentResultExpanded(result);
-            
-        }
-
-    }
-
     private static final class SPFRecordChecker implements SPFChecker {
         
         /**
@@ -280,7 +240,13 @@ public class SPF implements SPFChecker {
     }
 
     
-    private static final class DefaultSPFChecker implements SPFChecker {
+    private static final class DefaultSPFChecker implements SPFChecker, SPFCheckerExceptionCatcher {
+        
+        private Logger log;
+
+        public DefaultSPFChecker(Logger log) {
+            this.log = log;
+        }
 
         /**
          * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
@@ -295,6 +261,30 @@ public class SPF implements SPFChecker {
             }
             return null;
         }
+        
+
+        /**
+         * @see org.apache.james.jspf.core.SPFCheckerExceptionCatcher#onException(java.lang.Exception, org.apache.james.jspf.core.SPFSession)
+         */
+        public void onException(Exception exception, SPFSession session)
+                throws PermErrorException, NoneException, TempErrorException,
+                NeutralException {
+
+            String result;
+            if (exception instanceof SPFResultException) {
+                result = ((SPFResultException) exception).getResult();
+                if (!SPFErrorConstants.NEUTRAL_CONV.equals(result)) {
+                    log.warn(exception.getMessage(),exception);
+                }
+            } else {
+                // this should never happen at all. But anyway we will set the
+                // result to neutral. Safety first ..
+                log.error(exception.getMessage(),exception);
+                result = SPFErrorConstants.NEUTRAL_CONV;
+            }
+            session.setCurrentResultExpanded(result);
+        }
+
     }
     
     /**
@@ -315,11 +305,10 @@ public class SPF implements SPFChecker {
         spfData = new SPFSession(mailFrom, hostName, ipAddress);
       
 
-        SPFChecker resultHandler = new DefaultSPFChecker();
+        SPFChecker resultHandler = new DefaultSPFChecker(log);
         
         spfData.pushChecker(resultHandler);
         spfData.pushChecker(this);
-        spfData.pushExceptionCatcher(new SPFCheckerExceptionCatcherImplementation(resultHandler, log));
         
         FutureSPFResult ret = new FutureSPFResult();
         
@@ -341,12 +330,12 @@ public class SPF implements SPFChecker {
             NoneException, TempErrorException, NeutralException {
 
         // if we already have a result we don't need to add further processing.
-        if (spfData.getCurrentResultExpanded() == null) {
-        SPFChecker policyChecker = new PolicyChecker(getPolicies());
-        SPFChecker recordChecker = new SPFRecordChecker();
-        
-        spfData.pushChecker(recordChecker);
-        spfData.pushChecker(policyChecker);
+        if (spfData.getCurrentResultExpanded() == null && spfData.getCurrentResult() == null) {
+            SPFChecker policyChecker = new PolicyChecker(getPolicies());
+            SPFChecker recordChecker = new SPFRecordChecker();
+            
+            spfData.pushChecker(recordChecker);
+            spfData.pushChecker(policyChecker);
         }
         
         return null;

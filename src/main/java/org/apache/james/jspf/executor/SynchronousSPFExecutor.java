@@ -65,13 +65,16 @@ public class SynchronousSPFExecutor implements SPFExecutor {
                 }
             } catch (Exception e) {
                 while (e != null) {
-                    SPFCheckerExceptionCatcher catcher = session
-                            .getExceptionCatcher();
+                    while (checker == null || !(checker instanceof SPFCheckerExceptionCatcher)) {
+                        checker = session.popChecker();
+                    }
                     try {
-                        catcher.onException(e, session);
+                        ((SPFCheckerExceptionCatcher) checker).onException(e, session);
                         e = null;
                     } catch (SPFResultException ex) {
                         e = ex;
+                    } finally {
+                        checker = null;
                     }
                 }
             }

@@ -39,53 +39,6 @@ import org.apache.james.jspf.core.exceptions.TempErrorException;
 public class RedirectModifier extends GenericModifier implements
         SPFCheckEnabled, MacroExpandEnabled {
 
-    private final class ExceptionCatcher implements SPFCheckerExceptionCatcher {
-        private SPFChecker spfChecker;
-
-        private SPFChecker finallyChecker;
-
-        public ExceptionCatcher(SPFChecker spfChecker,
-                SPFChecker finallyChecker) {
-            this.spfChecker = spfChecker;
-            this.finallyChecker = finallyChecker;
-        }
-
-        /**
-         * @see org.apache.james.jspf.core.SPFCheckerExceptionCatcher#onException(java.lang.Exception, org.apache.james.jspf.core.SPFSession)
-         */
-        public void onException(Exception exception, SPFSession session)
-                throws PermErrorException, NoneException,
-                TempErrorException, NeutralException {
-            
-            finallyChecker.checkSPF(session);
-
-            // remove every checker until the initialized one
-            SPFChecker checker;
-            while ((checker = session.popChecker())!=spfChecker) {
-                log.debug("Redirect resulted in exception. Removing checker: "+checker);
-            }
-
-            if (exception instanceof NeutralException) {
-                throw new PermErrorException(
-                "included checkSPF returned NeutralException");
-
-            } else if (exception instanceof NoneException) {
-                // no spf record assigned to the redirect domain
-                throw new PermErrorException(
-                        "included checkSPF returned NoneException");
-            } else if (exception instanceof PermErrorException){
-                throw (PermErrorException) exception;
-            } else if (exception instanceof TempErrorException){
-                throw (TempErrorException) exception;
-            } else if (exception instanceof RuntimeException){
-                throw (RuntimeException) exception;
-            } else {
-                throw new IllegalStateException(exception.getMessage());
-            }
-        }
-
-    }
-
     private final class ExpandedChecker implements SPFChecker {
         
         /**
@@ -108,7 +61,7 @@ public class RedirectModifier extends GenericModifier implements
         }
     }
 
-    private final class CleanupChecker implements SPFChecker {
+    private final class CleanupChecker implements SPFChecker, SPFCheckerExceptionCatcher {
       
         /**
         * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
@@ -119,9 +72,37 @@ public class RedirectModifier extends GenericModifier implements
             // After the redirect we should not use the
             // explanation from the orginal record
             spfData.setIgnoreExplanation(true);
-            
-            spfData.popExceptionCatcher();
             return null;
+        }
+        
+        /**
+         * @see org.apache.james.jspf.core.SPFCheckerExceptionCatcher#onException(java.lang.Exception, org.apache.james.jspf.core.SPFSession)
+         */
+        public void onException(Exception exception, SPFSession session)
+                throws PermErrorException, NoneException,
+                TempErrorException, NeutralException {
+            
+            checkSPF(session);
+
+            // remove every checker until the initialized one
+            
+            if (exception instanceof NeutralException) {
+                throw new PermErrorException(
+                "included checkSPF returned NeutralException");
+
+            } else if (exception instanceof NoneException) {
+                // no spf record assigned to the redirect domain
+                throw new PermErrorException(
+                        "included checkSPF returned NoneException");
+            } else if (exception instanceof PermErrorException){
+                throw (PermErrorException) exception;
+            } else if (exception instanceof TempErrorException){
+                throw (TempErrorException) exception;
+            } else if (exception instanceof RuntimeException){
+                throw (RuntimeException) exception;
+            } else {
+                throw new IllegalStateException(exception.getMessage());
+            }
         }
     }
 
@@ -138,8 +119,6 @@ public class RedirectModifier extends GenericModifier implements
     private SPFChecker cleanupChecker = new CleanupChecker();
 
     private SPFChecker expandedChecker = new ExpandedChecker();
-
-    private ExceptionCatcher exceptionCatcher = new ExceptionCatcher(cleanupChecker, cleanupChecker);
 
     /**
      * Set the host which should be used for redirection and set it in SPF1Data
@@ -166,8 +145,6 @@ public class RedirectModifier extends GenericModifier implements
             
             spfData.pushChecker(cleanupChecker);
             
-            spfData.pushExceptionCatcher(exceptionCatcher);
-
             spfData.pushChecker(expandedChecker);
             return macroExpand.checkExpand(getHost(), spfData, MacroExpand.DOMAIN);
         }

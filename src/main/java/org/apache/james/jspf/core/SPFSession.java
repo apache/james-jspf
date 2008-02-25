@@ -72,8 +72,6 @@ public class SPFSession implements MacroData {
     
     private Stack checkers = new Stack();
     
-    private Stack catchers = new Stack();
-
     private String currentResultExpanded;
     
     /**
@@ -353,6 +351,7 @@ public class SPFSession implements MacroData {
      * @param checker  
      */
     public void pushChecker(SPFChecker checker) {
+        System.out.println(System.identityHashCode(this)+"/pushChecker: "+checker+" "+System.identityHashCode(checker));
         checkers.push(checker);
     }
     
@@ -367,44 +366,8 @@ public class SPFSession implements MacroData {
             return null;
         } else {
             SPFChecker checker = (SPFChecker) checkers.pop();
+            System.out.println(System.identityHashCode(this)+"/popChecker: "+checker+" "+System.identityHashCode(checker));
             return checker;
-        }
-    }
-
-    /**
-     * Add the given SPFCheckerExceptionCatcher on top of the stack
-     * 
-     * @param catcher
-     */
-    public void pushExceptionCatcher(SPFCheckerExceptionCatcher catcher) {
-        catchers.push(catcher);
-    }
-    
-    /**
-     * Remove the SPFCheckerExceptionCatcher on the top and return it. If no SPFCheckerExceptionCatcher is left
-     * null is returned
-     * 
-     * @return the last catcher
-     */
-    public SPFCheckerExceptionCatcher popExceptionCatcher() {
-        if (catchers.isEmpty()) {
-            return null;
-        } else {
-            return (SPFCheckerExceptionCatcher) catchers.pop();
-        }
-    }
-
-    /**
-     * Return the SPFCheckerExceptionCatcher on the top of the Stack, but not 
-     * remove it. If no SPFCheckerExceptionCatcher is left null is returned
-     * 
-     * @return the last catcher
-     */
-    public SPFCheckerExceptionCatcher getExceptionCatcher() {
-        if (catchers.isEmpty()) {
-            return null;
-        } else {
-            return (SPFCheckerExceptionCatcher) catchers.peek();
         }
     }
 
