@@ -82,7 +82,7 @@ public class RedirectModifier extends GenericModifier implements
                 throws PermErrorException, NoneException,
                 TempErrorException, NeutralException {
             
-            checkSPF(session);
+            session.setIgnoreExplanation(true);
 
             // remove every checker until the initialized one
             

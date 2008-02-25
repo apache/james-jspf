@@ -105,7 +105,7 @@ public class Directive implements SPFChecker {
     public DNSLookupContinuation checkSPF(SPFSession spfSession) throws PermErrorException,
             TempErrorException, NoneException, NeutralException {
         // if already have a current result we don't run this
-        if (spfSession.getCurrentResult() == null) {
+        if (spfSession.getCurrentResult() == null && spfSession.getCurrentResultExpanded() == null) {
 
             spfSession.removeAttribute(ATTRIBUTE_MECHANISM_RESULT);
 

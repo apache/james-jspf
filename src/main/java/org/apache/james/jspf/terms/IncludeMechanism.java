@@ -59,6 +59,7 @@ public class IncludeMechanism implements Mechanism, ConfigurationEnabled, LogEna
             spfData.setIgnoreExplanation(true);
             // set a null current result
             spfData.setCurrentResult(null);
+            spfData.setCurrentResultExpanded(null);
             
             spfData.pushChecker(spfChecker);
             
@@ -68,12 +69,14 @@ public class IncludeMechanism implements Mechanism, ConfigurationEnabled, LogEna
 
     private final class CleanupAndResultChecker implements SPFChecker, SPFCheckerExceptionCatcher {
         private String previousResult;
+        private String previousResultExpanded;
         private String previousDomain;
 
         private void restoreSession(SPFSession spfData) {
             spfData.setIgnoreExplanation(false);
             spfData.setCurrentDomain(previousDomain);
             spfData.setCurrentResult(previousResult);
+            spfData.setCurrentResultExpanded(previousResultExpanded);
         }
         
         /**
@@ -132,6 +135,7 @@ public class IncludeMechanism implements Mechanism, ConfigurationEnabled, LogEna
             // do we need to backup the session attributes and restore them?
             this.previousResult = spfSession.getCurrentResult();
             this.previousDomain = spfSession.getCurrentDomain();
+            this.previousResultExpanded = spfSession.getCurrentResultExpanded();
             return this;
         }
     }

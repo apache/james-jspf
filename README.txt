@@ -79,12 +79,16 @@ be resolved and the DNSResponse should be returned to the given SPFCheckerDNSRes
 turn is allowed to return DNSLookupContinuation if it needs DNS lookups). When an SPFChecker (or the 
 SPFCheckerDNSResponseListener) completed the processing it will return null.
 
-The SPFSession includes 2 stacks: the "checkers" Stack and the "catchers" Stack. The former contains
-the "to be processed" SPFChecker, the latter contains SPFCheckerExceptionCatcher.
+The SPFSession includes a checkers stack: A checker can also implement the SPFCheckerExceptionCatcher
+interface to be able to intercept exceptions from the nested checkers.
 The SPFExecutor role is to pop an SPFChecker from the SPFSession and execute it, by processing the
 DNSRequests included in the returned DNSLookupContinuations until a null is returned. If an exception
-is thrown by the current checker then an SPFCheckerExceptionCatcher is retrieved from the catcher
-stack and executed to handle the exception.
+is thrown by the current checker then the executor will poll every checker from the stack looking for
+a checker implementing the SPFCheckerExceptionCatcher interface, will remove it from the stack and
+will execute its onException method to handle the exception.
+Please note that the SPFCheckerExceptionCatcher call wil often result in an additional exception to be
+rethrown and the executor will take care to pop the chekers looking for another catcher that will handle
+the new exception.
 
 Terms, Policies and the Parser are all implementations of the SPFChecker interface. An SPFChecker
 implementation can do every processing in the checkSPF method or can simply push more fine grained
