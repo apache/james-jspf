@@ -360,31 +360,47 @@ tests:
     result: permerror
   invalid-domain-empty-label:
     description: >-
-      Domain-spec must end in macro-expand or valid toplabel.
+      target-name that is a valid domain-spec per RFC 4408 but an invalid
+      domain name per RFC 1035 (empty label) must be treated as non-existent.
     comment: >-
-      But anything goes before the toplabel.  Empty labels cannot be
-      encoded for sending to a name server, so resolver must give error
-      or empty result.  Empty result is analogous to 4.3/1, and so
-      is preferred.
-    spec: [8.1/2, 5/10]
+      An empty domain label, i.e. two successive dots, in a mechanism
+      target-name is valid domain-spec syntax, even though a DNS query cannot
+      be composed from it.  In analogy to 4.3/1 and 5/10/3, the mechanism
+      should then be treated as a no-match.
+    spec: [4.3/1, 5/10/3]
     helo: mail.example.com
     host: 1.2.3.4
     mailfrom: foo@t10.example.com
-    result: [fail, temperror]
+    result: fail
   invalid-domain-long:
     description: >-
-      Domain-spec must end in macro-expand or valid toplabel.
+      target-name that is a valid domain-spec per RFC 4408 but an invalid
+      domain name per RFC 1035 (long label) must be treated as non-existent.
     comment: >-
-      But anything goes before the toplabel.  Upper case H macro
-      url escapes the HELO string, the result is longer than 63 chars.
-      Long labels cannot be coded in a DNS query packet, so resolver must
-      give error or empty result.  Empty result is analogous to 4.3/1,
-      and so is preferred.
-    spec: [8.1/2, 5/10]
-    helo: "%%%%%%%%%%%%%%%%%%%%%%"
+      A domain label longer than 63 characters in a mechanism target-name is
+      valid domain-spec syntax, even though a DNS query cannot be composed
+      from it.  In analogy to 4.3/1 and 5/10/3, the mechanism should then be
+      treated as a no-match.
+    spec: [4.3/1, 5/10/3]
+    helo: mail.example.com
     host: 1.2.3.4
     mailfrom: foo@t11.example.com
-    result: [fail, temperror]
+    result: fail
+  invalid-domain-long-via-macro:
+    description: >-
+      target-name that is a valid domain-spec per RFC 4408 but an invalid
+      domain name per RFC 1035 (long label) must be treated as non-existent.
+    comment: >-
+      A domain label longer than 63 characters that results from macro
+      expansion in a mechanism target-name is valid domain-spec syntax (and is
+      not even subject to syntax checking after macro expansion), even though
+      a DNS query cannot be composed from it.  In analogy to 4.3/1 and 5/10/3,
+      the mechanism should then be treated as a no-match.
+    spec: [4.3/1, 5/10/3]
+    helo: "%%%%%%%%%%%%%%%%%%%%%%"
+    host: 1.2.3.4
+    mailfrom: foo@t12.example.com
+    result: fail
 zonedata:
   mail.example.com:
     - A: 1.2.3.4
@@ -409,6 +425,8 @@ zonedata:
   t10.example.com:
     - SPF: v=spf1 a:mail.example...com -all
   t11.example.com:
+    - SPF: v=spf1 a:a123456789012345678901234567890123456789012345678901234567890123.example.com -all
+  t12.example.com:
     - SPF: v=spf1 a:%{H}.bar -all
 ---
 description: ALL mechanism syntax
@@ -697,6 +715,16 @@ tests:
     host: 1.2.3.4
     mailfrom: foo@e5a.example.com
     result: permerror
+  a-only-top-label-trailing-dot:
+    description: >-
+      Domain-spec may not consist of only a top-label without a leading dot.
+    comment:
+      "A trailing dot doesn't help."
+    spec: 8.1/2
+    helo: mail.example.com
+    host: 1.2.3.4
+    mailfrom: foo@e5b.example.com
+    result: permerror
   a-colon-domain:
     description: >-
       Domain-spec may contain any visible char except %
@@ -729,20 +757,6 @@ tests:
     host: 1.2.3.4
     mailfrom: foo@e13.example.com
     result: permerror
-  a-valid-syntax-but-unqueryable:
-    description: >-
-      If a DNS-interactive mechanism has valid syntax according to the SPF
-      specification, but a DNS query cannot be composed from its target-name
-      (e.g. due to empty labels, i.e. two or more successive dots), then the
-      mechanism should be treated as a no-match.
-    comment: >-
-      The rationale is that, technically, the mechanism is not a syntax error,
-      and the odd target-name obviously cannot exist in DNS.
-    spec: 8.1/2
-    helo: mail.example.com
-    host: 1.2.3.4
-    mailfrom: foo@e14.example.com
-    result: neutral
 zonedata:
   mail.example.com:
     - A: 1.2.3.4
@@ -766,6 +780,8 @@ zonedata:
     - SPF: v=spf1 a:abc.123
   e5a.example.com:
     - SPF: v=spf1 a:museum
+  e5b.example.com:
+    - SPF: v=spf1 a:museum.
   e6.example.com:
     - SPF: v=spf1 a//33 -all
   e6a.example.com:
@@ -787,8 +803,6 @@ zonedata:
     - SPF: v=spf1 a:example.-com
   e13.example.com:
     - SPF: "v=spf1 a:"
-  e14.example.com:
-    - SPF: v=spf1 a:example..com
 ---
 description: Include mechanism semantics and syntax
 tests:
