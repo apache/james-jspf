@@ -21,15 +21,15 @@
   <property file="${user.home}/.m2/maven.properties"/>
   <property name="maven.build.output" value="target/classes"/>
   <property name="maven.build.directory" value="target"/>
-  <property name="maven.build.final.name" value="jspf-0.9.5-SNAPSHOT"/>
+  <property name="maven.build.final.name" value="jspf-0.9.7-SNAPSHOT"/>
   <property name="maven.test.reports" value="${maven.build.directory}/test-reports"/>
   <property name="maven.test.output" value="target/test-classes"/>
   <property name="stage.dir" value="stage/"/>
   <path id="build.classpath">
     <fileset dir="${stage.dir}">
-      <include name="dnsjava/jars/dnsjava-2.0.4-SNAPSHOT.jar"/>
-      <include name="uk.nominet/jars/dnsjnio-0.9.7-SNAPSHOT.jar"/>
-      <include name="commons-cli/jars/commons-cli-1.0.jar"/>
+      <include name="dnsjava/jars/dnsjava-2.0.5.jar"/>
+      <include name="uk.nominet/jars/dnsjnio-0.9.9.jar"/>
+      <include name="commons-cli/jars/commons-cli-1.1.jar"/>
       <include name="log4j/jars/log4j-1.2.14.jar"/>
       <include name="org.jvyaml/jars/jvyaml-0.2.1.jar"/>
     </fileset>
