@@ -30,7 +30,7 @@
     <relativePath>../james-project/project/pom.xml</relativePath>
   </parent>
   <name>Apache JAMES jSPF</name>
-  <version>0.9.7-SNAPSHOT</version>
+  <version>0.9.6-SNAPSHOT</version>
   <description>
     Apache James jSPF is an SPF spec implementation written in Java
   </description>
