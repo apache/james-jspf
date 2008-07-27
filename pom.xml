@@ -25,8 +25,39 @@
     <groupId>org.apache.james</groupId>
     <artifactId>james-project</artifactId>
     <version>1.2</version>
-    <!-- Either this really points to the james-project/pom.xml or you
-         will have to tune the local repository, later, in this file -->
+    <!-- Please note that due to http://jira.codehaus.org/browse/MNG-2896 -->
+    <!-- If you don't have james-project checked out in ../james-project -->
+    <!-- you will have to place your absolute path to the project instead -->
+    <!-- of ${basedir}, or, otherwise, manually install the parent poms -->
+    <!--
+         #windows:
+         mvn -fignorepom.xml install:install-file 
+            -Dfile=stage\org.apache.james\poms\james-parent-1.1.pom 
+            -Dpackaging=pom 
+            -DgroupId=org.apache.james 
+            -DartifactId=james-parent 
+            -Dversion=1.1
+         mvn -fignorepom.xml install:install-file 
+            -Dfile=stage\org.apache.james\poms\james-project-1.2.pom 
+            -Dpackaging=pom 
+            -DgroupId=org.apache.james 
+            -DartifactId=james-project 
+            -Dversion=1.2
+
+         #linux:
+         mvn -fignorepom.xml install:install-file 
+            -Dfile=stage/org.apache.james/poms/james-parent-1.1.pom 
+            -Dpackaging=pom 
+            -DgroupId=org.apache.james 
+            -DartifactId=james-parent 
+            -Dversion=1.1
+         mvn -fignorepom.xml install:install-file 
+            -Dfile=stage/org.apache.james/poms/james-project-1.2.pom 
+            -Dpackaging=pom 
+            -DgroupId=org.apache.james 
+            -DartifactId=james-project 
+            -Dversion=1.2
+     -->
     <relativePath>../james-project/project/pom.xml</relativePath>
   </parent>
   <name>Apache JAMES jSPF</name>
@@ -46,6 +77,7 @@
   
   <packaging>pom</packaging>
   <modules>
+    <module>stage</module>
     <module>resolver</module>
   </modules>
 
@@ -60,55 +92,52 @@
     <url>http://svn.apache.org/viewvc/james/jspf/trunk/</url>
   </scm>
 
-  <repositories>
-    <repository>
-      <id>local-jspf-stage-repository</id>
-      <name>Local jSPF stage repository</name>
-      <!-- Please note that due to http://jira.codehaus.org/browse/MNG-2896 -->
-      <!-- If you don't have james-project checked out in ../james-project -->
-      <!-- you will have to place your absolute path to the project instead -->
-      <!-- of ${basedir}, or, otherwise, manually install the parent poms -->
-      <!--
-           #windows:
-           mvn -fignorepom.xml install:install-file 
-              -Dfile=stage\org.apache.james\poms\james-parent-1.1.pom 
-              -Dpackaging=pom 
-              -DgroupId=org.apache.james 
-              -DartifactId=james-parent 
-              -Dversion=1.1
-           mvn -fignorepom.xml install:install-file 
-              -Dfile=stage\org.apache.james\poms\james-project-1.2.pom 
-              -Dpackaging=pom 
-              -DgroupId=org.apache.james 
-              -DartifactId=james-project 
-              -Dversion=1.2
-
-           #linux:
-           mvn -fignorepom.xml install:install-file 
-              -Dfile=stage/org.apache.james/poms/james-parent-1.1.pom 
-              -Dpackaging=pom 
-              -DgroupId=org.apache.james 
-              -DartifactId=james-parent 
-              -Dversion=1.1
-           mvn -fignorepom.xml install:install-file 
-              -Dfile=stage/org.apache.james/poms/james-project-1.2.pom 
-              -Dpackaging=pom 
-              -DgroupId=org.apache.james 
-              -DartifactId=james-project 
-              -Dversion=1.2
-       -->
-      <url>file://${basedir}/stage</url>
-      <layout>legacy</layout>
-      <releases>
-        <enabled>true</enabled>
-        <checksumPolicy>ignore</checksumPolicy>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-        <checksumPolicy>ignore</checksumPolicy>
-      </snapshots>
-    </repository>
-  </repositories>
+	<dependencyManagement>
+	  <dependencies>
+	    <dependency>
+	      <groupId>dnsjava</groupId>
+	      <artifactId>dnsjava</artifactId>
+	      <version>2.0.6</version>
+	    </dependency>
+	    <dependency>
+	      <groupId>uk.nominet</groupId>
+	      <artifactId>dnsjnio</artifactId>
+	      <version>0.9.9</version>
+	    </dependency>
+	    <dependency>
+	      <groupId>junit</groupId>
+	      <artifactId>junit</artifactId>
+	      <version>3.8.1</version>
+	      <scope>test</scope>
+	    </dependency>
+	    <dependency>
+	      <groupId>log4j</groupId>
+	      <artifactId>log4j</artifactId>
+	      <version>1.2.14</version>
+	    </dependency>
+	    <dependency>
+	      <groupId>org.jvyaml</groupId>
+	      <artifactId>jvyaml</artifactId>
+	      <version>0.2.1</version>
+	      <scope>test</scope>
+	    </dependency>
+	    <dependency>
+	      <groupId>commons-cli</groupId>
+	      <artifactId>commons-cli</artifactId>
+	      <version>1.1</version>
+	      <exclusions>
+	        <exclusion>
+	          <groupId>commons-logging</groupId>
+	          <artifactId>commons-logging</artifactId>
+	        </exclusion>
+	        <exclusion>
+	          <groupId>commons-lang</groupId>
+	          <artifactId>commons-lang</artifactId>
+	        </exclusion>
+	      </exclusions>
+	    </dependency>
+	  </dependencies>
+	</dependencyManagement>
 
   <mailingLists>
     <mailingList>

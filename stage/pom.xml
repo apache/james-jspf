@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="ISO-8859-15"?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.    
+-->
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.apache.james</groupId>
+  <artifactId>jspf-repository</artifactId>
+  <parent>
+    <groupId>org.apache.james</groupId>
+    <artifactId>apache-jspf</artifactId>
+    <version>0.9.7-SNAPSHOT</version>
+    <!-- Either this really points to the james-project/pom.xml or you
+         will have to tune the local repository, later, in this file -->
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <name>Apache JAMES jSPF Stage Repository</name>
+  <description>Local maven repository for Apache JAMES jSPF</description>
+  <packaging>pom</packaging>
+  <repositories>
+    <repository>
+      <id>module-local</id>
+      <name>Local Repository</name>
+      <url>file://${pom.basedir}/</url>
+      <layout>legacy</layout>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>dnsjava</groupId>
+      <artifactId>dnsjava</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>uk.nominet</groupId>
+      <artifactId>dnsjnio</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jvyaml</groupId>
+      <artifactId>jvyaml</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>commons-cli</groupId>
+      <artifactId>commons-cli</artifactId>
+    </dependency>
+  </dependencies>
+
+</project>
