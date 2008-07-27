@@ -76,4 +76,43 @@
     </dependency>
   </dependencies>
 
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>rat-maven-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!-- 3rd party descriptors distributed via maven repositories
+                 and included "as is" -->
+            <exclude>commons-cli/poms/commons-cli-1.1.pom</exclude>
+            <exclude>org.apache.james/xmls/james-parent-1.1-site.xml</exclude>
+            <exclude>org.apache.james/xmls/james-parent-1.1-site_en.xml</exclude>
+            <exclude>org.apache.james/xmls/james-project-1.2-site.xml</exclude>
+            <exclude>org.apache.james/xmls/james-project-1.2-site_en.xml</exclude>
+            <!-- maven release temporary file -->
+            <exclude>release.properties</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </reporting>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>rat-maven-plugin</artifactId>
+        <version>1.0-alpha-3</version>
+        <executions>
+          <execution>
+            <phase>verify</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>

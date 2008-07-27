@@ -59,7 +59,7 @@
     </dependency>
     <dependency>
     	<groupId>org.apache.james</groupId>
-    	<artifactId>apache-openspf-tester</artifactId>
+    	<artifactId>apache-jspf-tester</artifactId>
     	<scope>test</scope>
     </dependency>
     <dependency>
@@ -115,19 +115,10 @@
           <excludes>
             <!-- 3rd party resources described in NOTICE:
                  see the maven-remote-resources-plugin configuration, in this file -->
-            <exclude>src/test/resources/org/apache/james/jspf/pyspf-tests.yml</exclude>
-            <exclude>src/test/resources/org/apache/james/jspf/rfc4408-tests.yml</exclude>
-            <exclude>src/test/resources/org/apache/james/jspf/tests.yml</exclude>
             <exclude>src/test/resources/org/apache/james/jspf/test_live.txt</exclude>
             <exclude>src/test/resources/org/apache/james/jspf/test_parser.txt</exclude>
             <exclude>src/test/resources/org/apache/james/jspf/test_rfc_examples.txt</exclude>
-            <!-- 3rd party descriptors distributed via maven repositories
-                 and included "as is" -->
-            <exclude>stage/commons-cli/poms/commons-cli-1.1.pom</exclude>
-            <exclude>stage/org.apache.james/xmls/james-parent-1.1-site.xml</exclude>
-            <exclude>stage/org.apache.james/xmls/james-parent-1.1-site_en.xml</exclude>
-            <exclude>stage/org.apache.james/xmls/james-project-1.2-site.xml</exclude>
-            <exclude>stage/org.apache.james/xmls/james-project-1.2-site_en.xml</exclude>
+            <!-- maven release temporary file -->
             <exclude>release.properties</exclude>
           </excludes>
         </configuration>
