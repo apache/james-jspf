@@ -50,15 +50,11 @@ public class YamlTest extends AbstractYamlTest {
         return new BasicSuite();
     }
 
-    protected List internalLoadTests(String filename) throws IOException {
-        return loadTests(filename);
-    }
-
     static class BasicSuite extends TestSuite {
 
         public BasicSuite() throws IOException {
             super();
-            List tests = loadTests(YAMLFILE2);
+            List tests = SPFYamlTestDescriptor.loadTests(YAMLFILE2);
             Iterator i = tests.iterator();
             while (i.hasNext()) {
                 SPFYamlTestDescriptor o = (SPFYamlTestDescriptor) i.next();

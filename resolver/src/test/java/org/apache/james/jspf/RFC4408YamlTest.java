@@ -58,16 +58,12 @@ public class RFC4408YamlTest extends AbstractYamlTest {
         return new RFC4408Suite();
     }
 
-    protected List internalLoadTests(String filename) throws IOException {
-        return loadTests(filename);
-    }
-
     static class RFC4408Suite extends TestSuite {
 
         public RFC4408Suite() throws IOException {
             super();
             try {
-                List tests = loadTests(YAMLFILE2);
+                List tests = SPFYamlTestDescriptor.loadTests(YAMLFILE2);
                 Iterator i = tests.iterator();
                 while (i.hasNext()) {
                     SPFYamlTestDescriptor o = (SPFYamlTestDescriptor) i.next();
@@ -103,7 +99,7 @@ public class RFC4408YamlTest extends AbstractYamlTest {
     public static void main(String[] args) throws Throwable {
         Logger l = new Log4JLogger(org.apache.log4j.Logger.getLogger("ROOT"));
 
-        List tests = loadTests(YAMLFILE2);
+        List tests = SPFYamlTestDescriptor.loadTests(YAMLFILE2);
         Iterator i = tests.iterator();
         while (i.hasNext()) {
             SPFYamlTestDescriptor o = (SPFYamlTestDescriptor) i.next();

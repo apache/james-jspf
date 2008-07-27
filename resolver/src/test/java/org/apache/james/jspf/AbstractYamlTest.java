@@ -42,9 +42,6 @@ import org.apache.james.jspf.impl.SPF;
 import org.apache.james.jspf.parser.RFC4408SPF1Parser;
 import org.apache.james.jspf.wiring.WiringService;
 import org.apache.james.jspf.wiring.WiringServiceException;
-import org.jvyaml.Constructor;
-import org.jvyaml.DefaultYAMLFactory;
-import org.jvyaml.YAMLFactory;
 import org.xbill.DNS.Cache;
 import org.xbill.DNS.DClass;
 import org.xbill.DNS.ExtendedNonblockingResolver;
@@ -56,12 +53,7 @@ import org.xbill.DNS.Resolver;
 import org.xbill.DNS.SimpleResolver;
 import org.xbill.DNS.TextParseException;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -69,7 +61,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 import junit.framework.TestCase;
 
@@ -114,7 +105,7 @@ public abstract class AbstractYamlTest extends TestCase {
     protected abstract String getFilename();
 
     protected List internalLoadTests(String filename) throws IOException {
-        return loadTests(filename);
+        return SPFYamlTestDescriptor.loadTests(filename);
     }
 
     protected AbstractYamlTest(String name) throws IOException {
@@ -139,33 +130,6 @@ public abstract class AbstractYamlTest extends TestCase {
         }
         assertNotNull(data);
         // assertNotNull(test);
-    }
-
-    public static List loadTests(String filename) throws IOException {
-        List tests = new ArrayList();
-    
-        InputStream is = SPFYamlTest.class.getResourceAsStream(filename);
-        
-        if (is != null) {
-            Reader br = new BufferedReader(new InputStreamReader(is));
-            YAMLFactory fact = new DefaultYAMLFactory();
-            
-            Constructor ctor = fact.createConstructor(fact.createComposer(fact.createParser(fact.createScanner(br)),fact.createResolver()));
-            int i = 1;
-            while(ctor.checkData()) {
-                Object o = ctor.getData();
-                if (o instanceof HashMap) {
-                  HashMap m = (HashMap) o;
-                  SPFYamlTestDescriptor ts = new SPFYamlTestDescriptor(m, i);
-                  tests.add(ts);
-                }
-                i++;
-            }
-        
-            return tests;
-        } else {
-            throw new FileNotFoundException("Unable to load the file");
-        }
     }
 
     protected void runTest() throws Throwable {
@@ -530,46 +494,6 @@ public abstract class AbstractYamlTest extends TestCase {
 
     protected int getSpfExecutorType() {
         return spfExecutorType;
-    }
-
-    protected static class SPFYamlTestDescriptor {
-        private String comment;
-        private HashMap tests;
-        private HashMap zonedata;
-        
-        public SPFYamlTestDescriptor(HashMap source, int i) {
-            this.setComment((String) source.get("description"));
-            if (this.getComment() == null) {
-                this.setComment("Test #"+i); 
-            }
-            this.setTests((HashMap) source.get("tests"));
-            this.setZonedata((HashMap) source.get("zonedata"));
-        }
-        
-        public String getComment() {
-            return comment;
-        }
-        public void setComment(String comment) {
-            this.comment = comment;
-        }
-        public HashMap getTests() {
-            return tests;
-        }
-        public void setTests(HashMap tests) {
-            this.tests = tests;
-        }
-        public HashMap getZonedata() {
-            return zonedata;
-        }
-        public void setZonedata(HashMap zonedata) {
-            this.zonedata = new HashMap();
-            Set keys = zonedata.keySet();
-            for (Iterator i = keys.iterator(); i.hasNext(); ) {
-                String hostname = (String) i.next();
-                String lowercase = hostname.toLowerCase(Locale.US);
-                this.zonedata.put(lowercase, zonedata.get(hostname));
-            }
-        }
     }
 
 }

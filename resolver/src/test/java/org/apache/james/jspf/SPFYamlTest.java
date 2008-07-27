@@ -47,13 +47,11 @@ public class SPFYamlTest extends AbstractYamlTest {
         return new SPFSuite();
     }
 
-
-
     static class SPFSuite extends TestSuite {
 
         public SPFSuite() throws IOException {
             super();
-            List tests = loadTests(YAMLFILE);
+            List tests = SPFYamlTestDescriptor.loadTests(YAMLFILE);
             Iterator i = tests.iterator();
             while (i.hasNext()) {
                 SPFYamlTestDescriptor o = (SPFYamlTestDescriptor) i.next();

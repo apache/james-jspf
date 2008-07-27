@@ -57,10 +57,6 @@ public class RFC4408AsynchronousYamlTest extends RFC4408YamlTest {
         return new RFC4408AsynchronousSuite();
     }
 
-    protected List internalLoadTests(String filename) throws IOException {
-        return loadTests(filename);
-    }
-
     protected int getDnsServiceMockStyle() {
         return FAKE_SERVER;
     }
@@ -73,7 +69,7 @@ public class RFC4408AsynchronousYamlTest extends RFC4408YamlTest {
 
         public RFC4408AsynchronousSuite() throws IOException {
             super();
-            List tests = loadTests(YAMLFILE2);
+            List tests = SPFYamlTestDescriptor.loadTests(YAMLFILE2);
             Iterator i = tests.iterator();
             while (i.hasNext()) {
                 SPFYamlTestDescriptor o = (SPFYamlTestDescriptor) i.next();
@@ -97,7 +93,7 @@ public class RFC4408AsynchronousYamlTest extends RFC4408YamlTest {
     public static void main(String[] args) throws Throwable {
         Logger l = new Log4JLogger(org.apache.log4j.Logger.getLogger("ROOT"));
 
-        List tests = loadTests(YAMLFILE2);
+        List tests = SPFYamlTestDescriptor.loadTests(YAMLFILE2);
         Iterator i = tests.iterator();
         while (i.hasNext()) {
             SPFYamlTestDescriptor o = (SPFYamlTestDescriptor) i.next();

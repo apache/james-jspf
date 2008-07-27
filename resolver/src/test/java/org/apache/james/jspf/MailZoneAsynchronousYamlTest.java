@@ -56,10 +56,6 @@ public class MailZoneAsynchronousYamlTest extends MailZoneYamlTest {
         return new MailZoneAsynchronousSuite();
     }
 
-    protected List internalLoadTests(String filename) throws IOException {
-        return loadTests(filename);
-    }
-
     protected DNSService getDNSService() {
         DNSService dns = super.getDNSService();
         // Remove record limits for this test
@@ -80,7 +76,7 @@ public class MailZoneAsynchronousYamlTest extends MailZoneYamlTest {
 
         public MailZoneAsynchronousSuite() throws IOException {
             super();
-            List tests = loadTests(YAMLFILE2);
+            List tests = SPFYamlTestDescriptor.loadTests(YAMLFILE2);
             Iterator i = tests.iterator();
             while (i.hasNext()) {
                 SPFYamlTestDescriptor o = (SPFYamlTestDescriptor) i.next();
