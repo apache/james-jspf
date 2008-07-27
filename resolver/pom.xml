@@ -20,29 +20,19 @@
 -->
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.james</groupId>
-  <artifactId>apache-jspf</artifactId>
+  <artifactId>apache-jspf-resolver</artifactId>
   <parent>
     <groupId>org.apache.james</groupId>
-    <artifactId>james-project</artifactId>
-    <version>1.2</version>
+    <artifactId>apache-jspf</artifactId>
+    <version>0.9.7-SNAPSHOT</version>
     <!-- Either this really points to the james-project/pom.xml or you
          will have to tune the local repository, later, in this file -->
-    <relativePath>../james-project/project/pom.xml</relativePath>
+    <relativePath>../pom.xml</relativePath>
   </parent>
-  <name>Apache JAMES jSPF</name>
-  <version>0.9.7-SNAPSHOT</version>
+  <name>Apache JAMES jSPF Resolver</name>
   <description>
-    Apache James jSPF is an SPF spec implementation written in Java
+    Apache James jSPF Resolver is an SPF spec implementation written in Java
   </description>
-  <url>http://james.apache.org/jspf</url>
-  <inceptionYear>2006</inceptionYear>
-
-  <distributionManagement>
-    <site>
-      <id>jspf-website</id>
-      <url>scp://people.apache.org/www/james.apache.org/jspf/</url>
-    </site>
-  </distributionManagement>
 
   <dependencies>
     <dependency>
@@ -88,77 +78,6 @@
       </exclusions>
     </dependency>
   </dependencies>
-
-  <issueManagement>
-    <system>JIRA</system>
-    <url>http://issues.apache.org/jira/browse/JSPF</url>
-  </issueManagement>
-
-  <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/james/jspf/trunk</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/james/jspf/trunk</developerConnection>
-    <url>http://svn.apache.org/viewvc/james/jspf/trunk/</url>
-  </scm>
-
-  <repositories>
-    <repository>
-      <id>local-jspf-stage-repository</id>
-      <name>Local jSPF stage repository</name>
-      <!-- Please note that due to http://jira.codehaus.org/browse/MNG-2896 -->
-      <!-- If you don't have james-project checked out in ../james-project -->
-      <!-- you will have to place your absolute path to the project instead -->
-      <!-- of ${basedir}, or, otherwise, manually install the parent poms -->
-      <!--
-           #windows:
-           mvn -fignorepom.xml install:install-file 
-              -Dfile=stage\org.apache.james\poms\james-parent-1.1.pom 
-              -Dpackaging=pom 
-              -DgroupId=org.apache.james 
-              -DartifactId=james-parent 
-              -Dversion=1.1
-           mvn -fignorepom.xml install:install-file 
-              -Dfile=stage\org.apache.james\poms\james-project-1.2.pom 
-              -Dpackaging=pom 
-              -DgroupId=org.apache.james 
-              -DartifactId=james-project 
-              -Dversion=1.2
-
-           #linux:
-           mvn -fignorepom.xml install:install-file 
-              -Dfile=stage/org.apache.james/poms/james-parent-1.1.pom 
-              -Dpackaging=pom 
-              -DgroupId=org.apache.james 
-              -DartifactId=james-parent 
-              -Dversion=1.1
-           mvn -fignorepom.xml install:install-file 
-              -Dfile=stage/org.apache.james/poms/james-project-1.2.pom 
-              -Dpackaging=pom 
-              -DgroupId=org.apache.james 
-              -DartifactId=james-project 
-              -Dversion=1.2
-       -->
-      <url>file://${basedir}/stage</url>
-      <layout>legacy</layout>
-      <releases>
-        <enabled>true</enabled>
-        <checksumPolicy>ignore</checksumPolicy>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-        <checksumPolicy>ignore</checksumPolicy>
-      </snapshots>
-    </repository>
-  </repositories>
-
-  <mailingLists>
-    <mailingList>
-      <name>Apache jSPF Developement</name>
-      <subscribe>server-dev-subscribe@james.apache.org</subscribe>
-      <unsubscribe>server-dev-unsubscribe@james.apache.org</unsubscribe>
-      <post>server-dev@james.apache.org</post>
-      <archive>http://mail-archives.apache.org/mod_mbox/james-server-dev/</archive>
-    </mailingList>
-  </mailingLists>
 
   <reporting>
     <plugins>

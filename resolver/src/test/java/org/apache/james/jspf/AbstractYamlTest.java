@@ -144,7 +144,6 @@ public abstract class AbstractYamlTest extends TestCase {
     public static List loadTests(String filename) throws IOException {
         List tests = new ArrayList();
     
-        //InputStream is = SPFYamlTest.class.getResourceAsStream("pyspf-tests.yml");
         InputStream is = SPFYamlTest.class.getResourceAsStream(filename);
         
         if (is != null) {
