@@ -48,7 +48,7 @@
     <dependency>
       <groupId>dnsjava</groupId>
       <artifactId>dnsjava</artifactId>
-      <version>2.0.5</version>
+      <version>2.0.6</version>
     </dependency>
     <dependency>
       <groupId>uk.nominet</groupId>
@@ -216,14 +216,10 @@
             <!-- 3rd party descriptors distributed via maven repositories
                  and included "as is" -->
             <exclude>stage/commons-cli/poms/commons-cli-1.1.pom</exclude>
-            <exclude>stage/dnsjava/poms/dnsjava-2.0.5.pom</exclude>
-            <exclude>stage/junit/poms/junit-3.8.1.pom</exclude>
             <exclude>stage/org.apache.james/xmls/james-parent-1.1-site.xml</exclude>
             <exclude>stage/org.apache.james/xmls/james-parent-1.1-site_en.xml</exclude>
             <exclude>stage/org.apache.james/xmls/james-project-1.2-site.xml</exclude>
             <exclude>stage/org.apache.james/xmls/james-project-1.2-site_en.xml</exclude>
-            <exclude>stage/org.jvyaml/poms/jvyaml-0.2.1.pom</exclude>
-            <exclude>stage/uk.nominet/poms/dnsjnio-0.9.9.pom</exclude>
             <exclude>release.properties</exclude>
           </excludes>
         </configuration>
