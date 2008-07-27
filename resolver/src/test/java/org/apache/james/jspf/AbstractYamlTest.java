@@ -88,24 +88,24 @@ public abstract class AbstractYamlTest extends TestCase {
     protected static final int STAGED_EXECUTOR_DNSJNIO = 4;
     private int spfExecutorType = SYNCHRONOUS_EXECUTOR;
 
-    SPFYamlTestSuite data;
+    SPFYamlTestDescriptor data;
     String test;
     protected Logger log;
     private SPFExecutor executor;
     protected static MacroExpand macroExpand;
     protected static SPF spf;
-    protected static SPFYamlTestSuite prevData;
+    protected static SPFYamlTestDescriptor prevData;
     protected static SPFRecordParser parser;
     private static DNSService dns;
     protected static DNSTestingServer dnsTestServer;
 
-    protected AbstractYamlTest(SPFYamlTestSuite def, String test) {
+    protected AbstractYamlTest(SPFYamlTestDescriptor def, String test) {
         super(def.getComment()+" #"+test);
         this.data = def;
         this.test = test;
     }
 
-    protected AbstractYamlTest(SPFYamlTestSuite def) {
+    protected AbstractYamlTest(SPFYamlTestDescriptor def) {
         super(def.getComment()+" #COMPLETE!");
         this.data = def;
         this.test = null;
@@ -122,7 +122,7 @@ public abstract class AbstractYamlTest extends TestCase {
         List tests = internalLoadTests(getFilename());
         Iterator i = tests.iterator();
         while (i.hasNext() && data == null) {
-            SPFYamlTestSuite def = (SPFYamlTestSuite) i.next();
+            SPFYamlTestDescriptor def = (SPFYamlTestDescriptor) i.next();
             if (name.equals(def.getComment()+" #COMPLETE!")) {
                 data = def;
                 this.test = null;
@@ -156,7 +156,7 @@ public abstract class AbstractYamlTest extends TestCase {
                 Object o = ctor.getData();
                 if (o instanceof HashMap) {
                   HashMap m = (HashMap) o;
-                  SPFYamlTestSuite ts = new SPFYamlTestSuite(m, i);
+                  SPFYamlTestDescriptor ts = new SPFYamlTestDescriptor(m, i);
                   tests.add(ts);
                 }
                 i++;
@@ -532,15 +532,12 @@ public abstract class AbstractYamlTest extends TestCase {
         return spfExecutorType;
     }
 
-    protected static class SPFYamlTestSuite {
-        public String comment;
-        public HashMap tests;
+    protected static class SPFYamlTestDescriptor {
+        private String comment;
+        private HashMap tests;
         private HashMap zonedata;
-        public String getComment() {
-            return comment;
-        }
         
-        public SPFYamlTestSuite(HashMap source, int i) {
+        public SPFYamlTestDescriptor(HashMap source, int i) {
             this.setComment((String) source.get("description"));
             if (this.getComment() == null) {
                 this.setComment("Test #"+i); 
@@ -549,6 +546,9 @@ public abstract class AbstractYamlTest extends TestCase {
             this.setZonedata((HashMap) source.get("zonedata"));
         }
         
+        public String getComment() {
+            return comment;
+        }
         public void setComment(String comment) {
             this.comment = comment;
         }

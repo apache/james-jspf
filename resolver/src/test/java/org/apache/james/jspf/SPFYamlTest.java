@@ -35,7 +35,7 @@ public class SPFYamlTest extends AbstractYamlTest {
         super(name);
     }
 
-    protected SPFYamlTest(SPFYamlTestSuite def, String test) {
+    protected SPFYamlTest(SPFYamlTestDescriptor def, String test) {
         super(def, test);
     }
 
@@ -56,7 +56,7 @@ public class SPFYamlTest extends AbstractYamlTest {
             List tests = loadTests(YAMLFILE);
             Iterator i = tests.iterator();
             while (i.hasNext()) {
-                SPFYamlTestSuite o = (SPFYamlTestSuite) i.next();
+                SPFYamlTestDescriptor o = (SPFYamlTestDescriptor) i.next();
                 Iterator ttt = o.getTests().keySet().iterator();
                 while (ttt.hasNext()) {
                     addTest(new SPFYamlTest(o,(String) ttt.next()));

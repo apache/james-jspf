@@ -40,11 +40,11 @@ public class MailZoneYamlTest extends AbstractYamlTest {
         super(name);
     }
 
-    protected MailZoneYamlTest(SPFYamlTestSuite def, String test) {
+    protected MailZoneYamlTest(SPFYamlTestDescriptor def, String test) {
         super(def, test);
     }
 
-    protected MailZoneYamlTest(SPFYamlTestSuite def) {
+    protected MailZoneYamlTest(SPFYamlTestDescriptor def) {
         super(def);
     }
 
@@ -74,7 +74,7 @@ public class MailZoneYamlTest extends AbstractYamlTest {
             List tests = loadTests(YAMLFILE2);
             Iterator i = tests.iterator();
             while (i.hasNext()) {
-                SPFYamlTestSuite o = (SPFYamlTestSuite) i.next();
+                SPFYamlTestDescriptor o = (SPFYamlTestDescriptor) i.next();
                 Iterator ttt = o.getTests().keySet().iterator();
                 while (ttt.hasNext()) {
                     addTest(new MailZoneYamlTest(o,(String) ttt.next()));

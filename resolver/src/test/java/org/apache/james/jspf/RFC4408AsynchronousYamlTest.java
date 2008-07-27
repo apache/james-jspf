@@ -41,11 +41,11 @@ public class RFC4408AsynchronousYamlTest extends RFC4408YamlTest {
         super(name);
     }
 
-    protected RFC4408AsynchronousYamlTest(SPFYamlTestSuite def) {
+    protected RFC4408AsynchronousYamlTest(SPFYamlTestDescriptor def) {
         super(def);
     }
 
-    protected RFC4408AsynchronousYamlTest(SPFYamlTestSuite def, String test) {
+    protected RFC4408AsynchronousYamlTest(SPFYamlTestDescriptor def, String test) {
         super(def, test);
     }
 
@@ -76,7 +76,7 @@ public class RFC4408AsynchronousYamlTest extends RFC4408YamlTest {
             List tests = loadTests(YAMLFILE2);
             Iterator i = tests.iterator();
             while (i.hasNext()) {
-                SPFYamlTestSuite o = (SPFYamlTestSuite) i.next();
+                SPFYamlTestDescriptor o = (SPFYamlTestDescriptor) i.next();
                 addTest(new RFC4408AsynchronousYamlTest(o));
             }
         }
@@ -100,7 +100,7 @@ public class RFC4408AsynchronousYamlTest extends RFC4408YamlTest {
         List tests = loadTests(YAMLFILE2);
         Iterator i = tests.iterator();
         while (i.hasNext()) {
-            SPFYamlTestSuite o = (SPFYamlTestSuite) i.next();
+            SPFYamlTestDescriptor o = (SPFYamlTestDescriptor) i.next();
             Iterator ttt = o.getTests().keySet().iterator();
             while (ttt.hasNext()) {
                 RFC4408AsynchronousYamlTest t = new RFC4408AsynchronousYamlTest(o,(String) ttt.next());
