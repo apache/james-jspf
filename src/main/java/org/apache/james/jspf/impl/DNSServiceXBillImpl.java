@@ -30,6 +30,7 @@ import org.xbill.DNS.Lookup;
 import org.xbill.DNS.MXRecord;
 import org.xbill.DNS.PTRRecord;
 import org.xbill.DNS.Record;
+import org.xbill.DNS.Resolver;
 import org.xbill.DNS.SPFRecord;
 import org.xbill.DNS.TXTRecord;
 import org.xbill.DNS.TextParseException;
@@ -46,29 +47,44 @@ import java.util.List;
  */
 public class DNSServiceXBillImpl implements DNSService {
 
-    // Set seconds after which we return and TempError
-    protected int timeOut = 20;
-
     // The logger
     protected Logger log;
     
     // The record limit for lookups
     protected int recordLimit;
+
+    // The resolver used for the lookup
+    protected Resolver resolver;
     
     /**
-     * Default Constructor
+     * Default Constructor.
+     * Uses the DNSJava static DefaultResolver
      */
     public DNSServiceXBillImpl(Logger logger) {
+        this(logger, Lookup.getDefaultResolver());
+    }
+    
+    /**
+     * Constructor to specify a custom resolver.
+     */
+    public DNSServiceXBillImpl(Logger logger, Resolver resolver) {
         this.log = logger;
+        this.resolver = resolver;
         // Default record limit is 10
         this.recordLimit = 10;
     }
 
     /**
+     * NOTE if this class is created with the default constructor it
+     * will use the static DefaultResolver from DNSJava and this method
+     * will change it's timeout.
+     * Other tools using DNSJava in the same JVM could be affected by
+     * this timeout change.
+     * 
      * @see org.apache.james.jspf.core.DNSService#setTimeOut(int)
      */
     public synchronized void setTimeOut(int timeOut) {
-        this.timeOut = timeOut;
+        this.resolver.setTimeout(timeOut);
     }
 
     /**
@@ -131,8 +147,8 @@ public class DNSServiceXBillImpl implements DNSService {
 
             log.debug("Start "+recordTypeDescription+"-Record lookup for : " + request.getHostname());
 
-            Lookup.getDefaultResolver().setTimeout(timeOut);
             Lookup query = new Lookup(request.getHostname(), dnsJavaType);
+            query.setResolver(resolver);
 
             Record[] rr = query.run();
             int queryResult = query.getResult();
