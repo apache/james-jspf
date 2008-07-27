@@ -53,11 +53,6 @@
       <artifactId>log4j</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.jvyaml</groupId>
-      <artifactId>jvyaml</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
     	<groupId>org.apache.james.jspf</groupId>
     	<artifactId>tester</artifactId>
     	<scope>test</scope>
