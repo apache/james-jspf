@@ -104,13 +104,9 @@ public abstract class AbstractYamlTest extends TestCase {
 
     protected abstract String getFilename();
 
-    protected List internalLoadTests(String filename) throws IOException {
-        return SPFYamlTestDescriptor.loadTests(filename);
-    }
-
     protected AbstractYamlTest(String name) throws IOException {
         super(name);
-        List tests = internalLoadTests(getFilename());
+        List tests = SPFYamlTestDescriptor.loadTests(getFilename());
         Iterator i = tests.iterator();
         while (i.hasNext() && data == null) {
             SPFYamlTestDescriptor def = (SPFYamlTestDescriptor) i.next();
