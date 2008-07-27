@@ -71,6 +71,9 @@ public class DefaultTermsFactory implements TermsFactory {
         try {
             InputStream is = Thread.currentThread().getContextClassLoader()
                     .getResourceAsStream(termFile);
+            if (is == null) {
+                throw new NullPointerException("Unable to find the "+termFile+" resource in the classpath");
+            }
             Properties p = new Properties();
             p.load(is);
             String mechs = p.getProperty("mechanisms");
