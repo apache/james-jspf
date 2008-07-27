@@ -19,8 +19,8 @@
   under the License.    
 -->
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.apache.james</groupId>
-  <artifactId>apache-jspf-resolver</artifactId>
+  <groupId>org.apache.james.jspf</groupId>
+  <artifactId>resolver</artifactId>
   <parent>
     <groupId>org.apache.james</groupId>
     <artifactId>apache-jspf</artifactId>
@@ -58,8 +58,8 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-    	<groupId>org.apache.james</groupId>
-    	<artifactId>apache-jspf-tester</artifactId>
+    	<groupId>org.apache.james.jspf</groupId>
+    	<artifactId>tester</artifactId>
     	<scope>test</scope>
     </dependency>
     <dependency>
@@ -102,11 +102,6 @@
           <sourceEncoding>utf-8</sourceEncoding>
           <minimumTokens>100</minimumTokens>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-site-plugin</artifactId>
-        <version>2.0-beta-5</version>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>

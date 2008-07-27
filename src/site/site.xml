@@ -36,16 +36,16 @@
       <item name="Overview" href="index.html"/>
       <item name="jSPF FAQ" href="FAQ.html"/>
       <item name="Mailing Lists" href="mail-lists.html" />
-    </menu>
-
-    <menu name="Documentation">
-      <!-- Not yet there
-      <item name="jSPF" href="documentation.html"/>
-      <item name="Design" href="design.html"/>
-      -->
-      <item name="jSPF Javadocs" href="apidocs/index.html" />
       <item name="Useful RFCs" href="rfclist.html"/>
     </menu>
+
+    <!-- Not yet there
+    <menu name="Documentation">
+      <item name="jSPF" href="documentation.html"/>
+      <item name="Design" href="design.html"/>
+      <item name="jSPF Javadocs" href="apidocs/index.html" />
+    </menu>
+    -->
 
     <menu name="Project">
       <item name="Bug Database" href="issue-tracking.html"/>
@@ -56,6 +56,8 @@
       -->
       <item name="License" href="license.html"/>
     </menu>
+
+    <menu ref="modules" />
 
     ${reports}
 

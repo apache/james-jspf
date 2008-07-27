@@ -19,8 +19,8 @@
 -->
 <project>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.apache.james</groupId>
-  <artifactId>jspf-repository</artifactId>
+  <groupId>org.apache.james.jspf</groupId>
+  <artifactId>stage</artifactId>
   <parent>
     <groupId>org.apache.james</groupId>
     <artifactId>apache-jspf</artifactId>
