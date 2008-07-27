@@ -79,6 +79,7 @@
   <modules>
     <module>stage</module>
     <module>resolver</module>
+    <module>openspf-tester</module>
   </modules>
 
   <issueManagement>
@@ -94,6 +95,11 @@
 
 	<dependencyManagement>
 	  <dependencies>
+	    <dependency>
+	      <groupId>org.apache.james</groupId>
+	      <artifactId>apache-openspf-tester</artifactId>
+	      <version>0.9.7-SNAPSHOT</version>
+	    </dependency>
 	    <dependency>
 	      <groupId>dnsjava</groupId>
 	      <artifactId>dnsjava</artifactId>
@@ -119,7 +125,6 @@
 	      <groupId>org.jvyaml</groupId>
 	      <artifactId>jvyaml</artifactId>
 	      <version>0.2.1</version>
-	      <scope>test</scope>
 	    </dependency>
 	    <dependency>
 	      <groupId>commons-cli</groupId>
