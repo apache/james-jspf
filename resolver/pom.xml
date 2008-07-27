@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.    
+-->
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.apache.james</groupId>
+  <artifactId>apache-jspf</artifactId>
+  <parent>
+    <groupId>org.apache.james</groupId>
+    <artifactId>james-project</artifactId>
+    <version>1.2</version>
+    <!-- Either this really points to the james-project/pom.xml or you
+         will have to tune the local repository, later, in this file -->
+    <relativePath>../james-project/project/pom.xml</relativePath>
+  </parent>
+  <name>Apache JAMES jSPF</name>
+  <version>0.9.7-SNAPSHOT</version>
+  <description>
+    Apache James jSPF is an SPF spec implementation written in Java
+  </description>
+  <url>http://james.apache.org/jspf</url>
+  <inceptionYear>2006</inceptionYear>
+
+  <distributionManagement>
+    <site>
+      <id>jspf-website</id>
+      <url>scp://people.apache.org/www/james.apache.org/jspf/</url>
+    </site>
+  </distributionManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>dnsjava</groupId>
+      <artifactId>dnsjava</artifactId>
+      <version>2.0.6</version>
+    </dependency>
+    <dependency>
+      <groupId>uk.nominet</groupId>
+      <artifactId>dnsjnio</artifactId>
+      <version>0.9.9</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.14</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jvyaml</groupId>
+      <artifactId>jvyaml</artifactId>
+      <version>0.2.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>commons-cli</groupId>
+      <artifactId>commons-cli</artifactId>
+      <version>1.1</version>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-logging</groupId>
+          <artifactId>commons-logging</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>commons-lang</groupId>
+          <artifactId>commons-lang</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+  </dependencies>
+
+  <issueManagement>
+    <system>JIRA</system>
+    <url>http://issues.apache.org/jira/browse/JSPF</url>
+  </issueManagement>
+
+  <scm>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/james/jspf/trunk</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/james/jspf/trunk</developerConnection>
+    <url>http://svn.apache.org/viewvc/james/jspf/trunk/</url>
+  </scm>
+
+  <repositories>
+    <repository>
+      <id>local-jspf-stage-repository</id>
+      <name>Local jSPF stage repository</name>
+      <!-- Please note that due to http://jira.codehaus.org/browse/MNG-2896 -->
+      <!-- If you don't have james-project checked out in ../james-project -->
+      <!-- you will have to place your absolute path to the project instead -->
+      <!-- of ${basedir}, or, otherwise, manually install the parent poms -->
+      <!--
+           #windows:
+           mvn -fignorepom.xml install:install-file 
+              -Dfile=stage\org.apache.james\poms\james-parent-1.1.pom 
+              -Dpackaging=pom 
+              -DgroupId=org.apache.james 
+              -DartifactId=james-parent 
+              -Dversion=1.1
+           mvn -fignorepom.xml install:install-file 
+              -Dfile=stage\org.apache.james\poms\james-project-1.2.pom 
+              -Dpackaging=pom 
+              -DgroupId=org.apache.james 
+              -DartifactId=james-project 
+              -Dversion=1.2
+
+           #linux:
+           mvn -fignorepom.xml install:install-file 
+              -Dfile=stage/org.apache.james/poms/james-parent-1.1.pom 
+              -Dpackaging=pom 
+              -DgroupId=org.apache.james 
+              -DartifactId=james-parent 
+              -Dversion=1.1
+           mvn -fignorepom.xml install:install-file 
+              -Dfile=stage/org.apache.james/poms/james-project-1.2.pom 
+              -Dpackaging=pom 
+              -DgroupId=org.apache.james 
+              -DartifactId=james-project 
+              -Dversion=1.2
+       -->
+      <url>file://${basedir}/stage</url>
+      <layout>legacy</layout>
+      <releases>
+        <enabled>true</enabled>
+        <checksumPolicy>ignore</checksumPolicy>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+        <checksumPolicy>ignore</checksumPolicy>
+      </snapshots>
+    </repository>
+  </repositories>
+
+  <mailingLists>
+    <mailingList>
+      <name>Apache jSPF Developement</name>
+      <subscribe>server-dev-subscribe@james.apache.org</subscribe>
+      <unsubscribe>server-dev-unsubscribe@james.apache.org</unsubscribe>
+      <post>server-dev@james.apache.org</post>
+      <archive>http://mail-archives.apache.org/mod_mbox/james-server-dev/</archive>
+    </mailingList>
+  </mailingLists>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.3</version>
+      </plugin>
+      <plugin>
+        <artifactId>maven-surefire-report-plugin</artifactId>
+        <version>2.3</version>
+      </plugin> 
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.3</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jxr-plugin</artifactId>
+        <version>2.1</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <version>2.2</version>
+        <configuration>
+          <targetjdk>1.4</targetjdk>
+          <rulesets>
+            <ruleset>/rulesets/basic.xml</ruleset>
+            <ruleset>/rulesets/controversial.xml</ruleset>
+          </rulesets>
+          <format>xml</format>
+          <linkXref>true</linkXref>
+          <sourceEncoding>utf-8</sourceEncoding>
+          <minimumTokens>100</minimumTokens>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <version>2.0-beta-5</version>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>rat-maven-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!-- 3rd party resources described in NOTICE:
+                 see the maven-remote-resources-plugin configuration, in this file -->
+            <exclude>src/test/resources/org/apache/james/jspf/pyspf-tests.yml</exclude>
+            <exclude>src/test/resources/org/apache/james/jspf/rfc4408-tests.yml</exclude>
+            <exclude>src/test/resources/org/apache/james/jspf/tests.yml</exclude>
+            <exclude>src/test/resources/org/apache/james/jspf/test_live.txt</exclude>
+            <exclude>src/test/resources/org/apache/james/jspf/test_parser.txt</exclude>
+            <exclude>src/test/resources/org/apache/james/jspf/test_rfc_examples.txt</exclude>
+            <!-- 3rd party descriptors distributed via maven repositories
+                 and included "as is" -->
+            <exclude>stage/commons-cli/poms/commons-cli-1.1.pom</exclude>
+            <exclude>stage/org.apache.james/xmls/james-parent-1.1-site.xml</exclude>
+            <exclude>stage/org.apache.james/xmls/james-parent-1.1-site_en.xml</exclude>
+            <exclude>stage/org.apache.james/xmls/james-project-1.2-site.xml</exclude>
+            <exclude>stage/org.apache.james/xmls/james-project-1.2-site_en.xml</exclude>
+            <exclude>release.properties</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </reporting>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>rat-maven-plugin</artifactId>
+        <version>1.0-alpha-3</version>
+        <executions>
+          <execution>
+            <phase>verify</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.1</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>org.apache.james.jspf.impl.SPFQuery</mainClass>
+              <packageName>org.apache.james.jspf</packageName>
+              <addClasspath>true</addClasspath>
+            </manifest>
+            <manifestEntries>
+              <mode>development</mode>
+              <url>${pom.url}</url>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.0.2</version>
+        <configuration>
+          <source>1.4</source>
+          <target>1.4</target>
+          <encoding>iso8859-1</encoding>
+        </configuration>
+      </plugin>      
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.3</version>
+        <executions>
+          <execution>
+            <id>create-javadocs</id> <!-- this is used for inheritance merges -->
+            <phase>package</phase> <!-- append to the packaging phase. -->
+            <goals>
+              <goal>javadoc</goal> <!-- goals == mojos -->
+              <goal>jar</goal> <!-- goals == mojos -->
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.2-beta-1</version>
+        <configuration>
+          <descriptorSourceDirectory>${basedir}/src/assemble/</descriptorSourceDirectory>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id> <!-- this is used for inheritance merges -->
+            <phase>package</phase> <!-- append to the packaging phase. -->
+            <goals>
+              <goal>attached</goal> <!-- goals == mojos -->
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- Add NOTICE and LICENSE to generated JAR -->
+      <plugin>
+        <artifactId>maven-remote-resources-plugin</artifactId>
+        <version>1.0-alpha-5</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>process</goal>
+            </goals>
+            <configuration>
+              <resourceBundles>
+                <resourceBundle>org.apache:apache-jar-resource-bundle:1.2</resourceBundle>
+              </resourceBundles>
+              <properties>
+	              <!--  <preProjectText>PRE PROCESS TEXT</preProjectText>  -->
+	              <postProjectText>This product includes/uses software, JUnit (http://www.junit.org/),
+developed by Kent Beck, Erich Gamma, and David Saff
+License: Common Public License Version 1.0  (http://www.opensource.org/licenses/cpl.php)
+
+This product has been inspired from the spfjava library
+written by Roger Fullerton and Neil Murray.
+  
+This product contains DNS-aware tests inspired by DNSJava 
+test code written and copyrighted by Brian Wellington, too.
+(see src\test\java\org\apache\james\jspf\dnsserver\ files)
+
+This product contains resources (SPF parser tests: test_parser.txt 
+and test_rfc_examples.txt) derived from the libspf2 library 
+(http://www.libspf2.org/) and distributed under the BSD license 
+and copyright by Wayne Schlitt, Shevek. 
+(see src\test\resources\org\apache\james\jspf\libspf2.LICENSE)
+
+This product contains resources (rfc4408-tests.yml) from the
+openspf group, distributed under the BSD license and copyright
+by Stuart D. Gathman and Julian Mehnle.
+(see src\test\resources\org\apache\james\jspf\rfc4408-tests.LICENSE)
+
+This product contains resources (tests.yml, pyspf-tests.yml) 
+from the pyspf library (http://cheeseshop.python.org/pypi/pyspf) 
+distributed under the Python Software Foundation License and 
+copyright by Terence Way, Stuart Gathman (stuart@bmsi.com) and 
+Scott Kitterman.
+(see src\test\resources\org\apache\james\jspf\pyspf.LICENSE)
+
+This file is automatically generated by dependencies declared in pom.xml
+								</postProjectText>
+	              <addLicense>true</addLicense>
+              </properties>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
