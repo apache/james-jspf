@@ -1,0 +1,5 @@
+This is a branch to make jSPF a multimodule project (JSPF-63)
+
+2008/07/30 - Developing is stalled because there are issues with the offline
+build and a discussion "[jSPF] cost of supporting offline builds" is ongoing on
+the mailing list.
