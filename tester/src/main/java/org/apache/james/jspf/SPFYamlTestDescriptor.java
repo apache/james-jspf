@@ -82,7 +82,7 @@ public class SPFYamlTestDescriptor {
     public static List loadTests(String filename) throws IOException {
         List tests = new ArrayList();
     
-        InputStream is = SPFYamlTest.class.getResourceAsStream(filename);
+        InputStream is = SPFYamlTestDescriptor.class.getResourceAsStream(filename);
         
         if (is != null) {
             Reader br = new BufferedReader(new InputStreamReader(is));
