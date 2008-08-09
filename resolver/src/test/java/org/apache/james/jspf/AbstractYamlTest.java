@@ -341,11 +341,9 @@ public abstract class AbstractYamlTest extends TestCase {
             try {
                 dnsTestServer = new DNSTestingServer("0.0.0.0", ""+FAKE_SERVER_PORT);
             } catch (TextParseException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                throw new RuntimeException("Error trying to instantiate the testing dns server.", e);
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                throw new RuntimeException("Error trying to instantiate the testing dns server.", e);
             }
         }
         
