@@ -62,6 +62,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
 public abstract class AbstractYamlTest extends TestCase {
@@ -133,6 +134,8 @@ public abstract class AbstractYamlTest extends TestCase {
         if (log == null) {
                 log = new ConsoleLogger(ConsoleLogger.LEVEL_DEBUG, "root");
         }
+        
+        log.info("Running test: "+getName()+" ...");
 
         if (parser == null) {
             /* PREVIOUS SLOW WAY 
@@ -218,10 +221,17 @@ public abstract class AbstractYamlTest extends TestCase {
                 SPFResult res = runSingleTest(next);
                 queries.put(next, res);
             }
+            AssertionFailedError firstError = null; 
             for (Iterator i = queries.keySet().iterator(); i.hasNext(); ) {
                 String next = (String) i.next();
-                verifyResult(next, (SPFResult) queries.get(next));
+                try {
+                    verifyResult(next, (SPFResult) queries.get(next));
+                } catch (AssertionFailedError e) {
+                    log.getChildLogger(next).info("FAILED. "+e.getMessage()+" ("+getName()+")");
+                    if (firstError == null) firstError = e;
+                }
             }
+            if (firstError != null) throw firstError;
         }
         
     }
