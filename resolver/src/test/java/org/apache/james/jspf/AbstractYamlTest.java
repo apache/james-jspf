@@ -266,7 +266,7 @@ public abstract class AbstractYamlTest extends TestCase {
         HashMap currentTest = (HashMap) data.getTests().get(testName);
         Logger testLogger = log.getChildLogger(testName+"-verify");
         if (currentTest.get("result") instanceof String) {
-            assertEquals("Test "+testName+" ("+currentTest.get("description")+") failed. Returned: "+res.getResult()+" Expected: "+currentTest.get("result")+" [["+res.getResult()+"||"+res.getHeaderText()+"]]", currentTest.get("result"), res.getResult());
+            assertEquals("Test "+testName+" ("+currentTest.get("description")+") failed. Returned: "+resultSPF+" Expected: "+currentTest.get("result")+" [["+resultSPF+"||"+res.getHeaderText()+"]]", currentTest.get("result"), resultSPF);
         } else {
             ArrayList results = (ArrayList) currentTest.get("result");
             boolean match = false;
@@ -274,7 +274,7 @@ public abstract class AbstractYamlTest extends TestCase {
                 if (results.get(i).equals(resultSPF)) match = true;
                 // testLogger.debug("checking "+resultSPF+" against allowed result "+results.get(i));
             }
-            assertTrue(match);
+            assertTrue("Test "+testName+" ("+currentTest.get("description")+") failed. Returned: "+resultSPF+" Expected: "+results, match);
         }
         
         if (currentTest.get("explanation") != null) {
@@ -293,7 +293,7 @@ public abstract class AbstractYamlTest extends TestCase {
     
         }
     
-        testLogger.info("PASSED. Result="+res.getResult()+" Explanation="+res.getExplanation()+" Header="+res.getHeaderText());
+        testLogger.info("PASSED. Result="+resultSPF+" Explanation="+res.getExplanation()+" Header="+res.getHeaderText());
     }
 
     /**
