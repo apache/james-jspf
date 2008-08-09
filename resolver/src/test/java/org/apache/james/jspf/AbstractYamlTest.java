@@ -67,7 +67,7 @@ import junit.framework.TestCase;
 
 public abstract class AbstractYamlTest extends TestCase {
 
-    private static final int FAKE_SERVER_PORT = 31347;
+    private static final int FAKE_SERVER_PORT = 31348;
     protected static final int TIMEOUT = 10;
     protected static final int MOCK_SERVICE = 2;
     protected static final int FAKE_SERVER = 1;
