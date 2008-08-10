@@ -26,17 +26,17 @@
 
   <bannerRight>
     <name>The Apache Software Foundation</name>
-    <src>images/asf-logo-reduced.gif</src>
+    <src>http://james.apache.org/jspf/images/asf-logo-reduced.gif</src>
     <href>http://www.apache.org/index.html</href>
   </bannerRight> 
 
   <body>
-
-    <menu name="jSPF">
-      <item name="Overview" href="index.html"/>
-      <item name="jSPF FAQ" href="FAQ.html"/>
-      <item name="Mailing Lists" href="mail-lists.html" />
-      <item name="Useful RFCs" href="rfclist.html"/>
+    
+    <menu name="jSPF" inherit="top">
+      <item name="Overview" href="/index.html"/>
+      <item name="jSPF FAQ" href="/FAQ.html"/>
+      <item name="Mailing Lists" href="/mail-lists.html" />
+      <item name="Useful RFCs" href="/rfclist.html"/>
     </menu>
 
     <!-- Not yet there
@@ -48,18 +48,18 @@
     -->
 
     <menu name="Project">
-      <item name="Bug Database" href="issue-tracking.html"/>
-      <item name="Source Code" href="source-repository.html"/>
-      <item name="Who We Are" href="team-list.html" />
+      <item name="Bug Database" href="/issue-tracking.html"/>
+      <item name="Source Code" href="/source-repository.html"/>
+      <item name="Who We Are" href="/team-list.html" />
       <!-- Not yet there
       <item name="Contributing" href="contribute.html"/>
       -->
-      <item name="License" href="license.html"/>
+      <item name="License" href="/license.html"/>
     </menu>
 
     <menu ref="modules" />
 
-    ${reports}
+    <menu ref="reports" />
 
   </body>
 </project>

@@ -25,8 +25,6 @@
     <groupId>org.apache.james</groupId>
     <artifactId>apache-jspf</artifactId>
     <version>0.9.7-SNAPSHOT</version>
-    <!-- Either this really points to the james-project/pom.xml or you
-         will have to tune the local repository, later, in this file -->
     <relativePath>../pom.xml</relativePath>
   </parent>
   <name>Apache JAMES jSPF Resolver</name>
@@ -67,36 +65,19 @@
     <plugins>
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.3</version>
       </plugin>
       <plugin>
         <artifactId>maven-surefire-report-plugin</artifactId>
-        <version>2.3</version>
       </plugin> 
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.3</version>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jxr-plugin</artifactId>
-        <version>2.1</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-pmd-plugin</artifactId>
-        <version>2.2</version>
-        <configuration>
-          <targetjdk>1.4</targetjdk>
-          <rulesets>
-            <ruleset>/rulesets/basic.xml</ruleset>
-            <ruleset>/rulesets/controversial.xml</ruleset>
-          </rulesets>
-          <format>xml</format>
-          <linkXref>true</linkXref>
-          <sourceEncoding>utf-8</sourceEncoding>
-          <minimumTokens>100</minimumTokens>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -120,7 +101,6 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>rat-maven-plugin</artifactId>
-        <version>1.0-alpha-3</version>
         <executions>
           <execution>
             <phase>verify</phase>
@@ -133,7 +113,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>2.1</version>
         <configuration>
           <archive>
             <manifest>
@@ -151,16 +130,9 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.0.2</version>
-        <configuration>
-          <source>1.4</source>
-          <target>1.4</target>
-          <encoding>iso8859-1</encoding>
-        </configuration>
       </plugin>      
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.3</version>
         <executions>
           <execution>
             <id>create-javadocs</id> <!-- this is used for inheritance merges -->
@@ -174,7 +146,6 @@
       </plugin>
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.2-beta-1</version>
         <configuration>
           <descriptorSourceDirectory>${basedir}/src/assemble/</descriptorSourceDirectory>
         </configuration>
@@ -191,7 +162,6 @@
       <!-- Add NOTICE and LICENSE to generated JAR -->
       <plugin>
         <artifactId>maven-remote-resources-plugin</artifactId>
-        <version>1.0-alpha-5</version>
         <executions>
           <execution>
             <goals>
@@ -199,7 +169,7 @@
             </goals>
             <configuration>
               <resourceBundles>
-                <resourceBundle>org.apache:apache-jar-resource-bundle:1.2</resourceBundle>
+                <resourceBundle>org.apache:apache-jar-resource-bundle:1.4</resourceBundle>
               </resourceBundles>
               <properties>
 	              <!--  <preProjectText>PRE PROCESS TEXT</preProjectText>  -->
