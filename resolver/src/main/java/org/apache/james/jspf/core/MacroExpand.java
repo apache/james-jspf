@@ -281,7 +281,20 @@ public class MacroExpand {
                             .appendReplacement(decodedValue, replaceCell(macroCell, macroData, isExplanation));
                 } else if (match2.length() == 2 && match2.startsWith("%")) {
                     // handle the % escaping
-                    inputMatcher.appendReplacement(decodedValue, match2.substring(1));
+                    /*
+                     * From RFC4408:
+                     * 
+                     * A literal "%" is expressed by "%%".
+                     *   "%_" expands to a single " " space.
+                     *   "%-" expands to a URL-encoded space, viz., "%20".
+                     */
+                    if ("%_".equals(match2)) {
+                        inputMatcher.appendReplacement(decodedValue, " ");
+                    } else if ("%-".equals(match2)) {
+                        inputMatcher.appendReplacement(decodedValue, "%20");
+                    } else {
+                        inputMatcher.appendReplacement(decodedValue, match2.substring(1));
+                    }
                 }
             }
             
