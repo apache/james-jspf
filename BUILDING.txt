@@ -1,0 +1,30 @@
+#############################################################################
+# BUILDING JSPF
+#############################################################################
+
+You will need to install maven2 as well as acquire jSPF source from subversion 
+or a source tarball.
+
+Steps:
+
+1) Install maven2 (v2.0.9 as of the time of this writing)
+
+2) Add maven2 to your path.  For me, I do the following:
+   $ tar zxvf maven-2.0.9.tar.gz
+   $ mv maven-2.0.9 /usr/local
+   $ ln -sf /usr/local/maven-2.0.9/bin/mvn /usr/local/bin/mvn
+
+3) [offline build support] Change directory to jspf/stage dir
+   $ cd jspf-x/stage
+
+4) [offline build support] Locally install preprequisite dependencies
+   $ mvn -Plocal compile
+
+5) Change directory to jspf source dir
+   $ cd jspf-x/
+   
+6) Run the build (the "-Plocal" restrict maven to use bundled dependencies)
+   $ mvn -Plocal package
+
+That's it.  Please contact server-dev@james.apache.org if you have any
+problems.
