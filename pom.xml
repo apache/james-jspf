@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.    
+-->
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.apache.james</groupId>
+  <artifactId>apache-jspf</artifactId>
+  <parent>
+    <groupId>org.apache.james</groupId>
+    <artifactId>james-project</artifactId>
+    <version>1.3-SNAPSHOT</version>
+  </parent>
+  <name>Apache JAMES jSPF</name>
+  <version>0.9.7-SNAPSHOT</version>
+  <description>
+    Apache James jSPF is an SPF spec implementation written in Java
+  </description>
+  <url>http://james.apache.org/jspf/</url>
+  <inceptionYear>2006</inceptionYear>
+
+  <distributionManagement>
+    <site>
+      <id>jspf-website</id>
+      <url>scp://people.apache.org/www/james.apache.org/jspf/</url>
+    </site>
+  </distributionManagement>
+  
+  <packaging>pom</packaging>
+  
+  <modules>
+    <!-- The stage module contains dependencies for this product -->
+    <!-- It make sure dependencies needed by other modules are   -->
+    <!-- resolved/installed in the repository                    -->
+    <module>stage</module>
+    <module>resolver</module>
+    <module>tester</module>
+  </modules>
+
+  <issueManagement>
+    <system>JIRA</system>
+    <url>http://issues.apache.org/jira/browse/JSPF</url>
+  </issueManagement>
+
+  <scm>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/james/jspf/trunk</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/james/jspf/trunk</developerConnection>
+    <url>http://svn.apache.org/viewvc/james/jspf/trunk/</url>
+  </scm>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>2.0-beta-7</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>2.4</version>
+        </plugin>
+	      <plugin>
+	        <artifactId>maven-jxr-plugin</artifactId>
+	        <version>2.1</version>
+	      </plugin>
+	      <plugin>
+	        <artifactId>maven-pmd-plugin</artifactId>
+	        <version>2.4</version>
+	        <configuration>
+	          <targetjdk>1.4</targetjdk>
+	          <rulesets>
+	            <ruleset>/rulesets/basic.xml</ruleset>
+	            <ruleset>/rulesets/controversial.xml</ruleset>
+	          </rulesets>
+	          <format>xml</format>
+	          <linkXref>true</linkXref>
+	          <sourceEncoding>utf-8</sourceEncoding>
+	          <minimumTokens>100</minimumTokens>
+	        </configuration>
+	      </plugin>
+	      <plugin>
+	        <groupId>org.codehaus.mojo</groupId>
+	        <artifactId>rat-maven-plugin</artifactId>
+	        <version>1.0-alpha-3</version>
+	      </plugin>
+	      <plugin>
+	        <artifactId>maven-jar-plugin</artifactId>
+	        <version>2.2</version>
+	      </plugin>
+	      <plugin>
+	        <artifactId>maven-compiler-plugin</artifactId>
+	        <version>2.0.2</version>
+	        <configuration>
+	          <source>1.4</source>
+	          <target>1.4</target>
+	          <encoding>iso8859-1</encoding>
+	        </configuration>
+	      </plugin>      
+	      <plugin>
+	        <artifactId>maven-remote-resources-plugin</artifactId>
+	        <version>1.0</version>
+	      </plugin>
+	      <plugin>
+	        <artifactId>maven-surefire-plugin</artifactId>
+	        <version>2.4.3</version>
+	      </plugin>
+	      <plugin>
+	        <artifactId>maven-surefire-report-plugin</artifactId>
+	        <version>2.4.3</version>
+	      </plugin> 
+	      <plugin>
+	        <artifactId>maven-assembly-plugin</artifactId>
+	        <version>2.2-beta-2</version>
+	      </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+  
+	<dependencyManagement>
+	  <dependencies>
+	    <dependency>
+	      <groupId>org.apache.james.jspf</groupId>
+	      <artifactId>tester</artifactId>
+	      <version>0.9.7-SNAPSHOT</version>
+	    </dependency>
+	    <dependency>
+	      <groupId>org.apache.james.jspf</groupId>
+	      <artifactId>resolver</artifactId>
+	      <classifier>tests</classifier>
+        <version>0.9.7-SNAPSHOT</version>
+      </dependency>
+      <dependency>
+        <groupId>dnsjava</groupId>
+        <artifactId>dnsjava</artifactId>
+        <version>2.0.6</version>
+      </dependency>
+      <dependency>
+        <groupId>uk.nominet</groupId>
+        <artifactId>dnsjnio</artifactId>
+        <version>1.0.0-beta-1</version>
+	    </dependency>
+	    <dependency>
+	      <groupId>junit</groupId>
+	      <artifactId>junit</artifactId>
+	      <version>3.8.1</version>
+	      <scope>test</scope>
+	    </dependency>
+	    <dependency>
+	      <groupId>log4j</groupId>
+	      <artifactId>log4j</artifactId>
+	      <version>1.2.14</version>
+	    </dependency>
+	    <dependency>
+	      <groupId>org.jvyaml</groupId>
+	      <artifactId>jvyaml</artifactId>
+	      <version>0.2.1</version>
+	    </dependency>
+	    <dependency>
+	      <groupId>commons-cli</groupId>
+	      <artifactId>commons-cli</artifactId>
+	      <version>1.1</version>
+	      <exclusions>
+	        <exclusion>
+	          <groupId>commons-logging</groupId>
+	          <artifactId>commons-logging</artifactId>
+	        </exclusion>
+	        <exclusion>
+	          <groupId>commons-lang</groupId>
+	          <artifactId>commons-lang</artifactId>
+	        </exclusion>
+	      </exclusions>
+	    </dependency>
+	  </dependencies>
+	</dependencyManagement>
+	
+  <mailingLists>
+    <mailingList>
+      <name>Apache jSPF Developement</name>
+      <subscribe>server-dev-subscribe@james.apache.org</subscribe>
+      <unsubscribe>server-dev-unsubscribe@james.apache.org</unsubscribe>
+      <post>server-dev@james.apache.org</post>
+      <archive>http://mail-archives.apache.org/mod_mbox/james-server-dev/</archive>
+    </mailingList>
+  </mailingLists>
+
+  <properties>
+    <project.build.sourceEncoding>iso-8859-15</project.build.sourceEncoding>
+  </properties>
+
+</project>
