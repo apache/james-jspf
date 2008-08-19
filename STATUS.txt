@@ -1,0 +1,10 @@
+This is a branch to make jSPF a multimodule project (JSPF-63)
+
+2008/08/10 - ATM Bago, Bernd, Robert and Norman agreed to go ahead without ant and
+offline build support. No one complained yet.
+
+2008/08/04 - Made a "[PROPOSAL] remove ant and m2 offline build hacks from jSPF"
+
+2008/07/30 - Developing is stalled because there are issues with the offline
+build and a discussion "[jSPF] cost of supporting offline builds" is ongoing on
+the mailing list.
