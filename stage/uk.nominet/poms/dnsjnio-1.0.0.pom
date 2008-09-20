@@ -21,7 +21,7 @@
   <groupId>uk.nominet</groupId>
   <artifactId>dnsjnio</artifactId>
   <name>dnsjnio</name>
-  <version>1.0.0-beta-2</version>
+  <version>1.0.0</version>
   <packaging>jar</packaging>
   <url>http://sourceforge.net/projects/dnsjnio</url>
   <licenses>
