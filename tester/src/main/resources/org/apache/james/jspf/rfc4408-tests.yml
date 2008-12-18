@@ -212,11 +212,14 @@ tests:
   multitxt2:
     description: >-
       Multiple records is a permerror, v=spf1 is case insensitive
+    comment: >-
+      Implementations that query for SPF-type RRs only will acceptably yield
+      "none".
     spec: 4.5/6
     helo: mail.example1.com
     host: 1.2.3.4
     mailfrom: foo@example6.com
-    result: permerror
+    result: [permerror, none]
   multispf1:
     description: >-
       Multiple records is a permerror, even when they are identical.
@@ -1942,6 +1945,16 @@ tests:
     host: 1.2.3.4
     mailfrom: philip-gladstone-test@e11.example.com
     result: pass
+  macro-multiple-delimiters:
+    spec: [8.1/15, 8.1/16]
+    description: |-
+      Multiple delimiters may be specified in a macro expression.
+        macro-expand = ( "%{" macro-letter transformers *delimiter "}" )
+                       / "%%" / "%_" / "%-"
+    helo: mail.example.com
+    host: 1.2.3.4
+    mailfrom: foo-bar+zip+quux@e12.example.com
+    result: pass
 zonedata:
   example.com.d.spf.example.com:
     - SPF: v=spf1 redirect=a.spf.example.com
@@ -2021,6 +2034,10 @@ zonedata:
   e11.example.com:
     - SPF: v=spf1 exists:%{i}.%{l2r-}.user.%{d2}
   1.2.3.4.gladstone.philip.user.example.com:
+    - A: 127.0.0.2
+  e12.example.com:
+    - SPF: v=spf1 exists:%{l2r+-}.user.%{d2}
+  bar.foo.user.example.com:
     - A: 127.0.0.2
 ---
 description: Processing limits
