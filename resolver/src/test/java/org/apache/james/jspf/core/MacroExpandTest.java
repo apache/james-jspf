@@ -188,14 +188,16 @@ public class MacroExpandTest extends TestCase {
     }
     
     public void testLocalPartWithSpecialChars() throws PermErrorException {
-    	defIp4me.expand("+exists:CL.%{i}.FR.%{s}.spf.test.com", new rfcIP4MacroData() {
+    	
+    	
+    	assertEquals("+exists:CL.192.0.2.3.FR.test{$LNAME}@email.example.com.spf.test.com",defIp4me.expand("+exists:CL.%{i}.FR.%{s}.spf.test.com", new rfcIP4MacroData() {
     		public String getMailFrom() {
     			return "test{$LNAME}@email.example.com";
     		}
     		   public String getCurrentSenderPart() {
     	            return "test{$LNAME}";
     	        }
-    	}, MacroExpand.DOMAIN);
+    	}, MacroExpand.DOMAIN));
     }
 
 }
