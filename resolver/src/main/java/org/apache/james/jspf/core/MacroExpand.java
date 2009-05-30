@@ -278,7 +278,7 @@ public class MacroExpand {
                     macroCell = input.substring(inputMatcher.start() + 2, inputMatcher
                             .end() - 1);
                     inputMatcher
-                            .appendReplacement(decodedValue, replaceCell(macroCell, macroData, isExplanation));
+                            .appendReplacement(decodedValue, escapeForMatcher(replaceCell(macroCell, macroData, isExplanation)));
                 } else if (match2.length() == 2 && match2.startsWith("%")) {
                     // handle the % escaping
                     /*
@@ -293,7 +293,7 @@ public class MacroExpand {
                     } else if ("%-".equals(match2)) {
                         inputMatcher.appendReplacement(decodedValue, "%20");
                     } else {
-                        inputMatcher.appendReplacement(decodedValue, match2.substring(1));
+                        inputMatcher.appendReplacement(decodedValue, escapeForMatcher(match2.substring(1)));
                     }
                 }
             }
@@ -561,6 +561,28 @@ public class MacroExpand {
         // workaround for the above descripted problem
         return data.replaceAll("\\+", "%20");
 
+    }
+    
+    /**
+     * Because Dollar signs may be treated as references to captured subsequences in method Matcher.appendReplacement
+     * its necessary to escape Dollar signs because its allowed in the local-part of an emailaddress.
+     * 
+     * See JSPF-71 for the bugreport
+     * 
+     * @param raw
+     * @return escaped string
+     */
+    private String escapeForMatcher(String raw) {
+    	StringBuffer sb= new StringBuffer();
+    	
+    	for (int i = 0; i < raw.length(); i++) {
+    		char c = raw.charAt(i);
+    		if (c == '$') {
+    			sb.append('\\');
+    		}
+    		sb.append(c);
+    	}
+    	return sb.toString();
     }
 
 }

@@ -184,7 +184,18 @@ public class MacroExpandTest extends TestCase {
     public void testExample6_ipv6() throws PermErrorException {
         assertEquals(
                 "1.0.B.C.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.B.D.0.1.0.0.2.ip6._spf.example.com",
-                defIp6me.expand("%{ir}.%{v}._spf.%{d2}", new rfcIP6MacroData(), MacroExpand.DOMAIN));
+                defIp6me.expand("%{ir}.%{v}._spf.%{d2}", new rfcIP6MacroData(), MacroExpand.EXPLANATION));
+    }
+    
+    public void testLocalPartWithSpecialChars() throws PermErrorException {
+    	defIp4me.expand("+exists:CL.%{i}.FR.%{s}.spf.test.com", new rfcIP4MacroData() {
+    		public String getMailFrom() {
+    			return "test{$LNAME}@email.example.com";
+    		}
+    		   public String getCurrentSenderPart() {
+    	            return "test{$LNAME}";
+    	        }
+    	}, MacroExpand.DOMAIN);
     }
 
 }
