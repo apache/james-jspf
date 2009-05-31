@@ -188,16 +188,33 @@ public class MacroExpandTest extends TestCase {
     }
     
     public void testLocalPartWithSpecialChars() throws PermErrorException {
-    	
-    	
-    	assertEquals("+exists:CL.192.0.2.3.FR.test{$LNAME}@email.example.com.spf.test.com",defIp4me.expand("+exists:CL.%{i}.FR.%{s}.spf.test.com", new rfcIP4MacroData() {
-    		public String getMailFrom() {
-    			return "test{$LNAME}@email.example.com";
-    		}
-    		   public String getCurrentSenderPart() {
-    	            return "test{$LNAME}";
-    	        }
-    	}, MacroExpand.DOMAIN));
+
+        assertEquals(
+                "+exists:CL.192.0.2.3.FR.test{$LNAME}@email.example.com.spf.test.com",
+                defIp4me.expand("+exists:CL.%{i}.FR.%{s}.spf.test.com",
+                        new rfcIP4MacroData() {
+                            public String getMailFrom() {
+                                return "test{$LNAME}@email.example.com";
+                            }
+
+                            public String getCurrentSenderPart() {
+                                return "test{$LNAME}";
+                            }
+                        }, MacroExpand.DOMAIN));
+
+        // not sure if \ is allowed in email, but anyway make sure we correctly handle also backslash.
+        assertEquals(
+                "+exists:CL.192.0.2.3.FR.tes\\t{$LNAME}@email.example.com.spf.test.com",
+                defIp4me.expand("+exists:CL.%{i}.FR.%{s}.spf.test.com",
+                        new rfcIP4MacroData() {
+                            public String getMailFrom() {
+                                return "tes\\t{$LNAME}@email.example.com";
+                            }
+
+                            public String getCurrentSenderPart() {
+                                return "tes\\t{$LNAME}";
+                            }
+                        }, MacroExpand.DOMAIN));
     }
 
 }

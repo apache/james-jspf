@@ -573,16 +573,16 @@ public class MacroExpand {
      * @return escaped string
      */
     private String escapeForMatcher(String raw) {
-    	StringBuffer sb= new StringBuffer();
-    	
-    	for (int i = 0; i < raw.length(); i++) {
-    		char c = raw.charAt(i);
-    		if (c == '$') {
-    			sb.append('\\');
-    		}
-    		sb.append(c);
-    	}
-    	return sb.toString();
+        StringBuffer sb = new StringBuffer();
+
+        for (int i = 0; i < raw.length(); i++) {
+            char c = raw.charAt(i);
+            if (c == '$' || c == '\\') {
+                sb.append('\\');
+            }
+            sb.append(c);
+        }
+        return sb.toString();
     }
 
 }
