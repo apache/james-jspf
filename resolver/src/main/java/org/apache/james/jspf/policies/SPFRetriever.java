@@ -128,14 +128,6 @@ public class SPFRetriever implements SPFChecker {
             // DO NOT trim the result!
             String compare = all.next().toString();
 
-            // TODO is this correct? we remove the first and last char if the
-            // result has an initial " 
-            // remove '"'
-            if (compare.charAt(0)=='"') {
-                compare = compare.toLowerCase().substring(1,
-                        compare.length() - 1);
-            }
-
             // We trim the compare value only for the comparison
             if (compare.toLowerCase().trim().startsWith(SPF1Constants.SPF_VERSION1 + " ") || compare.trim().equalsIgnoreCase(SPF1Constants.SPF_VERSION1)) {
                 if (returnValue == null) {

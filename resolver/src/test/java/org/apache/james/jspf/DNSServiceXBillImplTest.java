@@ -20,9 +20,13 @@
 
 package org.apache.james.jspf;
 
+import org.apache.james.jspf.impl.DNSServiceXBillImpl;
+import org.xbill.DNS.DClass;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.Record;
+import org.xbill.DNS.SPFRecord;
+import org.xbill.DNS.TXTRecord;
 import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
 
@@ -58,6 +62,20 @@ public class DNSServiceXBillImplTest extends TestCase {
                 .getCanonicalHostName());
         Record[] record = new Lookup(Name.root, Type.ANY).run();
         if (record !=null) System.out.println(record[0]);
+    }
+    
+    public void testMultipleStrings() throws Exception {
+        Record[] rr = new Record[] { TXTRecord.fromString(Name.fromString("test.local."), Type.TXT, DClass.IN, 0, "\"string \" \"concatenated\"", Name.fromString("local.")) };
+        assertEquals("string concatenated", DNSServiceXBillImpl.convertRecordsToList(rr).get(0));
+
+        rr = new Record[] { TXTRecord.fromString(Name.fromString("test.local."), Type.TXT, DClass.IN, 0, "string", Name.fromString("local.")) };
+        assertEquals("string", DNSServiceXBillImpl.convertRecordsToList(rr).get(0));
+
+        rr = new Record[] { TXTRecord.fromString(Name.fromString("test.local."), Type.TXT, DClass.IN, 0, "\"quoted string\"", Name.fromString("local.")) };
+        assertEquals("quoted string", DNSServiceXBillImpl.convertRecordsToList(rr).get(0));
+
+        rr = new Record[] { SPFRecord.fromString(Name.fromString("test.local."), Type.SPF, DClass.IN, 0, "\"quot\" \"ed st\" \"ring\"", Name.fromString("local.")) };
+        assertEquals("quoted string", DNSServiceXBillImpl.convertRecordsToList(rr).get(0));
     }
 
 }

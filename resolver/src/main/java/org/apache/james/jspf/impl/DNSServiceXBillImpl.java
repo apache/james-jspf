@@ -39,6 +39,7 @@ import org.xbill.DNS.Type;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -180,6 +181,7 @@ public class DNSServiceXBillImpl implements DNSService {
         if (rr != null && rr.length > 0) {
             records = new ArrayList();
             for (int i = 0; i < rr.length; i++) {
+                System.out.println(rr[i].getType());
                 switch (rr[i].getType()) {
                     case Type.A:
                         ARecord a = (ARecord) rr[i];
@@ -199,11 +201,31 @@ public class DNSServiceXBillImpl implements DNSService {
                         break;
                     case Type.TXT:
                         TXTRecord txt = (TXTRecord) rr[i];
-                        records.add(txt.rdataToString());
+                        if (txt.getStrings().size() == 1) {
+                            records.add(txt.getStrings().get(0));
+                        } else {
+                            StringBuffer sb = new StringBuffer();
+                            for (Iterator it = txt.getStrings().iterator(); it
+                                    .hasNext();) {
+                                String k = (String) it.next();
+                                sb.append(k);
+                            }
+                            records.add(sb.toString());
+                        }
                         break;
                     case Type.SPF:
                         SPFRecord spf = (SPFRecord) rr[i];
-                        records.add(spf.rdataToString());
+                        if (spf.getStrings().size() == 1) {
+                            records.add(spf.getStrings().get(0));
+                        } else {
+                            StringBuffer sb = new StringBuffer();
+                            for (Iterator it = spf.getStrings().iterator(); it
+                                    .hasNext();) {
+                                String k = (String) it.next();
+                                sb.append(k);
+                            }
+                            records.add(sb.toString());
+                        }
                         break;
                     default:
                         return null;
