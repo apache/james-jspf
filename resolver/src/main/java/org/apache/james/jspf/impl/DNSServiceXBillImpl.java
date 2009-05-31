@@ -181,7 +181,6 @@ public class DNSServiceXBillImpl implements DNSService {
         if (rr != null && rr.length > 0) {
             records = new ArrayList();
             for (int i = 0; i < rr.length; i++) {
-                System.out.println(rr[i].getType());
                 switch (rr[i].getType()) {
                     case Type.A:
                         ARecord a = (ARecord) rr[i];
