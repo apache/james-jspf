@@ -52,6 +52,20 @@
       <directory>../target/site/apidocs</directory>
       <outputDirectory>/apidocs</outputDirectory>
     </fileSet>
+    <fileSet>
+      <directory>../stage/dnsjava/jars</directory>
+      <includes>
+        <include>*.LICENSE</include>
+      </includes>
+      <outputDirectory>/lib</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>../stage/org.jvyaml/jars</directory>
+      <includes>
+        <include>*.LICENSE</include>
+      </includes>
+      <outputDirectory>/lib</outputDirectory>
+    </fileSet>
   </fileSets>
   <dependencySets>
     <dependencySet>
