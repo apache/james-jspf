@@ -23,7 +23,7 @@
   <artifactId>stage</artifactId>
   <parent>
     <groupId>org.apache.james</groupId>
-    <artifactId>apache-jspf</artifactId>
+    <artifactId>apache-jspf-project</artifactId>
     <version>0.9.7-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>

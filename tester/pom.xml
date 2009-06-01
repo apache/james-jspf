@@ -20,10 +20,10 @@
 -->
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.james.jspf</groupId>
-  <artifactId>tester</artifactId>
+  <artifactId>apache-jspf-tester</artifactId>
   <parent>
     <groupId>org.apache.james</groupId>
-    <artifactId>apache-jspf</artifactId>
+    <artifactId>apache-jspf-project</artifactId>
     <version>0.9.7-SNAPSHOT</version>
   </parent>
   <name>Apache JAMES OpenSPF Tester</name>
