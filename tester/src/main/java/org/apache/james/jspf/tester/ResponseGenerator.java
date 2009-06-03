@@ -17,7 +17,7 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.dnsserver;
+package org.apache.james.jspf.tester;
 
 
 public interface ResponseGenerator {

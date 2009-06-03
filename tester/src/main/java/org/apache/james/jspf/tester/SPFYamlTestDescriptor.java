@@ -17,7 +17,7 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf;
+package org.apache.james.jspf.tester;
 
 import org.jvyaml.Constructor;
 import org.jvyaml.DefaultYAMLFactory;

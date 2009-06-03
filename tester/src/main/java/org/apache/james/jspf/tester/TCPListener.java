@@ -54,7 +54,7 @@
  * under the License.                                           *
  ****************************************************************/
 
-package org.apache.james.jspf.dnsserver;
+package org.apache.james.jspf.tester;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

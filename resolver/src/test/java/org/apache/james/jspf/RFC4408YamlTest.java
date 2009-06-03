@@ -21,6 +21,7 @@ package org.apache.james.jspf;
 
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.impl.Log4JLogger;
+import org.apache.james.jspf.tester.SPFYamlTestDescriptor;
 
 import java.io.IOException;
 import java.util.Iterator;

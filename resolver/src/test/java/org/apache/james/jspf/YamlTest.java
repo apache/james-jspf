@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.james.jspf.tester.SPFYamlTestDescriptor;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
