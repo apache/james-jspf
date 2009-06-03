@@ -82,6 +82,7 @@
       </plugin>
     </plugins>
   </reporting>
+  
   <build>
     <plugins>
       <plugin>
@@ -100,13 +101,16 @@
         <artifactId>maven-jar-plugin</artifactId>
         <configuration>
           <archive>
-            <manifest>
-              <mainClass>org.apache.james.jspf.impl.SPFQuery</mainClass>
-              <packageName>org.apache.james.jspf</packageName>
-              <addClasspath>true</addClasspath>
-            </manifest>
             <manifestEntries>
-              <mode>development</mode>
+              <Specification-Title>${pom.name}</Specification-Title>
+              <Specification-Version>${pom.version}</Specification-Version>
+              <Specification-Vendor>The Apache Software Foundation</Specification-Vendor>
+              <Implementation-Title>${pom.name}</Implementation-Title>
+              <Implementation-Version>${pom.version}</Implementation-Version>
+              <Implementation-Vendor>The Apache Software Foundation</Implementation-Vendor>
+              <Implementation-Vendor-Id>org.apache</Implementation-Vendor-Id>
+              <X-Compile-Source-JDK>${target.jdk}</X-Compile-Source-JDK>
+              <X-Compile-Target-JDK>${target.jdk}</X-Compile-Target-JDK>
               <url>${pom.url}</url>
             </manifestEntries>
           </archive>
@@ -144,6 +148,7 @@
       <!-- Add NOTICE and LICENSE to generated JAR -->
       <plugin>
         <artifactId>maven-remote-resources-plugin</artifactId>
+        <version>1.0</version>
         <executions>
           <execution>
             <goals>
