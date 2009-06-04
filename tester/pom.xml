@@ -72,10 +72,10 @@
           <excludes>
             <!-- 3rd party resources described in NOTICE:
                  see the maven-remote-resources-plugin configuration, in this file -->
-            <exclude>src/main/resources/org/apache/james/jspf/pyspf-tests.yml</exclude>
-            <exclude>src/main/resources/org/apache/james/jspf/rfc4408-tests.yml</exclude>
-            <exclude>src/main/resources/org/apache/james/jspf/rfc4408-tests-2008.08.yml</exclude>
-            <exclude>src/main/resources/org/apache/james/jspf/tests.yml</exclude>
+            <exclude>src/main/resources/org/apache/james/jspf/tester/pyspf-tests.yml</exclude>
+            <exclude>src/main/resources/org/apache/james/jspf/tester/rfc4408-tests.yml</exclude>
+            <exclude>src/main/resources/org/apache/james/jspf/tester/rfc4408-tests-2008.08.yml</exclude>
+            <exclude>src/main/resources/org/apache/james/jspf/tester/tests.yml</exclude>
             <exclude>release.properties</exclude>
           </excludes>
         </configuration>
