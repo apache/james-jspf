@@ -42,6 +42,17 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
 
+/**
+ * Run a fake dnsserver listening both TCP and UDP ports.
+ * 
+ * Mandatory parameters are -f (yaml zone definition) and -t (test name).
+ * if testname is "ALL" then all of the zones in the file are merged in a single
+ * zone and loaded.
+ * 
+ * e.g: DNSTestingServerLauncher -f rfc4408-tests.yml -t ALL
+ * 
+ * by default listen to port 53 of every interface, but ip and port can be updated.
+ */
 public class DNSTestingServerLauncher {
 
     private static final char CHAR_TESTNAME = 't';
@@ -93,26 +104,19 @@ public class DNSTestingServerLauncher {
                     
                     Constructor ctor = fact.createConstructor(fact.createComposer(fact.createParser(fact.createScanner(br)),fact.createResolver()));
                     boolean found = false;
+                    HashMap zonedata = new HashMap();
                     HashMap testMap = null;
                     while(ctor.checkData() && !found) {
                         Object o = ctor.getData();
                         if (o instanceof HashMap) {
                           testMap = (HashMap) o;
-                          if (test.equals(testMap.get("description"))) {
+                          if (test.equals(testMap.get("description")) || "ALL".equalsIgnoreCase(test)) {
                               found = true;
+                              loadZoneData(testMap, zonedata);
                           }
                         }
                     }
                     if (found) {
-                        HashMap loadedZoneData = (HashMap) testMap.get("zonedata");
-                        HashMap zonedata = new HashMap();
-                        Set keys = loadedZoneData.keySet();
-                        for (Iterator i = keys.iterator(); i.hasNext(); ) {
-                            String hostname = (String) i.next();
-                            String lowercase = hostname.toLowerCase(Locale.US);
-                            zonedata.put(lowercase, loadedZoneData.get(hostname));
-                        }
-                        
                         DNSTestingServer testingServer = new DNSTestingServer(ip, port);
                         testingServer.setData(zonedata);
                         
@@ -154,6 +158,19 @@ public class DNSTestingServerLauncher {
             usage();
         }
 
+    }
+
+    private static void loadZoneData(HashMap testMap, HashMap zonedata) {
+        HashMap loadedZoneData = (HashMap) testMap.get("zonedata");
+        Set keys = loadedZoneData.keySet();
+        for (Iterator i = keys.iterator(); i.hasNext(); ) {
+            String hostname = (String) i.next();
+            String lowercase = hostname.toLowerCase(Locale.US);
+            if (zonedata.containsKey(lowercase)) {
+                System.err.println("Replace zone entry for "+lowercase+" to "+loadedZoneData.get(hostname));
+            }
+            zonedata.put(lowercase, loadedZoneData.get(hostname));
+        }
     }
 
     /**
