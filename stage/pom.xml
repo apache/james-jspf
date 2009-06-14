@@ -17,20 +17,20 @@
   specific language governing permissions and limitations
   under the License.    
 -->
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.james.jspf</groupId>
   <artifactId>stage</artifactId>
   <parent>
     <groupId>org.apache.james</groupId>
     <artifactId>apache-jspf-project</artifactId>
-    <version>0.9.7-SNAPSHOT</version>
+    <version>0.9.7</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <name>Apache JAMES jSPF Stage Repository</name>
   <description>Local maven repository for Apache JAMES jSPF</description>
   <packaging>pom</packaging>
-  <version>0.9.7-SNAPSHOT</version>
+  <version>0.9.7</version>
   <repositories>
     <repository>
       <id>jspf-local-repository</id>
@@ -50,13 +50,13 @@
     <dependency>
       <groupId>org.apache.james</groupId>
       <artifactId>james-parent</artifactId>
-      <version>1.2-SNAPSHOT</version>
+      <version>1.2</version>
       <type>pom</type>
     </dependency>
     <dependency>
       <groupId>org.apache.james</groupId>
       <artifactId>james-project</artifactId>
-      <version>1.3-SNAPSHOT</version>
+      <version>1.3</version>
       <type>pom</type>
     </dependency>
     <dependency>
