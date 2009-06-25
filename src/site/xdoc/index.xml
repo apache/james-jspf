@@ -26,13 +26,21 @@
     <section name="What is it?">
       <p>
         The jSPF library is pure Java SPF implementation. It was designed to match the current
-        SPF-Specs of 2006-2008 (See RFC section). SPF is also knows as Sender Policy Framework.     
+        SPF-Specs of 2006-2009 (See RFC section). SPF is also knows as Sender Policy Framework.     
         It was designed to detect email spoofing.This is the solution if you ever was tired
         of getting spam from yourself. For more informations see 
         <a href="http://www.openspf.org"> openspf website</a>.
       </p>
     </section>
     <section name="News">
+   
+    <subsection name="2009">
+     
+      <h4>Jun/2009 - jSPF-0.9.7 released</h4>
+      <p>After 1 year we are proud to announce the <a href="../download.cgi">availability</a> release of APACHE jSPF-0.9.7. This release includes fixes for correct handling of $ signs in the local-part of emailaddresses and quotes in SPF-Records. 
+         It also includes a new version of dnsjnio which fixes some race-condition when using the async mode of jSPF.
+      </p>
+    </subsection> 
     
     <subsection name="2008">
      
