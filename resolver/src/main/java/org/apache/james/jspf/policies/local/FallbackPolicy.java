@@ -39,7 +39,7 @@ import java.util.Map;
  */
 public class FallbackPolicy implements PolicyPostFilter {
 
-    private Map entryMap;
+    private Map<String,SPF1Record> entryMap;
 
     private SPFRecordParser parser;
 
@@ -47,7 +47,7 @@ public class FallbackPolicy implements PolicyPostFilter {
 
     public FallbackPolicy(Logger log, SPFRecordParser parser) {
         this.log = log;
-        entryMap = Collections.synchronizedMap(new HashMap());
+        entryMap = Collections.synchronizedMap(new HashMap<String,SPF1Record>());
         this.parser = parser;
     }
 
@@ -132,14 +132,14 @@ public class FallbackPolicy implements PolicyPostFilter {
      *         the given host
      */
     protected SPF1Record getMySPFRecord(String host) {
-        Object entry = null;
+        SPF1Record entry = null;
 
         synchronized (entryMap) {
             entry = getRawEntry(host);
         }
 
         if (entry != null) {
-            return (SPF1Record) entry;
+            return entry;
         } else {
             return null;
         }
@@ -154,11 +154,11 @@ public class FallbackPolicy implements PolicyPostFilter {
      *            the host
      * @return the stored object for the given host or null
      */
-    private Object getRawEntry(String host) {
-        Iterator fallBackIt = entryMap.keySet().iterator();
+    private SPF1Record getRawEntry(String host) {
+        Iterator<String> fallBackIt = entryMap.keySet().iterator();
 
         while (fallBackIt.hasNext()) {
-            String rawHost = fallBackIt.next().toString();
+            String rawHost = fallBackIt.next();
 
             if ((rawHost.startsWith(".") && host.startsWith(rawHost))
                     || rawHost.endsWith(".") && host.endsWith(rawHost)) {

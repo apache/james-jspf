@@ -43,7 +43,7 @@ public interface DNSService {
      * 
      * @return names A List contains all domain names which could resolved
      */
-    public List getLocalDomainNames();
+    public List<String> getLocalDomainNames();
 
     /**
      * Set the timeout for DNS-Requests

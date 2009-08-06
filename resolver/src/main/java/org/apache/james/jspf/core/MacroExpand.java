@@ -98,11 +98,11 @@ public class MacroExpand {
             // later
             session.setClientDomain("unknown");
             try {
-                List records = response.getResponse();
+                List<String> records = response.getResponse();
                 if (records != null && records.size() > 0) {
-                    Iterator i = records.iterator();
+                    Iterator<String> i = records.iterator();
                     while (i.hasNext()) {
-                        String next = (String) i.next();
+                        String next = i.next();
                         if (IPAddr.getAddress(session.getIpAddress())
                                 .toString().equals(
                                         IPAddr.getAddress(next).toString())) {
@@ -134,10 +134,10 @@ public class MacroExpand {
 
             try {
                 boolean ip6 = IPAddr.isIPV6(session.getIpAddress());
-                List records = response.getResponse();
+                List<String> records = response.getResponse();
 
                 if (records != null && records.size() > 0) {
-                    String record = (String) records.get(0);
+                    String record = records.get(0);
                     session.setAttribute(ATTRIBUTE_MACRO_EXPAND_CHECKED_RECORD,
                             record);
 
@@ -376,7 +376,7 @@ public class MacroExpand {
         }
 
         // Reverse domains as necessary
-        ArrayList data = split(variable, delimeters);
+        ArrayList<String> data = split(variable, delimeters);
         if (isReversed) {
             data = reverse(data);
         }
@@ -436,7 +436,7 @@ public class MacroExpand {
             rValue = macroData.getReceivingDomain();
             if (rValue == null) {
                 rValue = "unknown";
-                List dNames = dnsProbe.getLocalDomainNames();
+                List<String> dNames = dnsProbe.getLocalDomainNames();
 
                 for (int i = 0; i < dNames.size(); i++) {
                     // check if the domainname is a FQDN
@@ -472,11 +472,11 @@ public class MacroExpand {
      *            The delimeter we want to use to split the String
      * @return ArrayList which contains the String parts
      */
-    private ArrayList split(String data, String delimeters) {
+    private ArrayList<String> split(String data, String delimeters) {
 
         String currentChar;
         StringBuffer element = new StringBuffer();
-        ArrayList splitParts = new ArrayList();
+        ArrayList<String> splitParts = new ArrayList<String>();
 
         for (int i = 0; i < data.length(); i++) {
             currentChar = data.substring(i, i + 1);
@@ -498,9 +498,9 @@ public class MacroExpand {
      *            The ArrayList we want to get reversed
      * @return reversed The reversed given ArrayList
      */
-    private ArrayList reverse(ArrayList data) {
+    private ArrayList<String> reverse(ArrayList<String> data) {
 
-        ArrayList reversed = new ArrayList();
+        ArrayList<String> reversed = new ArrayList<String>();
         for (int i = 0; i < data.size(); i++) {
             reversed.add(0, data.get(i));
         }
@@ -510,7 +510,7 @@ public class MacroExpand {
     /**
      * @see #subset(ArrayList, int)
      */
-    private String subset(ArrayList data) {
+    private String subset(ArrayList<String> data) {
         return subset(data, data.size());
     }
 
@@ -521,7 +521,7 @@ public class MacroExpand {
      * @param length The ArrayLength
      * @return A String which holds all entries seperated by dots
      */
-    private String subset(ArrayList data, int length) {
+    private String subset(ArrayList<String> data, int length) {
 
         StringBuffer buildString = new StringBuffer();
         if (data.size() < length) {

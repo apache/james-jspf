@@ -68,9 +68,9 @@ public class SPFSession implements MacroData {
 
     private boolean ignoreExplanation = false;
     
-    private Map attributes = new HashMap();
+    private Map<String,Object> attributes = new HashMap<String,Object>();
     
-    private Stack checkers = new Stack();
+    private Stack<SPFChecker> checkers = new Stack<SPFChecker>();
     
     private String currentResultExpanded;
     
@@ -364,7 +364,7 @@ public class SPFSession implements MacroData {
         if (checkers.isEmpty()) {
             return null;
         } else {
-            SPFChecker checker = (SPFChecker) checkers.pop();
+            SPFChecker checker = checkers.pop();
             return checker;
         }
     }

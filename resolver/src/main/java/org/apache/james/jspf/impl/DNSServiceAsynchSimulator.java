@@ -35,7 +35,7 @@ public class DNSServiceAsynchSimulator implements Runnable, DNSAsynchLookupServi
 
     private DNSService dnsService;
     private Thread worker;
-    private LinkedList queue;
+    private LinkedList<Request> queue;
     private int waitingThreads = 0;
     private boolean multiThread;
     
@@ -64,7 +64,7 @@ public class DNSServiceAsynchSimulator implements Runnable, DNSAsynchLookupServi
         this.dnsService = service;
         this.multiThread = multiThread;
 
-        this.queue = new LinkedList();
+        this.queue = new LinkedList<Request>();
         this.worker = new Thread(this);
         this.worker.setDaemon(true);
         this.worker.setName("DNSServiceAsynchSimulator");

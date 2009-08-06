@@ -30,7 +30,7 @@ import java.util.List;
  */
 public class DNSResponse {
     
-    private List response;
+    private List<String> response;
     
     private TimeoutException exception;
     
@@ -39,7 +39,7 @@ public class DNSResponse {
         this.response = null;
     }
     
-    public DNSResponse(List response) {
+    public DNSResponse(List<String> response) {
         this.exception = null;
         this.response = response;
     }
@@ -51,7 +51,7 @@ public class DNSResponse {
      * @throws TimeoutException get thrown if an timeout was returned while tried to 
      *         process a dns request
      */
-    public List getResponse() throws TimeoutException {
+    public List<String> getResponse() throws TimeoutException {
         if (exception != null) {
             throw exception;
         } else {

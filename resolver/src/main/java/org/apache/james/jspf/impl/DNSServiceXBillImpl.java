@@ -91,8 +91,8 @@ public class DNSServiceXBillImpl implements DNSService {
     /**
      * @see org.apache.james.jspf.core.DNSService#getLocalDomainNames()
      */
-    public List getLocalDomainNames() {
-        List names = new ArrayList();
+    public List<String> getLocalDomainNames() {
+        List<String> names = new ArrayList<String>();
 
         log.debug("Start Local ipaddress lookup");
         try {

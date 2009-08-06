@@ -53,7 +53,7 @@ public class SPFRetriever implements SPFChecker {
                 NoneException, TempErrorException,
                 NeutralException {
             
-            List spfR;
+            List<String> spfR;
             try {
                 spfR = response.getResponse();
                 String record = extractSPFRecord(spfR);
@@ -79,7 +79,7 @@ public class SPFRetriever implements SPFChecker {
                 throws PermErrorException, NoneException,
                 TempErrorException, NeutralException {
             try {
-                List spfR = response.getResponse();
+                List<String> spfR = response.getResponse();
                 
                 if (spfR == null || spfR.isEmpty()) {
                     
@@ -118,15 +118,15 @@ public class SPFRetriever implements SPFChecker {
      * @throws PermErrorException if more then one SPF - Record was found in the 
      *                            given List.
      */
-    protected static String extractSPFRecord(List spfR) throws PermErrorException {
+    protected static String extractSPFRecord(List<String> spfR) throws PermErrorException {
         if (spfR == null || spfR.isEmpty()) return null;
         
         String returnValue = null;
-        Iterator all = spfR.iterator();
+        Iterator<String> all = spfR.iterator();
            
         while (all.hasNext()) {
             // DO NOT trim the result!
-            String compare = all.next().toString();
+            String compare = all.next();
 
             // We trim the compare value only for the comparison
             if (compare.toLowerCase().trim().startsWith(SPF1Constants.SPF_VERSION1 + " ") || compare.trim().equalsIgnoreCase(SPF1Constants.SPF_VERSION1)) {
