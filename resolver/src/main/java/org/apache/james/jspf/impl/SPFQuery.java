@@ -156,57 +156,59 @@ public class SPFQuery {
      */
     private static Options generateOptions() {
         Options options = new Options();
-        options.addOption(OptionBuilder
-                .withLongOpt(CMD_IP)
-                .withValueSeparator('=')
-                .withArgName("ip")
-                .withDescription("Sender IP address")
-                .isRequired()
-                .hasArg()
-                .create(CHAR_IP));
-        options.addOption(OptionBuilder
-                .withLongOpt(CMD_SENDER)
-                .withValueSeparator('=')
-                .withArgName("sender")
-                .withDescription("Sender address")
-                .isRequired()
-                .hasArg()
-                .create(CHAR_SENDER));
-        options.addOption(OptionBuilder
-                .withLongOpt(CMD_HELO)
-                .withValueSeparator('=')
-                .withArgName("helo")
-                .withDescription("Helo name")
-                .isRequired()
-                .hasArg()
-                .create(CHAR_HELO));
-        options.addOption(OptionBuilder
-                .withLongOpt(CMD_DEFAULT_EXP)
-                .withValueSeparator('=')
-                .withArgName("expl")
-                .withDescription("Default explanation")
-                .hasArg()
-                .create(CHAR_DEFAULT_EXP));
-        options.addOption(OptionBuilder
-                .withLongOpt(CMD_BEST_GUESS)
-                .withArgName("bestguess")
-                .withDescription("Enable 'best guess' rule")
-                .create(CHAR_BEST_GUESS));
-        options.addOption(OptionBuilder
-                .withLongOpt(CMD_TRUSTED_FORWARDER)
-                .withArgName("trustedfwd")
-                .withDescription("Enable 'trusted forwarder' rule")
-                .create(CHAR_TRUSTED_FORWARDER));
-        options.addOption(OptionBuilder
-                .withLongOpt(CMD_DEBUG)
-                .withArgName("debug")
-                .withDescription("Enable debug")
-                .create(CHAR_DEBUG));
-        options.addOption(OptionBuilder
-                .withLongOpt(CMD_VERBOSE)
-                .withArgName("verbose")
-                .withDescription("Enable verbose mode")
-                .create(CHAR_VERBOSE));
+        
+        OptionBuilder.withLongOpt(CMD_IP);
+        OptionBuilder.withValueSeparator('=');
+        OptionBuilder.withArgName("ip");
+        OptionBuilder.withDescription("Sender IP address");
+        OptionBuilder.isRequired();
+        OptionBuilder.hasArg();
+        options.addOption(OptionBuilder.create(CHAR_IP));
+       
+        
+        OptionBuilder.withLongOpt(CMD_SENDER);
+        OptionBuilder.withValueSeparator('=');
+        OptionBuilder.withArgName("sender");
+        OptionBuilder.withDescription("Sender address");
+        OptionBuilder.isRequired();
+        OptionBuilder.hasArg();
+        options.addOption(OptionBuilder.create(CHAR_SENDER));
+        
+        OptionBuilder.withLongOpt(CMD_HELO);
+        OptionBuilder.withValueSeparator('=');
+        OptionBuilder.withArgName("helo");
+        OptionBuilder.withDescription("Helo name");
+        OptionBuilder.isRequired();
+        OptionBuilder.hasArg();
+        options.addOption(OptionBuilder.create(CHAR_HELO));
+                
+        OptionBuilder.withLongOpt(CMD_DEFAULT_EXP);
+        OptionBuilder.withValueSeparator('=');
+        OptionBuilder.withArgName("expl");
+        OptionBuilder.withDescription("Default explanation");
+        OptionBuilder.hasArg();  
+        options.addOption(OptionBuilder.create(CHAR_DEFAULT_EXP));
+                
+        OptionBuilder.withLongOpt(CMD_BEST_GUESS);
+        OptionBuilder.withArgName("bestguess");
+        OptionBuilder.withDescription("Enable 'best guess' rule");
+        options.addOption(OptionBuilder.create(CHAR_BEST_GUESS));
+               
+        OptionBuilder.withLongOpt(CMD_TRUSTED_FORWARDER);
+        OptionBuilder.withArgName("trustedfwd");
+        OptionBuilder.withDescription("Enable 'trusted forwarder' rule");
+        options.addOption(OptionBuilder.create(CHAR_TRUSTED_FORWARDER));
+
+        OptionBuilder.withLongOpt(CMD_DEBUG);
+        OptionBuilder.withArgName("debug");
+        OptionBuilder.withDescription("Enable debug");
+        options.addOption(OptionBuilder.create(CHAR_DEBUG));
+
+        OptionBuilder.withLongOpt(CMD_VERBOSE);
+        OptionBuilder.withArgName("verbose");
+        OptionBuilder.withDescription("Enable verbose mode");
+        options.addOption(OptionBuilder.create(CHAR_VERBOSE));
+                
         return options;
     }
 
