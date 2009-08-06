@@ -201,7 +201,7 @@
 
   <properties>
     <project.build.sourceEncoding>iso-8859-15</project.build.sourceEncoding>
-    <target.jdk>1.4</target.jdk>
+    <target.jdk>1.5</target.jdk>
   </properties>
 
 </project>
