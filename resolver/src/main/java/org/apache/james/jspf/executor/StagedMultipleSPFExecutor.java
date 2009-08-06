@@ -42,7 +42,7 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
 
     private static final String ATTRIBUTE_STAGED_EXECUTOR_CONTINUATION = "StagedMultipleSPFExecutor.continuation";
 
-    private static class ResponseQueueImpl extends LinkedList implements IResponseQueue {
+    private static class ResponseQueueImpl extends LinkedList<IResponse> implements IResponseQueue {
 
         private static final long serialVersionUID = 5714025260393791651L;
         
@@ -86,8 +86,8 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
     private Logger log;
     private DNSAsynchLookupService dnsProbe;
     private Thread worker;
-    private Map sessions;
-    private Map results;
+    private Map<Integer,SPFSession> sessions;
+    private Map<Integer,FutureSPFResult>results;
     private ResponseQueueImpl responseQueue;
 
     public StagedMultipleSPFExecutor(Logger log, DNSAsynchLookupService service) {
@@ -96,8 +96,8 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
 
         this.responseQueue = new ResponseQueueImpl();
 
-        this.sessions = Collections.synchronizedMap(new HashMap());
-        this.results = Collections.synchronizedMap(new HashMap());
+        this.sessions = Collections.synchronizedMap(new HashMap<Integer,SPFSession>());
+        this.results = Collections.synchronizedMap(new HashMap<Integer,FutureSPFResult>());
 
         this.worker = new Thread(this);
         this.worker.setDaemon(true);
@@ -174,9 +174,9 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
             
             IResponse resp = responseQueue.removeResponse();
             
-            Integer respId = (Integer) resp.getId();
-            SPFSession session = (SPFSession) sessions.remove(respId);
-            FutureSPFResult result = (FutureSPFResult) results.remove(respId);
+            Integer respId = (Integer)resp.getId();
+            SPFSession session = sessions.remove(respId);
+            FutureSPFResult result = results.remove(respId);
             
             DNSLookupContinuation cont = (DNSLookupContinuation) session.getAttribute(ATTRIBUTE_STAGED_EXECUTOR_CONTINUATION);
             

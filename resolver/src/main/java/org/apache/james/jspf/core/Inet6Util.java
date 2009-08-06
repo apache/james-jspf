@@ -64,8 +64,8 @@ public class Inet6Util {
 
         StringTokenizer tokenizer = new StringTokenizer(ipAddressString, ":.",
                 true);
-        ArrayList hexStrings = new ArrayList();
-        ArrayList decStrings = new ArrayList();
+        ArrayList<String> hexStrings = new ArrayList<String>();
+        ArrayList<String> decStrings = new ArrayList<String>();
         String token = "";
         String prevToken = "";
         int doubleColonIndex = -1; // If a double colon exists, we need to

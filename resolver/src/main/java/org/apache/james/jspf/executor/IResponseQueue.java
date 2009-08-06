@@ -26,7 +26,7 @@ import java.util.List;
  * Queue implementation which is used to manage IResponse
  *
  */
-public interface IResponseQueue extends List {
+public interface IResponseQueue extends List<IResponse> {
     
     /**
      * Return the last IResponse in the queue. If the queue is empty it will
