@@ -189,36 +189,38 @@ public class DNSTestingServerLauncher {
      */
     private static Options generateOptions() {
         Options options = new Options();
-        options.addOption(OptionBuilder
-                .withLongOpt(CMD_IP)
-                .withValueSeparator('=')
-                .hasArg()
-                .withArgName("ip")
-                .withDescription("Listening IP (default: 0.0.0.0 for every IP)")
-                .create(CHAR_IP));
-        options.addOption(OptionBuilder
-                .withLongOpt(CMD_PORT)
-                .withValueSeparator('=')
-                .hasArg()
-                .withArgName("port")
-                .withDescription("Listening port (default: 53)")
-                .create(CHAR_PORT));
-        options.addOption(OptionBuilder
-                .withLongOpt(CMD_FILE)
-                .withValueSeparator('=')
-                .withDescription("YML file name")
-                .withArgName("file")
-                .isRequired()
-                .hasArg()
-                .create(CHAR_FILE));
-        options.addOption(OptionBuilder
-                .withLongOpt(CMD_TESTNAME)
-                .withValueSeparator('=')
-                .hasArg()
-                .withDescription("Test name")
-                .withArgName("test")
-                .isRequired()
-                .create(CHAR_TESTNAME));
+        
+        OptionBuilder.withLongOpt(CMD_IP);
+        OptionBuilder.withValueSeparator('=');
+        OptionBuilder.hasArg();
+        OptionBuilder.withArgName("ip");
+        OptionBuilder.withDescription("Listening IP (default: 0.0.0.0 for every IP)");
+        options.addOption(OptionBuilder.create(CHAR_IP));
+                
+        OptionBuilder.withLongOpt(CMD_PORT);
+        OptionBuilder.withValueSeparator('=');
+        OptionBuilder.hasArg();
+        OptionBuilder.withArgName("port");
+        OptionBuilder.withDescription("Listening port (default: 53)");
+        options.addOption(OptionBuilder.create(CHAR_PORT));
+                
+        OptionBuilder.withLongOpt(CMD_FILE);
+        OptionBuilder.withValueSeparator('=');
+        OptionBuilder.withDescription("YML file name");
+        OptionBuilder.withArgName("file");
+        OptionBuilder.isRequired();
+        OptionBuilder.hasArg();
+        options.addOption(OptionBuilder.create(CHAR_FILE));
+                
+        OptionBuilder.withLongOpt(CMD_TESTNAME);
+        OptionBuilder.withValueSeparator('=');
+        OptionBuilder.hasArg();
+        OptionBuilder.withDescription("Test name");
+        OptionBuilder.withArgName("test");
+        OptionBuilder.isRequired();
+        options.addOption(OptionBuilder.create(CHAR_TESTNAME));
+                
+                
         return options;
     }
 
