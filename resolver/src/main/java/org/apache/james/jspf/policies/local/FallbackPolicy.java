@@ -78,9 +78,7 @@ public class FallbackPolicy implements PolicyPostFilter {
                 host = rawHost;
             }
 
-            synchronized (entryMap) {
-                entryMap.put(host, spfRecord);
-            }
+            entryMap.put(host, spfRecord);
         } catch (SPFResultException e) {
             throw new IllegalArgumentException("Invalid SPF-Record: "
                     + rawSpfRecord);
@@ -94,9 +92,7 @@ public class FallbackPolicy implements PolicyPostFilter {
      */
     public void clearEntrys() {
         log.debug("Clear all entries");
-        synchronized (entryMap) {
-            entryMap.clear();
-        }
+        entryMap.clear();
     }
 
     /**
