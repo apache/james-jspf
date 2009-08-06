@@ -25,6 +25,11 @@ package org.apache.james.jspf.core.exceptions;
 public abstract class SPFResultException extends Exception {
 
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = -7541368045839292195L;
+
+	/**
      * Exception
      * 
      * @param strErrorMessage string
