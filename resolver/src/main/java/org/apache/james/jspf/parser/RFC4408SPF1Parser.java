@@ -105,7 +105,7 @@ public class RFC4408SPF1Parser implements SPFRecordParser {
 
     private int TERM_STEP_REGEX_MODIFIER_POS;
 
-    private List matchResultPositions;
+    private List<TermDefinition> matchResultPositions;
 
     private Logger log;
 
@@ -160,21 +160,21 @@ public class RFC4408SPF1Parser implements SPFRecordParser {
      * regex.
      */
     private void initializePositions() {
-        ArrayList matchResultPositions = new ArrayList();
+        ArrayList<TermDefinition> matchResultPositions = new ArrayList<TermDefinition>();
 
         // FULL MATCH
         int posIndex = 0;
         matchResultPositions.ensureCapacity(posIndex + 1);
         matchResultPositions.add(posIndex, null);
 
-        Iterator i;
+        Iterator<TermDefinition> i;
 
         TERM_STEP_REGEX_MODIFIER_POS = ++posIndex;
         matchResultPositions.ensureCapacity(posIndex + 1);
         matchResultPositions.add(TERM_STEP_REGEX_MODIFIER_POS, null);
         i = termsFactory.getModifiersCollection().iterator();
         while (i.hasNext()) {
-            TermDefinition td = (TermDefinition) i.next();
+            TermDefinition td = i.next();
             int size = td.getMatchSize() + 1;
             for (int k = 0; k < size; k++) {
                 posIndex++;
@@ -192,7 +192,7 @@ public class RFC4408SPF1Parser implements SPFRecordParser {
         matchResultPositions.add(TERM_STEP_REGEX_MECHANISM_POS, null);
         i = termsFactory.getMechanismsCollection().iterator();
         while (i.hasNext()) {
-            TermDefinition td = (TermDefinition) i.next();
+            TermDefinition td = i.next();
             int size = td.getMatchSize() + 1;
             for (int k = 0; k < size; k++) {
                 posIndex++;
@@ -230,9 +230,9 @@ public class RFC4408SPF1Parser implements SPFRecordParser {
      *            static field to concatenate
      * @return regex The regex
      */
-    private String createRegex(Collection commandMap) {
+    private String createRegex(Collection<TermDefinition> commandMap) {
         StringBuffer modifierRegex = new StringBuffer();
-        Iterator i = commandMap.iterator();
+        Iterator<TermDefinition> i = commandMap.iterator();
         boolean first = true;
         while (i.hasNext()) {
             if (first) {
@@ -241,7 +241,7 @@ public class RFC4408SPF1Parser implements SPFRecordParser {
             } else {
                 modifierRegex.append(")|(");
             }
-            Pattern pattern = ((TermDefinition) i.next()).getPattern();
+            Pattern pattern = i.next().getPattern();
             modifierRegex.append(pattern.pattern());
         }
         modifierRegex.append("))");
@@ -290,7 +290,7 @@ public class RFC4408SPF1Parser implements SPFRecordParser {
                             TERM_STEP_REGEX_MODIFIER_POS);
 
                     if (mod.enforceSingleInstance()) {
-                        Iterator it = result.getModifiers().iterator();
+                        Iterator<Modifier> it = result.getModifiers().iterator();
                         while (it.hasNext()) {
                             if (it.next().getClass().equals(mod.getClass())) {
                                 throw new PermErrorException("More than one "

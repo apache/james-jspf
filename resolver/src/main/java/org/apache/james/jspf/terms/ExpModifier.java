@@ -152,7 +152,7 @@ public class ExpModifier extends GenericModifier implements MacroExpandEnabled, 
      */
     public DNSLookupContinuation onDNSResponse(DNSResponse lookup, SPFSession spfData) throws PermErrorException, TempErrorException, NeutralException, NoneException {
         try {
-            List records = lookup.getResponse();
+            List<String> records = lookup.getResponse();
         
             if (records == null) {
                 return null;
@@ -170,7 +170,7 @@ public class ExpModifier extends GenericModifier implements MacroExpandEnabled, 
                 
             } else {
                 
-                String exp = (String) records.get(0);
+                String exp = records.get(0);
                 if (exp.length()>=2 && exp.charAt(0) == '"' && exp.charAt(exp.length() -1 ) == '"') {
                     exp = exp.substring(1, exp.length() - 1);
                 }

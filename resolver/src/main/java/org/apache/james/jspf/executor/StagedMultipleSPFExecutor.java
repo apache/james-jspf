@@ -31,7 +31,6 @@ import org.apache.james.jspf.core.exceptions.TimeoutException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -184,7 +183,7 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
             if (resp.getException() != null) {
                 response = new DNSResponse((TimeoutException) resp.getException());
             } else {
-                response = new DNSResponse((List) resp.getValue());
+                response = new DNSResponse(resp.getValue());
             }
             
             

@@ -23,18 +23,18 @@ import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.core.SPF1Record;
-import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.core.exceptions.NeutralException;
 import org.apache.james.jspf.core.exceptions.NoneException;
 import org.apache.james.jspf.core.exceptions.PermErrorException;
 import org.apache.james.jspf.core.exceptions.TempErrorException;
+import org.apache.james.jspf.terms.Modifier;
 
 /**
  * Sets the result to NEUTRAL if no directive is found 
  */
 public class NeutralIfNotMatchPolicy implements PolicyPostFilter {
     
-    private final class NeutralIfNotMatchModifier implements SPFChecker {
+    private final class NeutralIfNotMatchModifier implements Modifier {
         
         /**
          * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
@@ -50,6 +50,14 @@ public class NeutralIfNotMatchPolicy implements PolicyPostFilter {
         public String toString() {
             return "defaultresult";
         }
+
+        /**
+         * (non-Javadoc)
+         * @see org.apache.james.jspf.terms.Modifier#enforceSingleInstance()
+         */
+		public boolean enforceSingleInstance() {
+			return false;
+		}
     }
 
     /**

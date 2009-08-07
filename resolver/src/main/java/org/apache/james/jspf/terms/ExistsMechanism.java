@@ -78,7 +78,7 @@ public class ExistsMechanism extends GenericMechanism implements SPFCheckerDNSRe
      * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
      */
     public DNSLookupContinuation onDNSResponse(DNSResponse response, SPFSession spfSession) throws PermErrorException, TempErrorException {
-        List aRecords;
+        List<String> aRecords;
         
         try {
             aRecords = response.getResponse();

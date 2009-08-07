@@ -48,14 +48,15 @@ public class SPFStrictCheckerRetriever extends SPFRetriever {
         /**
          * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
          */
-        public DNSLookupContinuation onDNSResponse(
+        @SuppressWarnings("unchecked")
+		public DNSLookupContinuation onDNSResponse(
                 DNSResponse response, SPFSession session)
                 throws PermErrorException,
                 NoneException, TempErrorException,
                 NeutralException {
             
-            List spfR = (List) session.getAttribute(ATTRIBUTE_SPFSTRICT_CHECK_SPFRECORDS);
-            List spfTxtR = null;
+            List<String> spfR = (List<String>) session.getAttribute(ATTRIBUTE_SPFSTRICT_CHECK_SPFRECORDS);
+            List<String> spfTxtR = null;
             try {
                 spfTxtR = response.getResponse();
             } catch (TimeoutException e) {
@@ -84,7 +85,7 @@ public class SPFStrictCheckerRetriever extends SPFRetriever {
                 throws PermErrorException, NoneException,
                 TempErrorException, NeutralException {
             try {
-                List spfR = response.getResponse();
+                List<String> spfR = response.getResponse();
                 
                 session.setAttribute(ATTRIBUTE_SPFSTRICT_CHECK_SPFRECORDS, spfR);
                 
@@ -117,7 +118,7 @@ public class SPFStrictCheckerRetriever extends SPFRetriever {
     }
 
 
-    private static String calculateSpfRecord(List spfR, List spfTxtR)
+    private static String calculateSpfRecord(List<String> spfR, List<String> spfTxtR)
             throws PermErrorException {
         String spfR1 = null;
         String spfR2 = null;

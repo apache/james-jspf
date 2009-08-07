@@ -19,6 +19,8 @@
 
 package org.apache.james.jspf.executor;
 
+import java.util.List;
+
 public interface IResponse {
     
     /**
@@ -33,7 +35,7 @@ public interface IResponse {
      * 
      * @return object
      */
-    public Object getValue();
+    public List<String> getValue();
     
     /**
      * Return the exception which was stored for the IResponse object

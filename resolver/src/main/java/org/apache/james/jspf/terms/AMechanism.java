@@ -76,7 +76,7 @@ public class AMechanism extends GenericMechanism implements SPFCheckerDNSRespons
                 spfData.setAttribute(ATTRIBUTE_AMECHANISM_IPV4CHECK, Boolean.valueOf(validIPV4Address));
                 if (validIPV4Address) {
 
-                    List aRecords = getARecords(host);
+                    List<String> aRecords = getARecords(host);
                     if (aRecords == null) {
                         try {
                             DNSRequest request = new DNSRequest(host, DNSRequest.A);
@@ -90,7 +90,7 @@ public class AMechanism extends GenericMechanism implements SPFCheckerDNSRespons
          
                 } else {
                     
-                    List aaaaRecords = getAAAARecords(host);
+                    List<String> aaaaRecords = getAAAARecords(host);
                     if (aaaaRecords == null) {
                         try {
                             DNSRequest request = new DNSRequest(host, DNSRequest.AAAA);
@@ -159,10 +159,10 @@ public class AMechanism extends GenericMechanism implements SPFCheckerDNSRespons
      * @return true or false
      * @throws PermErrorException 
      */
-    public boolean checkAddressList(IPAddr checkAddress, List addressList, int cidr) throws PermErrorException {
+    public boolean checkAddressList(IPAddr checkAddress, List<String> addressList, int cidr) throws PermErrorException {
 
         for (int i = 0; i < addressList.size(); i++) {
-            String ip = (String) addressList.get(i);
+            String ip = addressList.get(i);
 
             // Check for empty record
             if (ip != null) {
@@ -221,11 +221,11 @@ public class AMechanism extends GenericMechanism implements SPFCheckerDNSRespons
     /**
      * Retrieve a list of AAAA records
      */
-    public List getAAAARecords(String strServer) {
-        List listAAAAData = null;
+    public List<String> getAAAARecords(String strServer) {
+        List<String> listAAAAData = null;
         if (IPAddr.isIPV6(strServer)) {
             // Address is already an IP address, so add it to list
-            listAAAAData = new ArrayList();
+            listAAAAData = new ArrayList<String>();
             listAAAAData.add(strServer);
         }
         return listAAAAData;
@@ -239,10 +239,10 @@ public class AMechanism extends GenericMechanism implements SPFCheckerDNSRespons
      *            The hostname or ipAddress whe should get the A-Records for
      * @return The ipAddresses
      */
-    public List getARecords(String strServer) {
-        List listAData = null;
+    public List<String> getARecords(String strServer) {
+        List<String> listAData = null;
         if (IPAddr.isIPAddr(strServer)) {
-            listAData = new ArrayList();
+            listAData = new ArrayList<String>();
             listAData.add(strServer);
         }
         return listAData;
@@ -253,7 +253,7 @@ public class AMechanism extends GenericMechanism implements SPFCheckerDNSRespons
      */
     public DNSLookupContinuation onDNSResponse(DNSResponse response, SPFSession spfSession)
         throws PermErrorException, TempErrorException, NoneException, NeutralException {
-        List listAData = null;
+        List<String> listAData = null;
         try {
             listAData = response.getResponse();
         } catch (TimeoutException e) {

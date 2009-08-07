@@ -36,7 +36,7 @@ public interface DNSService {
      * @return an array of Strings representing the records
      * @throws TimeoutException
      */
-    public List getRecords(DNSRequest request) throws TimeoutException;
+    public List<String> getRecords(DNSRequest request) throws TimeoutException;
 
     /**
      * Try to get all domain names for the running host

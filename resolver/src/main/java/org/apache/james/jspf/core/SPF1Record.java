@@ -24,6 +24,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.james.jspf.terms.Directive;
+import org.apache.james.jspf.terms.Modifier;
+
 /**
  * The Class represent the SPF1 Record and provide methods to get all directives
  * and modifiers.
@@ -32,8 +35,8 @@ import java.util.List;
 public class SPF1Record {
     
     private String record;
-    private List directives = new ArrayList();
-    private List modifiers = new ArrayList();
+    private List<Directive> directives = new ArrayList<Directive>();
+    private List<Modifier> modifiers = new ArrayList<Modifier>();
 
     public SPF1Record() {
         this.record = null;
@@ -49,7 +52,7 @@ public class SPF1Record {
      * @return directives Collection of all qualifier+mechanism which should be
      *         used
      */
-    public List getDirectives() {
+    public List<Directive> getDirectives() {
         return directives;
     }
 
@@ -58,7 +61,7 @@ public class SPF1Record {
      * 
      * @return modifiers Collection of all modifiers which should be used
      */
-    public List getModifiers() {
+    public List<Modifier> getModifiers() {
         return modifiers;
     }
 
@@ -74,7 +77,8 @@ public class SPF1Record {
      * 
      * @return a chained iterator of the terms
      */
-    public Iterator iterator() {
+    @SuppressWarnings("unchecked")
+	public Iterator<SPFChecker> iterator() {
         return new Iterator() {
             boolean first = true;
             Iterator current = getDirectives().iterator();

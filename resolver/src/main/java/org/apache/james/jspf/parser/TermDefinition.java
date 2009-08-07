@@ -39,7 +39,7 @@ public interface TermDefinition {
      * 
      * @return the class object.
      */
-    public Class getTermDef();
+    public Class<?> getTermDef();
 
     /**
      * Return the number of groups to be expected from the pattern of this

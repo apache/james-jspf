@@ -29,7 +29,7 @@ import java.util.Iterator;
  * This class associates "Enabling interfaces" to the service that provides the
  * dependency.
  */
-public class WiringServiceTable extends Hashtable implements WiringService {
+public class WiringServiceTable extends Hashtable<Class<?>,Object> implements WiringService {
 
     private static final long serialVersionUID = -9151935136150279119L;
 
@@ -37,9 +37,9 @@ public class WiringServiceTable extends Hashtable implements WiringService {
      * @see org.apache.james.jspf.wiring.WiringService#wire(java.lang.Object)
      */
     public void wire(Object component) throws WiringServiceException {
-        Iterator i = keySet().iterator();
+        Iterator<Class<?>> i = keySet().iterator();
         while (i.hasNext()) {
-            Class enablingClass = (Class) i.next();
+            Class<?> enablingClass = i.next();
             if (enablingClass.isInstance(component)) {
                 Method[] m = enablingClass.getDeclaredMethods();
                 if (m!=null && m.length == 1 && m[0] != null) {

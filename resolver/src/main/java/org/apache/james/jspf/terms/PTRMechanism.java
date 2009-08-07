@@ -120,10 +120,11 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled,
     /**
      * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
      */
-    public DNSLookupContinuation onDNSResponse(DNSResponse response, SPFSession spfSession)
+    @SuppressWarnings("unchecked")
+	public DNSLookupContinuation onDNSResponse(DNSResponse response, SPFSession spfSession)
             throws PermErrorException, TempErrorException, NoneException, NeutralException {
         
-        List domainList = (List) spfSession.getAttribute(ATTRIBUTE_DOMAIN_LIST);
+        List<String> domainList = (List<String>) spfSession.getAttribute(ATTRIBUTE_DOMAIN_LIST);
         try {
             if (domainList == null) {
             
@@ -150,7 +151,7 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled,
                 String compareDomain = (String) spfSession.getAttribute(ATTRIBUTE_CURRENT_DOMAIN);
                 String host = (String) spfSession.getAttribute(ATTRIBUTE_EXPANDED_HOST);
     
-                List aList = response.getResponse();
+                List<String> aList = response.getResponse();
     
 
                 if (aList != null) {

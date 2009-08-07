@@ -33,11 +33,11 @@ public class DefaultTermDefinition implements TermDefinition {
 
     private Pattern pattern;
 
-    private Class termDef;
+    private Class<?> termDef;
 
     private int matchSize = 0;
 
-    public DefaultTermDefinition(Class tClass) throws IllegalArgumentException,
+    public DefaultTermDefinition(Class<?> tClass) throws IllegalArgumentException,
             SecurityException, IllegalAccessException, NoSuchFieldException {
         String pString = (String) tClass.getField("REGEX").get(null);
         pattern = Pattern.compile(pString);
@@ -76,7 +76,7 @@ public class DefaultTermDefinition implements TermDefinition {
     /**
      * @see org.apache.james.jspf.parser.TermDefinition#getTermDef()
      */
-    public Class getTermDef() {
+    public Class<?> getTermDef() {
         return termDef;
     }
 

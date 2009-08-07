@@ -28,7 +28,7 @@ import java.util.List;
  */
 public class IResponseImpl implements IResponse {
     private Exception exception = null;
-    private List value = null;
+    private List<String> value = null;
     private Object id = null;
     
     public IResponseImpl(Object id, Exception e) {
@@ -36,7 +36,7 @@ public class IResponseImpl implements IResponse {
         this.id = id;
     }
     
-    public IResponseImpl(Object id, List result) {
+    public IResponseImpl(Object id, List<String> result) {
         this.value = result;
         this.id = id;
     }
@@ -58,7 +58,7 @@ public class IResponseImpl implements IResponse {
     /**
      * @see org.apache.james.jspf.executor.IResponse#getValue()
      */
-    public Object getValue() {
+    public List<String> getValue() {
         return value;
     }
 }

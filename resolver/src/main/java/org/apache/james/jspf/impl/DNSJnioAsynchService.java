@@ -19,6 +19,8 @@
 
 package org.apache.james.jspf.impl;
 
+import java.util.List;
+
 import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.exceptions.TimeoutException;
 import org.apache.james.jspf.executor.DNSAsynchLookupService;
@@ -85,7 +87,7 @@ public class DNSJnioAsynchService implements DNSAsynchLookupService {
                             return id;
                         }
 
-                        public Object getValue() {
+                        public List<String> getValue() {
                             return (DNSServiceXBillImpl.convertRecordsToList(lookup.getAnswers()));
                         }
                         

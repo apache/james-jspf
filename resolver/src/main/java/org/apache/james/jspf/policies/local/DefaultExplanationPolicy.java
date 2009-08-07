@@ -32,6 +32,7 @@ import org.apache.james.jspf.core.exceptions.NoneException;
 import org.apache.james.jspf.core.exceptions.PermErrorException;
 import org.apache.james.jspf.core.exceptions.TempErrorException;
 import org.apache.james.jspf.policies.PolicyPostFilter;
+import org.apache.james.jspf.terms.Modifier;
 
 /**
  * Policy to add a default explanation
@@ -61,7 +62,7 @@ public final class DefaultExplanationPolicy implements PolicyPostFilter {
         }
     }
 
-    private final class DefaultExplanationChecker implements SPFChecker {
+    private final class DefaultExplanationChecker implements Modifier {
         
         private SPFChecker explanationCheckr = new ExplanationChecker();
         
@@ -94,6 +95,14 @@ public final class DefaultExplanationPolicy implements PolicyPostFilter {
                 return "defaultExplanation="+defExplanation;
             }
         }
+
+        /**
+         * (non-Javadoc)
+         * @see org.apache.james.jspf.terms.Modifier#enforceSingleInstance()
+         */
+		public boolean enforceSingleInstance() {
+			return false;
+		}
     }
 
     private static final String ATTRIBUTE_DEFAULT_EXPLANATION_POLICY_EXPLANATION = "DefaultExplanationPolicy.explanation";

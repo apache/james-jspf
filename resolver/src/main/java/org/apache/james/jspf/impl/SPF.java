@@ -81,16 +81,16 @@ public class SPF implements SPFChecker {
             // make sure we cleanup the record, for recursion support
             spfData.removeAttribute(SPF1Utils.ATTRIBUTE_SPF1_RECORD);
             
-            LinkedList policyCheckers = new LinkedList();
+            LinkedList<SPFChecker> policyCheckers = new LinkedList<SPFChecker>();
             
-            Iterator i = spfRecord.iterator();
+            Iterator<SPFChecker> i = spfRecord.iterator();
             while (i.hasNext()) {
-                SPFChecker checker = (SPFChecker) i.next();
+                SPFChecker checker = i.next();
                 policyCheckers.add(checker);
             }
 
             while (policyCheckers.size() > 0) {
-                SPFChecker removeLast = (SPFChecker) policyCheckers.removeLast();
+                SPFChecker removeLast = policyCheckers.removeLast();
                 spfData.pushChecker(removeLast);
             }
 
@@ -100,9 +100,9 @@ public class SPF implements SPFChecker {
 
     private static final class PolicyChecker implements SPFChecker {
         
-        private LinkedList policies;
+        private LinkedList<SPFChecker> policies;
         
-        public PolicyChecker(LinkedList policies) {
+        public PolicyChecker(LinkedList<SPFChecker> policies) {
             this.policies = policies;
         }
         
@@ -114,7 +114,7 @@ public class SPF implements SPFChecker {
                 NeutralException, NoneException {
             
             while (policies.size() > 0) {
-                SPFChecker removeLast = (SPFChecker) policies.removeLast();
+                SPFChecker removeLast = policies.removeLast();
                 spfData.pushChecker(removeLast);
             }
             
@@ -344,9 +344,9 @@ public class SPF implements SPFChecker {
     /**
      * Return a default policy for SPF
      */
-    public LinkedList getPolicies() {
+    public LinkedList<SPFChecker> getPolicies() {
 
-        LinkedList policies = new LinkedList();
+        LinkedList<SPFChecker> policies = new LinkedList<SPFChecker>();
         
         if (override != null) {
             policies.add(new SPFPolicyChecker(override));

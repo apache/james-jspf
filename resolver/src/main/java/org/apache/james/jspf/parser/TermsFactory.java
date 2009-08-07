@@ -39,7 +39,7 @@ public interface TermsFactory {
      * @throws PermErrorException if something goes wrong
      * @throws InstantiationException 
      */
-    public Object createTerm(Class klass, Configuration subres)
+    public Object createTerm(Class<?> klass, Configuration subres)
             throws PermErrorException, InstantiationException;
 
     /**
@@ -47,13 +47,13 @@ public interface TermsFactory {
      * 
      * @return a Collection of TermDefinition 
      */
-    public Collection getMechanismsCollection();
+    public Collection<TermDefinition> getMechanismsCollection();
 
     /**
      * Return the collection of known Modifiers
      * 
      * @return a Collection of TermDefinition 
      */
-    public Collection getModifiersCollection();
+    public Collection<TermDefinition> getModifiersCollection();
 
 }

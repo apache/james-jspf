@@ -86,12 +86,13 @@ public class MXMechanism extends AMechanism implements SPFCheckerDNSResponseList
     /**
      * @see org.apache.james.jspf.terms.AMechanism#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
      */
-    public DNSLookupContinuation onDNSResponse(DNSResponse response, SPFSession spfSession)
+    @SuppressWarnings("unchecked")
+	public DNSLookupContinuation onDNSResponse(DNSResponse response, SPFSession spfSession)
         throws PermErrorException, TempErrorException, NoneException, NeutralException {
         try {
             
-            List records = (List) spfSession.getAttribute(ATTRIBUTE_CHECK_RECORDS);
-            List mxR = (List) spfSession.getAttribute(ATTRIBUTE_MX_RECORDS);
+            List<String> records = (List<String>) spfSession.getAttribute(ATTRIBUTE_CHECK_RECORDS);
+            List<String> mxR = (List<String>) spfSession.getAttribute(ATTRIBUTE_MX_RECORDS);
 
             if (records == null) {
             
@@ -107,11 +108,11 @@ public class MXMechanism extends AMechanism implements SPFCheckerDNSResponseList
                 
             } else {
                 
-                List res = response.getResponse();
+                List<String> res = response.getResponse();
 
                 if (res != null) {
                     if (mxR == null) {
-                        mxR = new ArrayList();
+                        mxR = new ArrayList<String>();
                         spfSession.setAttribute(ATTRIBUTE_MX_RECORDS, mxR);
                     }
                     mxR.addAll(res);
@@ -123,7 +124,7 @@ public class MXMechanism extends AMechanism implements SPFCheckerDNSResponseList
             boolean isIPv6 = IPAddr.isIPV6(spfSession.getIpAddress());
 
             String mx;
-            while (records.size() > 0 && (mx = (String) records.remove(0)) != null && mx.length() > 0) {
+            while (records.size() > 0 && (mx = records.remove(0)) != null && mx.length() > 0) {
                 log.debug("Add MX-Record " + mx + " to list");
 
                 return new DNSLookupContinuation(new DNSRequest(mx, isIPv6 ? DNSRequest.AAAA : DNSRequest.A), MXMechanism.this);

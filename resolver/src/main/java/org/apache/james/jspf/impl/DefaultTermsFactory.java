@@ -22,6 +22,7 @@ package org.apache.james.jspf.impl;
 import org.apache.james.jspf.core.LogEnabled;
 import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.exceptions.PermErrorException;
+import org.apache.james.jspf.parser.TermDefinition;
 import org.apache.james.jspf.parser.TermsFactory;
 import org.apache.james.jspf.terms.Configuration;
 import org.apache.james.jspf.terms.ConfigurationEnabled;
@@ -43,9 +44,9 @@ public class DefaultTermsFactory implements TermsFactory {
     
     private String termFile = "org/apache/james/jspf/parser/jspf.default.terms";
     
-    private Collection mechanismsCollection;
+    private Collection<TermDefinition> mechanismsCollection;
 
-    private Collection modifiersCollection;
+    private Collection<TermDefinition> modifiersCollection;
 
     private Logger log;
     
@@ -80,7 +81,7 @@ public class DefaultTermsFactory implements TermsFactory {
             String mods = p.getProperty("modifiers");
             String[] classes;
             classes = mechs.split(",");
-            Class[] knownMechanisms = new Class[classes.length];
+            Class<?>[] knownMechanisms = new Class[classes.length];
             for (int i = 0; i < classes.length; i++) {
                 log.debug("Add following class as known mechanismn: "
                         + classes[i]);
@@ -89,7 +90,7 @@ public class DefaultTermsFactory implements TermsFactory {
             }
             mechanismsCollection = createTermDefinitionCollection(knownMechanisms);
             classes = mods.split(",");
-            Class[] knownModifiers = new Class[classes.length];
+            Class<?>[] knownModifiers = new Class[classes.length];
             for (int i = 0; i < classes.length; i++) {
                 log.debug("Add following class as known modifier: "
                         + classes[i]);
@@ -117,8 +118,8 @@ public class DefaultTermsFactory implements TermsFactory {
      *            static field to concatenate
      * @return map <Class,Pattern>
      */
-    private Collection createTermDefinitionCollection(Class[] classes) {
-        Collection l = new ArrayList();
+    private Collection<TermDefinition> createTermDefinitionCollection(Class<?>[] classes) {
+        Collection<TermDefinition> l = new ArrayList<TermDefinition>();
         for (int j = 0; j < classes.length; j++) {
             try {
                 l.add(new DefaultTermDefinition(classes[j]));
@@ -135,7 +136,7 @@ public class DefaultTermsFactory implements TermsFactory {
     /**
      * @see org.apache.james.jspf.parser.TermsFactory#createTerm(java.lang.Class, org.apache.james.jspf.terms.Configuration)
      */
-    public Object createTerm(Class termDef, Configuration subres) throws PermErrorException, InstantiationException {
+    public Object createTerm(Class<?> termDef, Configuration subres) throws PermErrorException, InstantiationException {
         try {
             Object term = termDef.newInstance();
             
@@ -164,7 +165,7 @@ public class DefaultTermsFactory implements TermsFactory {
     /**
      * @see org.apache.james.jspf.parser.TermsFactory#getMechanismsCollection()
      */
-    public Collection getMechanismsCollection() {
+    public Collection<TermDefinition> getMechanismsCollection() {
         return mechanismsCollection;
     }
 
@@ -172,7 +173,7 @@ public class DefaultTermsFactory implements TermsFactory {
     /**
      * @see org.apache.james.jspf.parser.TermsFactory#getModifiersCollection()
      */
-    public Collection getModifiersCollection() {
+    public Collection<TermDefinition> getModifiersCollection() {
         return modifiersCollection;
     }
 

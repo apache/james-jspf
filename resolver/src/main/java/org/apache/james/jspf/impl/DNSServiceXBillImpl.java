@@ -130,7 +130,7 @@ public class DNSServiceXBillImpl implements DNSService {
     /**
      * @see org.apache.james.jspf.core.DNSService#getRecords(org.apache.james.jspf.core.DNSRequest)
      */
-    public List getRecords(DNSRequest request)
+    public List<String> getRecords(DNSRequest request)
             throws TimeoutException {
         String recordTypeDescription;
         int dnsJavaType;
@@ -159,7 +159,7 @@ public class DNSServiceXBillImpl implements DNSService {
                 throw new TimeoutException(query.getErrorString());
             }
             
-            List records = convertRecordsToList(rr);
+            List<String> records = convertRecordsToList(rr);
             
             log.debug("Found " + (rr != null ? rr.length : 0) + " "+recordTypeDescription+"-Records");
             return records;
@@ -176,10 +176,11 @@ public class DNSServiceXBillImpl implements DNSService {
      * @param rr Record array
      * @return list
      */
-    public static List convertRecordsToList(Record[] rr) {
-        List records;
+    @SuppressWarnings("unchecked")
+	public static List<String> convertRecordsToList(Record[] rr) {
+        List<String> records;
         if (rr != null && rr.length > 0) {
-            records = new ArrayList();
+            records = new ArrayList<String>();
             for (int i = 0; i < rr.length; i++) {
                 switch (rr[i].getType()) {
                     case Type.A:
@@ -201,10 +202,10 @@ public class DNSServiceXBillImpl implements DNSService {
                     case Type.TXT:
                         TXTRecord txt = (TXTRecord) rr[i];
                         if (txt.getStrings().size() == 1) {
-                            records.add(txt.getStrings().get(0));
+                            records.add((String)txt.getStrings().get(0));
                         } else {
                             StringBuffer sb = new StringBuffer();
-                            for (Iterator it = txt.getStrings().iterator(); it
+                            for (Iterator<String> it = txt.getStrings().iterator(); it
                                     .hasNext();) {
                                 String k = (String) it.next();
                                 sb.append(k);
@@ -215,10 +216,10 @@ public class DNSServiceXBillImpl implements DNSService {
                     case Type.SPF:
                         SPFRecord spf = (SPFRecord) rr[i];
                         if (spf.getStrings().size() == 1) {
-                            records.add(spf.getStrings().get(0));
+                            records.add((String)spf.getStrings().get(0));
                         } else {
                             StringBuffer sb = new StringBuffer();
-                            for (Iterator it = spf.getStrings().iterator(); it
+                            for (Iterator<String> it = spf.getStrings().iterator(); it
                                     .hasNext();) {
                                 String k = (String) it.next();
                                 sb.append(k);
