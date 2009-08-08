@@ -108,17 +108,17 @@ public abstract class AbstractYamlTest extends TestCase {
 
     protected AbstractYamlTest(String name) throws IOException {
         super(name);
-        List tests = SPFYamlTestDescriptor.loadTests(getFilename());
-        Iterator i = tests.iterator();
+        List<SPFYamlTestDescriptor> tests = SPFYamlTestDescriptor.loadTests(getFilename());
+        Iterator<SPFYamlTestDescriptor> i = tests.iterator();
         while (i.hasNext() && data == null) {
-            SPFYamlTestDescriptor def = (SPFYamlTestDescriptor) i.next();
+            SPFYamlTestDescriptor def = i.next();
             if (name.equals(def.getComment()+" #COMPLETE!")) {
                 data = def;
                 this.test = null;
             } else {
-                Iterator j = def.getTests().keySet().iterator();
+                Iterator<String> j = def.getTests().keySet().iterator();
                 while (j.hasNext() && data == null) {
-                    String test = (String) j.next();
+                    String test = j.next();
                     if (name.equals(def.getComment()+ " #"+test)) {
                         data = def;
                         this.test = test;
@@ -216,17 +216,17 @@ public abstract class AbstractYamlTest extends TestCase {
             SPFResult res = runSingleTest(next);
             verifyResult(next, res);
         } else {
-            Map queries = new HashMap();
-            for (Iterator i = data.getTests().keySet().iterator(); i.hasNext(); ) {
-                String next = (String) i.next();
+            Map<String,SPFResult> queries = new HashMap<String,SPFResult>();
+            for (Iterator<String> i = data.getTests().keySet().iterator(); i.hasNext(); ) {
+                String next = i.next();
                 SPFResult res = runSingleTest(next);
                 queries.put(next, res);
             }
             AssertionFailedError firstError = null; 
-            for (Iterator i = queries.keySet().iterator(); i.hasNext(); ) {
-                String next = (String) i.next();
+            for (Iterator<String> i = queries.keySet().iterator(); i.hasNext(); ) {
+                String next = i.next();
                 try {
-                    verifyResult(next, (SPFResult) queries.get(next));
+                    verifyResult(next, queries.get(next));
                 } catch (AssertionFailedError e) {
                     log.getChildLogger(next).info("FAILED. "+e.getMessage()+" ("+getName()+")", e.getMessage()==null ? e : null);
                     if (firstError == null) firstError = e;
@@ -264,12 +264,12 @@ public abstract class AbstractYamlTest extends TestCase {
 
     private void verifyResult(String testName, SPFResult res) {
         String resultSPF = res.getResult();
-        HashMap currentTest = (HashMap) data.getTests().get(testName);
+        HashMap<String,Object> currentTest = data.getTests().get(testName);
         Logger testLogger = log.getChildLogger(testName+"-verify");
         if (currentTest.get("result") instanceof String) {
             assertEquals("Test "+testName+" ("+currentTest.get("description")+") failed. Returned: "+resultSPF+" Expected: "+currentTest.get("result")+" [["+resultSPF+"||"+res.getHeaderText()+"]]", currentTest.get("result"), resultSPF);
         } else {
-            ArrayList results = (ArrayList) currentTest.get("result");
+            ArrayList<String> results = (ArrayList<String>) currentTest.get("result");
             boolean match = false;
             for (int i = 0; i < results.size(); i++) {
                 if (results.get(i).equals(resultSPF)) match = true;
@@ -352,8 +352,8 @@ public abstract class AbstractYamlTest extends TestCase {
         
         DNSServiceXBillImpl serviceXBillImpl = new DNSServiceXBillImpl(log) {
 
-            public List getLocalDomainNames() {
-                List l = new ArrayList();
+            public List<String> getLocalDomainNames() {
+                List<String> l = new ArrayList<String>();
                 l.add("localdomain.foo.bar");
                 return l; 
             }
@@ -380,16 +380,16 @@ public abstract class AbstractYamlTest extends TestCase {
 
     final class SPFYamlDNSService implements DNSService {
 
-        private HashMap zonedata;
+        private HashMap<String,Object> zonedata;
         private int recordLimit;
 
-        public SPFYamlDNSService(HashMap zonedata) {
+        public SPFYamlDNSService(HashMap<String,Object> zonedata) {
             this.zonedata = zonedata;
             this.recordLimit = 10;
         }
 
-        public List getLocalDomainNames() {
-            List l = new ArrayList();
+        public List<String> getLocalDomainNames() {
+            List<String> l = new ArrayList<String>();
             l.add("localdomain.foo.bar");
             return l; 
         }
@@ -411,14 +411,14 @@ public abstract class AbstractYamlTest extends TestCase {
             this.recordLimit = recordLimit;
         }
 
-        public List getRecords(DNSRequest request) throws TimeoutException {
+        public List<String> getRecords(DNSRequest request) throws TimeoutException {
             return getRecords(request.getHostname(), request.getRecordType(), 6);
         }
 
-        public List getRecords(String hostname, int recordType, int depth) throws TimeoutException {
+        public List<String> getRecords(String hostname, int recordType, int depth) throws TimeoutException {
             String type = getRecordTypeDescription(recordType);
 
-            List res;
+            List<String> res;
             
             // remove trailing dot before running the search.
             if (hostname.endsWith(".")) hostname = hostname.substring(0, hostname.length()-1);
@@ -427,32 +427,32 @@ public abstract class AbstractYamlTest extends TestCase {
             hostname = hostname.toLowerCase(Locale.US);
             
             if (zonedata.get(hostname) != null) {
-                List l = (List) zonedata.get(hostname);
-                Iterator i = l.iterator();
-                res = new ArrayList();
+                List<Object> l = (List<Object>) zonedata.get(hostname);
+                Iterator<Object> i = l.iterator();
+                res = new ArrayList<String>();
                 while (i.hasNext()) {
                     Object o = i.next();
                     if (o instanceof HashMap) {
-                        HashMap hm = (HashMap) o;
+                        HashMap<String,Object> hm = (HashMap<String,Object>) o;
                         if (hm.get(type) != null) {
                             if (recordType == DNSRequest.MX) {
-                                List mxList = (List) hm.get(type);
+                                List<String> mxList = (List<String>) hm.get(type);
     
                                 // For MX records we overwrite the result ignoring the priority.
-                                Iterator mxs = mxList.iterator();
+                                Iterator<String> mxs = mxList.iterator();
                                 while (mxs.hasNext()) {
                                     // skip the MX priority
                                     mxs.next();
-                                    String cname = (String) mxs.next();
+                                    String cname = mxs.next();
                                     res.add(cname);
                                 }
                             } else {
                                 Object obj = hm.get(type);
                                 
                                 if (obj instanceof String) {
-                                    res.add(obj);
+                                    res.add((String)obj);
                                 } else if (obj instanceof ArrayList) {
-                                    ArrayList a = (ArrayList) obj;
+                                    ArrayList<String> a = (ArrayList<String>) obj;
                                     StringBuffer sb = new StringBuffer();
                                     
                                     for (int i2 = 0; i2 < a.size(); i2++) {

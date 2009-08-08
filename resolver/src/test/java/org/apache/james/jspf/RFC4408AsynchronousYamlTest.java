@@ -70,10 +70,10 @@ public class RFC4408AsynchronousYamlTest extends RFC4408YamlTest {
 
         public RFC4408AsynchronousSuite() throws IOException {
             super();
-            List tests = SPFYamlTestDescriptor.loadTests(YAMLFILE2);
-            Iterator i = tests.iterator();
+            List<SPFYamlTestDescriptor> tests = SPFYamlTestDescriptor.loadTests(YAMLFILE2);
+            Iterator<SPFYamlTestDescriptor> i = tests.iterator();
             while (i.hasNext()) {
-                SPFYamlTestDescriptor o = (SPFYamlTestDescriptor) i.next();
+                SPFYamlTestDescriptor o = i.next();
                 addTest(new RFC4408AsynchronousYamlTest(o));
             }
         }
@@ -94,13 +94,13 @@ public class RFC4408AsynchronousYamlTest extends RFC4408YamlTest {
     public static void main(String[] args) throws Throwable {
         Logger l = new Log4JLogger(org.apache.log4j.Logger.getLogger("ROOT"));
 
-        List tests = SPFYamlTestDescriptor.loadTests(YAMLFILE2);
-        Iterator i = tests.iterator();
+        List<SPFYamlTestDescriptor> tests = SPFYamlTestDescriptor.loadTests(YAMLFILE2);
+        Iterator<SPFYamlTestDescriptor> i = tests.iterator();
         while (i.hasNext()) {
             SPFYamlTestDescriptor o = (SPFYamlTestDescriptor) i.next();
-            Iterator ttt = o.getTests().keySet().iterator();
+            Iterator<String> ttt = o.getTests().keySet().iterator();
             while (ttt.hasNext()) {
-                RFC4408AsynchronousYamlTest t = new RFC4408AsynchronousYamlTest(o,(String) ttt.next());
+                RFC4408AsynchronousYamlTest t = new RFC4408AsynchronousYamlTest(o, ttt.next());
                 t.setLogger(l);
                 TestRunner.run(t);
             }

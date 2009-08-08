@@ -68,13 +68,13 @@ public class MailZoneYamlTest extends AbstractYamlTest {
 
         public MailZoneSuite() throws IOException {
             super();
-            List tests = SPFYamlTestDescriptor.loadTests(YAMLFILE2);
-            Iterator i = tests.iterator();
+            List<SPFYamlTestDescriptor> tests = SPFYamlTestDescriptor.loadTests(YAMLFILE2);
+            Iterator<SPFYamlTestDescriptor> i = tests.iterator();
             while (i.hasNext()) {
-                SPFYamlTestDescriptor o = (SPFYamlTestDescriptor) i.next();
-                Iterator ttt = o.getTests().keySet().iterator();
+                SPFYamlTestDescriptor o = i.next();
+                Iterator<String> ttt = o.getTests().keySet().iterator();
                 while (ttt.hasNext()) {
-                    addTest(new MailZoneYamlTest(o,(String) ttt.next()));
+                    addTest(new MailZoneYamlTest(o,ttt.next()));
                 }
             }
         }

@@ -42,10 +42,10 @@ public class SPF1ParserTest extends TestCase {
 
     public SPF1ParserTest(String name) throws IOException {
         super(name);
-        List tests = loadTests();
-        Iterator i = tests.iterator();
+        List<SPF1RecordTestDef> tests = loadTests();
+        Iterator<SPF1RecordTestDef> i = tests.iterator();
         while (i.hasNext()) {
-            SPF1RecordTestDef def = (SPF1RecordTestDef) i.next();
+            SPF1RecordTestDef def = i.next();
             if (name.equals(def.recIn)) {
                 data = def;
                 break;
@@ -98,8 +98,8 @@ public class SPF1ParserTest extends TestCase {
 
     }
 
-    public static List loadTests() throws IOException {
-        List tests = new ArrayList();
+    public static List<SPF1RecordTestDef> loadTests() throws IOException {
+        List<SPF1RecordTestDef> tests = new ArrayList<SPF1RecordTestDef>();
 
         BufferedReader br = new BufferedReader(new InputStreamReader(Thread
                 .currentThread().getContextClassLoader().getResourceAsStream(
@@ -169,8 +169,8 @@ public class SPF1ParserTest extends TestCase {
 
         public SPF1RecordTestSuite() throws IOException {
             super();
-            List tests = loadTests();
-            Iterator i = tests.iterator();
+            List<SPF1RecordTestDef> tests = loadTests();
+            Iterator<SPF1RecordTestDef> i = tests.iterator();
             SPFRecordParser parser = new RFC4408SPF1Parser(new ConsoleLogger(), new DefaultTermsFactory(new ConsoleLogger()));
             while (i.hasNext()) {
                 addTest(new SPF1ParserTest((SPF1RecordTestDef) i.next(), parser));

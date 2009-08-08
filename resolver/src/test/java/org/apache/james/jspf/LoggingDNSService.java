@@ -35,17 +35,29 @@ public class LoggingDNSService implements DNSService {
         this.dnsService = service;
         this.logger = logger;
     }
-    
+
+    /**
+     * (non-Javadoc)
+     * @see org.apache.james.jspf.core.DNSService#getRecordLimit()
+     */
     public int getRecordLimit() {
         return dnsService.getRecordLimit();
     }
 
+    /**
+     * (non-Javadoc)
+     * @see org.apache.james.jspf.core.DNSService#setRecordLimit(int)
+     */
     public void setRecordLimit(int recordLimit) {
         dnsService.setRecordLimit(recordLimit);
     }
 
-    public List getLocalDomainNames() {
-        List res = dnsService.getLocalDomainNames();
+    /**
+     * (non-Javadoc)
+     * @see org.apache.james.jspf.core.DNSService#getLocalDomainNames()
+     */
+    public List<String> getLocalDomainNames() {
+        List<String> res = dnsService.getLocalDomainNames();
         StringBuffer logBuff = new StringBuffer();
         logBuff.append("getLocalDomainNames() = ");
         if (res != null) {
@@ -65,13 +77,21 @@ public class LoggingDNSService implements DNSService {
 
     }
 
+    /**
+     * (non-Javadoc)
+     * @see org.apache.james.jspf.core.DNSService#setTimeOut(int)
+     */
     public void setTimeOut(int timeOut) {
         dnsService.setTimeOut(timeOut);
     }
 
-    public List getRecords(DNSRequest request) throws TimeoutException {
+    /**
+     * (non-Javadoc)
+     * @see org.apache.james.jspf.core.DNSService#getRecords(org.apache.james.jspf.core.DNSRequest)
+     */
+    public List<String> getRecords(DNSRequest request) throws TimeoutException {
         try {
-            List result = dnsService.getRecords(request);
+            List<String> result = dnsService.getRecords(request);
             StringBuffer logBuff = new StringBuffer();
             logBuff.append("getRecords(" + request.getHostname() + "," + request.getRecordType() + ") = ");
             if (result != null) {

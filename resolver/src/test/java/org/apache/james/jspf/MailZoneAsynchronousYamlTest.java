@@ -77,10 +77,10 @@ public class MailZoneAsynchronousYamlTest extends MailZoneYamlTest {
 
         public MailZoneAsynchronousSuite() throws IOException {
             super();
-            List tests = SPFYamlTestDescriptor.loadTests(YAMLFILE2);
-            Iterator i = tests.iterator();
+            List<SPFYamlTestDescriptor> tests = SPFYamlTestDescriptor.loadTests(YAMLFILE2);
+            Iterator<SPFYamlTestDescriptor> i = tests.iterator();
             while (i.hasNext()) {
-                SPFYamlTestDescriptor o = (SPFYamlTestDescriptor) i.next();
+                SPFYamlTestDescriptor o = i.next();
                 addTest(new MailZoneAsynchronousYamlTest(o));
             }
         }

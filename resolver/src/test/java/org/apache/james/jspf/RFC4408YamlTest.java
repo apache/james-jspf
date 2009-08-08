@@ -64,13 +64,13 @@ public class RFC4408YamlTest extends AbstractYamlTest {
         public RFC4408Suite() throws IOException {
             super();
             try {
-                List tests = SPFYamlTestDescriptor.loadTests(YAMLFILE2);
-                Iterator i = tests.iterator();
+                List<SPFYamlTestDescriptor> tests = SPFYamlTestDescriptor.loadTests(YAMLFILE2);
+                Iterator<SPFYamlTestDescriptor> i = tests.iterator();
                 while (i.hasNext()) {
-                    SPFYamlTestDescriptor o = (SPFYamlTestDescriptor) i.next();
-                    Iterator ttt = o.getTests().keySet().iterator();
+                    SPFYamlTestDescriptor o = i.next();
+                    Iterator<String> ttt = o.getTests().keySet().iterator();
                     while (ttt.hasNext()) {
-                        addTest(new RFC4408YamlTest(o,(String) ttt.next()));
+                        addTest(new RFC4408YamlTest(o, ttt.next()));
                     }
                 }
             } catch (RuntimeException e) {
@@ -100,11 +100,11 @@ public class RFC4408YamlTest extends AbstractYamlTest {
     public static void main(String[] args) throws Throwable {
         Logger l = new Log4JLogger(org.apache.log4j.Logger.getLogger("ROOT"));
 
-        List tests = SPFYamlTestDescriptor.loadTests(YAMLFILE2);
-        Iterator i = tests.iterator();
+        List<SPFYamlTestDescriptor> tests = SPFYamlTestDescriptor.loadTests(YAMLFILE2);
+        Iterator<SPFYamlTestDescriptor> i = tests.iterator();
         while (i.hasNext()) {
             SPFYamlTestDescriptor o = (SPFYamlTestDescriptor) i.next();
-            Iterator ttt = o.getTests().keySet().iterator();
+            Iterator<String> ttt = o.getTests().keySet().iterator();
             while (ttt.hasNext()) {
                 RFC4408YamlTest t = new RFC4408YamlTest(o,(String) ttt.next());
                 t.setLogger(l);

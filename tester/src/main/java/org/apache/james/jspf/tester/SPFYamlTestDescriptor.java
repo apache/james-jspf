@@ -42,7 +42,7 @@ import java.util.Set;
  */
 public class SPFYamlTestDescriptor {
     private String comment;
-    private HashMap tests;
+    private HashMap<String,HashMap<String,Object>> tests;
     private HashMap zonedata;
     
     public SPFYamlTestDescriptor(HashMap source, int i) {
@@ -60,10 +60,10 @@ public class SPFYamlTestDescriptor {
     public void setComment(String comment) {
         this.comment = comment;
     }
-    public HashMap getTests() {
+    public HashMap<String,HashMap<String,Object>> getTests() {
         return tests;
     }
-    public void setTests(HashMap tests) {
+    public void setTests(HashMap<String, HashMap<String,Object>> tests) {
         this.tests = tests;
     }
     public HashMap getZonedata() {
@@ -79,8 +79,8 @@ public class SPFYamlTestDescriptor {
         }
     }
     
-    public static List loadTests(String filename) throws IOException {
-        List tests = new ArrayList();
+    public static List<SPFYamlTestDescriptor> loadTests(String filename) throws IOException {
+        List<SPFYamlTestDescriptor> tests = new ArrayList<SPFYamlTestDescriptor>();
     
         InputStream is = SPFYamlTestDescriptor.class.getResourceAsStream(filename);
         
