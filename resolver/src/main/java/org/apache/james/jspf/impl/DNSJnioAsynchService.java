@@ -27,14 +27,15 @@ import org.apache.james.jspf.executor.DNSAsynchLookupService;
 import org.apache.james.jspf.executor.IResponse;
 import org.apache.james.jspf.executor.IResponseQueue;
 import org.xbill.DNS.DClass;
-import org.xbill.DNS.ExtendedNonblockingResolver;
-import org.xbill.DNS.LookupAsynch;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.Resolver;
 import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
+
+import uk.nominet.dnsjnio.ExtendedNonblockingResolver;
+import uk.nominet.dnsjnio.LookupAsynch;
 
 public class DNSJnioAsynchService implements DNSAsynchLookupService {
 

@@ -131,7 +131,6 @@
           <excludes>
             <!-- 3rd party descriptors distributed via maven repositories
                  and included "as is" -->
-            <exclude>commons-cli/poms/commons-cli-1.1.pom</exclude>
             <exclude>org.apache/poms/apache-resource-bundles-2.pom</exclude>
             <exclude>org.apache/poms/apache-jar-resource-bundle-1.4.pom</exclude>
             <exclude>org.apache.maven.skins/poms/maven-skins-2.pom</exclude>

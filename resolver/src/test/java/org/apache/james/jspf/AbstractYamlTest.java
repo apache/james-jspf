@@ -45,14 +45,15 @@ import org.apache.james.jspf.wiring.WiringServiceException;
 import org.apache.james.jspf.tester.SPFYamlTestDescriptor;
 import org.xbill.DNS.Cache;
 import org.xbill.DNS.DClass;
-import org.xbill.DNS.ExtendedNonblockingResolver;
 import org.xbill.DNS.Lookup;
-import org.xbill.DNS.LookupAsynch;
 import org.xbill.DNS.Name;
-import org.xbill.DNS.NonblockingResolver;
 import org.xbill.DNS.Resolver;
 import org.xbill.DNS.SimpleResolver;
 import org.xbill.DNS.TextParseException;
+
+import uk.nominet.dnsjnio.ExtendedNonblockingResolver;
+import uk.nominet.dnsjnio.LookupAsynch;
+import uk.nominet.dnsjnio.NonblockingResolver;
 
 import java.io.IOException;
 import java.net.UnknownHostException;

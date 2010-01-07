@@ -40,10 +40,6 @@ public class MacroExpandTest extends TestCase {
             return "2.0.0.1.0.D.B.8.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.C.B.0.1";
         }
 
-        public String getIpAddress() {
-            return "2001:DB8::CB01";
-        }
-
         public String getReadableIP() {
             return "2001:DB8::CB01";
         }
@@ -78,10 +74,6 @@ public class MacroExpandTest extends TestCase {
             return "email.example.com";
         }
 
-        public String getIpAddress() {
-            return "192.0.2.3";
-        }
-        
         public String getMacroIpAddress() {
             return "192.0.2.3";
         }
