@@ -239,7 +239,7 @@ public abstract class AbstractYamlTest extends TestCase {
     }
 
     private SPFResult runSingleTest(String testName) {
-        HashMap currentTest = (HashMap) data.getTests().get(testName);
+        Map<String, ?> currentTest = data.getTests().get(testName);
         Logger testLogger = log.getChildLogger(testName);
         testLogger.info("TESTING "+testName+": "+currentTest.get("description"));
 
@@ -263,9 +263,10 @@ public abstract class AbstractYamlTest extends TestCase {
         return res;
     }
 
+    @SuppressWarnings("unchecked")
     private void verifyResult(String testName, SPFResult res) {
         String resultSPF = res.getResult();
-        HashMap<String,Object> currentTest = data.getTests().get(testName);
+        Map<String,?> currentTest = data.getTests().get(testName);
         Logger testLogger = log.getChildLogger(testName+"-verify");
         if (currentTest.get("result") instanceof String) {
             assertEquals("Test "+testName+" ("+currentTest.get("description")+") failed. Returned: "+resultSPF+" Expected: "+currentTest.get("result")+" [["+resultSPF+"||"+res.getHeaderText()+"]]", currentTest.get("result"), resultSPF);
@@ -326,6 +327,7 @@ public abstract class AbstractYamlTest extends TestCase {
     /**
      * @return a dns resolver pointing to the local fake server
      */
+    @SuppressWarnings("unchecked")
     protected DNSService getDNSServiceFakeServer() {
         Resolver resolver = null;
         try {
@@ -349,7 +351,7 @@ public abstract class AbstractYamlTest extends TestCase {
             }
         }
         
-        dnsTestServer.setData(data.getZonedata());
+        dnsTestServer.setData((Map<String, List<?>>) data.getZonedata());
         
         DNSServiceXBillImpl serviceXBillImpl = new DNSServiceXBillImpl(log) {
 
@@ -381,10 +383,10 @@ public abstract class AbstractYamlTest extends TestCase {
 
     final class SPFYamlDNSService implements DNSService {
 
-        private HashMap<String,Object> zonedata;
+        private Map<String,?> zonedata;
         private int recordLimit;
 
-        public SPFYamlDNSService(HashMap<String,Object> zonedata) {
+        public SPFYamlDNSService(Map<String,?> zonedata) {
             this.zonedata = zonedata;
             this.recordLimit = 10;
         }
@@ -416,6 +418,7 @@ public abstract class AbstractYamlTest extends TestCase {
             return getRecords(request.getHostname(), request.getRecordType(), 6);
         }
 
+        @SuppressWarnings("unchecked")
         public List<String> getRecords(String hostname, int recordType, int depth) throws TimeoutException {
             String type = getRecordTypeDescription(recordType);
 

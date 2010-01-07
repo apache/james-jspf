@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -42,16 +43,17 @@ import java.util.Set;
  */
 public class SPFYamlTestDescriptor {
     private String comment;
-    private HashMap<String,HashMap<String,Object>> tests;
-    private HashMap zonedata;
+    private Map<String, Map<String, ?>> tests;
+    private Map<String, Map> zonedata;
     
-    public SPFYamlTestDescriptor(HashMap source, int i) {
+    @SuppressWarnings("unchecked")
+    public SPFYamlTestDescriptor(Map<String, ?> source, int i) {
         this.setComment((String) source.get("description"));
         if (this.getComment() == null) {
             this.setComment("Test #"+i); 
         }
-        this.setTests((HashMap) source.get("tests"));
-        this.setZonedata((HashMap) source.get("zonedata"));
+        this.setTests((Map) source.get("tests"));
+        this.setZonedata((Map) source.get("zonedata"));
     }
     
     public String getComment() {
@@ -60,19 +62,19 @@ public class SPFYamlTestDescriptor {
     public void setComment(String comment) {
         this.comment = comment;
     }
-    public HashMap<String,HashMap<String,Object>> getTests() {
+    public Map<String,Map<String,?>> getTests() {
         return tests;
     }
-    public void setTests(HashMap<String, HashMap<String,Object>> tests) {
+    public void setTests(Map<String, Map<String,?>> tests) {
         this.tests = tests;
     }
-    public HashMap getZonedata() {
+    public Map<String, ?> getZonedata() {
         return zonedata;
     }
-    public void setZonedata(HashMap zonedata) {
-        this.zonedata = new HashMap();
-        Set keys = zonedata.keySet();
-        for (Iterator i = keys.iterator(); i.hasNext(); ) {
+    public void setZonedata(Map<String, Map> zonedata) {
+        this.zonedata = new HashMap<String, Map>();
+        Set<String> keys = zonedata.keySet();
+        for (Iterator<String> i = keys.iterator(); i.hasNext(); ) {
             String hostname = (String) i.next();
             String lowercase = hostname.toLowerCase(Locale.US);
             this.zonedata.put(lowercase, zonedata.get(hostname));
@@ -92,8 +94,8 @@ public class SPFYamlTestDescriptor {
             int i = 1;
             while(ctor.checkData()) {
                 Object o = ctor.getData();
-                if (o instanceof HashMap) {
-                  HashMap m = (HashMap) o;
+                if (o instanceof Map) {
+                  Map m = (Map) o;
                   SPFYamlTestDescriptor ts = new SPFYamlTestDescriptor(m, i);
                   tests.add(ts);
                 }

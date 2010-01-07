@@ -89,12 +89,13 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 public class DNSTestingServer implements ResponseGenerator {
 
@@ -104,7 +105,7 @@ public class DNSTestingServer implements ResponseGenerator {
 
     protected Zone zone;
     
-    private HashSet timeoutServers;
+    private Set<Name> timeoutServers;
     
     Random random = new Random();
 
@@ -127,16 +128,17 @@ public class DNSTestingServer implements ResponseGenerator {
         zone = null;
     }
 
-    public synchronized void setData(HashMap zonedata) {
+    @SuppressWarnings("unchecked")
+    public synchronized void setData(Map<String, List<?>> map) {
         try {
-            this.timeoutServers = new HashSet();
-            List records = new LinkedList();
+            this.timeoutServers = new HashSet<Name>();
+            List<Record> records = new LinkedList<Record>();
 
             records.add(new SOARecord(Name.root, DClass.IN, 3600, Name.root,
                     Name.root, 857623948, 0, 0, 0, 0));
             records.add(new NSRecord(Name.root, DClass.IN, 3600, Name.root));
 
-            Iterator hosts = zonedata.keySet().iterator();
+            Iterator<String> hosts = map.keySet().iterator();
             while (hosts.hasNext()) {
                 String host = (String) hosts.next();
                 Name hostname;
@@ -146,20 +148,20 @@ public class DNSTestingServer implements ResponseGenerator {
                     hostname = Name.fromString(host);
                 }
 
-                List l = (List) zonedata.get(host);
+                List<?> l = map.get(host);
                 if (l != null)
-                    for (Iterator i = l.iterator(); i.hasNext();) {
+                    for (Iterator<?> i = l.iterator(); i.hasNext();) {
                         Object o = i.next();
-                        if (o instanceof HashMap) {
-                            HashMap hm = (HashMap) o;
+                        if (o instanceof Map) {
+                            Map<String, ?> hm = (Map) o;
 
-                            Iterator types = hm.keySet().iterator();
+                            Iterator<String> types = hm.keySet().iterator();
 
                             while (types.hasNext()) {
                                 String type = (String) types.next();
                                 if ("MX".equals(type)) {
-                                    List mxList = (List) hm.get(type);
-                                    Iterator mxs = mxList.iterator();
+                                    List<?> mxList = (List<?>) hm.get(type);
+                                    Iterator<?> mxs = mxList.iterator();
                                     while (mxs.hasNext()) {
                                         Long prio = (Long) mxs.next();
                                         String cname = (String) mxs.next();
@@ -183,17 +185,17 @@ public class DNSTestingServer implements ResponseGenerator {
                                                 DClass.IN, 3600, Address
                                                         .getByAddress((String) value)));
                                     } else if ("SPF".equals(type)) {
-                                        if (value instanceof List) {
+                                        if (value instanceof List<?>) {
                                             records.add(new SPFRecord(hostname,
-                                                    DClass.IN, 3600, (List) value));
+                                                    DClass.IN, 3600, (List<?>) value));
                                         } else {
                                             records.add(new SPFRecord(hostname,
                                                     DClass.IN, 3600, (String) value));
                                         }
                                     } else if ("TXT".equals(type)) {
-                                        if (value instanceof List) {
+                                        if (value instanceof List<?>) {
                                             records.add(new TXTRecord(hostname,
-                                                    DClass.IN, 3600, (List) value));
+                                                    DClass.IN, 3600, (List<?>) value));
                                         } else {
                                             records.add(new TXTRecord(hostname,
                                                     DClass.IN, 3600, (String) value));
@@ -282,13 +284,14 @@ public class DNSTestingServer implements ResponseGenerator {
         return sr;
     }
 
+    @SuppressWarnings("unchecked")
     void addRRset(Name name, Message response, RRset rrset, int section,
             int flags) {
         for (int s = 1; s <= section; s++)
             if (response.findRRset(name, rrset.getType(), s))
                 return;
         if ((flags & FLAG_SIGONLY) == 0) {
-            Iterator it = rrset.rrs();
+            Iterator<Record> it = rrset.rrs();
             while (it.hasNext()) {
                 Record r = (Record) it.next();
                 if (r.getName().isWild() && !name.isWild())
