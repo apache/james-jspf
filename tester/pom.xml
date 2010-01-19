@@ -44,8 +44,8 @@
       <groupId>dnsjava</groupId>
       <artifactId>dnsjava</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.jvyaml</groupId>
+	<dependency>
+      <groupId>net.java.dev</groupId>
       <artifactId>jvyaml</artifactId>
     </dependency>
     <dependency>
