@@ -44,7 +44,7 @@ import java.util.Set;
 public class SPFYamlTestDescriptor {
     private String comment;
     private Map<String, Map<String, ?>> tests;
-    private Map<String, Map> zonedata;
+    private Map<String, Object> zonedata;
     
     @SuppressWarnings("unchecked")
     public SPFYamlTestDescriptor(Map<String, ?> source, int i) {
@@ -72,7 +72,7 @@ public class SPFYamlTestDescriptor {
         return zonedata;
     }
     public void setZonedata(Map<String, Map> zonedata) {
-        this.zonedata = new HashMap<String, Map>();
+        this.zonedata = new HashMap<String, Object>();
         Set<String> keys = zonedata.keySet();
         for (Iterator<String> i = keys.iterator(); i.hasNext(); ) {
             String hostname = (String) i.next();
@@ -85,6 +85,7 @@ public class SPFYamlTestDescriptor {
         List<SPFYamlTestDescriptor> tests = new ArrayList<SPFYamlTestDescriptor>();
     
         InputStream is = SPFYamlTestDescriptor.class.getResourceAsStream(filename);
+        System.out.println(filename+": "+is);
         
         if (is != null) {
             Reader br = new BufferedReader(new InputStreamReader(is));
