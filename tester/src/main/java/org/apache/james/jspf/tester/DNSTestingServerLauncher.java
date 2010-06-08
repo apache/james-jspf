@@ -74,6 +74,7 @@ public class DNSTestingServerLauncher {
     /**
      * @param args
      */
+    @SuppressWarnings("unchecked")
     public static void main(String[] args) {
         String ip = null;
         String port = null;
@@ -160,6 +161,7 @@ public class DNSTestingServerLauncher {
 
     }
 
+    @SuppressWarnings("unchecked")
     private static void loadZoneData(HashMap testMap, HashMap zonedata) {
         HashMap loadedZoneData = (HashMap) testMap.get("zonedata");
         Set keys = loadedZoneData.keySet();

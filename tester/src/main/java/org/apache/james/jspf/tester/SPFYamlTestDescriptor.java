@@ -71,7 +71,7 @@ public class SPFYamlTestDescriptor {
     public Map<String, ?> getZonedata() {
         return zonedata;
     }
-    public void setZonedata(Map<String, Map> zonedata) {
+    public void setZonedata(Map<String, Map<?, ?>> zonedata) {
         this.zonedata = new HashMap<String, Object>();
         Set<String> keys = zonedata.keySet();
         for (Iterator<String> i = keys.iterator(); i.hasNext(); ) {
@@ -81,6 +81,7 @@ public class SPFYamlTestDescriptor {
         }
     }
     
+    @SuppressWarnings("unchecked")
     public static List<SPFYamlTestDescriptor> loadTests(String filename) throws IOException {
         List<SPFYamlTestDescriptor> tests = new ArrayList<SPFYamlTestDescriptor>();
     
@@ -95,8 +96,8 @@ public class SPFYamlTestDescriptor {
             int i = 1;
             while(ctor.checkData()) {
                 Object o = ctor.getData();
-                if (o instanceof Map) {
-                  Map m = (Map) o;
+                if (o instanceof Map<?, ?>) {
+                  Map<String, ?> m = (Map<String, ?>) o;
                   SPFYamlTestDescriptor ts = new SPFYamlTestDescriptor(m, i);
                   tests.add(ts);
                 }
