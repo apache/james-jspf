@@ -25,7 +25,6 @@
     <groupId>org.apache.james</groupId>
     <artifactId>apache-jspf-project</artifactId>
     <version>0.9.8-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
   </parent>
   <name>Apache JAMES jSPF Resolver</name>
   <description>

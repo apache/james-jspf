@@ -198,6 +198,8 @@
   <properties>
     <project.build.sourceEncoding>iso-8859-15</project.build.sourceEncoding>
     <target.jdk>1.5</target.jdk>
+    <!-- Override the source descriptor -->
+    <sourceReleaseAssemblyDescriptor>src</sourceReleaseAssemblyDescriptor>
   </properties>
 
 </project>

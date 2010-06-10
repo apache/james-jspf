@@ -137,10 +137,7 @@
             </manifestEntries>
           </archive>
         </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-      </plugin>      
+      </plugin>   
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
         <executions>
