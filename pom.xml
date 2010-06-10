@@ -27,7 +27,7 @@
     <version>1.5</version>
   </parent>
   <name>Apache JAMES jSPF</name>
-  <version>0.9.8-SNAPSHOT</version>
+  <version>0.9.8</version>
   <description>
     Apache James jSPF is an SPF spec implementation written in Java
   </description>
@@ -55,9 +55,9 @@
   </issueManagement>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/james/jspf/trunk</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/james/jspf/trunk</developerConnection>
-    <url>http://svn.apache.org/viewvc/james/jspf/trunk/</url>
+    <connection>scm:svn:http://svn.apache.org/repos/asf/james/jspf/tags/apache-jspf-project-0.9.8</connection>
+    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/james/jspf/tags/apache-jspf-project-0.9.8</developerConnection>
+    <url>http://svn.apache.org/viewvc/james/jspf/tags/apache-jspf-project-0.9.8</url>
   </scm>
 
   <build>
@@ -133,13 +133,13 @@
 	    <dependency>
 	      <groupId>org.apache.james.jspf</groupId>
 	      <artifactId>apache-jspf-tester</artifactId>
-        <version>0.9.8-SNAPSHOT</version>
+        <version>0.9.8</version>
       </dependency>
 	    <dependency>
 	      <groupId>org.apache.james.jspf</groupId>
 	      <artifactId>apache-jspf-resolver</artifactId>
 	      <classifier>tests</classifier>
-        <version>0.9.8-SNAPSHOT</version>
+        <version>0.9.8</version>
       </dependency>
       <dependency>
         <groupId>dnsjava</groupId>
