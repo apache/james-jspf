@@ -33,7 +33,14 @@
       </p>
     </section>
     <section name="News">
-   
+      
+    <subsection name="2010">
+     
+      <h4>Jun/2010 - jSPF-0.9.8 released</h4>
+      <p>The JAMES Developer Team is proud to announce the <a href="../download.cgi">availability</a> release of APACHE jSPF-0.9.8. This release includes fixes for correct handling of TXT record escapings and pass the fc4408-tests-2009.10 testsuite. 
+      </p>
+    </subsection> 
+    
     <subsection name="2009">
      
       <h4>Jun/2009 - jSPF-0.9.7 released</h4>
