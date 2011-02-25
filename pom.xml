@@ -83,7 +83,7 @@
 	        <artifactId>maven-pmd-plugin</artifactId>
 	        <version>2.4</version>
 	        <configuration>
-	          <targetjdk>1.4</targetjdk>
+	          <targetJdk>${target.jdk}</targetJdk>
 	          <rulesets>
 	            <ruleset>/rulesets/basic.xml</ruleset>
 	            <ruleset>/rulesets/controversial.xml</ruleset>
