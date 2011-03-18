@@ -60,27 +60,19 @@
     </dependency>
   </dependencies>
 
-  <reporting>
+  <build>
     <plugins>
       <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <artifactId>maven-surefire-report-plugin</artifactId>
-      </plugin> 
-      <plugin>
-        <artifactId>maven-javadoc-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <artifactId>maven-jxr-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-pmd-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>rat-maven-plugin</artifactId>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>verify</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
         <configuration>
           <excludes>
             <!-- 3rd party resources described in NOTICE:
@@ -93,26 +85,9 @@
           </excludes>
         </configuration>
       </plugin>
-    </plugins>
-  </reporting>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>rat-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>verify</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-        <version>2.0.0</version>
         <executions>
           <execution>
             <id>bundle-manifest</id>
@@ -142,16 +117,16 @@
               <addClasspath>true</addClasspath>
             </manifest>
             <manifestEntries>
-              <Specification-Title>${pom.name}</Specification-Title>
-              <Specification-Version>${pom.version}</Specification-Version>
+              <Specification-Title>${project.name}</Specification-Title>
+              <Specification-Version>${project.version}</Specification-Version>
               <Specification-Vendor>The Apache Software Foundation</Specification-Vendor>
-              <Implementation-Title>${pom.name}</Implementation-Title>
-              <Implementation-Version>${pom.version}</Implementation-Version>
+              <Implementation-Title>${project.name}</Implementation-Title>
+              <Implementation-Version>${project.version}</Implementation-Version>
               <Implementation-Vendor>The Apache Software Foundation</Implementation-Vendor>
               <Implementation-Vendor-Id>org.apache</Implementation-Vendor-Id>
               <X-Compile-Source-JDK>${target.jdk}</X-Compile-Source-JDK>
               <X-Compile-Target-JDK>${target.jdk}</X-Compile-Target-JDK>
-              <url>${pom.url}</url>
+              <url>${project.url}</url>
             </manifestEntries>
           </archive>
         </configuration>
@@ -161,6 +136,7 @@
         <artifactId>maven-compiler-plugin</artifactId>
       </plugin>      
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
         <executions>
           <execution>
@@ -176,7 +152,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
-        <version>2.0.4</version>
         <executions>
           <execution>
             <id>attach-sources</id>
@@ -188,6 +163,7 @@
       </plugin>
       <!-- Add NOTICE and LICENSE to generated JAR -->
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-remote-resources-plugin</artifactId>
         <executions>
           <execution>

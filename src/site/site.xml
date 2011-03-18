@@ -18,15 +18,22 @@
   under the License.    
 -->
 <project name="jSPF">
+  <skin>
+    <groupId>org.apache.james</groupId>
+    <artifactId>maven-skin</artifactId>
+    <version>1.6-SNAPSHOT</version>
+  </skin>
+
   <bannerLeft>
     <name>James jSPF</name>
-    <src>images/james-jspf-logo.gif</src>
+    <src>images/logos/james-jspf-logo.gif</src>
     <href>http://james.apache.org/jspf/index.html</href>
+    <alt>james-jspf-logo.gif</alt>
   </bannerLeft>
 
   <bannerRight>
     <name>The Apache Software Foundation</name>
-    <src>http://james.apache.org/jspf/images/asf-logo-reduced.gif</src>
+    <src>images/logos/asf-logo-reduced.gif</src>
     <href>http://www.apache.org/index.html</href>
   </bannerRight> 
 
@@ -35,7 +42,7 @@
     <menu name="jSPF" inherit="top">
       <item name="Overview" href="/index.html"/>
       <item name="jSPF FAQ" href="/FAQ.html"/>
-      <item name="Mailing Lists" href="/mail-lists.html" />
+      <item name="Mailing Lists" href="https://builds.apache.org/hudson/view/G-L/view/James/job/jspf-trunk-site/site/mail-lists.html" />
       <item name="Useful RFCs" href="/rfclist.html"/>
     </menu>
 
@@ -48,18 +55,14 @@
     -->
 
     <menu name="Project">
-      <item name="Bug Database" href="/issue-tracking.html"/>
-      <item name="Source Code" href="/source-repository.html"/>
-      <item name="Who We Are" href="/team-list.html" />
+      <item name="Bug Database" href="https://builds.apache.org/hudson/view/G-L/view/James/job/jspf-trunk-site/site/issue-tracking.html"/>
+      <item name="Source Code" href="https://builds.apache.org/hudson/view/G-L/view/James/job/jspf-trunk-site/site/source-repository.html"/>
+      <item name="Who We Are" href="https://builds.apache.org/hudson/view/G-L/view/James/job/jspf-trunk-site/site/team-list.html" />
       <!-- Not yet there
       <item name="Contributing" href="contribute.html"/>
       -->
-      <item name="License" href="/license.html"/>
+      <item name="License" href="https://builds.apache.org/hudson/view/G-L/view/James/job/jspf-trunk-site/site/license.html"/>
     </menu>
-
-    <menu ref="modules" />
-
-    <menu ref="reports" />
 
   </body>
 </project>
