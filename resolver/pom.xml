@@ -100,8 +100,9 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
+            <!-- Exclude commons-cli in OSGI. See JSPF-90 -->
+            <Import-Package>!org.apache.commons.cli,*</Import-Package>
             <Export-Package>org.apache.james.jspf.*</Export-Package>
-            <Embed-Dependency>*;scope=runtime</Embed-Dependency>
           </instructions>
         </configuration>
       </plugin>
