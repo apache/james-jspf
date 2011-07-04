@@ -101,7 +101,8 @@
         <configuration>
           <instructions>
             <!-- Exclude commons-cli in OSGI. See JSPF-90 -->
-            <Import-Package>!org.apache.commons.cli,*</Import-Package>
+            <!-- Mark dnsjnio packages as optional. See JSPF-89 -->
+            <Import-Package>!org.apache.commons.cli,uk.nominet.dnsjnio;resolution:=optional,*</Import-Package>
             <Export-Package>org.apache.james.jspf.*</Export-Package>
           </instructions>
         </configuration>
