@@ -24,7 +24,7 @@
   <parent>
     <groupId>org.apache.james</groupId>
     <artifactId>apache-jspf-project</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>0.9.9</version>
   </parent>
   <name>Apache JAMES jSPF Resolver</name>
   <description>
