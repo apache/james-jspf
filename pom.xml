@@ -27,7 +27,7 @@
     <version>1.6</version>
   </parent>
   <name>Apache JAMES jSPF</name>
-  <version>1.0.0-SMAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
   <description>
     Apache James jSPF is an SPF spec implementation written in Java
   </description>
@@ -308,13 +308,13 @@
 	    <dependency>
 	      <groupId>org.apache.james.jspf</groupId>
 	      <artifactId>apache-jspf-tester</artifactId>
-        <version>1.0.0-SMAPSHOT</version>
+        <version>${project.version}</version>
       </dependency>
 	    <dependency>
 	      <groupId>org.apache.james.jspf</groupId>
 	      <artifactId>apache-jspf-resolver</artifactId>
 	      <classifier>tests</classifier>
-        <version>1.0.0-SMAPSHOT</version>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>dnsjava</groupId>
