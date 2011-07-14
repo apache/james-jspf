@@ -1,0 +1,35 @@
+   Apache JSPF
+   Copyright 2009 The Apache Software Foundation
+
+   This product includes software developed at
+   The Apache Software Foundation (http://www.apache.org/).
+   
+   This product includes/uses software, JUnit (http://www.junit.org/),
+   developed by Kent Beck, Erich Gamma, and David Saff
+   License: Common Public License Version 1.0  (http://www.opensource.org/licenses/cpl.php)
+	
+   This product has been inspired from the spfjava library
+   written by Roger Fullerton and Neil Murray.
+	  
+   This product contains DNS-aware code inspired by DNSJava 
+   test code written and copyrighted by Brian Wellington, too.
+   (see tester\src\main\java\org\apache\james\jspf\tester\ files)
+	
+   This product contains resources (SPF parser tests: test_parser.txt 
+   and test_rfc_examples.txt) derived from the libspf2 library 
+   (http://www.libspf2.org/) and distributed under the BSD license 
+   and copyright by Wayne Schlitt, Shevek. 
+   (see resolver\src\test\resources\org\apache\james\jspf\libspf2.LICENSE)
+	
+   This product contains resources (rfc4408-tests.yml) from the
+   openspf group, distributed under the BSD license and copyright
+   by Stuart D. Gathman and Julian Mehnle.
+   (see tester\src\main\resources\org\apache\james\jspf\tester\rfc4408-tests.LICENSE)
+	
+   This product contains resources (tests.yml, pyspf-tests.yml) 
+   from the pyspf library (http://cheeseshop.python.org/pypi/pyspf) 
+   distributed under the Python Software Foundation License and 
+   copyright by Terence Way, Stuart Gathman (stuart@bmsi.com) and 
+   Scott Kitterman.
+   (see tester\src\main\resources\org\apache\james\jspf\tester\pyspf.LICENSE)
+   
