@@ -29,8 +29,6 @@
       <directory>..</directory>
       <outputDirectory>/</outputDirectory>
       <includes>
-        <include>LICENSE.*</include>
-        <include>NOTICE.*</include>
         <include>RELEASE_NOTES*</include>
         <include>README*</include>
       </includes>
@@ -54,7 +52,20 @@
       <outputDirectory>/apidocs</outputDirectory>
     </fileSet>
   </fileSets>
-  
+
+  <files>
+    <file>
+      <source>src/licensing/noticeForApp.txt</source>
+      <outputDirectory>/</outputDirectory>
+      <destName>NOTICE</destName>
+    </file>
+    <file>
+      <source>src/licensing/licenseForApp.txt</source>
+      <outputDirectory>/</outputDirectory> 
+      <destName>LICENSE</destName>
+    </file>
+  </files>  
+
   <dependencySets>
     <dependencySet>
       <outputDirectory>/lib/</outputDirectory>
