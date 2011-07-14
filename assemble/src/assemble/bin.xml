@@ -31,7 +31,8 @@
       <includes>
         <include>LICENSE.*</include>
         <include>NOTICE.*</include>
-        <include>RELEASE_NOTES.txt</include>
+        <include>RELEASE_NOTES*</include>
+        <include>README*</include>
       </includes>
     </fileSet>
     <fileSet>
