@@ -105,7 +105,7 @@ public class FutureSPFResult extends SPFResult {
      * 
      * @return true or false
      */
-    public boolean isReady() {
+    public synchronized boolean isReady() {
         return isReady;
     }
 }
