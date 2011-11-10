@@ -18,11 +18,6 @@
   under the License.
 -->
 <project name="jSPF">
-  <skin>
-    <groupId>org.apache.james</groupId>
-    <artifactId>james-skin</artifactId>
-    <version>1.7-SNAPSHOT</version>
-  </skin>
 
   <bannerLeft>
     <name>James jSPF</name>
@@ -30,12 +25,6 @@
     <href>http://james.apache.org/jspf/index.html</href>
     <alt>james-jspf-logo.gif</alt>
   </bannerLeft>
-
-  <bannerRight>
-    <name>The Apache Software Foundation</name>
-    <src>images/logos/asf-logo-reduced.gif</src>
-    <href>http://www.apache.org/index.html</href>
-  </bannerRight> 
 
   <body>
     
@@ -53,16 +42,6 @@
       <item name="jSPF Javadocs" href="apidocs/index.html" />
     </menu>
     -->
-
-    <menu name="Project">
-      <item name="Bug Database" href="https://builds.apache.org/hudson/view/G-L/view/James/job/jspf-trunk-site/site/issue-tracking.html"/>
-      <item name="Source Code" href="https://builds.apache.org/hudson/view/G-L/view/James/job/jspf-trunk-site/site/source-repository.html"/>
-      <item name="Who We Are" href="https://builds.apache.org/hudson/view/G-L/view/James/job/jspf-trunk-site/site/team-list.html" />
-      <!-- Not yet there
-      <item name="Contributing" href="contribute.html"/>
-      -->
-      <item name="License" href="https://builds.apache.org/hudson/view/G-L/view/James/job/jspf-trunk-site/site/license.html"/>
-    </menu>
 
   </body>
 </project>
