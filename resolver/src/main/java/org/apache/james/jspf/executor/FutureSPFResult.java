@@ -19,6 +19,9 @@
 
 package org.apache.james.jspf.executor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.james.jspf.core.SPFSession;
 
 
@@ -29,6 +32,8 @@ import org.apache.james.jspf.core.SPFSession;
 public class FutureSPFResult extends SPFResult {
     
     private boolean isReady;
+    private List<IFutureSPFResultListener> listeners;
+    private int waiters;
     
     public FutureSPFResult() {
         isReady = false;
@@ -41,9 +46,21 @@ public class FutureSPFResult extends SPFResult {
      * 
      */
     public synchronized void setSPFResult(SPFSession session) {
-        setSPFSession(session);
-        isReady = true;
-        notify();
+        if (!isReady) {
+            setSPFSession(session);
+            isReady = true;
+            if (waiters > 0) {
+                notifyAll();
+            }
+            if (listeners != null) {
+                for (IFutureSPFResultListener listener : listeners) {
+                    listener.onSPFResult(this);
+                }
+            }
+            listeners = null;
+        }
+        
+
     }
 
     /**
@@ -53,9 +70,13 @@ public class FutureSPFResult extends SPFResult {
     private synchronized void checkReady() {
         while (!isReady) {
             try {
+                waiters++;
                 wait();
             } catch (InterruptedException e) {
-                //
+                // 
+                Thread.interrupted();
+            } finally {
+                waiters--;
             }
         }
     }
@@ -107,5 +128,48 @@ public class FutureSPFResult extends SPFResult {
      */
     public synchronized boolean isReady() {
         return isReady;
+    }
+
+    /**
+     * Add a {@link IFutureSPFResultListener} which will get notified once {@link #isReady()} returns <code>true</code>
+     * 
+     * @param listener
+     */
+    public synchronized void addListener(IFutureSPFResultListener listener) {
+        if (!isReady) {
+            if (listeners == null) {
+                listeners = new ArrayList<IFutureSPFResultListener>();
+            }
+            listeners.add(listener);
+        } else {
+            listener.onSPFResult(this);
+        }
+    }
+   
+    /**
+     * Remove a {@link IFutureSPFResultListener}
+     * 
+     * @param listener
+     */
+    public synchronized void removeListener(IFutureSPFResultListener listener) {
+        if (listeners != null) {
+            listeners.remove(listener);
+        }
+    }
+    
+    
+    /**
+     * Listener which will get notified once a {@link FutureSPFResult#isReady()} returns <code>true</code>. So it will not block anymore
+     * 
+     *
+     */
+    public interface IFutureSPFResultListener {
+        
+        /**
+         * Get called once a {@link FutureSPFResult} is ready
+         * 
+         * @param result
+         */
+        void onSPFResult(FutureSPFResult result);
     }
 }
