@@ -26,19 +26,16 @@
     <parent>
         <groupId>org.apache.james</groupId>
         <artifactId>james-project</artifactId>
-        <version>1.7</version>
+        <version>1.8</version>
         <relativePath></relativePath>
     </parent>
 
-    <groupId>org.apache.james</groupId>
     <artifactId>apache-jspf-project</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Apache JAMES jSPF</name>
-    <description>
-    Apache James jSPF is an SPF spec implementation written in Java
-    </description>
+    <description>Apache James jSPF is an SPF spec implementation written in Java</description>
     <url>http://james.apache.org/jspf/</url>
     <inceptionYear>2006</inceptionYear>
 
@@ -66,8 +63,6 @@
     </distributionManagement>
 
     <properties>
-        <project.build.sourceEncoding>iso-8859-15</project.build.sourceEncoding>
-        <target.jdk>1.5</target.jdk>
         <!-- Override the source descriptor -->
         <sourceReleaseAssemblyDescriptor>src</sourceReleaseAssemblyDescriptor>
     </properties>
@@ -128,22 +123,4 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>emma-maven-plugin</artifactId>
-                <inherited>true</inherited>          
-                <executions>
-                    <execution>
-                        <phase>process-classes</phase>               
-                        <goals>
-                            <goal>instrument</goal>
-                        </goals>
-                     </execution>
-                  </executions>
-             </plugin>
-        </plugins>
-    </build>
 </project>
