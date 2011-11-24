@@ -73,8 +73,7 @@ public class FutureSPFResult extends SPFResult {
                 waiters++;
                 wait();
             } catch (InterruptedException e) {
-                // 
-                Thread.interrupted();
+                Thread.currentThread().interrupt();
             } finally {
                 waiters--;
             }
