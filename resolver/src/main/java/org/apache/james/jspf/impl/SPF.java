@@ -310,7 +310,7 @@ public class SPF implements SPFChecker {
         spfData.pushChecker(resultHandler);
         spfData.pushChecker(this);
         
-        FutureSPFResult ret = new FutureSPFResult();
+        FutureSPFResult ret = new FutureSPFResult(log);
         
         executor.execute(spfData, ret);
 

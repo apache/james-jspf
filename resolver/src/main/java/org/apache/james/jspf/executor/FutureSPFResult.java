@@ -22,6 +22,7 @@ package org.apache.james.jspf.executor;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPFSession;
 
 
@@ -34,12 +35,19 @@ public class FutureSPFResult extends SPFResult {
     private boolean isReady;
     private List<IFutureSPFResultListener> listeners;
     private int waiters;
+    private final Logger log;
     
     public FutureSPFResult() {
+        this.log = null;
         isReady = false;
     }
     
-    /**
+    public FutureSPFResult(Logger log) {
+        this.log = log;   	
+        this.isReady = false;
+    }
+
+	/**
      * Set SPFResult using the given SPFsession
      * 
      * @param session 
@@ -54,7 +62,14 @@ public class FutureSPFResult extends SPFResult {
             }
             if (listeners != null) {
                 for (IFutureSPFResultListener listener : listeners) {
-                    listener.onSPFResult(this);
+                    try {
+                        listener.onSPFResult(this);
+                    } catch (Throwable e) {
+                    	// catch exception. See JSPF-95
+                        if (log != null) {
+                            log.warn("An exception was thrown by the listener " + listener, e);
+                        }
+                    }
                 }
             }
             listeners = null;
