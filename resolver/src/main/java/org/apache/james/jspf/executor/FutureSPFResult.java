@@ -20,6 +20,7 @@
 package org.apache.james.jspf.executor;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.james.jspf.core.Logger;
@@ -53,29 +54,35 @@ public class FutureSPFResult extends SPFResult {
      * @param session 
      * 
      */
-    public synchronized void setSPFResult(SPFSession session) {
-        if (!isReady) {
-            setSPFSession(session);
-            isReady = true;
-            if (waiters > 0) {
-                notifyAll();
+    public void setSPFResult(SPFSession session) {
+        Iterator<IFutureSPFResultListener> listenerIt = null;
+        synchronized (this) {
+            if (!isReady) {
+                setSPFSession(session);
+                isReady = true;
+                if (waiters > 0) {
+                    notifyAll();
+                }
+                if (listeners != null) {
+                    listenerIt = listeners.iterator();
+                    listeners = null;
+                }
             }
-            if (listeners != null) {
-                for (IFutureSPFResultListener listener : listeners) {
-                    try {
-                        listener.onSPFResult(this);
-                    } catch (Throwable e) {
-                    	// catch exception. See JSPF-95
-                        if (log != null) {
-                            log.warn("An exception was thrown by the listener " + listener, e);
-                        }
+        }
+        if (listenerIt != null) {
+            while (listenerIt.hasNext()) {
+                IFutureSPFResultListener listener = listenerIt.next();
+                try {
+                    listener.onSPFResult(this);
+                } catch (Throwable e) {
+                    // catch exception. See JSPF-95
+                    if (log != null) {
+                        log.warn("An exception was thrown by the listener " + listener, e);
                     }
                 }
             }
-            listeners = null;
+            listenerIt = null;
         }
-        
-
     }
 
     /**
@@ -166,7 +173,7 @@ public class FutureSPFResult extends SPFResult {
      * @param listener
      */
     public synchronized void removeListener(IFutureSPFResultListener listener) {
-        if (listeners != null) {
+        if (!isReady && listeners != null) {
             listeners.remove(listener);
         }
     }
