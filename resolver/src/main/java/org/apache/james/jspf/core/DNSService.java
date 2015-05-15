@@ -60,7 +60,7 @@ public interface DNSService {
     /**
      * Sets a new limit for the number of records for MX and PTR lookups.
      * 
-     * @param recordLimit the new limit (0 => unlimited)
+     * @param recordLimit the new limit (0 =&gt; unlimited)
      */
     public void setRecordLimit(int recordLimit);
 
