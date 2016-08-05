@@ -160,6 +160,10 @@ public class SPFSession implements MacroData {
      * @see org.apache.james.jspf.core.MacroData#getClientDomain()
      */
     public String getClientDomain() {
+        if (clientDomain == null) {
+            return "unknown";
+        }
+        
         return clientDomain;
     }
     
