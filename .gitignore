@@ -1,0 +1,14 @@
+.project
+.settings
+*~
+target
+*.iml
+.gitignore
+.idea
+*.patch
+*.log
+.m2
+*.jar
+*.gz
+*.zip
+*.war
