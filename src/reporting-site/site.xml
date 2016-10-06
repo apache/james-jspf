@@ -21,9 +21,9 @@
 
     <bannerLeft>
         <name>James jSPF</name>
-        <src>images/logos/james-jspf-logo.gif</src>
+        <src>images/james-logo.png</src>
         <href>http://james.apache.org/jspf/index.html</href>
-        <alt>james-jspf-logo.gif</alt>
+        <alt>james-logo.png</alt>
     </bannerLeft>
 
     <body>
