@@ -62,6 +62,8 @@
     </distributionManagement>
 
     <properties>
+        <james-skin.version>1.8</james-skin.version>
+
         <!-- Override the source descriptor -->
         <sourceReleaseAssemblyDescriptor>src</sourceReleaseAssemblyDescriptor>
         <!-- Use java 5 -->
