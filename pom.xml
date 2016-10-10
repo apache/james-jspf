@@ -26,6 +26,7 @@
         <version>1.8.3-SNAPSHOT</version>
     </parent>
 
+    <groupId>org.apache.james</groupId>
     <artifactId>apache-jspf-project</artifactId>
     <version>1.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
