@@ -124,6 +124,18 @@
     </dependencyManagement>
 
      <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.0</version>
+                <configuration>
+                    <optimize>true</optimize>
+                    <source>${target.jdk}</source>
+                    <target>${target.jdk}</target>
+                </configuration>
+            </plugin>
+        </plugins>
         <pluginManagement>
             <plugins>
                 <!-- See https://issues.apache.org/**jira/browse/FELIX-3037<https://issues.apache.org/jira/browse/FELIX-3037>-->
