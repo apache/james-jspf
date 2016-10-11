@@ -24,12 +24,12 @@
         <groupId>org.apache</groupId>
         <artifactId>apache</artifactId>
         <version>18</version>
-        <relativePath/>
+        <relativePath />
     </parent>
 
     <groupId>org.apache.james</groupId>
     <artifactId>apache-jspf-project</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
     <packaging>pom</packaging>
 
     <name>Apache JAMES jSPF</name>
@@ -47,7 +47,8 @@
         <connection>scm:git:http://git-wip-us.apache.org/repos/asf/james-jspf.git</connection>
         <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/james-jspf.git</developerConnection>
         <url>https://git-wip-us.apache.org/repos/asf/james-jspf.git</url>
-    </scm>
+      <tag>apache-jspf-project-1.0.1</tag>
+  </scm>
     <issueManagement>
         <system>JIRA</system>
         <url>http://issues.apache.org/jira/browse/JSPF</url>
@@ -163,7 +164,7 @@
                             </goals>
                           </pluginExecutionFilter>
                           <action>
-                            <ignore></ignore>
+                            <ignore />
                           </action>
                         </pluginExecution>
                       </pluginExecutions>
