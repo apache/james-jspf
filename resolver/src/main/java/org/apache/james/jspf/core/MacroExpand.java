@@ -150,6 +150,8 @@ public class MacroExpand {
                 // just return the default "unknown".
                 session.setClientDomain("unknown");
             }
+                    
+            session.setClientDomain("unknown");        
             return null;
 
         }
