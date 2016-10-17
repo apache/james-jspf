@@ -825,6 +825,13 @@ tests:
     # this has been changed to permerror because of the latest openspf updates
     # result: fail
     result: permerror
+  mailzone-#135:
+    # 10.0.0.1 has no PTR record associated with
+    description: domain of 95.spf1-test.mailzone.com does not designate 10.0.0.1 as permitted sender
+    helo: 95.spf1-test.mailzone.com
+    host: 10.0.0.1
+    mailfrom: 95.spf1-test.mailzone.com
+    result: fail
 zonedata:
   01.spf1-test.mailzone.com:
     - TXT:  v=spf1                                                             
