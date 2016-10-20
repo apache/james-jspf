@@ -148,7 +148,6 @@ public class MacroExpand {
                 }
             } catch (TimeoutException e) {
                 // just return the default "unknown".
-                session.setClientDomain("unknown");
             }
                     
             session.setClientDomain("unknown");        
