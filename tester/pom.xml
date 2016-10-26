@@ -63,25 +63,6 @@
             <plugin>
                 <groupId>org.apache.rat</groupId>
                 <artifactId>apache-rat-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <excludes>
-                        <!-- 3rd party resources described in NOTICE:
-                            see the maven-remote-resources-plugin configuration, in this file -->
-                        <exclude>src/main/resources/org/apache/james/jspf/tester/pyspf-tests.yml</exclude>
-                        <exclude>src/main/resources/org/apache/james/jspf/tester/rfc4408-tests.yml</exclude>
-                        <exclude>src/main/resources/org/apache/james/jspf/tester/rfc4408-tests-2009.10.yml</exclude>
-                        <exclude>src/main/resources/org/apache/james/jspf/tester/tests.yml</exclude>
-                        <exclude>release.properties</exclude>
-                    </excludes>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>

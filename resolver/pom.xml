@@ -69,25 +69,6 @@
             <plugin>
                 <groupId>org.apache.rat</groupId>
                 <artifactId>apache-rat-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <excludes>
-                        <!-- 3rd party resources described in NOTICE:
-                            see the maven-remote-resources-plugin configuration, in this file -->
-                        <exclude>src/test/resources/org/apache/james/jspf/test_live.txt</exclude>
-                        <exclude>src/test/resources/org/apache/james/jspf/test_parser.txt</exclude>
-                        <exclude>src/test/resources/org/apache/james/jspf/test_rfc_examples.txt</exclude>
-                        <!-- maven release temporary file -->
-                        <exclude>release.properties</exclude>
-                    </excludes>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
