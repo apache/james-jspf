@@ -69,6 +69,7 @@
       <item name="Overview" href="/index.html"/>
       <item name="jSPF FAQ" href="/FAQ.html"/>
       <item name="Useful RFCs" href="/rfclist.html"/>
+      <item name="Issue Tracker" href="https://issues.apache.org/jira/browse/JSPF" />
       <item name="Download Releases" href="http://james.apache.org/download.cgi#Apache_jSPF"/>
     </menu>
 
