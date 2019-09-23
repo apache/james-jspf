@@ -20,6 +20,8 @@
 
 package org.apache.james.jspf.terms;
 
+import java.util.List;
+
 import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSResponse;
@@ -35,14 +37,16 @@ import org.apache.james.jspf.core.exceptions.NoneException;
 import org.apache.james.jspf.core.exceptions.PermErrorException;
 import org.apache.james.jspf.core.exceptions.TempErrorException;
 import org.apache.james.jspf.core.exceptions.TimeoutException;
-
-import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class represent the exp modifier
  * 
  */
 public class ExpModifier extends GenericModifier implements MacroExpandEnabled, SPFCheckerDNSResponseListener {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExpModifier.class);
 
     private final class ExpandedExplanationChecker implements SPFChecker {
        
@@ -165,7 +169,7 @@ public class ExpModifier extends GenericModifier implements MacroExpandEnabled, 
             // errors in the explanation string, then proceed as if no exp modifier was given.   
             if (records.size() > 1) {
                 
-                log.debug("More then one TXT-Record found for explanation");
+                LOGGER.debug("More then one TXT-Record found for explanation");
                 // Only catch the error and return null
                 
             } else {

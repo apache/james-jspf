@@ -19,9 +19,6 @@
 
 package org.apache.james.jspf.core;
 
-import org.apache.james.jspf.ConsoleLogger;
-import org.apache.james.jspf.core.MacroData;
-import org.apache.james.jspf.core.MacroExpand;
 import org.apache.james.jspf.core.exceptions.PermErrorException;
 
 import junit.framework.TestCase;
@@ -97,8 +94,8 @@ public class MacroExpandTest extends TestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
-        defIp4me = new MacroExpand(new ConsoleLogger(), null);
-        defIp6me = new MacroExpand(new ConsoleLogger(), null);
+        defIp4me = new MacroExpand(null);
+        defIp6me = new MacroExpand(null);
     }
 
     public void testPercS() throws PermErrorException {

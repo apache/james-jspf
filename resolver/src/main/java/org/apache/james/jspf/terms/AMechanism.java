@@ -20,6 +20,9 @@
 
 package org.apache.james.jspf.terms;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSResponse;
@@ -35,15 +38,15 @@ import org.apache.james.jspf.core.exceptions.NoneException;
 import org.apache.james.jspf.core.exceptions.PermErrorException;
 import org.apache.james.jspf.core.exceptions.TempErrorException;
 import org.apache.james.jspf.core.exceptions.TimeoutException;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class represent the a mechanism
  * 
  */
 public class AMechanism extends GenericMechanism implements SPFCheckerDNSResponseListener {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AMechanism.class);
 
     private static final String ATTRIBUTE_AMECHANISM_IPV4CHECK = "AMechanism.ipv4check";
 
@@ -106,7 +109,7 @@ public class AMechanism extends GenericMechanism implements SPFCheckerDNSRespons
             // PermError / TempError
             // TODO: Should we replace this with the "right" Exceptions ?
             } catch (Exception e) {
-                log.debug("No valid ipAddress: ",e);
+                LOGGER.debug("No valid ipAddress: ", e);
                 throw new PermErrorException("No valid ipAddress: "
                         + spfData.getIpAddress());
             }

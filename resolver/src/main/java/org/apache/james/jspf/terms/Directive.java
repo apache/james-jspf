@@ -21,7 +21,6 @@
 package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.DNSLookupContinuation;
-import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.core.SPFSession;
@@ -29,11 +28,15 @@ import org.apache.james.jspf.core.exceptions.NeutralException;
 import org.apache.james.jspf.core.exceptions.NoneException;
 import org.apache.james.jspf.core.exceptions.PermErrorException;
 import org.apache.james.jspf.core.exceptions.TempErrorException;
+import org.apache.james.jspf.executor.FutureSPFResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A Directive is a mechanism with a resulting qualifier.
  */
 public class Directive implements SPFChecker {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Directive.class);
 
     private final class MechanismResultChecker implements SPFChecker {
 
@@ -50,10 +53,10 @@ public class Directive implements SPFChecker {
                 } else {
                     spfData.setCurrentResult(qualifier);
                 }
-                
-                log.info("Processed directive matched: " + Directive.this + " returned " + spfData.getCurrentResult());
+
+                LOGGER.info("Processed directive matched: " + Directive.this + " returned " + spfData.getCurrentResult());
             } else {
-                log.debug("Processed directive NOT matched: " + this);
+                LOGGER.debug("Processed directive NOT matched: " + this);
             }
             return null;
         }
@@ -66,8 +69,6 @@ public class Directive implements SPFChecker {
 
     private Mechanism mechanism = null;
 
-    private Logger log;
-
     private MechanismResultChecker resultChecker;
 
     /**
@@ -77,10 +78,9 @@ public class Directive implements SPFChecker {
      * @param mechanism The Mechanism 
      * @throws PermErrorException Get thrown if a PermError should returned
      */
-    public Directive(String qualifier, Mechanism mechanism, Logger logger)
+    public Directive(String qualifier, Mechanism mechanism)
             throws PermErrorException {
         super();
-        this.log = logger;
         if (qualifier == null) {
             throw new PermErrorException("Qualifier cannot be null");
         }

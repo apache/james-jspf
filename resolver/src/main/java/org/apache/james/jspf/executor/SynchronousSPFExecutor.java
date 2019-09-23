@@ -22,23 +22,23 @@ package org.apache.james.jspf.executor;
 import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.DNSService;
-import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.core.SPFCheckerExceptionCatcher;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.core.exceptions.SPFResultException;
 import org.apache.james.jspf.core.exceptions.TimeoutException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Synchronous implementation of SPFExecuter. All queries will get executed synchronously
  */
 public class SynchronousSPFExecutor implements SPFExecutor {
-    
-    private Logger log;
+    private static final Logger LOGGER = LoggerFactory.getLogger(SynchronousSPFExecutor.class);
+
     private DNSService dnsProbe;
 
-    public SynchronousSPFExecutor(Logger log, DNSService service) {
-        this.log = log;
+    public SynchronousSPFExecutor(DNSService service) {
         this.dnsProbe = service;
     }
 
@@ -49,7 +49,7 @@ public class SynchronousSPFExecutor implements SPFExecutor {
         SPFChecker checker;
         while ((checker = session.popChecker()) != null) {
             // only execute checkers we added (better recursivity)
-            log.debug("Executing checker: " + checker);
+            LOGGER.debug("Executing checker: {}", checker);
             try {
                 DNSLookupContinuation cont = checker.checkSPF(session);
                 // if the checker returns a continuation we return it

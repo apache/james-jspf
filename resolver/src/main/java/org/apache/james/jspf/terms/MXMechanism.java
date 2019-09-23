@@ -20,6 +20,9 @@
 
 package org.apache.james.jspf.terms;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSResponse;
@@ -34,15 +37,15 @@ import org.apache.james.jspf.core.exceptions.NoneException;
 import org.apache.james.jspf.core.exceptions.PermErrorException;
 import org.apache.james.jspf.core.exceptions.TempErrorException;
 import org.apache.james.jspf.core.exceptions.TimeoutException;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class represent the mx mechanism
  * 
  */
 public class MXMechanism extends AMechanism implements SPFCheckerDNSResponseListener {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MXMechanism.class);
 
     private final class ExpandedChecker implements SPFChecker {
         
@@ -125,7 +128,7 @@ public class MXMechanism extends AMechanism implements SPFCheckerDNSResponseList
 
             String mx;
             while (records.size() > 0 && (mx = records.remove(0)) != null && mx.length() > 0) {
-                log.debug("Add MX-Record " + mx + " to list");
+                LOGGER.debug("Add MX-Record " + mx + " to list");
 
                 return new DNSLookupContinuation(new DNSRequest(mx, isIPv6 ? DNSRequest.AAAA : DNSRequest.A), MXMechanism.this);
                 

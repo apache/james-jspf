@@ -21,32 +21,30 @@
 package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.DNSLookupContinuation;
-import org.apache.james.jspf.core.LogEnabled;
-import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.core.exceptions.NeutralException;
 import org.apache.james.jspf.core.exceptions.NoneException;
 import org.apache.james.jspf.core.exceptions.PermErrorException;
 import org.apache.james.jspf.core.exceptions.TempErrorException;
+import org.slf4j.LoggerFactory;
 
 /**
  * This abstract class represent a gerneric modifier
  * 
  */
-public abstract class GenericModifier implements Modifier, ConfigurationEnabled, LogEnabled {
+public abstract class GenericModifier implements Modifier, ConfigurationEnabled {
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(GenericModifier.class);
 
     private String host;
-
-    protected Logger log;
 
     /**
      * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
      */
     public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
             TempErrorException, NeutralException, NoneException {
-        log.debug("Processing modifier: " + this);
+        LOGGER.debug("Processing modifier: " + this);
         DNSLookupContinuation res = checkSPFLogged(spfData);
-        log.debug("Processed modifier: " + this + " resulted in "
+        LOGGER.debug("Processed modifier: " + this + " resulted in "
                 + res == null ? spfData.getCurrentResult() : " dns continuation...");
         return res;
     }
@@ -77,14 +75,4 @@ public abstract class GenericModifier implements Modifier, ConfigurationEnabled,
     protected synchronized String getHost() {
         return host;
     }
-    
-
-    /**
-     * @see org.apache.james.jspf.core.LogEnabled#enableLogging(org.apache.james.jspf.core.Logger)
-     */
-    public void enableLogging(Logger logger) {
-        this.log = logger;
-    }
-
-
 }

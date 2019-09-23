@@ -19,7 +19,6 @@
 
 package org.apache.james.jspf.policies.local;
 
-import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPF1Record;
 import org.apache.james.jspf.core.SPFRecordParser;
 import org.apache.james.jspf.core.exceptions.NeutralException;
@@ -30,10 +29,9 @@ import org.apache.james.jspf.policies.Policy;
 
 public class OverridePolicy extends FallbackPolicy implements Policy {
 
-    public OverridePolicy(Logger log, SPFRecordParser parser) {
-        super(log, parser);
+    public OverridePolicy(SPFRecordParser parser) {
+        super(parser);
     }
-    
 
     /**
      * @see org.apache.james.jspf.policies.Policy#getSPFRecord(java.lang.String)

@@ -19,26 +19,26 @@
 
 package org.apache.james.jspf.executor;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+
 import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.DNSResponse;
-import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.core.SPFCheckerExceptionCatcher;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.core.exceptions.SPFResultException;
 import org.apache.james.jspf.core.exceptions.TimeoutException;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import org.slf4j.LoggerFactory;
 
 /**
  * Async implementation of SPFExecutor
  *
  */
 public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
-
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(StagedMultipleSPFExecutor.class);
     private static final String ATTRIBUTE_STAGED_EXECUTOR_CONTINUATION = "StagedMultipleSPFExecutor.continuation";
 
     private static class ResponseQueueImpl extends LinkedList<IResponse> implements IResponseQueue {
@@ -81,16 +81,14 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
     private synchronized int nextId() {
         return id++;
     }
-    
-    private Logger log;
+
     private DNSAsynchLookupService dnsProbe;
     private Thread worker;
     private Map<Integer,SPFSession> sessions;
     private Map<Integer,FutureSPFResult>results;
     private ResponseQueueImpl responseQueue;
 
-    public StagedMultipleSPFExecutor(Logger log, DNSAsynchLookupService service) {
-        this.log = log;
+    public StagedMultipleSPFExecutor(DNSAsynchLookupService service) {
         this.dnsProbe = service;
 
         this.responseQueue = new ResponseQueueImpl();
@@ -119,7 +117,7 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
         SPFChecker checker;
         while ((checker = session.popChecker()) != null) {
             // only execute checkers we added (better recursivity)
-            log.debug("Executing checker: " + checker);
+            LOGGER.debug("Executing checker: {}", checker);
             try {
                 DNSLookupContinuation cont = checker.checkSPF(session);
                 // if the checker returns a continuation we return it

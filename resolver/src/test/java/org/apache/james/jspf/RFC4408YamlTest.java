@@ -19,13 +19,11 @@
 
 package org.apache.james.jspf;
 
-import org.apache.james.jspf.core.Logger;
-import org.apache.james.jspf.impl.Log4JLogger;
-import org.apache.james.jspf.tester.SPFYamlTestDescriptor;
-
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+
+import org.apache.james.jspf.tester.SPFYamlTestDescriptor;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -86,10 +84,6 @@ public class RFC4408YamlTest extends AbstractYamlTest {
 
     }
     
-    protected void setLogger(Logger logger) {
-        this.log = logger;
-    }
-    
     /**
      * This method has been created for spf spec people to let them better read the
      * output of our tests against their yaml file
@@ -98,8 +92,6 @@ public class RFC4408YamlTest extends AbstractYamlTest {
      * @throws Throwable 
      */
     public static void main(String[] args) throws Throwable {
-        Logger l = new Log4JLogger(org.apache.log4j.Logger.getLogger("ROOT"));
-
         List<SPFYamlTestDescriptor> tests = SPFYamlTestDescriptor.loadTests(YAMLFILE2);
         Iterator<SPFYamlTestDescriptor> i = tests.iterator();
         while (i.hasNext()) {
@@ -107,7 +99,6 @@ public class RFC4408YamlTest extends AbstractYamlTest {
             Iterator<String> ttt = o.getTests().keySet().iterator();
             while (ttt.hasNext()) {
                 RFC4408YamlTest t = new RFC4408YamlTest(o,(String) ttt.next());
-                t.setLogger(l);
                 TestRunner.run(t);
             }
         }

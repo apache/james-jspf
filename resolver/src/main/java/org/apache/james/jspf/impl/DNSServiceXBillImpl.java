@@ -19,11 +19,18 @@
 
 package org.apache.james.jspf.impl;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.IPAddr;
-import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.exceptions.TimeoutException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xbill.DNS.AAAARecord;
 import org.xbill.DNS.ARecord;
 import org.xbill.DNS.Lookup;
@@ -36,21 +43,13 @@ import org.xbill.DNS.TXTRecord;
 import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 /**
  * This class contains helper to get all neccassary DNS infos that are needed
  * for SPF
  */
 public class DNSServiceXBillImpl implements DNSService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DNSServiceXBillImpl.class);
 
-    // The logger
-    protected Logger log;
-    
     // The record limit for lookups
     protected int recordLimit;
 
@@ -61,15 +60,14 @@ public class DNSServiceXBillImpl implements DNSService {
      * Default Constructor.
      * Uses the DNSJava static DefaultResolver
      */
-    public DNSServiceXBillImpl(Logger logger) {
-        this(logger, Lookup.getDefaultResolver());
+    public DNSServiceXBillImpl() {
+        this(Lookup.getDefaultResolver());
     }
     
     /**
      * Constructor to specify a custom resolver.
      */
-    public DNSServiceXBillImpl(Logger logger, Resolver resolver) {
-        this.log = logger;
+    public DNSServiceXBillImpl(Resolver resolver) {
         this.resolver = resolver;
         // Default record limit is 10
         this.recordLimit = 10;
@@ -94,7 +92,7 @@ public class DNSServiceXBillImpl implements DNSService {
     public List<String> getLocalDomainNames() {
         List<String> names = new ArrayList<String>();
 
-        log.debug("Start Local ipaddress lookup");
+        LOGGER.debug("Start Local ipaddress lookup");
         try {
             InetAddress ia[] = InetAddress.getAllByName(InetAddress
                     .getLocalHost().getHostName());
@@ -103,7 +101,7 @@ public class DNSServiceXBillImpl implements DNSService {
                 String host = ia[i].getHostName();
                 names.add(host);
 
-                log.debug("Add hostname " + host + " to list");
+                LOGGER.debug("Add hostname {} to list", host);
             }
         } catch (UnknownHostException e) {
             // just ignore this..
@@ -146,7 +144,7 @@ public class DNSServiceXBillImpl implements DNSService {
         }
         try {
 
-            log.debug("Start "+recordTypeDescription+"-Record lookup for : " + request.getHostname());
+            LOGGER.debug("Start {} Record lookup for : {}", recordTypeDescription, request.getHostname());
 
             Lookup query = new Lookup(request.getHostname(), dnsJavaType);
             query.setResolver(resolver);
@@ -161,11 +159,11 @@ public class DNSServiceXBillImpl implements DNSService {
             
             List<String> records = convertRecordsToList(rr);
             
-            log.debug("Found " + (rr != null ? rr.length : 0) + " "+recordTypeDescription+"-Records");
+            LOGGER.debug("Found {} {}-Records", (rr != null ? rr.length : 0), recordTypeDescription);
             return records;
         } catch (TextParseException e) {
             // i think this is the best we could do
-            log.debug("No "+recordTypeDescription+" Record found for host: " + request.getHostname());
+            LOGGER.debug("No {}} Record found for host: {}", recordTypeDescription, request.getHostname());
             return null;
         }
     }
