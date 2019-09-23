@@ -66,8 +66,7 @@
 
         <!-- Override the source descriptor -->
         <sourceReleaseAssemblyDescriptor>src</sourceReleaseAssemblyDescriptor>
-        <!-- Use java 5 -->
-        <target.jdk>1.5</target.jdk>
+        <target.jdk>1.8</target.jdk>
     </properties>
 
     <dependencyManagement>
