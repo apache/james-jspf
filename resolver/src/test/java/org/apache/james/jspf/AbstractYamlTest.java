@@ -49,6 +49,7 @@ import org.apache.james.jspf.parser.RFC4408SPF1Parser;
 import org.apache.james.jspf.tester.DNSTestingServer;
 import org.apache.james.jspf.tester.SPFYamlTestDescriptor;
 import org.apache.james.jspf.wiring.WiringService;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xbill.DNS.Cache;
 import org.xbill.DNS.DClass;
@@ -65,7 +66,7 @@ import uk.nominet.dnsjnio.LookupAsynch;
 import uk.nominet.dnsjnio.NonblockingResolver;
 
 public abstract class AbstractYamlTest extends TestCase {
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AbstractYamlTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractYamlTest.class);
 
     private static final int FAKE_SERVER_PORT = 31348;
     protected static final int TIMEOUT = 10;
@@ -216,7 +217,7 @@ public abstract class AbstractYamlTest extends TestCase {
                 try {
                     verifyResult(next, queries.get(next));
                 } catch (AssertionFailedError e) {
-                    LOGGER.info("FAILED. "+e.getMessage()+" ("+getName()+")", e.getMessage()==null ? e : null);
+                    LOGGER.info("FAILED. {} ({}})", e.getMessage(), getName(), e);
                     if (firstError == null) firstError = e;
                 }
             }
@@ -227,7 +228,7 @@ public abstract class AbstractYamlTest extends TestCase {
 
     private SPFResult runSingleTest(String testName) {
         Map<String, ?> currentTest = data.getTests().get(testName);
-        LOGGER.info("TESTING "+testName+": "+currentTest.get("description"));
+        LOGGER.info("TESTING {}: {}", testName, currentTest.get("description"));
 
         String ip = null;
         String sender = null;
@@ -281,7 +282,7 @@ public abstract class AbstractYamlTest extends TestCase {
     
         }
     
-        LOGGER.info("PASSED. Result="+resultSPF+" Explanation="+res.getExplanation()+" Header="+res.getHeaderText());
+        LOGGER.info("PASSED. Result={} Explanation={} Header={}", resultSPF, res.getExplanation(), res.getHeaderText());
     }
 
     /**

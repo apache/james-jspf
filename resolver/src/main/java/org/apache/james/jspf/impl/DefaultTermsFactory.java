@@ -76,8 +76,7 @@ public class DefaultTermsFactory implements TermsFactory {
             classes = mechs.split(",");
             Class<?>[] knownMechanisms = new Class[classes.length];
             for (int i = 0; i < classes.length; i++) {
-                LOGGER.debug("Add following class as known mechanismn: "
-                        + classes[i]);
+                LOGGER.debug("Add following class as known mechanismn: {}", classes[i]);
                 knownMechanisms[i] = Thread.currentThread()
                         .getContextClassLoader().loadClass(classes[i]);
             }
@@ -85,8 +84,7 @@ public class DefaultTermsFactory implements TermsFactory {
             classes = mods.split(",");
             Class<?>[] knownModifiers = new Class[classes.length];
             for (int i = 0; i < classes.length; i++) {
-                LOGGER.debug("Add following class as known modifier: "
-                        + classes[i]);
+                LOGGER.debug("Add following class as known modifier: {}", classes[i]);
                 knownModifiers[i] = Thread.currentThread()
                         .getContextClassLoader().loadClass(classes[i]);
             }

@@ -54,9 +54,9 @@ public class Directive implements SPFChecker {
                     spfData.setCurrentResult(qualifier);
                 }
 
-                LOGGER.info("Processed directive matched: " + Directive.this + " returned " + spfData.getCurrentResult());
+                LOGGER.info("Processed directive matched: {} returned {}", Directive.this, spfData.getCurrentResult());
             } else {
-                LOGGER.debug("Processed directive NOT matched: " + this);
+                LOGGER.debug("Processed directive NOT matched: {}", this);
             }
             return null;
         }

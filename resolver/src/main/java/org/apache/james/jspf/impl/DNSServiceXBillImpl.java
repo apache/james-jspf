@@ -144,7 +144,7 @@ public class DNSServiceXBillImpl implements DNSService {
         }
         try {
 
-            LOGGER.debug("Start {} Record lookup for : {}", recordTypeDescription, request.getHostname());
+            LOGGER.debug("Start {}-Record lookup for : {}", recordTypeDescription, request.getHostname());
 
             Lookup query = new Lookup(request.getHostname(), dnsJavaType);
             query.setResolver(resolver);
@@ -163,7 +163,7 @@ public class DNSServiceXBillImpl implements DNSService {
             return records;
         } catch (TextParseException e) {
             // i think this is the best we could do
-            LOGGER.debug("No {}} Record found for host: {}", recordTypeDescription, request.getHostname());
+            LOGGER.debug("No {} Record found for host: {}", recordTypeDescription, request.getHostname());
             return null;
         }
     }

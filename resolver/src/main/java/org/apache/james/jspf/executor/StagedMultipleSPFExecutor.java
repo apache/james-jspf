@@ -31,6 +31,7 @@ import org.apache.james.jspf.core.SPFCheckerExceptionCatcher;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.core.exceptions.SPFResultException;
 import org.apache.james.jspf.core.exceptions.TimeoutException;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -38,7 +39,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(StagedMultipleSPFExecutor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StagedMultipleSPFExecutor.class);
     private static final String ATTRIBUTE_STAGED_EXECUTOR_CONTINUATION = "StagedMultipleSPFExecutor.continuation";
 
     private static class ResponseQueueImpl extends LinkedList<IResponse> implements IResponseQueue {

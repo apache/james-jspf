@@ -128,7 +128,7 @@ public class MXMechanism extends AMechanism implements SPFCheckerDNSResponseList
 
             String mx;
             while (records.size() > 0 && (mx = records.remove(0)) != null && mx.length() > 0) {
-                LOGGER.debug("Add MX-Record " + mx + " to list");
+                LOGGER.debug("Add MX-Record {} to list", mx);
 
                 return new DNSLookupContinuation(new DNSRequest(mx, isIPv6 ? DNSRequest.AAAA : DNSRequest.A), MXMechanism.this);
                 

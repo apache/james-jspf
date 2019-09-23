@@ -26,6 +26,7 @@ import org.apache.james.jspf.core.exceptions.NeutralException;
 import org.apache.james.jspf.core.exceptions.NoneException;
 import org.apache.james.jspf.core.exceptions.PermErrorException;
 import org.apache.james.jspf.core.exceptions.TempErrorException;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -33,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * 
  */
 public abstract class GenericModifier implements Modifier, ConfigurationEnabled {
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(GenericModifier.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GenericModifier.class);
 
     private String host;
 
@@ -42,10 +43,10 @@ public abstract class GenericModifier implements Modifier, ConfigurationEnabled 
      */
     public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
             TempErrorException, NeutralException, NoneException {
-        LOGGER.debug("Processing modifier: " + this);
+        LOGGER.debug("Processing modifier: {}", this);
         DNSLookupContinuation res = checkSPFLogged(spfData);
-        LOGGER.debug("Processed modifier: " + this + " resulted in "
-                + res == null ? spfData.getCurrentResult() : " dns continuation...");
+        LOGGER.debug("Processed modifier: {} resulted in {} ",
+            this, res == null ? spfData.getCurrentResult() : "dns continuation...");
         return res;
     }
     

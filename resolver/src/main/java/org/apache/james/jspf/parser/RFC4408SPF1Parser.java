@@ -201,15 +201,12 @@ public class RFC4408SPF1Parser implements SPFRecordParser {
         }
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Parsing catch group positions: Modifiers["
-                    + TERM_STEP_REGEX_MODIFIER_POS + "] Qualifier["
-                    + TERM_STEP_REGEX_QUALIFIER_POS + "] Mechanism["
-                    + TERM_STEP_REGEX_MECHANISM_POS + "]");
+            LOGGER.debug("Parsing catch group positions: Modifiers[{}] Qualifier[{}}] Mechanism[{}}]",
+                TERM_STEP_REGEX_MODIFIER_POS, TERM_STEP_REGEX_QUALIFIER_POS, TERM_STEP_REGEX_MECHANISM_POS);
             for (int k = 0; k < matchResultPositions.size(); k++) {
                 LOGGER
-                        .debug(k
-                                + ") "
-                                + (matchResultPositions.get(k) != null ? ((TermDefinition) matchResultPositions
+                        .debug("{}) {}", k,
+                            (matchResultPositions.get(k) != null ? ((TermDefinition) matchResultPositions
                                         .get(k)).getPattern().pattern()
                                         : null));
             }

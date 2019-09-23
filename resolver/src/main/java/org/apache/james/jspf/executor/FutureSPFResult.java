@@ -71,7 +71,7 @@ public class FutureSPFResult extends SPFResult {
                     listener.onSPFResult(this);
                 } catch (Throwable e) {
                     // catch exception. See JSPF-95
-                    LOGGER.warn("An exception was thrown by the listener " + listener, e);
+                    LOGGER.warn("An exception was thrown by the listener {}", listener, e);
                 }
             }
             listenerIt = null;

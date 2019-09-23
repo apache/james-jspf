@@ -110,8 +110,8 @@ public class LoggingDNSService implements DNSService {
             LOGGER.debug(logBuff.toString());
             return result;
         } catch (TimeoutException e) {
-            LOGGER.debug("getRecords(" + request.getHostname()
-                    + ") = TempErrorException[" + e.getMessage() + "]");
+            LOGGER.debug("getRecords({}) = TempErrorException[{}]",
+                request.getHostname(), e.getMessage());
             throw e;
         }
     }
