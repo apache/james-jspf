@@ -52,7 +52,7 @@ public class SPF1ParserTest extends TestCase {
             }
         }
         assertNotNull(data);
-        parser = new RFC4408SPF1Parser(new ConsoleLogger(), new DefaultTermsFactory(new ConsoleLogger()));
+        parser = new RFC4408SPF1Parser(new DefaultTermsFactory());
     }
 
     public static Test suite() throws IOException {
@@ -171,7 +171,7 @@ public class SPF1ParserTest extends TestCase {
             super();
             List<SPF1RecordTestDef> tests = loadTests();
             Iterator<SPF1RecordTestDef> i = tests.iterator();
-            SPFRecordParser parser = new RFC4408SPF1Parser(new ConsoleLogger(), new DefaultTermsFactory(new ConsoleLogger()));
+            SPFRecordParser parser = new RFC4408SPF1Parser(new DefaultTermsFactory());
             while (i.hasNext()) {
                 addTest(new SPF1ParserTest((SPF1RecordTestDef) i.next(), parser));
             }

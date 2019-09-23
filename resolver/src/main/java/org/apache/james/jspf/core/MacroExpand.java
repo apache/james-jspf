@@ -26,12 +26,6 @@ package org.apache.james.jspf.core;
  * 
  */
 
-import org.apache.james.jspf.core.exceptions.NeutralException;
-import org.apache.james.jspf.core.exceptions.NoneException;
-import org.apache.james.jspf.core.exceptions.PermErrorException;
-import org.apache.james.jspf.core.exceptions.TempErrorException;
-import org.apache.james.jspf.core.exceptions.TimeoutException;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -40,7 +34,16 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.james.jspf.core.exceptions.NeutralException;
+import org.apache.james.jspf.core.exceptions.NoneException;
+import org.apache.james.jspf.core.exceptions.PermErrorException;
+import org.apache.james.jspf.core.exceptions.TempErrorException;
+import org.apache.james.jspf.core.exceptions.TimeoutException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class MacroExpand {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MacroExpand.class);
 
     private Pattern domainSpecPattern;
 
@@ -51,8 +54,6 @@ public class MacroExpand {
     private Pattern macroLettersExpPattern;
 
     private Pattern cellPattern;
-
-    private Logger log;
 
     private DNSService dnsProbe;
 
@@ -69,10 +70,9 @@ public class MacroExpand {
     /**
      * Construct MacroExpand
      * 
-     * @param logger the logget to use
      * @param dnsProbe the dns service to use
      */
-    public MacroExpand(Logger logger, DNSService dnsProbe) {
+    public MacroExpand(DNSService dnsProbe) {
         // This matches 2 groups
         domainSpecPattern = Pattern.compile(SPFTermsRegexps.DOMAIN_SPEC_REGEX_R);
         // The real pattern replacer
@@ -80,7 +80,6 @@ public class MacroExpand {
         // The macro letters pattern
         macroLettersExpPattern = Pattern.compile(SPFTermsRegexps.MACRO_LETTER_PATTERN_EXP);
         macroLettersPattern = Pattern.compile(SPFTermsRegexps.MACRO_LETTER_PATTERN);
-        log = logger;
         this.dnsProbe = dnsProbe;
     }
     
@@ -195,7 +194,7 @@ public class MacroExpand {
      */
     private String expandExplanation(String input, MacroData macroData) throws PermErrorException, RequireClientDomainException {
 
-        log.debug("Start do expand explanation: " + input);
+        LOGGER.debug("Start do expand explanation: {}", input);
 
         String[] parts = input.split(" ");
         StringBuffer res = new StringBuffer();
@@ -203,7 +202,7 @@ public class MacroExpand {
             if (i > 0) res.append(" ");
             res.append(expandMacroString(parts[i], macroData, true));
         }
-        log.debug("Done expand explanation: " + res);
+        LOGGER.debug("Done expand explanation: {}", res);
         
         return res.toString();
     }
@@ -220,7 +219,7 @@ public class MacroExpand {
      */
     private String expandDomain(String input, MacroData macroData) throws PermErrorException, RequireClientDomainException {
 
-        log.debug("Start expand domain: " + input);
+        LOGGER.debug("Start expand domain: {}", input);
 
         Matcher inputMatcher = domainSpecPattern.matcher(input);
         if (!inputMatcher.matches() || inputMatcher.groupCount() != 2) {
@@ -247,7 +246,7 @@ public class MacroExpand {
             domainName = domainName.substring(split + 1);
         }
 
-        log.debug("Domain expanded: " + domainName);
+        LOGGER.debug("Domain expanded: {}", domainName);
         
         return domainName;
     }
@@ -456,7 +455,7 @@ public class MacroExpand {
             throw new PermErrorException("Unknown command : " + variable);
 
         } else {
-            log.debug("Used macro: " + macro + " replaced with: " + rValue);
+            LOGGER.debug("Used macro: {} replaced with: {}", macro, rValue);
 
             return rValue;
         }

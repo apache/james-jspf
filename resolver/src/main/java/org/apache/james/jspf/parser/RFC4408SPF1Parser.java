@@ -20,17 +20,19 @@
 
 package org.apache.james.jspf.parser;
 
-import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPF1Record;
 import org.apache.james.jspf.core.SPFRecordParser;
 import org.apache.james.jspf.core.exceptions.NeutralException;
 import org.apache.james.jspf.core.exceptions.NoneException;
 import org.apache.james.jspf.core.exceptions.PermErrorException;
+import org.apache.james.jspf.executor.FutureSPFResult;
 import org.apache.james.jspf.terms.Configuration;
 import org.apache.james.jspf.terms.Directive;
 import org.apache.james.jspf.terms.Mechanism;
 import org.apache.james.jspf.terms.Modifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -77,6 +79,7 @@ import java.util.regex.Pattern;
  * 
  */
 public class RFC4408SPF1Parser implements SPFRecordParser {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RFC4408SPF1Parser.class);
 
     /**
      * Regex based on http://www.ietf.org/rfc/rfc4408.txt.
@@ -107,18 +110,14 @@ public class RFC4408SPF1Parser implements SPFRecordParser {
 
     private List<TermDefinition> matchResultPositions;
 
-    private Logger log;
-
     private TermsFactory termsFactory;
 
     /**
      * Constructor. Creates all the values needed to run the parsing
      * 
-     * @param logger the logger to use
      * @param termsFactory the TermsFactory implementation
      */
-    public RFC4408SPF1Parser(Logger logger, TermsFactory termsFactory) {
-        this.log = logger;
+    public RFC4408SPF1Parser(TermsFactory termsFactory) {
         this.termsFactory = termsFactory;
         
         /**
@@ -201,16 +200,13 @@ public class RFC4408SPF1Parser implements SPFRecordParser {
             }
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug("Parsing catch group positions: Modifiers["
-                    + TERM_STEP_REGEX_MODIFIER_POS + "] Qualifier["
-                    + TERM_STEP_REGEX_QUALIFIER_POS + "] Mechanism["
-                    + TERM_STEP_REGEX_MECHANISM_POS + "]");
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Parsing catch group positions: Modifiers[{}] Qualifier[{}] Mechanism[{}]",
+                TERM_STEP_REGEX_MODIFIER_POS, TERM_STEP_REGEX_QUALIFIER_POS, TERM_STEP_REGEX_MECHANISM_POS);
             for (int k = 0; k < matchResultPositions.size(); k++) {
-                log
-                        .debug(k
-                                + ") "
-                                + (matchResultPositions.get(k) != null ? ((TermDefinition) matchResultPositions
+                LOGGER
+                        .debug("{}) {}", k,
+                            (matchResultPositions.get(k) != null ? ((TermDefinition) matchResultPositions
                                         .get(k)).getPattern().pattern()
                                         : null));
             }
@@ -254,7 +250,7 @@ public class RFC4408SPF1Parser implements SPFRecordParser {
     public SPF1Record parse(String spfRecord) throws PermErrorException,
             NoneException, NeutralException {
 
-        log.debug("Start parsing SPF-Record: " + spfRecord);
+        LOGGER.debug("Start parsing SPF-Record: " + spfRecord);
 
         SPF1Record result = new SPF1Record();
 
@@ -311,7 +307,7 @@ public class RFC4408SPF1Parser implements SPFRecordParser {
                             TERM_STEP_REGEX_MECHANISM_POS);
 
                     result.getDirectives().add(
-                            new Directive(qualifier, (Mechanism) mech, log.getChildLogger(qualifier+"directive")));
+                            new Directive(qualifier, (Mechanism) mech));
 
                 }
 

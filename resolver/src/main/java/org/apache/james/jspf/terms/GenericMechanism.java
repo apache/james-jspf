@@ -20,8 +20,6 @@
 
 package org.apache.james.jspf.terms;
 
-import org.apache.james.jspf.core.LogEnabled;
-import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.MacroExpand;
 import org.apache.james.jspf.core.MacroExpandEnabled;
 import org.apache.james.jspf.core.SPFSession;
@@ -31,7 +29,7 @@ import org.apache.james.jspf.core.exceptions.PermErrorException;
  * This abstract class represent a gerneric mechanism
  *  
  */
-public abstract class GenericMechanism implements Mechanism, ConfigurationEnabled, LogEnabled, MacroExpandEnabled {
+public abstract class GenericMechanism implements Mechanism, ConfigurationEnabled, MacroExpandEnabled {
 
     /**
      * ABNF: ip4-cidr-length = "/" 1*DIGIT
@@ -51,8 +49,6 @@ public abstract class GenericMechanism implements Mechanism, ConfigurationEnable
             + ")?";
 
     private String domain;
-
-    protected Logger log;
 
     protected MacroExpand macroExpand;
 
@@ -89,13 +85,6 @@ public abstract class GenericMechanism implements Mechanism, ConfigurationEnable
      */
     protected synchronized String getDomain() {
         return domain;
-    }
-
-    /**
-     * @see org.apache.james.jspf.core.LogEnabled#enableLogging(org.apache.james.jspf.core.Logger)
-     */
-    public void enableLogging(Logger logger) {
-        this.log = logger;
     }
 
     /**

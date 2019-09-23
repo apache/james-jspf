@@ -20,11 +20,12 @@
 
 package org.apache.james.jspf.impl;
 
+import java.util.Iterator;
+import java.util.LinkedList;
+
 import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.DNSServiceEnabled;
-import org.apache.james.jspf.core.LogEnabled;
-import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.MacroExpand;
 import org.apache.james.jspf.core.MacroExpandEnabled;
 import org.apache.james.jspf.core.SPF1Record;
@@ -59,14 +60,14 @@ import org.apache.james.jspf.policies.local.FallbackPolicy;
 import org.apache.james.jspf.policies.local.OverridePolicy;
 import org.apache.james.jspf.policies.local.TrustedForwarderPolicy;
 import org.apache.james.jspf.wiring.WiringServiceTable;
-
-import java.util.Iterator;
-import java.util.LinkedList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is used to generate a SPF-Test and provided all intressting data.
  */
 public class SPF implements SPFChecker {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SPF.class);
 
     private static final class SPFRecordChecker implements SPFChecker {
         
@@ -182,8 +183,6 @@ public class SPF implements SPFChecker {
     private DNSService dnsProbe;
 
     private SPFRecordParser parser;
-
-    private Logger log;
     
     private String defaultExplanation = null;
     
@@ -205,21 +204,18 @@ public class SPF implements SPFChecker {
      * Uses passed logger and passed dnsServicer
      * 
      * @param dnsProbe the dns provider
-     * @param logger the logger to use
      */
-    public SPF(DNSService dnsProbe, Logger logger) {
+    public SPF(DNSService dnsProbe) {
         super();
         this.dnsProbe = dnsProbe;
-        this.log = logger;
         WiringServiceTable wiringService = new WiringServiceTable();
-        wiringService.put(LogEnabled.class, this.log);
         wiringService.put(DNSServiceEnabled.class, this.dnsProbe);
-        this.macroExpand = new MacroExpand(logger.getChildLogger("macroExpand"), this.dnsProbe);
+        this.macroExpand = new MacroExpand(this.dnsProbe);
         wiringService.put(MacroExpandEnabled.class, this.macroExpand);
-        this.parser = new RFC4408SPF1Parser(logger.getChildLogger("parser"), new DefaultTermsFactory(logger.getChildLogger("termsfactory"), wiringService));
+        this.parser = new RFC4408SPF1Parser(new DefaultTermsFactory(wiringService));
         // We add this after the parser creation because services cannot be null
         wiringService.put(SPFCheckEnabled.class, this);
-        this.executor = new SynchronousSPFExecutor(log, dnsProbe);
+        this.executor = new SynchronousSPFExecutor(dnsProbe);
     }
     
     
@@ -228,25 +224,17 @@ public class SPF implements SPFChecker {
      * 
      * @param dnsProbe the dns provider
      * @param parser the parser to use
-     * @param logger the logger to use
      */
-    public SPF(DNSService dnsProbe, SPFRecordParser parser, Logger logger, MacroExpand macroExpand, SPFExecutor executor) {
+    public SPF(DNSService dnsProbe, SPFRecordParser parser, MacroExpand macroExpand, SPFExecutor executor) {
         super();
         this.dnsProbe = dnsProbe;
         this.parser = parser;
-        this.log = logger;
         this.macroExpand = macroExpand;
         this.executor = executor;
     }
 
     
     private static final class DefaultSPFChecker implements SPFChecker, SPFCheckerExceptionCatcher {
-        
-        private Logger log;
-
-        public DefaultSPFChecker(Logger log) {
-            this.log = log;
-        }
 
         /**
          * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
@@ -274,12 +262,12 @@ public class SPF implements SPFChecker {
             if (exception instanceof SPFResultException) {
                 result = ((SPFResultException) exception).getResult();
                 if (!SPFErrorConstants.NEUTRAL_CONV.equals(result)) {
-                    log.warn(exception.getMessage(),exception);
+                    LOGGER.warn(exception.getMessage(),exception);
                 }
             } else {
                 // this should never happen at all. But anyway we will set the
                 // result to neutral. Safety first ..
-                log.error(exception.getMessage(),exception);
+                LOGGER.error(exception.getMessage(),exception);
                 result = SPFErrorConstants.NEUTRAL_CONV;
             }
             session.setCurrentResultExpanded(result);
@@ -305,12 +293,12 @@ public class SPF implements SPFChecker {
         spfData = new SPFSession(mailFrom, hostName, ipAddress);
       
 
-        SPFChecker resultHandler = new DefaultSPFChecker(log);
+        SPFChecker resultHandler = new DefaultSPFChecker();
         
         spfData.pushChecker(resultHandler);
         spfData.pushChecker(this);
         
-        FutureSPFResult ret = new FutureSPFResult(log);
+        FutureSPFResult ret = new FutureSPFResult();
         
         executor.execute(spfData, ret);
 
@@ -374,12 +362,12 @@ public class SPF implements SPFChecker {
         
         // trustedForwarder support is enabled
         if (useTrustedForwarder) {
-            policies.add(new SPFPolicyPostFilterChecker(new TrustedForwarderPolicy(log)));
+            policies.add(new SPFPolicyPostFilterChecker(new TrustedForwarderPolicy()));
         }
 
         policies.add(new SPFPolicyPostFilterChecker(new NeutralIfNotMatchPolicy()));
 
-        policies.add(new SPFPolicyPostFilterChecker(new DefaultExplanationPolicy(log, defaultExplanation, macroExpand)));
+        policies.add(new SPFPolicyPostFilterChecker(new DefaultExplanationPolicy(defaultExplanation, macroExpand)));
         
         return policies;
     }
@@ -391,7 +379,7 @@ public class SPF implements SPFChecker {
      * @param timeOut The timout in seconds
      */
     public synchronized void setTimeOut(int timeOut) {
-        log.debug("TimeOut was set to: " + timeOut);
+        LOGGER.debug("TimeOut was set to: {}", timeOut);
         dnsProbe.setTimeOut(timeOut);
     }
     
@@ -425,7 +413,7 @@ public class SPF implements SPFChecker {
     public synchronized FallbackPolicy getFallbackPolicy() {
         // Initialize fallback policy
         if (fallBack == null) {
-            this.fallBack =  new FallbackPolicy(log.getChildLogger("fallbackpolicy"), parser);
+            this.fallBack =  new FallbackPolicy(parser);
         }
         return fallBack;
     }
@@ -450,7 +438,7 @@ public class SPF implements SPFChecker {
      */
     public synchronized OverridePolicy getOverridePolicy() {
         if (override == null) {
-            override = new OverridePolicy(log.getChildLogger("overridepolicy"), parser);
+            override = new OverridePolicy(parser);
         }
         return override;
     }

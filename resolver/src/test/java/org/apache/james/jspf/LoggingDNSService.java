@@ -21,19 +21,20 @@ package org.apache.james.jspf;
 
 import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSService;
-import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.exceptions.TimeoutException;
+import org.apache.james.jspf.executor.FutureSPFResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 public class LoggingDNSService implements DNSService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(LoggingDNSService.class);
 
     private DNSService dnsService;
-    private Logger logger;
 
-    public LoggingDNSService(DNSService service, Logger logger) {
+    public LoggingDNSService(DNSService service) {
         this.dnsService = service;
-        this.logger = logger;
     }
 
     /**
@@ -72,7 +73,7 @@ public class LoggingDNSService implements DNSService {
         } else {
             logBuff.append("getLocalDomainNames-ret: null");
         }
-        logger.debug(logBuff.toString());
+        LOGGER.debug(logBuff.toString());
         return res;
 
     }
@@ -106,11 +107,11 @@ public class LoggingDNSService implements DNSService {
             } else {
                 logBuff.append("getRecords-ret: null");
             }
-            logger.debug(logBuff.toString());
+            LOGGER.debug(logBuff.toString());
             return result;
         } catch (TimeoutException e) {
-            logger.debug("getRecords(" + request.getHostname()
-                    + ") = TempErrorException[" + e.getMessage() + "]");
+            LOGGER.debug("getRecords({}) = TempErrorException[{}]",
+                request.getHostname(), e.getMessage());
             throw e;
         }
     }

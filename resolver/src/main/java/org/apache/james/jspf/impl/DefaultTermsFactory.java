@@ -19,8 +19,13 @@
 
 package org.apache.james.jspf.impl;
 
-import org.apache.james.jspf.core.LogEnabled;
-import org.apache.james.jspf.core.Logger;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Properties;
+
 import org.apache.james.jspf.core.exceptions.PermErrorException;
 import org.apache.james.jspf.parser.TermDefinition;
 import org.apache.james.jspf.parser.TermsFactory;
@@ -29,38 +34,26 @@ import org.apache.james.jspf.terms.ConfigurationEnabled;
 import org.apache.james.jspf.wiring.WiringService;
 import org.apache.james.jspf.wiring.WiringServiceException;
 import org.apache.james.jspf.wiring.WiringServiceTable;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Properties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The default implementation of the TermsFactory
  */
 public class DefaultTermsFactory implements TermsFactory {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultTermsFactory.class);
     
     private String termFile = "org/apache/james/jspf/parser/jspf.default.terms";
-    
     private Collection<TermDefinition> mechanismsCollection;
-
     private Collection<TermDefinition> modifiersCollection;
-
-    private Logger log;
-    
     private WiringService wiringService;
 
-    public DefaultTermsFactory(Logger log) {
-        this.log = log;
+    public DefaultTermsFactory() {
         this.wiringService = new WiringServiceTable();
-        ((WiringServiceTable) this.wiringService).put(LogEnabled.class, log);
         init();
     }
 
-    public DefaultTermsFactory(Logger log, WiringService wiringService) {
-        this.log = log;
+    public DefaultTermsFactory(WiringService wiringService) {
         this.wiringService = wiringService;
         init();
     }
@@ -83,8 +76,7 @@ public class DefaultTermsFactory implements TermsFactory {
             classes = mechs.split(",");
             Class<?>[] knownMechanisms = new Class[classes.length];
             for (int i = 0; i < classes.length; i++) {
-                log.debug("Add following class as known mechanismn: "
-                        + classes[i]);
+                LOGGER.debug("Add following class as known mechanismn: {}", classes[i]);
                 knownMechanisms[i] = Thread.currentThread()
                         .getContextClassLoader().loadClass(classes[i]);
             }
@@ -92,8 +84,7 @@ public class DefaultTermsFactory implements TermsFactory {
             classes = mods.split(",");
             Class<?>[] knownModifiers = new Class[classes.length];
             for (int i = 0; i < classes.length; i++) {
-                log.debug("Add following class as known modifier: "
-                        + classes[i]);
+                LOGGER.debug("Add following class as known modifier: {}", classes[i]);
                 knownModifiers[i] = Thread.currentThread()
                         .getContextClassLoader().loadClass(classes[i]);
             }
@@ -124,7 +115,7 @@ public class DefaultTermsFactory implements TermsFactory {
             try {
                 l.add(new DefaultTermDefinition(classes[j]));
             } catch (Exception e) {
-                log.debug("Unable to create the term collection", e);
+                LOGGER.debug("Unable to create the term collection", e);
                 throw new IllegalStateException(
                         "Unable to create the term collection");
             }

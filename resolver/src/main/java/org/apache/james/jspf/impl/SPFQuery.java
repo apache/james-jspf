@@ -120,7 +120,7 @@ public class SPFQuery {
                 if (line.hasOption(CHAR_VERBOSE))
                     logger.setLevel(Level.TRACE);
 
-                SPF spf = new DefaultSPF(new Log4JLogger(logger));
+                SPF spf = new DefaultSPF();
 
                 // Check if we should set a costum default explanation
                 if (defaultExplanation != null) {

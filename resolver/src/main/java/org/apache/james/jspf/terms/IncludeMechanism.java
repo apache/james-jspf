@@ -21,8 +21,6 @@
 package org.apache.james.jspf.terms;
 
 import org.apache.james.jspf.core.DNSLookupContinuation;
-import org.apache.james.jspf.core.LogEnabled;
-import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.MacroExpand;
 import org.apache.james.jspf.core.MacroExpandEnabled;
 import org.apache.james.jspf.core.SPF1Constants;
@@ -40,7 +38,7 @@ import org.apache.james.jspf.core.exceptions.TempErrorException;
  * This class represent the incude mechanism
  * 
  */
-public class IncludeMechanism implements Mechanism, ConfigurationEnabled, LogEnabled, SPFCheckEnabled, MacroExpandEnabled {
+public class IncludeMechanism implements Mechanism, ConfigurationEnabled, SPFCheckEnabled, MacroExpandEnabled {
 
     private final class ExpandedChecker implements SPFChecker {
       
@@ -147,8 +145,6 @@ public class IncludeMechanism implements Mechanism, ConfigurationEnabled, LogEna
             + SPFTermsRegexps.DOMAIN_SPEC_REGEX;
 
     protected String host;
-    
-    protected Logger log;
 
     private SPFChecker spfChecker;
 
@@ -183,13 +179,6 @@ public class IncludeMechanism implements Mechanism, ConfigurationEnabled, LogEna
      */
     protected synchronized String getHost() {
         return host;
-    }
-
-    /**
-     * @see org.apache.james.jspf.core.LogEnabled#enableLogging(org.apache.james.jspf.core.Logger)
-     */
-    public void enableLogging(Logger logger) {
-        this.log = logger;
     }
 
     /**

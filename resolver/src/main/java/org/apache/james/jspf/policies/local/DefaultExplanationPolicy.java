@@ -20,7 +20,6 @@
 package org.apache.james.jspf.policies.local;
 
 import org.apache.james.jspf.core.DNSLookupContinuation;
-import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.MacroExpand;
 import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPF1Record;
@@ -31,14 +30,17 @@ import org.apache.james.jspf.core.exceptions.NeutralException;
 import org.apache.james.jspf.core.exceptions.NoneException;
 import org.apache.james.jspf.core.exceptions.PermErrorException;
 import org.apache.james.jspf.core.exceptions.TempErrorException;
+import org.apache.james.jspf.executor.FutureSPFResult;
 import org.apache.james.jspf.policies.PolicyPostFilter;
 import org.apache.james.jspf.terms.Modifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Policy to add a default explanation
  */
 public final class DefaultExplanationPolicy implements PolicyPostFilter {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultExplanationPolicy.class);
     
     private final class ExplanationChecker implements SPFChecker {
         
@@ -56,7 +58,7 @@ public final class DefaultExplanationPolicy implements PolicyPostFilter {
                 spfData.setExplanation(explanation);
             } catch (PermErrorException e) {
                 // Should never happen !
-                log.debug("Invalid defaulfExplanation: " + attExplanation);
+                LOGGER.debug("Invalid defaulfExplanation: {}", attExplanation);
             }
             return null;
         }
@@ -106,11 +108,7 @@ public final class DefaultExplanationPolicy implements PolicyPostFilter {
     }
 
     private static final String ATTRIBUTE_DEFAULT_EXPLANATION_POLICY_EXPLANATION = "DefaultExplanationPolicy.explanation";
-    
-    /**
-     * log
-     */
-    private Logger log;
+
     /**
      * the default explanation
      */
@@ -119,12 +117,10 @@ public final class DefaultExplanationPolicy implements PolicyPostFilter {
     private MacroExpand macroExpand;
     
     /**
-     * @param log the logger
      * @param explanation the default explanation
      * @param macroExpand the MacroExpand service
      */
-    public DefaultExplanationPolicy(Logger log, String explanation, MacroExpand macroExpand) {
-        this.log = log;
+    public DefaultExplanationPolicy(String explanation, MacroExpand macroExpand) {
         this.defExplanation = explanation;
         this.macroExpand = macroExpand;
     }

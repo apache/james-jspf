@@ -19,7 +19,6 @@
 
 package org.apache.james.jspf.policies.local;
 
-import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPF1Record;
 import org.apache.james.jspf.core.exceptions.NeutralException;
 import org.apache.james.jspf.core.exceptions.NoneException;
@@ -28,6 +27,8 @@ import org.apache.james.jspf.core.exceptions.TempErrorException;
 import org.apache.james.jspf.policies.PolicyPostFilter;
 import org.apache.james.jspf.terms.Directive;
 import org.apache.james.jspf.terms.IncludeMechanism;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * PolicyPostFilter which implements trusted forwared. 
@@ -35,21 +36,12 @@ import org.apache.james.jspf.terms.IncludeMechanism;
  *
  */
 public class TrustedForwarderPolicy implements PolicyPostFilter {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TrustedForwarderPolicy.class);
 
     /**
      * The hostname to include
      */
     public static final String TRUSTED_FORWARDER_HOST = "spf.trusted-forwarder.org";
-
-    
-    private Logger log;
-
-    /**
-     * @param log the logger
-     */
-    public TrustedForwarderPolicy(Logger log) {
-        this.log = log;
-    }
 
     /**
      * @see org.apache.james.jspf.policies.PolicyPostFilter#getSPFRecord(java.lang.String, org.apache.james.jspf.core.SPF1Record)
@@ -58,7 +50,7 @@ public class TrustedForwarderPolicy implements PolicyPostFilter {
         if (spfRecord == null) return null;
         String mechanism = ((Directive) spfRecord.getDirectives().get(spfRecord.getDirectives().size())).toString();
         if (mechanism.equals("-all") || mechanism.equals("?all")) {
-            log.debug("Add TrustedForwarderPolicy = include:"+TRUSTED_FORWARDER_HOST);
+            LOGGER.debug("Add TrustedForwarderPolicy = include:{}", TRUSTED_FORWARDER_HOST);
             try {
                 IncludeMechanism trusted = new IncludeMechanism() {
                     /**
@@ -71,7 +63,7 @@ public class TrustedForwarderPolicy implements PolicyPostFilter {
                         return this;
                     }
                 }.setHost(TRUSTED_FORWARDER_HOST);
-                spfRecord.getDirectives().add(spfRecord.getDirectives().size()-1, new Directive(null, trusted, log.getChildLogger("trustedforwarder")));
+                spfRecord.getDirectives().add(spfRecord.getDirectives().size()-1, new Directive(null, trusted));
             } catch (PermErrorException e) {
                 // will never happen
             }

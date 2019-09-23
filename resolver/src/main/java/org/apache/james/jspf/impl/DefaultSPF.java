@@ -19,25 +19,11 @@
 
 package org.apache.james.jspf.impl;
 
-import org.apache.james.jspf.core.Logger;
-
 public class DefaultSPF extends SPF {
-
-    
     /**
-     * Uses default Log4JLogger and DNSJava based dns resolver
+     * Uses DNSJava based dns resolver
      */
     public DefaultSPF() {
-        this(new Log4JLogger(org.apache.log4j.Logger.getLogger(SPF.class)));
+        super(new DNSServiceXBillImpl());
     }
-    
-    /**
-     * Uses passed logger and DNSJava based dns resolver
-     * 
-     * @param logger the logger to use
-     */
-    public DefaultSPF(Logger logger) {
-        super(new DNSServiceXBillImpl(logger), logger);
-    }
-
 }

@@ -19,7 +19,11 @@
 
 package org.apache.james.jspf.policies.local;
 
-import org.apache.james.jspf.core.Logger;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.apache.james.jspf.core.SPF1Record;
 import org.apache.james.jspf.core.SPFRecordParser;
 import org.apache.james.jspf.core.exceptions.NeutralException;
@@ -28,25 +32,20 @@ import org.apache.james.jspf.core.exceptions.PermErrorException;
 import org.apache.james.jspf.core.exceptions.SPFResultException;
 import org.apache.james.jspf.core.exceptions.TempErrorException;
 import org.apache.james.jspf.policies.PolicyPostFilter;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class to support Fallback feature
  */
 public class FallbackPolicy implements PolicyPostFilter {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FallbackPolicy.class);
 
     private Map<String,SPF1Record> entryMap;
 
     private SPFRecordParser parser;
 
-    private Logger log;
-
-    public FallbackPolicy(Logger log, SPFRecordParser parser) {
-        this.log = log;
+    public FallbackPolicy(SPFRecordParser parser) {
         entryMap = Collections.synchronizedMap(new HashMap<String,SPF1Record>());
         this.parser = parser;
     }
@@ -65,15 +64,15 @@ public class FallbackPolicy implements PolicyPostFilter {
             throws IllegalArgumentException {
         String host;
         try {
-            log.debug("Start parsing SPF-Record: " + rawSpfRecord);
+            LOGGER.debug("Start parsing SPF-Record: {}", rawSpfRecord);
             SPF1Record spfRecord = parser.parse(rawSpfRecord);
             if (rawHost.startsWith("*")) {
                 host = rawHost.substring(1);
-                log.debug("Convert host " + rawHost + " to " + host);
+                LOGGER.debug("Convert host {} to {}", rawHost, host);
             } else if (rawHost.endsWith("*")) {
                 int length = rawHost.length();
                 host = rawHost.substring(length - 1, length);
-                log.debug("Convert host " + rawHost + " to " + host);
+                LOGGER.debug("Convert host {} to {}", rawHost, host);
             } else {
                 host = rawHost;
             }
@@ -91,7 +90,7 @@ public class FallbackPolicy implements PolicyPostFilter {
      * 
      */
     public void clearEntrys() {
-        log.debug("Clear all entries");
+        LOGGER.debug("Clear all entries");
         entryMap.clear();
     }
 
@@ -102,7 +101,7 @@ public class FallbackPolicy implements PolicyPostFilter {
      *            The host
      */
     public void removeEntry(String host) {
-        log.debug("Remove fallback entry for host: " + host);
+        LOGGER.debug("Remove fallback entry for host: {}", host);
         synchronized (entryMap) {
             entryMap.remove(getRawEntry(host));
         }

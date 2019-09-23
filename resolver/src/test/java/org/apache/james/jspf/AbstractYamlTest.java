@@ -19,17 +19,23 @@
 
 package org.apache.james.jspf;
 
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
 import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.DNSServiceEnabled;
-import org.apache.james.jspf.core.LogEnabled;
-import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.MacroExpand;
 import org.apache.james.jspf.core.MacroExpandEnabled;
 import org.apache.james.jspf.core.SPFCheckEnabled;
 import org.apache.james.jspf.core.SPFRecordParser;
 import org.apache.james.jspf.core.exceptions.TimeoutException;
-import org.apache.james.jspf.tester.DNSTestingServer;
 import org.apache.james.jspf.executor.SPFExecutor;
 import org.apache.james.jspf.executor.SPFResult;
 import org.apache.james.jspf.executor.StagedMultipleSPFExecutor;
@@ -40,9 +46,11 @@ import org.apache.james.jspf.impl.DNSServiceXBillImpl;
 import org.apache.james.jspf.impl.DefaultTermsFactory;
 import org.apache.james.jspf.impl.SPF;
 import org.apache.james.jspf.parser.RFC4408SPF1Parser;
-import org.apache.james.jspf.wiring.WiringService;
-import org.apache.james.jspf.wiring.WiringServiceException;
+import org.apache.james.jspf.tester.DNSTestingServer;
 import org.apache.james.jspf.tester.SPFYamlTestDescriptor;
+import org.apache.james.jspf.wiring.WiringService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xbill.DNS.Cache;
 import org.xbill.DNS.DClass;
 import org.xbill.DNS.Lookup;
@@ -51,23 +59,14 @@ import org.xbill.DNS.Resolver;
 import org.xbill.DNS.SimpleResolver;
 import org.xbill.DNS.TextParseException;
 
+import junit.framework.AssertionFailedError;
+import junit.framework.TestCase;
 import uk.nominet.dnsjnio.ExtendedNonblockingResolver;
 import uk.nominet.dnsjnio.LookupAsynch;
 import uk.nominet.dnsjnio.NonblockingResolver;
 
-import java.io.IOException;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
-import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
-
 public abstract class AbstractYamlTest extends TestCase {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractYamlTest.class);
 
     private static final int FAKE_SERVER_PORT = 31348;
     protected static final int TIMEOUT = 10;
@@ -84,7 +83,6 @@ public abstract class AbstractYamlTest extends TestCase {
 
     SPFYamlTestDescriptor data;
     String test;
-    protected Logger log;
     private SPFExecutor executor;
     protected static MacroExpand macroExpand;
     protected static SPF spf;
@@ -132,25 +130,16 @@ public abstract class AbstractYamlTest extends TestCase {
     }
 
     protected void runTest() throws Throwable {
-
-        if (log == null) {
-                log = new ConsoleLogger(ConsoleLogger.LEVEL_DEBUG, "root");
-        }
         
-        log.info("Running test: "+getName()+" ...");
+        LOGGER.info("Running test: "+getName()+" ...");
 
         if (parser == null) {
             /* PREVIOUS SLOW WAY 
             enabledServices = new WiringServiceTable();
             enabledServices.put(LogEnabled.class, log);
             */
-            parser = new RFC4408SPF1Parser(log.getChildLogger("parser"), new DefaultTermsFactory(log.getChildLogger("termsfactory"), new WiringService() {
-
-                public void wire(Object component) throws WiringServiceException {
-                    if (component instanceof LogEnabled) {
-                        String[] path = component.getClass().toString().split("\\.");
-                        ((LogEnabled) component).enableLogging(log.getChildLogger("dep").getChildLogger(path[path.length-1].toLowerCase()));
-                    }
+            parser = new RFC4408SPF1Parser(new DefaultTermsFactory(new WiringService() {
+                public void wire(Object component) {
                     if (component instanceof MacroExpandEnabled) {
                         ((MacroExpandEnabled) component).enableMacroExpand(macroExpand);
                     }
@@ -161,18 +150,17 @@ public abstract class AbstractYamlTest extends TestCase {
                         ((SPFCheckEnabled) component).enableSPFChecking(spf);
                     }
                 }
-                
             }));
         }
         if (this.data != AbstractYamlTest.prevData) {
-            dns = new LoggingDNSService(getDNSService(), log.getChildLogger("dns"));
+            dns = new LoggingDNSService(getDNSService());
             AbstractYamlTest.prevData = this.data;
         }
-        macroExpand = new MacroExpand(log.getChildLogger("macroExpand"), dns);
+        macroExpand = new MacroExpand(dns);
         if (getSpfExecutorType() == SYNCHRONOUS_EXECUTOR) {  // synchronous
-            executor = new SynchronousSPFExecutor(log, dns);
+            executor = new SynchronousSPFExecutor(dns);
         } else if (getSpfExecutorType() == STAGED_EXECUTOR || getSpfExecutorType() == STAGED_EXECUTOR_MULTITHREADED){
-            executor = new StagedMultipleSPFExecutor(log, new DNSServiceAsynchSimulator(dns, getSpfExecutorType() == STAGED_EXECUTOR_MULTITHREADED));
+            executor = new StagedMultipleSPFExecutor(new DNSServiceAsynchSimulator(dns, getSpfExecutorType() == STAGED_EXECUTOR_MULTITHREADED));
         } else if (getSpfExecutorType() == STAGED_EXECUTOR_DNSJNIO) {
             
             // reset cache between usages of the asynchronous lookuper
@@ -200,7 +188,7 @@ public abstract class AbstractYamlTest extends TestCase {
                 
                 DNSJnioAsynchService jnioAsynchService = new DNSJnioAsynchService(resolver);
                 jnioAsynchService.setTimeout(TIMEOUT);
-                executor = new StagedMultipleSPFExecutor(log, jnioAsynchService);
+                executor = new StagedMultipleSPFExecutor(jnioAsynchService);
 
             } catch (UnknownHostException e) {
                 // TODO Auto-generated catch block
@@ -210,7 +198,7 @@ public abstract class AbstractYamlTest extends TestCase {
         } else {
             throw new UnsupportedOperationException("Unknown executor type");
         }
-        spf = new SPF(dns, parser, log.getChildLogger("spf"), macroExpand, executor);
+        spf = new SPF(dns, parser, macroExpand, executor);
 
         if (test != null) {
             String next = test;
@@ -229,7 +217,7 @@ public abstract class AbstractYamlTest extends TestCase {
                 try {
                     verifyResult(next, queries.get(next));
                 } catch (AssertionFailedError e) {
-                    log.getChildLogger(next).info("FAILED. "+e.getMessage()+" ("+getName()+")", e.getMessage()==null ? e : null);
+                    LOGGER.info("FAILED. {} ({})", e.getMessage(), getName(), e);
                     if (firstError == null) firstError = e;
                 }
             }
@@ -240,8 +228,7 @@ public abstract class AbstractYamlTest extends TestCase {
 
     private SPFResult runSingleTest(String testName) {
         Map<String, ?> currentTest = data.getTests().get(testName);
-        Logger testLogger = log.getChildLogger(testName);
-        testLogger.info("TESTING "+testName+": "+currentTest.get("description"));
+        LOGGER.info("TESTING {}: {}", testName, currentTest.get("description"));
 
         String ip = null;
         String sender = null;
@@ -267,7 +254,6 @@ public abstract class AbstractYamlTest extends TestCase {
     private void verifyResult(String testName, SPFResult res) {
         String resultSPF = res.getResult();
         Map<String,?> currentTest = data.getTests().get(testName);
-        Logger testLogger = log.getChildLogger(testName+"-verify");
         if (currentTest.get("result") instanceof String) {
             assertEquals("Test "+testName+" ("+currentTest.get("description")+") failed. Returned: "+resultSPF+" Expected: "+currentTest.get("result")+" [["+resultSPF+"||"+res.getHeaderText()+"]]", currentTest.get("result"), resultSPF);
         } else {
@@ -296,7 +282,7 @@ public abstract class AbstractYamlTest extends TestCase {
     
         }
     
-        testLogger.info("PASSED. Result="+resultSPF+" Explanation="+res.getExplanation()+" Header="+res.getHeaderText());
+        LOGGER.info("PASSED. Result={} Explanation={} Header={}", resultSPF, res.getExplanation(), res.getHeaderText());
     }
 
     /**
@@ -353,7 +339,7 @@ public abstract class AbstractYamlTest extends TestCase {
         
         dnsTestServer.setData((Map<String, List<?>>) data.getZonedata());
         
-        DNSServiceXBillImpl serviceXBillImpl = new DNSServiceXBillImpl(log) {
+        DNSServiceXBillImpl serviceXBillImpl = new DNSServiceXBillImpl() {
 
             public List<String> getLocalDomainNames() {
                 List<String> l = new ArrayList<String>();
@@ -371,7 +357,7 @@ public abstract class AbstractYamlTest extends TestCase {
      * @return a real dns resolver
      */
     protected DNSService getDNSServiceReal() {
-        DNSServiceXBillImpl serviceXBillImpl = new DNSServiceXBillImpl(log);
+        DNSServiceXBillImpl serviceXBillImpl = new DNSServiceXBillImpl();
         // TIMEOUT 2 seconds
         serviceXBillImpl.setTimeOut(TIMEOUT);
         return serviceXBillImpl;

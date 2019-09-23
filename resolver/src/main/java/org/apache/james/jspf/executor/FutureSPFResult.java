@@ -23,8 +23,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.james.jspf.core.Logger;
 import org.apache.james.jspf.core.SPFSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -32,20 +33,14 @@ import org.apache.james.jspf.core.SPFSession;
  *
  */
 public class FutureSPFResult extends SPFResult {
-    
+    private static final Logger LOGGER = LoggerFactory.getLogger(FutureSPFResult.class);
+
     private boolean isReady;
     private List<IFutureSPFResultListener> listeners;
     private int waiters;
-    private final Logger log;
     
     public FutureSPFResult() {
-        this.log = null;
         isReady = false;
-    }
-    
-    public FutureSPFResult(Logger log) {
-        this.log = log;   	
-        this.isReady = false;
     }
 
 	/**
@@ -76,9 +71,7 @@ public class FutureSPFResult extends SPFResult {
                     listener.onSPFResult(this);
                 } catch (Throwable e) {
                     // catch exception. See JSPF-95
-                    if (log != null) {
-                        log.warn("An exception was thrown by the listener " + listener, e);
-                    }
+                    LOGGER.warn("An exception was thrown by the listener {}", listener, e);
                 }
             }
             listenerIt = null;
