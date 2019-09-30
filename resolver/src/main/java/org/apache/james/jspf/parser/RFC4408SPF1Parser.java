@@ -201,7 +201,7 @@ public class RFC4408SPF1Parser implements SPFRecordParser {
         }
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Parsing catch group positions: Modifiers[{}] Qualifier[{}}] Mechanism[{}}]",
+            LOGGER.debug("Parsing catch group positions: Modifiers[{}] Qualifier[{}] Mechanism[{}]",
                 TERM_STEP_REGEX_MODIFIER_POS, TERM_STEP_REGEX_QUALIFIER_POS, TERM_STEP_REGEX_MECHANISM_POS);
             for (int k = 0; k < matchResultPositions.size(); k++) {
                 LOGGER

@@ -217,7 +217,7 @@ public abstract class AbstractYamlTest extends TestCase {
                 try {
                     verifyResult(next, queries.get(next));
                 } catch (AssertionFailedError e) {
-                    LOGGER.info("FAILED. {} ({}})", e.getMessage(), getName(), e);
+                    LOGGER.info("FAILED. {} ({})", e.getMessage(), getName(), e);
                     if (firstError == null) firstError = e;
                 }
             }
