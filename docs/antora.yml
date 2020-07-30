@@ -1,0 +1,4 @@
+name: jspf
+title: Apache James jSPF
+version: '1.0.2-SNAPSHOT'
+prerelease: true

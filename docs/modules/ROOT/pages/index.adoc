@@ -1,0 +1,4 @@
+= Apache James jSPF documentation
+
+
+TODO: This is a placeholder. Migrate older documentation.
