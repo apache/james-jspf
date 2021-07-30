@@ -8,7 +8,7 @@
   "License"); you may not use this file except in compliance
   with the License.  You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+    https://www.apache.org/licenses/LICENSE-2.0
 
   Unless required by applicable law or agreed to in writing,
   software distributed under the License is distributed on an
@@ -28,14 +28,14 @@
   <bannerLeft>
     <name>James jSPF</name>
     <src>images/james-logo.png</src>
-    <href>http://james.apache.org/jspf/index.html</href>
+    <href>https://james.apache.org/jspf/index.html</href>
     <alt>james-logo.png</alt>
   </bannerLeft>
 
     <bannerRight>
         <name>The Apache Software Foundation</name>
         <src>images/logos/asf_logo_small.png</src>
-        <href>http://www.apache.org/index.html</href>
+        <href>https://www.apache.org/index.html</href>
     </bannerRight>
 
   <body>
@@ -44,25 +44,25 @@
         <links>
             <item
                 name="Home"
-                href="http://james.apache.org/index.html" />
+                href="https://james.apache.org/index.html" />
             <item
                 name="Server"
-                href="http://james.apache.org/documentation.html" />
+                href="https://james.apache.org/documentation.html" />
             <item
                 name="Mime4J"
-                href="http://james.apache.org/mime4j/index.html" />
+                href="https://james.apache.org/mime4j/index.html" />
             <item
                 name="jSieve"
-                href="http://james.apache.org/jsieve/index.html" />
+                href="https://james.apache.org/jsieve/index.html" />
             <item
                 name="jSPF"
-                href="http://james.apache.org/jspf/index.html" />
+                href="https://james.apache.org/jspf/index.html" />
             <item
                 name="jDKIM"
-                href="http://james.apache.org/jdkim/index.html" />
+                href="https://james.apache.org/jdkim/index.html" />
             <item
                 name="Hupa"
-                href="http://james.apache.org/hupa/index.html" />
+                href="https://james.apache.org/hupa/index.html" />
         </links>
     
     <menu name="jSPF" inherit="top">
@@ -70,7 +70,7 @@
       <item name="jSPF FAQ" href="/FAQ.html"/>
       <item name="Useful RFCs" href="/rfclist.html"/>
       <item name="Issue Tracker" href="https://issues.apache.org/jira/browse/JSPF" />
-      <item name="Download Releases" href="http://james.apache.org/download.cgi#Apache_jSPF"/>
+      <item name="Download Releases" href="https://james.apache.org/download.cgi#Apache_jSPF"/>
     </menu>
 
   </body>
