@@ -28,10 +28,12 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.apache.james.jspf.core.exceptions.SPFErrorConstants;
 import org.apache.james.jspf.executor.SPFResult;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.SimpleLayout;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Layout;
+import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.core.appender.ConsoleAppender;
+import org.apache.logging.log4j.core.layout.MessageLayout;
 
 /**
  * This class is used for commandline usage of JSPF
@@ -79,7 +81,7 @@ public class SPFQuery {
     private final static String CMD_TRUSTED_FORWARDER = "enable-trusted-forwarder";
     private final static char CHAR_TRUSTED_FORWARDER = 't';
 
-    private static Logger logger = Logger.getRootLogger();
+    private static Logger logger = (org.apache.logging.log4j.core.Logger) LogManager.getLogger(SPFQuery.class);
 
     /**
      * @param args
@@ -94,8 +96,8 @@ public class SPFQuery {
         boolean useBestGuess = false;
         boolean useTrustedForwarder = false;
 
-        SimpleLayout layout = new SimpleLayout();
-        ConsoleAppender consoleAppender = new ConsoleAppender(layout);
+        Layout layout = new MessageLayout();
+        ConsoleAppender consoleAppender = ConsoleAppender.createDefaultAppenderForLayout(layout);
         logger.addAppender(consoleAppender);
 
         logger.setLevel(Level.ERROR);
