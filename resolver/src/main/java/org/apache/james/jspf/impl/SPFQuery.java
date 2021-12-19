@@ -28,10 +28,6 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.apache.james.jspf.core.exceptions.SPFErrorConstants;
 import org.apache.james.jspf.executor.SPFResult;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.SimpleLayout;
 
 /**
  * This class is used for commandline usage of JSPF
@@ -79,8 +75,6 @@ public class SPFQuery {
     private final static String CMD_TRUSTED_FORWARDER = "enable-trusted-forwarder";
     private final static char CHAR_TRUSTED_FORWARDER = 't';
 
-    private static Logger logger = Logger.getRootLogger();
-
     /**
      * @param args
      *            The commandline arguments to parse
@@ -93,12 +87,6 @@ public class SPFQuery {
         String defaultExplanation = null;
         boolean useBestGuess = false;
         boolean useTrustedForwarder = false;
-
-        SimpleLayout layout = new SimpleLayout();
-        ConsoleAppender consoleAppender = new ConsoleAppender(layout);
-        logger.addAppender(consoleAppender);
-
-        logger.setLevel(Level.ERROR);
 
         Options options = generateOptions();
         CommandLineParser parser = new PosixParser();
@@ -114,11 +102,6 @@ public class SPFQuery {
             useTrustedForwarder = line.hasOption(CHAR_TRUSTED_FORWARDER);
             // check if all needed values was set
             if (ip != null && sender != null && helo != null) {
-
-                if (line.hasOption(CHAR_DEBUG))
-                    logger.setLevel(Level.DEBUG);
-                if (line.hasOption(CHAR_VERBOSE))
-                    logger.setLevel(Level.TRACE);
 
                 SPF spf = new DefaultSPF();
 
