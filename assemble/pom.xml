@@ -47,10 +47,6 @@
             <artifactId>dnsjnio</artifactId>
         </dependency>
         <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-        </dependency>
-        <dependency>
             <groupId>net.java.dev</groupId>
             <artifactId>jvyaml</artifactId>
         </dependency>
