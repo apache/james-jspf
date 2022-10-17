@@ -187,7 +187,7 @@ public class DNSTestingServer implements ResponseGenerator {
                                     } else if ("SPF".equals(type)) {
                                         if (value instanceof List<?>) {
                                             records.add(new SPFRecord(hostname,
-                                                    DClass.IN, 3600, (List<?>) value));
+                                                    DClass.IN, 3600L, (List<String>) value));
                                         } else {
                                             records.add(new SPFRecord(hostname,
                                                     DClass.IN, 3600, (String) value));
@@ -195,7 +195,7 @@ public class DNSTestingServer implements ResponseGenerator {
                                     } else if ("TXT".equals(type)) {
                                         if (value instanceof List<?>) {
                                             records.add(new TXTRecord(hostname,
-                                                    DClass.IN, 3600, (List<?>) value));
+                                                    DClass.IN, 3600L, (List<String>) value));
                                         } else {
                                             records.add(new TXTRecord(hostname,
                                                     DClass.IN, 3600, (String) value));
@@ -264,7 +264,7 @@ public class DNSTestingServer implements ResponseGenerator {
     private SetResponse findRecords(Name name, int type) {
         SetResponse sr = zone.findRecords(name, type);
         
-        if (sr == null || sr.answers() == null || sr.answers().length == 0) {
+        if (sr == null || sr.answers() == null || sr.answers().size() == 0) {
             boolean timeout = timeoutServers.contains(name);
             if (timeout) {
                 try {
@@ -291,7 +291,7 @@ public class DNSTestingServer implements ResponseGenerator {
             if (response.findRRset(name, rrset.getType(), s))
                 return;
         if ((flags & FLAG_SIGONLY) == 0) {
-            Iterator<Record> it = rrset.rrs();
+            Iterator<Record> it = rrset.rrs().iterator();
             while (it.hasNext()) {
                 Record r = (Record) it.next();
                 if (r.getName().isWild() && !name.isWild())
@@ -300,7 +300,7 @@ public class DNSTestingServer implements ResponseGenerator {
             }
         }
         if ((flags & (FLAG_SIGONLY | FLAG_DNSSECOK)) != 0) {
-            Iterator it = rrset.sigs();
+            Iterator it = rrset.sigs().iterator();
             while (it.hasNext()) {
                 Record r = (Record) it.next();
                 if (r.getName().isWild() && !name.isWild())
@@ -392,9 +392,9 @@ public class DNSTestingServer implements ResponseGenerator {
             rcode = addAnswer(response, newname, type, dclass, iterations + 1,
                     flags);
         } else if (sr.isSuccessful()) {
-            RRset[] rrsets = sr.answers();
-            for (int i = 0; i < rrsets.length; i++)
-                addRRset(name, response, rrsets[i], Section.ANSWER, flags);
+            List<RRset> rrsets = sr.answers();
+            for (int i = 0; i < rrsets.size(); i++)
+                addRRset(name, response, rrsets.get(i), Section.ANSWER, flags);
 
             RRset findNSRecords = findNSRecords();
             addRRset(findNSRecords.getName(), response, findNSRecords,
