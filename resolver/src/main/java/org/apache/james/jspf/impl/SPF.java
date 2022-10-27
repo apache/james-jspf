@@ -22,6 +22,7 @@ package org.apache.james.jspf.impl;
 
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.concurrent.CompletableFuture;
 
 import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.DNSService;
@@ -41,6 +42,7 @@ import org.apache.james.jspf.core.exceptions.PermErrorException;
 import org.apache.james.jspf.core.exceptions.SPFErrorConstants;
 import org.apache.james.jspf.core.exceptions.SPFResultException;
 import org.apache.james.jspf.core.exceptions.TempErrorException;
+import org.apache.james.jspf.executor.AsynchronousSPFExecutor;
 import org.apache.james.jspf.executor.FutureSPFResult;
 import org.apache.james.jspf.executor.SPFExecutor;
 import org.apache.james.jspf.executor.SPFResult;
@@ -215,7 +217,7 @@ public class SPF implements SPFChecker {
         this.parser = new RFC4408SPF1Parser(new DefaultTermsFactory(wiringService));
         // We add this after the parser creation because services cannot be null
         wiringService.put(SPFCheckEnabled.class, this);
-        this.executor = new SynchronousSPFExecutor(dnsProbe);
+        this.executor = new AsynchronousSPFExecutor(dnsProbe);
     }
     
     

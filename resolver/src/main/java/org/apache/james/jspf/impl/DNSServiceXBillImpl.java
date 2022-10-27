@@ -24,6 +24,8 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSService;
@@ -35,6 +37,7 @@ import org.xbill.DNS.AAAARecord;
 import org.xbill.DNS.ARecord;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.MXRecord;
+import org.xbill.DNS.Name;
 import org.xbill.DNS.PTRRecord;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.Resolver;
@@ -42,6 +45,7 @@ import org.xbill.DNS.SPFRecord;
 import org.xbill.DNS.TXTRecord;
 import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
+import org.xbill.DNS.lookup.LookupSession;
 
 /**
  * This class contains helper to get all neccassary DNS infos that are needed
@@ -167,7 +171,33 @@ public class DNSServiceXBillImpl implements DNSService {
             return null;
         }
     }
-    
+
+    @Override
+    public CompletionStage<List<String>> getRecordsAsync(DNSRequest request) {
+        String recordTypeDescription;
+        int dnsJavaType;
+        switch (request.getRecordType()) {
+            case DNSRequest.A: recordTypeDescription = "A"; dnsJavaType = Type.A; break;
+            case DNSRequest.AAAA: recordTypeDescription = "AAAA"; dnsJavaType = Type.AAAA; break;
+            case DNSRequest.MX: recordTypeDescription = "MX"; dnsJavaType = Type.MX; break;
+            case DNSRequest.PTR: recordTypeDescription = "PTR"; dnsJavaType = Type.PTR; break;
+            case DNSRequest.TXT: recordTypeDescription = "TXT"; dnsJavaType = Type.TXT; break;
+            case DNSRequest.SPF: recordTypeDescription= "SPF"; dnsJavaType = Type.SPF; break;
+            default: // TODO fail!
+                throw new IllegalArgumentException();
+        }
+        LOGGER.debug("Start {}-Record lookup for : {}", recordTypeDescription, request.getHostname());
+        final LookupSession lookupSession = LookupSession.defaultBuilder().build();
+
+        try {
+            return lookupSession.lookupAsync(Name.fromString(request.getHostname()), dnsJavaType)
+                .thenApply(result -> convertRecordsToList(result.getRecords().toArray(new Record[0])));
+        } catch (TextParseException e) {
+            LOGGER.debug("No {} Record found for host: {}", recordTypeDescription, request.getHostname());
+            throw new IllegalArgumentException();
+        }
+    }
+
     /**
      * Convert the given Record array to a List
      * 

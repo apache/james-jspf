@@ -27,6 +27,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSService;
@@ -40,7 +44,6 @@ import org.apache.james.jspf.executor.SPFExecutor;
 import org.apache.james.jspf.executor.SPFResult;
 import org.apache.james.jspf.executor.StagedMultipleSPFExecutor;
 import org.apache.james.jspf.executor.SynchronousSPFExecutor;
-import org.apache.james.jspf.impl.DNSJnioAsynchService;
 import org.apache.james.jspf.impl.DNSServiceAsynchSimulator;
 import org.apache.james.jspf.impl.DNSServiceXBillImpl;
 import org.apache.james.jspf.impl.DefaultTermsFactory;
@@ -51,7 +54,6 @@ import org.apache.james.jspf.tester.SPFYamlTestDescriptor;
 import org.apache.james.jspf.wiring.WiringService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xbill.DNS.Cache;
 import org.xbill.DNS.DClass;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Name;
@@ -61,12 +63,10 @@ import org.xbill.DNS.TextParseException;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
-import uk.nominet.dnsjnio.ExtendedNonblockingResolver;
-import uk.nominet.dnsjnio.LookupAsynch;
-import uk.nominet.dnsjnio.NonblockingResolver;
 
 public abstract class AbstractYamlTest extends TestCase {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractYamlTest.class);
+    private static final ExecutorService EXECUTOR_SERVICE = Executors.newCachedThreadPool();
 
     private static final int FAKE_SERVER_PORT = 31348;
     protected static final int TIMEOUT = 10;
@@ -78,7 +78,6 @@ public abstract class AbstractYamlTest extends TestCase {
     protected static final int SYNCHRONOUS_EXECUTOR = 1;
     protected static final int STAGED_EXECUTOR = 2;
     protected static final int STAGED_EXECUTOR_MULTITHREADED = 3;
-    protected static final int STAGED_EXECUTOR_DNSJNIO = 4;
     private int spfExecutorType = SYNCHRONOUS_EXECUTOR;
 
     SPFYamlTestDescriptor data;
@@ -161,40 +160,6 @@ public abstract class AbstractYamlTest extends TestCase {
             executor = new SynchronousSPFExecutor(dns);
         } else if (getSpfExecutorType() == STAGED_EXECUTOR || getSpfExecutorType() == STAGED_EXECUTOR_MULTITHREADED){
             executor = new StagedMultipleSPFExecutor(new DNSServiceAsynchSimulator(dns, getSpfExecutorType() == STAGED_EXECUTOR_MULTITHREADED));
-        } else if (getSpfExecutorType() == STAGED_EXECUTOR_DNSJNIO) {
-            
-            // reset cache between usages of the asynchronous lookuper
-            LookupAsynch.setDefaultCache(new Cache(), DClass.IN);
-            // reset cache between usages of the asynchronous lookuper
-            LookupAsynch.getDefaultCache(DClass.IN).clearCache();
-
-            try {
-                ExtendedNonblockingResolver resolver;
-                
-                if (getDnsServiceMockStyle() == FAKE_SERVER) {
-                    NonblockingResolver nonblockingResolver = new NonblockingResolver("127.0.0.1");
-                    resolver = ExtendedNonblockingResolver.newInstance(new NonblockingResolver[] {nonblockingResolver});
-                    nonblockingResolver.setPort(FAKE_SERVER_PORT);
-                    nonblockingResolver.setTCP(false);
-                } else if (getDnsServiceMockStyle() == REAL_SERVER) {
-                    resolver = ExtendedNonblockingResolver.newInstance();
-                    Resolver[] resolvers = resolver.getResolvers();
-                    for (int i = 0; i < resolvers.length; i++) {
-                        resolvers[i].setTCP(false);
-                    }
-                } else {
-                    throw new IllegalStateException("DnsServiceMockStyle "+getDnsServiceMockStyle()+" is not supported when STAGED_EXECUTOR_DNSJNIO executor style is used");
-                }
-                
-                DNSJnioAsynchService jnioAsynchService = new DNSJnioAsynchService(resolver);
-                jnioAsynchService.setTimeout(TIMEOUT);
-                executor = new StagedMultipleSPFExecutor(jnioAsynchService);
-
-            } catch (UnknownHostException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-
         } else {
             throw new UnsupportedOperationException("Unknown executor type");
         }
@@ -464,6 +429,19 @@ public abstract class AbstractYamlTest extends TestCase {
                 return res.size() > 0 ? res : null;
             }
             return null;
+        }
+
+        @Override
+        public CompletionStage<List<String>> getRecordsAsync(DNSRequest request) {
+            CompletableFuture<List<String>> completableFuture = new CompletableFuture<>();
+            EXECUTOR_SERVICE.execute(() -> {
+                try {
+                    completableFuture.complete(getRecords(request));
+                } catch (TimeoutException e) {
+                    completableFuture.completeExceptionally(e);
+                }
+            });
+            return completableFuture;
         }
         
     }

@@ -19,14 +19,14 @@
 
 package org.apache.james.jspf;
 
+import java.util.List;
+import java.util.concurrent.CompletionStage;
+
 import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.exceptions.TimeoutException;
-import org.apache.james.jspf.executor.FutureSPFResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 public class LoggingDNSService implements DNSService {
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggingDNSService.class);
@@ -93,21 +93,7 @@ public class LoggingDNSService implements DNSService {
     public List<String> getRecords(DNSRequest request) throws TimeoutException {
         try {
             List<String> result = dnsService.getRecords(request);
-            StringBuffer logBuff = new StringBuffer();
-            logBuff.append("getRecords(" + request.getHostname() + "," + request.getRecordType() + ") = ");
-            if (result != null) {
-                for (int i = 0; i < result.size(); i++) {
-                    logBuff.append(result.get(i));
-                    if (i == result.size() - 1) {
-                        logBuff.append("");
-                    } else {
-                        logBuff.append(",");
-                    }
-                }
-            } else {
-                logBuff.append("getRecords-ret: null");
-            }
-            LOGGER.debug(logBuff.toString());
+            debugLog(request, result);
             return result;
         } catch (TimeoutException e) {
             LOGGER.debug("getRecords({}) = TempErrorException[{}]",
@@ -116,4 +102,34 @@ public class LoggingDNSService implements DNSService {
         }
     }
 
+    private void debugLog(DNSRequest request, List<String> result) {
+        StringBuffer logBuff = new StringBuffer();
+        logBuff.append("getRecords(" + request.getHostname() + "," + request.getRecordType() + ") = ");
+        if (result != null) {
+            for (int i = 0; i < result.size(); i++) {
+                logBuff.append(result.get(i));
+                if (i == result.size() - 1) {
+                    logBuff.append("");
+                } else {
+                    logBuff.append(",");
+                }
+            }
+        } else {
+            logBuff.append("getRecords-ret: null");
+        }
+        LOGGER.debug(logBuff.toString());
+    }
+
+    @Override
+    public CompletionStage<List<String>> getRecordsAsync(DNSRequest request) {
+        return getRecordsAsync(request)
+            .thenApply(res -> {
+                debugLog(request, res);
+                return res;
+            })
+            .exceptionally(e -> {
+                LOGGER.debug("getRecords({}) = TempErrorException[{}]", request.getHostname(), e.getMessage());
+                return null;
+            });
+    }
 }
