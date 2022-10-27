@@ -70,7 +70,7 @@ public class MailZoneAsynchronousYamlTest extends MailZoneYamlTest {
     }
 
     protected int getSpfExecutorType() {
-        return STAGED_EXECUTOR_DNSJNIO;
+        return STAGED_EXECUTOR_MULTITHREADED;
     }
 
     static class MailZoneAsynchronousSuite extends TestSuite {

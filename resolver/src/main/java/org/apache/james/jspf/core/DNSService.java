@@ -22,6 +22,8 @@ package org.apache.james.jspf.core;
 import org.apache.james.jspf.core.exceptions.TimeoutException;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 /**
  * Interface which should be used to access all necassary DNS-Records
@@ -37,6 +39,8 @@ public interface DNSService {
      * @throws TimeoutException
      */
     public List<String> getRecords(DNSRequest request) throws TimeoutException;
+
+    CompletionStage<List<String>> getRecordsAsync(DNSRequest request);
 
     /**
      * Try to get all domain names for the running host
