@@ -54,9 +54,12 @@ public class AsynchronousSPFExecutor implements SPFExecutor {
         while ((checker = session.popChecker()) != null) {
             // only execute checkers we added (better recursivity)
             LOGGER.debug("Executing checker: {}", checker);
-            final SPFChecker finalChecker = checker;
+            SPFChecker finalChecker = checker;
             try {
-                final DNSLookupContinuation cont = checker.checkSPF(session);
+                DNSLookupContinuation cont = checker.checkSPF(session);
+                if (cont == null) {
+                    continue;
+                }
                 // if the checker returns a continuation we return it
                 dnsProbe.getRecordsAsync(cont.getRequest())
                     .thenAccept(results -> {
@@ -68,11 +71,10 @@ public class AsynchronousSPFExecutor implements SPFExecutor {
                     })
                     .exceptionally(e -> {
                         if (e instanceof TimeoutException) {
-                            try {
-                                cont.getListener().onDNSResponse(new DNSResponse((TimeoutException) e), session);
-                            } catch (PermErrorException | NoneException | TempErrorException | NeutralException ex2) {
-                                handleError(session, finalChecker, ex2);
-                            }
+                            handleTimeout(session, finalChecker, cont, (TimeoutException) e);
+                        }
+                        if (e.getCause() instanceof TimeoutException) {
+                            handleTimeout(session, finalChecker, cont, (TimeoutException) e.getCause());
                         }
                         return null;
                     });
@@ -81,6 +83,14 @@ public class AsynchronousSPFExecutor implements SPFExecutor {
             }
         }
         result.setSPFResult(session);
+    }
+
+    private void handleTimeout(SPFSession session, SPFChecker finalChecker, DNSLookupContinuation cont, TimeoutException e) {
+        try {
+            cont.getListener().onDNSResponse(new DNSResponse(e), session);
+        } catch (PermErrorException | NoneException | TempErrorException | NeutralException ex2) {
+            handleError(session, finalChecker, ex2);
+        }
     }
 
     private void handleError(SPFSession session, SPFChecker checker, Exception e) {
