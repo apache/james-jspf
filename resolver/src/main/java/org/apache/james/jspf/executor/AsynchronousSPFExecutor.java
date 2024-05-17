@@ -60,29 +60,33 @@ public class AsynchronousSPFExecutor implements SPFExecutor {
                 if (cont == null) {
                     continue;
                 }
-                // if the checker returns a continuation we return it
-                dnsProbe.getRecordsAsync(cont.getRequest())
-                    .thenAccept(results -> {
-                        try {
-                            cont.getListener().onDNSResponse(new DNSResponse(results), session);
-                        } catch (PermErrorException | NoneException | TempErrorException | NeutralException e) {
-                            handleError(session, finalChecker, e);
-                        }
-                    })
-                    .exceptionally(e -> {
-                        if (e instanceof TimeoutException) {
-                            handleTimeout(session, finalChecker, cont, (TimeoutException) e);
-                        }
-                        if (e.getCause() instanceof TimeoutException) {
-                            handleTimeout(session, finalChecker, cont, (TimeoutException) e.getCause());
-                        }
-                        return null;
-                    });
+                doGetRecordAsync(session, cont, finalChecker);
             } catch (Exception e) {
                 handleError(session, checker, e);
             }
         }
         result.setSPFResult(session);
+    }
+
+    private void doGetRecordAsync(SPFSession session, DNSLookupContinuation cont, SPFChecker finalChecker) {
+        // if the checker returns a continuation we return it
+        dnsProbe.getRecordsAsync(cont.getRequest())
+            .thenAccept(results -> {
+                try {
+                    cont.getListener().onDNSResponse(new DNSResponse(results), session);
+                } catch (PermErrorException | NoneException | TempErrorException | NeutralException e) {
+                    handleError(session, finalChecker, e);
+                }
+            })
+            .exceptionally(e -> {
+                if (e instanceof TimeoutException) {
+                    handleTimeout(session, finalChecker, cont, (TimeoutException) e);
+                }
+                if (e.getCause() instanceof TimeoutException) {
+                    handleTimeout(session, finalChecker, cont, (TimeoutException) e.getCause());
+                }
+                return null;
+            });
     }
 
     private void handleTimeout(SPFSession session, SPFChecker finalChecker, DNSLookupContinuation cont, TimeoutException e) {
