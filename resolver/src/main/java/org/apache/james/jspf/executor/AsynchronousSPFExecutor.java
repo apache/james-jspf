@@ -73,7 +73,10 @@ public class AsynchronousSPFExecutor implements SPFExecutor {
         dnsProbe.getRecordsAsync(cont.getRequest())
             .thenAccept(results -> {
                 try {
-                    cont.getListener().onDNSResponse(new DNSResponse(results), session);
+                    DNSLookupContinuation lookupContinuation = cont.getListener().onDNSResponse(new DNSResponse(results), session);
+                    if (lookupContinuation != null) {
+                        doGetRecordAsync(session, lookupContinuation, finalChecker);
+                    }
                 } catch (PermErrorException | NoneException | TempErrorException | NeutralException e) {
                     handleError(session, finalChecker, e);
                 }
