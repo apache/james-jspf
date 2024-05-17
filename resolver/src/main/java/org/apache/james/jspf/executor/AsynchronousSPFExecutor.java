@@ -50,39 +50,47 @@ public class AsynchronousSPFExecutor implements SPFExecutor {
      * @see SPFExecutor#execute(SPFSession, FutureSPFResult)
      */
     public void execute(SPFSession session, FutureSPFResult result) {
-        SPFChecker checker;
-        while ((checker = session.popChecker()) != null) {
-            // only execute checkers we added (better recursivity)
-            LOGGER.debug("Executing checker: {}", checker);
-            SPFChecker finalChecker = checker;
-            try {
-                DNSLookupContinuation cont = checker.checkSPF(session);
-                if (cont == null) {
-                    continue;
-                }
-                // if the checker returns a continuation we return it
-                dnsProbe.getRecordsAsync(cont.getRequest())
-                    .thenAccept(results -> {
-                        try {
-                            cont.getListener().onDNSResponse(new DNSResponse(results), session);
-                        } catch (PermErrorException | NoneException | TempErrorException | NeutralException e) {
-                            handleError(session, finalChecker, e);
-                        }
-                    })
-                    .exceptionally(e -> {
-                        if (e instanceof TimeoutException) {
-                            handleTimeout(session, finalChecker, cont, (TimeoutException) e);
-                        }
-                        if (e.getCause() instanceof TimeoutException) {
-                            handleTimeout(session, finalChecker, cont, (TimeoutException) e.getCause());
-                        }
-                        return null;
-                    });
-            } catch (Exception e) {
-                handleError(session, checker, e);
-            }
+        SPFChecker checker = session.popChecker();
+        if (checker == null) {
+            result.setSPFResult(session);
+            return;
         }
-        result.setSPFResult(session);
+        // only execute checkers we added (better recursivity)
+        LOGGER.debug("Executing checker: {}", checker);
+        try {
+            DNSLookupContinuation cont = checker.checkSPF(session);
+            handleCont(session, result, cont, checker);
+        } catch (Exception e) {
+            handleError(session, checker, e);
+            result.setSPFResult(session);
+        }
+    }
+
+    private void handleCont(SPFSession session, FutureSPFResult result, DNSLookupContinuation cont, SPFChecker checker) {
+        if (cont != null) {
+            // if the checker returns a continuation we return it
+            dnsProbe.getRecordsAsync(cont.getRequest())
+                .thenAccept(results -> {
+                    try {
+                        DNSLookupContinuation dnsLookupContinuation = cont.getListener().onDNSResponse(new DNSResponse(results), session);
+                        handleCont(session, result, dnsLookupContinuation, checker);
+                    } catch (PermErrorException | NoneException | TempErrorException | NeutralException e) {
+                        handleError(session, checker, e);
+                    }
+                })
+                .exceptionally(e -> {
+                    if (e instanceof TimeoutException) {
+                        handleTimeout(session, checker, cont, (TimeoutException) e);
+                    }
+                    if (e.getCause() instanceof TimeoutException) {
+                        handleTimeout(session, checker, cont, (TimeoutException) e.getCause());
+                    }
+                    result.setSPFResult(session);
+                    return null;
+                });
+        } else {
+            execute(session, result);
+        }
     }
 
     private void handleTimeout(SPFSession session, SPFChecker finalChecker, DNSLookupContinuation cont, TimeoutException e) {
