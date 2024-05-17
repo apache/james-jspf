@@ -19,6 +19,12 @@
 
 package org.apache.james.jspf.executor;
 
+import java.util.Set;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.DNSService;
@@ -31,6 +37,7 @@ import org.apache.james.jspf.core.exceptions.PermErrorException;
 import org.apache.james.jspf.core.exceptions.SPFResultException;
 import org.apache.james.jspf.core.exceptions.TempErrorException;
 import org.apache.james.jspf.core.exceptions.TimeoutException;
+import org.apache.james.jspf.policies.SPFRetriever;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +45,9 @@ import org.slf4j.LoggerFactory;
  * Synchronous implementation of SPFExecuter. All queries will get executed synchronously
  */
 public class AsynchronousSPFExecutor implements SPFExecutor {
+    Set<Class<SPFRetriever>> UN_SUPPORTED_ASYNC_CHECKERS = Stream.of(SPFRetriever.class)
+        .collect(Collectors.toSet());
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AsynchronousSPFExecutor.class);
 
     private DNSService dnsProbe;
@@ -54,13 +64,12 @@ public class AsynchronousSPFExecutor implements SPFExecutor {
         while ((checker = session.popChecker()) != null) {
             // only execute checkers we added (better recursivity)
             LOGGER.debug("Executing checker: {}", checker);
-            SPFChecker finalChecker = checker;
             try {
                 DNSLookupContinuation cont = checker.checkSPF(session);
                 if (cont == null) {
                     continue;
                 }
-                doGetRecordAsync(session, cont, finalChecker);
+                doGetRecord(session, cont, checker);
             } catch (Exception e) {
                 handleError(session, checker, e);
             }
@@ -68,14 +77,14 @@ public class AsynchronousSPFExecutor implements SPFExecutor {
         result.setSPFResult(session);
     }
 
-    private void doGetRecordAsync(SPFSession session, DNSLookupContinuation cont, SPFChecker finalChecker) {
+    private void doGetRecord(SPFSession session, DNSLookupContinuation cont, SPFChecker finalChecker) {
         // if the checker returns a continuation we return it
-        dnsProbe.getRecordsAsync(cont.getRequest())
+        CompletionStage<Void> completionStage = dnsProbe.getRecordsAsync(cont.getRequest())
             .thenAccept(results -> {
                 try {
                     DNSLookupContinuation lookupContinuation = cont.getListener().onDNSResponse(new DNSResponse(results), session);
                     if (lookupContinuation != null) {
-                        doGetRecordAsync(session, lookupContinuation, finalChecker);
+                        doGetRecord(session, lookupContinuation, finalChecker);
                     }
                 } catch (PermErrorException | NoneException | TempErrorException | NeutralException e) {
                     handleError(session, finalChecker, e);
@@ -90,6 +99,14 @@ public class AsynchronousSPFExecutor implements SPFExecutor {
                 }
                 return null;
             });
+
+        if (UN_SUPPORTED_ASYNC_CHECKERS.contains(finalChecker.getClass())) {
+            try {
+                completionStage.toCompletableFuture().get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException("Error while executing async checker", e);
+            }
+        }
     }
 
     private void handleTimeout(SPFSession session, SPFChecker finalChecker, DNSLookupContinuation cont, TimeoutException e) {
