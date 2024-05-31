@@ -25,6 +25,7 @@ import org.apache.james.jspf.core.exceptions.PermErrorException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
+import java.util.function.Predicate;
 
 /**
  * 
@@ -368,6 +369,22 @@ public class SPFSession implements MacroData {
             return checker;
         }
     }
+
+    public SPFChecker popChecker(Predicate<SPFChecker> predicate) {
+        SPFChecker result = null;
+        while (result == null) {
+            if (checkers.isEmpty()) {
+                return null;
+            }
+            SPFChecker checker = checkers.pop();
+            if (predicate.test(checker)) {
+                result = checker;
+            }
+        }
+        return result;
+    }
+
+
 
     /**
      * @param result

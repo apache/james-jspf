@@ -103,16 +103,16 @@ public class AsynchronousSPFExecutor implements SPFExecutor {
 
     private void handleError(SPFSession session, SPFChecker checker, Exception e) {
         while (e != null) {
-            while (checker == null || !(checker instanceof SPFCheckerExceptionCatcher)) {
-                checker = session.popChecker();
+            checker = session.popChecker(c -> c instanceof SPFCheckerExceptionCatcher);
+            if (checker == null) {
+                // Error case not handled by JSPF. Throw to avoid infinite loop. See JSPF-110.
+                throw new RuntimeException(e);
             }
             try {
                 ((SPFCheckerExceptionCatcher) checker).onException(e, session);
                 e = null;
             } catch (SPFResultException ex) {
                 e = ex;
-            } finally {
-                checker = null;
             }
         }
     }
