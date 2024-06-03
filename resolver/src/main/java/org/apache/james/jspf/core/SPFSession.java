@@ -400,4 +400,26 @@ public class SPFSession implements MacroData {
         return currentResultExpanded;
     }
 
+    @Override
+    public String toString() {
+        return "SPFSession{" +
+               "ipAddress='" + ipAddress + '\'' +
+               ", mailFrom='" + mailFrom + '\'' +
+               ", hostName='" + hostName + '\'' +
+               ", currentSenderPart='" + currentSenderPart + '\'' +
+               ", currentDomain='" + currentDomain + '\'' +
+               ", inAddress='" + inAddress + '\'' +
+               ", clientDomain='" + clientDomain + '\'' +
+               ", senderDomain='" + senderDomain + '\'' +
+               ", readableIP='" + readableIP + '\'' +
+               ", receivingDomain='" + receivingDomain + '\'' +
+               ", currentDepth=" + currentDepth +
+               ", explanation='" + explanation + '\'' +
+               ", currentResult='" + currentResult + '\'' +
+               ", ignoreExplanation=" + ignoreExplanation +
+               ", attributes=" + attributes +
+               ", checkers=" + checkers +
+               ", currentResultExpanded='" + currentResultExpanded + '\'' +
+               '}';
+    }
 }
