@@ -106,7 +106,7 @@ public class AsynchronousSPFExecutor implements SPFExecutor {
             checker = session.popChecker(c -> c instanceof SPFCheckerExceptionCatcher);
             if (checker == null) {
                 // Error case not handled by JSPF. Throw to avoid infinite loop. See JSPF-110.
-                throw new RuntimeException(e);
+                throw new RuntimeException("SPFCheckerExceptionCatcher implementation not found, session: " + session, e);
             }
             try {
                 ((SPFCheckerExceptionCatcher) checker).onException(e, session);
