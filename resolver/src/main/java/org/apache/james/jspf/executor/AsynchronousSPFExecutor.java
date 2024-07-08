@@ -19,6 +19,8 @@
 
 package org.apache.james.jspf.executor;
 
+import java.util.ArrayList;
+
 import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.DNSService;
@@ -33,6 +35,7 @@ import org.apache.james.jspf.core.exceptions.TempErrorException;
 import org.apache.james.jspf.core.exceptions.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xbill.DNS.lookup.NoSuchRRSetException;
 
 /**
  * Synchronous implementation of SPFExecuter. All queries will get executed synchronously
@@ -61,7 +64,7 @@ public class AsynchronousSPFExecutor implements SPFExecutor {
             DNSLookupContinuation cont = checker.checkSPF(session);
             handleCont(session, result, cont, checker);
         } catch (Exception e) {
-            handleError(session, checker, e);
+            handleError(session, e);
             result.setSPFResult(session);
         }
     }
@@ -75,15 +78,23 @@ public class AsynchronousSPFExecutor implements SPFExecutor {
                         DNSLookupContinuation dnsLookupContinuation = cont.getListener().onDNSResponse(new DNSResponse(results), session);
                         handleCont(session, result, dnsLookupContinuation, checker);
                     } catch (PermErrorException | NoneException | TempErrorException | NeutralException e) {
-                        handleError(session, checker, e);
+                        handleError(session, e);
                     }
                 })
                 .exceptionally(e -> {
+                    if (e instanceof NoSuchRRSetException || e.getCause() instanceof NoSuchRRSetException) {
+                        try {
+                            DNSLookupContinuation dnsLookupContinuation = cont.getListener().onDNSResponse(new DNSResponse(new ArrayList<>()), session);
+                            handleCont(session, result, dnsLookupContinuation, checker);
+                        } catch (PermErrorException | NoneException | TempErrorException | NeutralException ex2) {
+                            handleError(session, ex2);
+                        }
+                    }
                     if (e instanceof TimeoutException) {
-                        handleTimeout(session, checker, cont, (TimeoutException) e);
+                        handleTimeout(cont, new DNSResponse((TimeoutException) e), session, result, checker);
                     }
                     if (e.getCause() instanceof TimeoutException) {
-                        handleTimeout(session, checker, cont, (TimeoutException) e.getCause());
+                        handleTimeout(cont, new DNSResponse((TimeoutException) e.getCause()), session, result, checker);
                     }
                     result.setSPFResult(session);
                     return null;
@@ -93,17 +104,18 @@ public class AsynchronousSPFExecutor implements SPFExecutor {
         }
     }
 
-    private void handleTimeout(SPFSession session, SPFChecker finalChecker, DNSLookupContinuation cont, TimeoutException e) {
+    private void handleTimeout(DNSLookupContinuation cont, DNSResponse e, SPFSession session, FutureSPFResult result, SPFChecker checker) {
         try {
-            cont.getListener().onDNSResponse(new DNSResponse(e), session);
+            DNSLookupContinuation dnsLookupContinuation = cont.getListener().onDNSResponse(e, session);
+            handleCont(session, result, dnsLookupContinuation, checker);
         } catch (PermErrorException | NoneException | TempErrorException | NeutralException ex2) {
-            handleError(session, finalChecker, ex2);
+            handleError(session, ex2);
         }
     }
 
-    private void handleError(SPFSession session, SPFChecker checker, Exception e) {
+    private void handleError(SPFSession session, Exception e) {
         while (e != null) {
-            checker = session.popChecker(c -> c instanceof SPFCheckerExceptionCatcher);
+            SPFChecker checker = session.popChecker(c -> c instanceof SPFCheckerExceptionCatcher);
             if (checker == null) {
                 // Error case not handled by JSPF. Throw to avoid infinite loop. See JSPF-110.
                 throw new RuntimeException("SPFCheckerExceptionCatcher implementation not found, session: " + session, e);
