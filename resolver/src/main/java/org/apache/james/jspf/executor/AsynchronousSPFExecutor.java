@@ -19,7 +19,9 @@
 
 package org.apache.james.jspf.executor;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.CompletionException;
 
 import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.DNSResponse;
@@ -82,20 +84,30 @@ public class AsynchronousSPFExecutor implements SPFExecutor {
                     }
                 })
                 .exceptionally(e -> {
-                    if (e instanceof NoSuchRRSetException || e.getCause() instanceof NoSuchRRSetException) {
+                    if (e instanceof CompletionException) {
+                        e = e.getCause();
+                    }
+                    if (e instanceof IOException && e.getMessage().startsWith("Timed out ")) {
+                        e = new TimeoutException(e.getMessage());
+                    }
+                    if (e instanceof NoSuchRRSetException) {
                         try {
                             DNSLookupContinuation dnsLookupContinuation = cont.getListener().onDNSResponse(new DNSResponse(new ArrayList<>()), session);
                             handleCont(session, result, dnsLookupContinuation, checker);
+                            result.setSPFResult(session);
+                            return null;
                         } catch (PermErrorException | NoneException | TempErrorException | NeutralException ex2) {
                             handleError(session, ex2);
+                            result.setSPFResult(session);
+                            return null;
                         }
                     }
                     if (e instanceof TimeoutException) {
                         handleTimeout(cont, new DNSResponse((TimeoutException) e), session, result, checker);
+                        result.setSPFResult(session);
+                        return null;
                     }
-                    if (e.getCause() instanceof TimeoutException) {
-                        handleTimeout(cont, new DNSResponse((TimeoutException) e.getCause()), session, result, checker);
-                    }
+                    handleError(session, e);
                     result.setSPFResult(session);
                     return null;
                 });
@@ -113,7 +125,7 @@ public class AsynchronousSPFExecutor implements SPFExecutor {
         }
     }
 
-    private void handleError(SPFSession session, Exception e) {
+    private void handleError(SPFSession session, Throwable e) {
         while (e != null) {
             SPFChecker checker = session.popChecker(c -> c instanceof SPFCheckerExceptionCatcher);
             if (checker == null) {

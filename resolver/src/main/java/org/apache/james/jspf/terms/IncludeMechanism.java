@@ -103,9 +103,9 @@ public class IncludeMechanism implements Mechanism, ConfigurationEnabled, SPFChe
         }
 
         /**
-         * @see org.apache.james.jspf.core.SPFCheckerExceptionCatcher#onException(java.lang.Exception, org.apache.james.jspf.core.SPFSession)
+         * @see org.apache.james.jspf.core.SPFCheckerExceptionCatcher#onException(java.lang.Throwable, org.apache.james.jspf.core.SPFSession)
          */
-        public void onException(Exception exception, SPFSession session)
+        public void onException(Throwable exception, SPFSession session)
                 throws PermErrorException, NoneException,
                 TempErrorException, NeutralException {
             
