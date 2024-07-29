@@ -40,6 +40,6 @@ public interface SPFCheckerExceptionCatcher {
      * @throws TempErrorException
      * @throws NeutralException
      */
-    public void onException(Exception exception, SPFSession session) throws PermErrorException, NoneException, TempErrorException, NeutralException;
+    public void onException(Throwable exception, SPFSession session) throws PermErrorException, NoneException, TempErrorException, NeutralException;
 
 }

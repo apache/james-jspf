@@ -19,24 +19,14 @@
 
 package org.apache.james.jspf;
 
-import static org.junit.Assert.assertEquals;
-
-import org.apache.james.jspf.executor.SPFResult;
 import org.apache.james.jspf.impl.DefaultSPF;
-import org.apache.james.jspf.impl.SPF;
+import org.junit.Assert;
 import org.junit.Test;
 
-public class AsynchronousSPFExecutorIntegrationTest {
-
+public class DefaultSPFResolverTest {
     @Test
-    public void test() {
-        SPF spf = new DefaultSPF();
-        SPFResult result = spf.checkSPF("109.197.176.25", "nico@linagora.com", "linagora.com");
-        System.out.println(result.getResult());
-        System.out.println(result.getExplanation());
-        System.out.println(result.getHeader());
-        assertEquals("pass", result.getResult());
-        assertEquals("Received-SPF: pass (spfCheck: domain of linagora.com designates 109.197.176.25 as permitted sender) client-ip=109.197.176.25; envelope-from=nico@linagora.com; helo=linagora.com;",
-            result.getHeader());
+    public void shouldHandleNotFound() {
+        String spfResult = new DefaultSPF().checkSPF("207.54.72.202","do_not_reply@reyifglerifwukfvbdjhrkbvebvekvfulervkerkeruerbeb.de","reyifglerifwukfvbdjhrkbvebvekvfulervkerkeruerbeb.de").getResult();
+        Assert.assertEquals("neutral", spfResult);
     }
 }
