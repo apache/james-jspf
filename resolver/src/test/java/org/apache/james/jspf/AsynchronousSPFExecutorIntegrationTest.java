@@ -29,18 +29,8 @@ import org.apache.james.jspf.impl.DefaultSPF;
 import org.apache.james.jspf.impl.SPF;
 import org.junit.Test;
 
-import org.xbill.DNS.Resolver;
 import org.xbill.DNS.ExtendedResolver;
 import org.apache.james.jspf.impl.DNSServiceXBillImpl;
-import org.apache.james.jspf.wiring.WiringServiceTable;
-import org.apache.james.jspf.core.MacroExpand;
-import org.apache.james.jspf.core.DNSServiceEnabled;
-import org.apache.james.jspf.core.MacroExpandEnabled;
-import org.apache.james.jspf.impl.DefaultTermsFactory;
-import org.apache.james.jspf.parser.RFC4408SPF1Parser;
-import org.apache.james.jspf.executor.AsynchronousSPFExecutor;
-import org.apache.james.jspf.executor.SPFExecutor;
-import org.apache.james.jspf.core.SPFCheckEnabled;
 
 public class AsynchronousSPFExecutorIntegrationTest {
 
