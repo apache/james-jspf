@@ -39,4 +39,16 @@ public class AsynchronousSPFExecutorIntegrationTest {
         assertEquals("Received-SPF: pass (spfCheck: domain of linagora.com designates 109.197.176.25 as permitted sender) client-ip=109.197.176.25; envelope-from=nico@linagora.com; helo=linagora.com;",
             result.getHeader());
     }
+
+    @Test
+    public void shouldParseWireParseExceptionRecordTruncated() {
+        SPF spf = new DefaultSPF();
+        SPFResult result = spf.checkSPF("170.146.224.15", "HelpDesk@arcofmc.org", "arcofmc.org");
+        System.out.println(result.getResult());
+        System.out.println(result.getExplanation());
+        System.out.println(result.getHeader());
+        assertEquals("permerror", result.getResult());
+        assertEquals("Received-SPF: permerror (spfCheck: Error in processing SPF Record) client-ip=170.146.224.15; envelope-from=HelpDesk@arcofmc.org; helo=arcofmc.org;",
+            result.getHeader());
+    }
 }
