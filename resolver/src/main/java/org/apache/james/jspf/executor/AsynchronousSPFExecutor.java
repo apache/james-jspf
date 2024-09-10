@@ -38,6 +38,7 @@ import org.apache.james.jspf.core.exceptions.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xbill.DNS.lookup.NoSuchRRSetException;
+import org.xbill.DNS.WireParseException;
 
 /**
  * Synchronous implementation of SPFExecuter. All queries will get executed synchronously
@@ -90,7 +91,16 @@ public class AsynchronousSPFExecutor implements SPFExecutor {
                     if (e instanceof IOException && e.getMessage().startsWith("Timed out ")) {
                         e = new TimeoutException(e.getMessage());
                     }
-                    if (e instanceof NoSuchRRSetException) {
+
+                    /**
+                     * When exceptions occur trying to resolve the DNS response, we must do some clean
+                     * up handling or the request will end up hanging.
+                     * 
+                     * NOTE — The org.xbill.DNS.WireParseException gets triggered if the SPF record is truncated
+                     *        due to too many lookups. There might be other types of DNS exceptions that need
+                     *        to be caught as well.
+                     */
+                    if ((e instanceof NoSuchRRSetException) || (e instanceof WireParseException)) {
                         try {
                             DNSLookupContinuation dnsLookupContinuation = cont.getListener().onDNSResponse(new DNSResponse(new ArrayList<>()), session);
                             handleCont(session, result, dnsLookupContinuation, checker);
