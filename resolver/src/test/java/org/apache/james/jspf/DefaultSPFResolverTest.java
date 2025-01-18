@@ -25,8 +25,13 @@ import org.junit.Test;
 
 public class DefaultSPFResolverTest {
     @Test
-    public void shouldHandleNotFound() {
+    public void shouldHandleDomainNotFound() {
         String spfResult = new DefaultSPF().checkSPF("207.54.72.202","do_not_reply@reyifglerifwukfvbdjhrkbvebvekvfulervkerkeruerbeb.de","reyifglerifwukfvbdjhrkbvebvekvfulervkerkeruerbeb.de").getResult();
+        Assert.assertEquals("none", spfResult);
+    }
+    @Test
+    public void shouldHandleSPFNotFound() {
+        String spfResult = new DefaultSPF().checkSPF("207.54.72.202","do_not_reply@de","de").getResult();
         Assert.assertEquals("none", spfResult);
     }
 }

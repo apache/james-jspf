@@ -19,8 +19,6 @@
 
 package org.apache.james.jspf;
 
-import static org.junit.Assert.assertEquals;
-
 import org.apache.james.jspf.executor.SPFResult;
 import org.apache.james.jspf.impl.DefaultSPF;
 import org.apache.james.jspf.impl.SPF;
@@ -31,7 +29,9 @@ import org.xbill.DNS.SimpleResolver;
 
 import java.net.UnknownHostException;
 
-public class AsynchronousSPFExecutorIntegrationTest {
+import static org.junit.Assert.assertEquals;
+
+public class SynchronousSPFExecutorIntegrationTest {
     @BeforeClass
     public static void setup() {
         System.out.println("Setting default resolver");
@@ -44,7 +44,7 @@ public class AsynchronousSPFExecutorIntegrationTest {
 
     @Test
     public void test() {
-        SPF spf = DefaultSPF.createAsync();
+        SPF spf = DefaultSPF.createSync();
         SPFResult result = spf.checkSPF("109.197.176.25", "nico@linagora.com", "linagora.com");
         System.out.println(result.getResult());
         System.out.println(result.getExplanation());
@@ -56,7 +56,7 @@ public class AsynchronousSPFExecutorIntegrationTest {
 
     @Test
     public void shouldHandleDomainNotFound() {
-        SPF spf = DefaultSPF.createAsync();
+        SPF spf = DefaultSPF.createSync();
         SPFResult result = spf.checkSPF("207.54.72.202","do_not_reply@reyifglerifwukfvbdjhrkbvebvekvfulervkerkeruerbeb.de","reyifglerifwukfvbdjhrkbvebvekvfulervkerkeruerbeb.de");
         System.out.println(result.getResult());
         System.out.println(result.getExplanation());
@@ -66,7 +66,7 @@ public class AsynchronousSPFExecutorIntegrationTest {
 
     @Test
     public void shouldHandleSPFNotFound() {
-        SPF spf = DefaultSPF.createAsync();
+        SPF spf = DefaultSPF.createSync();
         SPFResult result = spf.checkSPF("207.54.72.202","do_not_reply@de","de");
         System.out.println(result.getResult());
         System.out.println(result.getExplanation());
