@@ -22,7 +22,6 @@ package org.apache.james.jspf.impl;
 
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.concurrent.CompletableFuture;
 
 import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.DNSService;
@@ -46,7 +45,6 @@ import org.apache.james.jspf.executor.AsynchronousSPFExecutor;
 import org.apache.james.jspf.executor.FutureSPFResult;
 import org.apache.james.jspf.executor.SPFExecutor;
 import org.apache.james.jspf.executor.SPFResult;
-import org.apache.james.jspf.executor.SynchronousSPFExecutor;
 import org.apache.james.jspf.parser.RFC4408SPF1Parser;
 import org.apache.james.jspf.policies.InitialChecksPolicy;
 import org.apache.james.jspf.policies.NeutralIfNotMatchPolicy;
@@ -64,6 +62,7 @@ import org.apache.james.jspf.policies.local.TrustedForwarderPolicy;
 import org.apache.james.jspf.wiring.WiringServiceTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xbill.DNS.lookup.NoSuchDomainException;
 
 /**
  * This class is used to generate a SPF-Test and provided all intressting data.
@@ -266,6 +265,9 @@ public class SPF implements SPFChecker {
                 if (!SPFErrorConstants.NEUTRAL_CONV.equals(result)) {
                     LOGGER.warn(exception.getMessage(),exception);
                 }
+            } else if(exception instanceof NoSuchDomainException) {
+                LOGGER.error(exception.getMessage(), exception);
+                result = SPFErrorConstants.NONE_CONV;
             } else {
                 // this should never happen at all. But anyway we will set the
                 // result to neutral. Safety first ..
