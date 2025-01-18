@@ -27,6 +27,6 @@ public class DefaultSPFResolverTest {
     @Test
     public void shouldHandleNotFound() {
         String spfResult = new DefaultSPF().checkSPF("207.54.72.202","do_not_reply@reyifglerifwukfvbdjhrkbvebvekvfulervkerkeruerbeb.de","reyifglerifwukfvbdjhrkbvebvekvfulervkerkeruerbeb.de").getResult();
-        Assert.assertEquals("neutral", spfResult);
+        Assert.assertEquals("none", spfResult);
     }
 }
