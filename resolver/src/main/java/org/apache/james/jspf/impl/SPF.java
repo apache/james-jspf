@@ -41,10 +41,10 @@ import org.apache.james.jspf.core.exceptions.PermErrorException;
 import org.apache.james.jspf.core.exceptions.SPFErrorConstants;
 import org.apache.james.jspf.core.exceptions.SPFResultException;
 import org.apache.james.jspf.core.exceptions.TempErrorException;
-import org.apache.james.jspf.executor.AsynchronousSPFExecutor;
 import org.apache.james.jspf.executor.FutureSPFResult;
 import org.apache.james.jspf.executor.SPFExecutor;
 import org.apache.james.jspf.executor.SPFResult;
+import org.apache.james.jspf.executor.SynchronousSPFExecutor;
 import org.apache.james.jspf.parser.RFC4408SPF1Parser;
 import org.apache.james.jspf.policies.InitialChecksPolicy;
 import org.apache.james.jspf.policies.NeutralIfNotMatchPolicy;
@@ -65,7 +65,7 @@ import org.slf4j.LoggerFactory;
 import org.xbill.DNS.lookup.NoSuchDomainException;
 
 /**
- * This class is used to generate a SPF-Test and provided all intressting data.
+ *  An {@link SPFChecker} implementation to start the SPF record validation.
  */
 public class SPF implements SPFChecker {
     private static final Logger LOGGER = LoggerFactory.getLogger(SPF.class);
@@ -202,13 +202,18 @@ public class SPF implements SPFChecker {
     private SPFExecutor executor;
 
     /**
-     * Uses passed logger and passed dnsServicer
-     * 
-     * @param dnsProbe the dns provider
+     * Creates an instance with the provided dnsService and executor.
+     *
+     * @param dnsService    the dns provider
+     * @param spfExecutor   the {@link SPFExecutor}
+     * @see DNSServiceXBillImpl
+     * @see org.apache.james.jspf.executor.AsynchronousSPFExecutor
+     * @see SynchronousSPFExecutor
      */
-    public SPF(DNSService dnsProbe) {
+    public SPF(DNSService dnsService, SPFExecutor spfExecutor) {
         super();
-        this.dnsProbe = dnsProbe;
+        this.dnsProbe = dnsService;
+        this.executor = spfExecutor;
         WiringServiceTable wiringService = new WiringServiceTable();
         wiringService.put(DNSServiceEnabled.class, this.dnsProbe);
         this.macroExpand = new MacroExpand(this.dnsProbe);
@@ -216,15 +221,29 @@ public class SPF implements SPFChecker {
         this.parser = new RFC4408SPF1Parser(new DefaultTermsFactory(wiringService));
         // We add this after the parser creation because services cannot be null
         wiringService.put(SPFCheckEnabled.class, this);
-        this.executor = new AsynchronousSPFExecutor(dnsProbe);
     }
-    
-    
+
+    /**
+     * Creates an instances with the provided DNSService and a SynchronousSPFExecutor
+     *
+     * @see DNSServiceXBillImpl
+     * @param dnsService the dns service
+     */
+    public SPF(DNSService dnsService) {
+        this(dnsService, new SynchronousSPFExecutor(dnsService));
+    }
+
     /**
      * Uses passed services
-     * 
+     *
+     * @see DNSServiceXBillImpl
+     * @see org.apache.james.jspf.executor.AsynchronousSPFExecutor
+     * @see SynchronousSPFExecutor
+     * @see RFC4408SPF1Parser
      * @param dnsProbe the dns provider
      * @param parser the parser to use
+     * @param macroExpand a {@link MacroExpand} instance
+     * @param executor an executor
      */
     public SPF(DNSService dnsProbe, SPFRecordParser parser, MacroExpand macroExpand, SPFExecutor executor) {
         super();

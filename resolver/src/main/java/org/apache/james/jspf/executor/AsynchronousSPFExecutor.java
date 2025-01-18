@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 import org.xbill.DNS.lookup.NoSuchRRSetException;
 
 /**
- * Synchronous implementation of SPFExecuter. All queries will get executed synchronously
+ * Asynchronous implementation of SPFExecutor. All queries will get executed asynchronously
  */
 public class AsynchronousSPFExecutor implements SPFExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(AsynchronousSPFExecutor.class);
