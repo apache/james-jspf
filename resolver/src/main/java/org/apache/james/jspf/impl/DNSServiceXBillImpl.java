@@ -187,7 +187,7 @@ public class DNSServiceXBillImpl implements DNSService {
                 throw new IllegalArgumentException();
         }
         LOGGER.debug("Start {}-Record lookup for : {}", recordTypeDescription, request.getHostname());
-        final LookupSession lookupSession = LookupSession.defaultBuilder().build();
+        final LookupSession lookupSession = LookupSession.defaultBuilder().resolver(this.resolver).build();
 
         try {
             return lookupSession.lookupAsync(Name.fromString(request.getHostname()), dnsJavaType)
