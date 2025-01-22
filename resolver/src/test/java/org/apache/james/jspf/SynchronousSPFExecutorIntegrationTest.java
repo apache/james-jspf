@@ -19,15 +19,20 @@
 
 package org.apache.james.jspf;
 
+import org.apache.james.jspf.executor.AsynchronousSPFExecutor;
 import org.apache.james.jspf.executor.SPFResult;
+import org.apache.james.jspf.executor.SynchronousSPFExecutor;
+import org.apache.james.jspf.impl.DNSServiceXBillImpl;
 import org.apache.james.jspf.impl.DefaultSPF;
 import org.apache.james.jspf.impl.SPF;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xbill.DNS.Lookup;
+import org.xbill.DNS.Resolver;
 import org.xbill.DNS.SimpleResolver;
 
 import java.net.UnknownHostException;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static org.junit.Assert.assertEquals;
 
@@ -72,5 +77,22 @@ public class SynchronousSPFExecutorIntegrationTest {
         System.out.println(result.getExplanation());
         System.out.println(result.getHeader());
         assertEquals("none", result.getResult());
+    }
+
+    @Test
+    public void shouldReturnTempErrorOnPortUnreachable() throws UnknownHostException {
+        Resolver simpleResolver = new SimpleResolver("127.0.0.1");
+        simpleResolver.setPort(ThreadLocalRandom.current().nextInt(55000, 56000));
+
+        DNSServiceXBillImpl dns = new DNSServiceXBillImpl(simpleResolver);
+
+        SPF spf = new SPF(dns, new SynchronousSPFExecutor(dns));
+        SPFResult result = spf.checkSPF("207.54.72.202",
+                "do_not_reply@reyifglerifwukfvbdjhrkbvebvekvfulervkerkeruerbeb.de",
+                "reyifglerifwukfvbdjhrkbvebvekvfulervkerkeruerbeb.de");
+        System.out.println(result.getResult());
+        System.out.println(result.getExplanation());
+        System.out.println(result.getHeader());
+        assertEquals("temperror", result.getResult());
     }
 }
