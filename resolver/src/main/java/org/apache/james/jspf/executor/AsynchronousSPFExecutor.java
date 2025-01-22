@@ -84,10 +84,10 @@ public class AsynchronousSPFExecutor implements SPFExecutor {
                     }
                 })
                 .exceptionally(e -> {
-                    if (e instanceof CompletionException) {
+                    if (e instanceof CompletionException && e.getCause() != null) {
                         e = e.getCause();
                     }
-                    if (e instanceof IOException && e.getMessage().startsWith("Timed out ")) {
+                    if (e instanceof IOException && e.getMessage() != null && e.getMessage().startsWith("Timed out ")) {
                         e = new TimeoutException(e.getMessage());
                     }
                     if (e instanceof NoSuchRRSetException) {
