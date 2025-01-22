@@ -67,7 +67,7 @@ public class SynchronousSPFExecutorIntegrationTest {
     @Test
     public void shouldHandleSPFNotFound() {
         SPF spf = DefaultSPF.createSync();
-        SPFResult result = spf.checkSPF("207.54.72.202","do_not_reply@de","de");
+        SPFResult result = spf.checkSPF("207.54.72.202","do_not_reply@com.br","com.br");
         System.out.println(result.getResult());
         System.out.println(result.getExplanation());
         System.out.println(result.getHeader());
