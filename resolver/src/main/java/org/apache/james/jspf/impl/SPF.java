@@ -20,6 +20,7 @@
 
 package org.apache.james.jspf.impl;
 
+import java.net.SocketException;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -287,6 +288,10 @@ public class SPF implements SPFChecker {
             } else if(exception instanceof NoSuchDomainException) {
                 LOGGER.error(exception.getMessage(), exception);
                 result = SPFErrorConstants.NONE_CONV;
+            } else if (exception instanceof SocketException) {
+                //SocketException or PortUnreachableException can be caused by a temporary issue
+                LOGGER.error(exception.getMessage(), exception);
+                result = SPFErrorConstants.TEMP_ERROR_CONV;
             } else {
                 // this should never happen at all. But anyway we will set the
                 // result to neutral. Safety first ..
