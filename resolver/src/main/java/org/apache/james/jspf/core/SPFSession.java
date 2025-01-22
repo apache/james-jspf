@@ -46,7 +46,7 @@ public class SPFSession implements MacroData {
 
     private String currentDomain = ""; // (d)<current-domain>
 
-    private String inAddress = "in-addr"; // (v)
+    private String inAddress = "invalid"; // (v)
 
     private String clientDomain = null; // (p)
 
