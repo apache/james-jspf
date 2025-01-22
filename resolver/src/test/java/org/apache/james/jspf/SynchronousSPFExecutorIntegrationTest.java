@@ -25,8 +25,10 @@ import org.apache.james.jspf.executor.SynchronousSPFExecutor;
 import org.apache.james.jspf.impl.DNSServiceXBillImpl;
 import org.apache.james.jspf.impl.DefaultSPF;
 import org.apache.james.jspf.impl.SPF;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xbill.DNS.DClass;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Resolver;
 import org.xbill.DNS.SimpleResolver;
@@ -45,6 +47,11 @@ public class SynchronousSPFExecutorIntegrationTest {
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Before
+    public void clearDnsCache() {
+        Lookup.getDefaultCache(DClass.IN).clearCache();
     }
 
     @Test
