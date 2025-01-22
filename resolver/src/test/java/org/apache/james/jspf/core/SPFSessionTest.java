@@ -19,19 +19,47 @@
 
 package org.apache.james.jspf.core;
 
-import org.apache.james.jspf.core.exceptions.NoneException;
-import org.apache.james.jspf.core.exceptions.PermErrorException;
+import org.junit.Test;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
 
-public class SPFSessionTest extends TestCase {
-
-    /*
-     * Test method for 'org.apache.james.jspf.core.SPF1Data.getMacroIpAddress()'
-     */
-    public void testGetMacroIpAddress() throws PermErrorException, NoneException {
+public class SPFSessionTest {
+    @Test
+    public void testGetMacroIpAddress() {
         SPFSession d = new SPFSession("mailfrom@fromdomain.com","helodomain.com","2001:DB8::CB01");
         assertEquals("2.0.0.1.0.D.B.8.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.C.B.0.1",d.getMacroIpAddress());
     }
 
+    @Test
+    public void shouldReturnInvalidIP6() {
+        String addr = "2001:db8::644:f:f:f:x";
+        SPFSession spfSession = new SPFSession("", "", addr);
+        assertEquals("invalid", spfSession.getInAddress());
+    }
+
+    @Test
+    public void shouldReturnInvalidIP4() {
+        String addr = "192.168.0.256";
+        SPFSession spfSession = new SPFSession("", "", addr);
+        assertEquals("invalid", spfSession.getInAddress());
+    }
+
+    @Test
+    public void shouldReturnValidIP6() {
+        String addr = "2001:db8::644:f:f:f:1";
+        SPFSession spfSession = new SPFSession("", "", addr);
+        assertEquals("ip6", spfSession.getInAddress());
+    }
+
+    @Test
+    public void shouldReturnIPv4Mapped() {
+        SPFSession spfSession = new SPFSession("", "", "::ffff:192.168.1.1");
+        assertEquals("ip6", spfSession.getInAddress());
+    }
+
+    @Test
+    public void shouldReturnIPv4() {
+        SPFSession spfSession = new SPFSession("", "", "192.168.1.1");
+        assertEquals("in-addr", spfSession.getInAddress());
+    }
 }
