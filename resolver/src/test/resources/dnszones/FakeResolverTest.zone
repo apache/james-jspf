@@ -1,0 +1,17 @@
+$TTL 30
+@   30    IN    SOA    ns1.fakeresolver.test. hostmaster.fakeresolver.test. 1 30 30 30 30
+@   30    IN    NS     ns1
+ns1                                IN   A 192.0.2.2
+
+shouldResolveTXT                   IN    TXT      "v=spf1 ip4:192.0.2.127 -all"
+shouldResolveTXT                   IN    TXT      "lkjdslkhkjlahljkjkasdhfklsdf"
+shouldResolveA                     IN    A        192.0.2.128
+shouldResolveMX                    IN    MX 10    shouldResolveExternallyCNAME
+shouldResolveExternallyCNAME       IN    CNAME    www.example.com.
+
+shouldResolveNS                    IN   NS        shouldResolveNS.ns1
+shouldResolveNS                    IN   NS        shouldResolveNS.ns2
+shouldResolveNS                    IN   NS        shouldResolveNS.ns3
+shouldResolveNS.ns1                IN   A         192.0.2.11
+shouldResolveNS.ns2                IN   A         192.0.2.12
+shouldResolveNS.ns3                IN   A         192.0.2.13
