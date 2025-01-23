@@ -21,61 +21,56 @@
 package org.apache.james.jspf;
 
 import org.apache.james.jspf.impl.DNSServiceXBillImpl;
+import org.junit.Test;
 import org.xbill.DNS.DClass;
-import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.SPFRecord;
 import org.xbill.DNS.TXTRecord;
-import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
 
-import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.List;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
-public class DNSServiceXBillImplTest extends TestCase {
-
-    protected void setUp() throws Exception {
-        super.setUp();
+public class DNSServiceXBillImplTest {
+    @Test
+    public void testGetLocalDomainNames() throws UnknownHostException {
+        assertFalse(new DNSServiceXBillImpl().getLocalDomainNames().isEmpty());
     }
 
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
-    /*
-     * Test method for
-     * 'org.apache.james.jspf.DNSServiceXBillImpl.getLocalDomainNames()'
-     */
-    public void testGetLocalDomainNames() throws UnknownHostException,
-            TextParseException {
-        // This write MACHINE-NAME/MACHINE-ADDRESS
-        System.out.println(InetAddress.getLocalHost());
-        // THIS WRITE localhost/127.0.0.1
-        System.out.println(InetAddress.getAllByName(null)[0]);
-        // THIS WRITE a fully qualified MACHINE-NAME.MACHINE-DOMAIN
-        System.out.println(InetAddress.getLocalHost().getCanonicalHostName());
-        // THIS WRITE localhost
-        System.out.println(InetAddress.getAllByName(null)[0]
-                .getCanonicalHostName());
-        Record[] record = new Lookup(Name.root, Type.ANY).run();
-        if (record !=null) System.out.println(record[0]);
-    }
-    
+    @Test
     public void testMultipleStrings() throws Exception {
-        Record[] rr = new Record[] { TXTRecord.fromString(Name.fromString("test.local."), Type.TXT, DClass.IN, 0, "\"string \" \"concatenated\"", Name.fromString("local.")) };
-        assertEquals("string concatenated", DNSServiceXBillImpl.convertRecordsToList(rr).get(0));
+        Record[] rr = new Record[]{
+                TXTRecord.fromString(Name.fromString("test.local."),
+                        Type.TXT, DClass.IN, 0, "\"string \" \"concatenated\"", Name.fromString("local."))};
+        List<String> records = DNSServiceXBillImpl.convertRecordsToList(rr);
+        assertNotNull(records);
+        assertEquals("string concatenated", records.get(0));
 
-        rr = new Record[] { TXTRecord.fromString(Name.fromString("test.local."), Type.TXT, DClass.IN, 0, "string", Name.fromString("local.")) };
-        assertEquals("string", DNSServiceXBillImpl.convertRecordsToList(rr).get(0));
+        rr = new Record[]{
+                TXTRecord.fromString(Name.fromString("test.local."),
+                        Type.TXT, DClass.IN, 0, "string", Name.fromString("local."))};
+        records = DNSServiceXBillImpl.convertRecordsToList(rr);
+        assertNotNull(records);
+        assertEquals("string", records.get(0));
 
-        rr = new Record[] { TXTRecord.fromString(Name.fromString("test.local."), Type.TXT, DClass.IN, 0, "\"quoted string\"", Name.fromString("local.")) };
-        assertEquals("quoted string", DNSServiceXBillImpl.convertRecordsToList(rr).get(0));
+        rr = new Record[]{
+                TXTRecord.fromString(Name.fromString("test.local."),
+                        Type.TXT, DClass.IN, 0, "\"quoted string\"", Name.fromString("local."))};
+        records = DNSServiceXBillImpl.convertRecordsToList(rr);
+        assertNotNull(records);
+        assertEquals("quoted string", records.get(0));
 
-        rr = new Record[] { SPFRecord.fromString(Name.fromString("test.local."), Type.SPF, DClass.IN, 0, "\"quot\" \"ed st\" \"ring\"", Name.fromString("local.")) };
-        assertEquals("quoted string", DNSServiceXBillImpl.convertRecordsToList(rr).get(0));
+        rr = new Record[]{
+                SPFRecord.fromString(Name.fromString("test.local."),
+                        Type.SPF, DClass.IN, 0, "\"quot\" \"ed st\" \"ring\"", Name.fromString("local."))};
+        records = DNSServiceXBillImpl.convertRecordsToList(rr);
+        assertNotNull(records);
+        assertEquals("quoted string", records.get(0));
     }
 
 }
