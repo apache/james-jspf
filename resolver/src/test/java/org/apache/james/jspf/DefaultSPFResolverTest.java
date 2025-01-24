@@ -19,21 +19,19 @@
 
 package org.apache.james.jspf;
 
-import org.apache.james.jspf.executor.SPFResult;
+import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.impl.DefaultSPF;
-import org.junit.Assert;
-import org.junit.Before;
+import org.apache.james.jspf.impl.SPF;
 import org.junit.BeforeClass;
-import org.junit.Test;
-import org.xbill.DNS.DClass;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.SimpleResolver;
 
 import java.net.UnknownHostException;
 
-import static org.junit.Assert.assertEquals;
-
-public class DefaultSPFResolverTest {
+/**
+ * Class to run the tests using the default executor returned by {@link SPF} and {@link DefaultSPF}
+ */
+public class DefaultSPFResolverTest extends SPFExecutorBaseTest {
     @BeforeClass
     public static void setup() {
         // set default resolver before the tests to avoid errors caused by previous tests
@@ -44,27 +42,13 @@ public class DefaultSPFResolverTest {
         }
     }
 
-    @Before
-    public void clearDnsCache() {
-        Lookup.getDefaultCache(DClass.IN).clearCache();
+    @Override
+    protected SPF createSPF() {
+        return new DefaultSPF();
     }
 
-    @Test
-    public void shouldHandleDomainNotFound() {
-        SPFResult spfResult = new DefaultSPF().checkSPF("207.54.72.202",
-                "do_not_reply@reyifglerifwukfvbdjhrkbvebvekvfulervkerkeruerbeb.de",
-                "reyifglerifwukfvbdjhrkbvebvekvfulervkerkeruerbeb.de");
-        assertEquals("none", spfResult.getResult());
-        assertEquals("Received-SPF: none (spfCheck: 207.54.72.202 is neither permitted nor denied by domain of reyifglerifwukfvbdjhrkbvebvekvfulervkerkeruerbeb.de) client-ip=207.54.72.202; envelope-from=do_not_reply@reyifglerifwukfvbdjhrkbvebvekvfulervkerkeruerbeb.de; helo=reyifglerifwukfvbdjhrkbvebvekvfulervkerkeruerbeb.de;",
-                spfResult.getHeader());
-    }
-
-    @Test
-    public void shouldHandleSPFNotFound() {
-        SPFResult spfResult = new DefaultSPF().checkSPF("207.54.72.202",
-                "do_not_reply@com.br", "com.br");
-        assertEquals("none", spfResult.getResult());
-        assertEquals("Received-SPF: none (spfCheck: 207.54.72.202 is neither permitted nor denied by domain of com.br) client-ip=207.54.72.202; envelope-from=do_not_reply@com.br; helo=com.br;",
-                spfResult.getHeader());
+    @Override
+    protected SPF createCustomSPF(DNSService dnsService) {
+        return new SPF(dnsService);
     }
 }
