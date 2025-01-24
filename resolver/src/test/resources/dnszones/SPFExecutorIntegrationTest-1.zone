@@ -1,0 +1,12 @@
+$TTL 30
+@   30    IN    SOA    ns1.fakeresolver.apache. hostmaster.fakeresolver.apache. 1 30 30 30 30
+@   30    IN    NS     ns1
+
+shouldReturnErrorIfMoreThanOneTxtSpf1Record         IN    TXT   "v=spf1 ip4:192.0.2.162 -all"
+shouldReturnErrorIfMoreThanOneTxtSpf1Record         IN    TXT   "v=spf1 ip4:192.0.2.127 ip4:1.1.1.1 -all"
+
+shouldReturnPassIfJustOneTxtSpf1Record              IN    TXT   "v=spf1 include:_spf.google.com include:spf.protection.outlook.com ip4:2.3.4.5 ip4:192.0.2.127 -all"
+
+shouldReturnPermErrorIfIncludeDomainNotFound        IN    TXT   "v=spf1 ip4:4.3.2.1 include:unknownDomain.fake -all"
+
+shouldReturnPassIfMultipleStrings                 IN    TXT   "v=spf1 mx a ip4:192.0.2.127 ip4:4.3.2.1 ip4:4.3.2.1 ip4:4.3.2.1 ip4:4.3.2.1 ip4:4.3.2.1 ip4:4.3.2.1 ip4:4.3.2.1 ip4:4.3.2.1 ip4:4.3.2.1 ip4:4.3.2.1 ip4:4.3.2.1 ip4:4.3.2.1 ip4:4.3.2.1 ip4:4.3.2.1 ip4:4.3.2.1 ip4:4.3.2.1 ip4:4.3.2.1 ip4:4.3.2.1" " ip4:4.3.2.1 -all"
