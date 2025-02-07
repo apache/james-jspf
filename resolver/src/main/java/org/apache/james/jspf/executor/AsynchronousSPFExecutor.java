@@ -138,6 +138,8 @@ public class AsynchronousSPFExecutor implements SPFExecutor {
                 e = null;
             } catch (SPFResultException ex) {
                 e = ex;
+            } catch (Exception ex) {
+                LOGGER.error("Error: ", ex);
             }
         }
     }
