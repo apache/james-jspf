@@ -37,7 +37,7 @@ import org.apache.james.jspf.core.exceptions.TempErrorException;
 import org.apache.james.jspf.core.exceptions.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xbill.DNS.lookup.NoSuchRRSetException;
+import org.xbill.DNS.lookup.LookupFailedException;
 
 /**
  * Asynchronous implementation of SPFExecutor. All queries will get executed asynchronously
@@ -91,7 +91,7 @@ public class AsynchronousSPFExecutor implements SPFExecutor {
                     if (e instanceof IOException && e.getMessage() != null && e.getMessage().startsWith("Timed out ")) {
                         e = new TimeoutException(e.getMessage());
                     }
-                    if (e instanceof NoSuchRRSetException) {
+                    if (e instanceof LookupFailedException) {
                         try {
                             DNSLookupContinuation dnsLookupContinuation = cont.getListener().onDNSResponse(new DNSResponse(new ArrayList<>()), session);
                             handleCont(session, result, dnsLookupContinuation, checker);
