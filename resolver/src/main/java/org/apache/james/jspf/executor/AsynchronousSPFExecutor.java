@@ -81,6 +81,7 @@ public class AsynchronousSPFExecutor implements SPFExecutor {
                         handleCont(session, result, dnsLookupContinuation, checker);
                     } catch (PermErrorException | NoneException | TempErrorException | NeutralException e) {
                         handleError(session, e);
+                        result.setSPFResult(session);
                     }
                 })
                 .exceptionally(e -> {
