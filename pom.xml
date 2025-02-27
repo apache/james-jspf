@@ -29,7 +29,7 @@
 
     <groupId>org.apache.james</groupId>
     <artifactId>apache-jspf-project</artifactId>
-    <version>1.0.5</version>
+    <version>1.0.5-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Apache JAMES jSPF</name>
@@ -47,7 +47,7 @@
         <connection>scm:git:http://git-wip-us.apache.org/repos/asf/james-jspf.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/apache/james-jspf.git</developerConnection>
         <url>https://git-wip-us.apache.org/repos/asf/james-jspf.git</url>
-      <tag>apache-jspf-project-1.0.5</tag>
+      <tag>HEAD</tag>
   </scm>
     <issueManagement>
         <system>JIRA</system>
