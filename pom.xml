@@ -66,7 +66,7 @@
 
         <!-- Override the source descriptor -->
         <sourceReleaseAssemblyDescriptor>src</sourceReleaseAssemblyDescriptor>
-        <target.jdk>1.8</target.jdk>
+        <target.jdk>11</target.jdk>
     </properties>
 
     <dependencyManagement>
