@@ -50,6 +50,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 
 public class FakeResolverTest {
     private static final Logger logger = LoggerFactory.getLogger(FakeResolverTest.class);
@@ -117,6 +118,7 @@ public class FakeResolverTest {
 
     @Test
     public void shouldMatchResolvedTXT() throws IOException {
+        assumeFalse("No reachable external name for TXT, skipping", externalNameTXT.isEmpty());
         recordsMatch(Name.fromString(externalNameTXT), Type.TXT);
     }
 
@@ -135,6 +137,7 @@ public class FakeResolverTest {
 
     @Test
     public void shouldMatchResolvedMX() throws IOException {
+        assumeFalse("No reachable external name for MX, skipping", externalNameMX.isEmpty());
         recordsMatch(Name.fromString(externalNameMX), Type.MX);
     }
 
@@ -158,6 +161,7 @@ public class FakeResolverTest {
 
     @Test
     public void shouldMatchResolvedNS() throws IOException {
+        assumeFalse("No reachable external name for NS, skipping", externalNameNS.isEmpty());
         recordsMatch(Name.fromString(externalNameNS), Type.NS);
     }
 
@@ -175,21 +179,25 @@ public class FakeResolverTest {
 
     @Test
     public void shouldMatchResolvedCNAME() throws IOException {
+        assumeFalse("No reachable external name for CNAME, skipping", externalNameCNAME.isEmpty());
         recordsMatch(Name.fromString(externalNameCNAME), Type.CNAME);
     }
 
     @Test
     public void shouldMatchResolvedA() throws IOException {
+        assumeFalse("No reachable external name for A, skipping", externalNameA.isEmpty());
         recordsMatch(Name.fromString(externalNameA), Type.A);
     }
 
     @Test
     public void shouldMatchResolvedAAAA() throws IOException {
+        assumeFalse("No reachable external name for AAAA, skipping", externalNameAAAA.isEmpty());
         recordsMatch(Name.fromString(externalNameAAAA), Type.AAAA);
     }
 
     @Test
     public void shouldResolveExternallyLegacy() throws IOException {
+        assumeFalse("No reachable external name for CNAME, skipping", externalNameCNAME.isEmpty());
         String domain = "fakeresolver.zone";
         FakeResolver fakeResolver = new FakeResolver(new SimpleResolver());
         fakeResolver.fromZoneFile(domain, DNSZONEFILE);
