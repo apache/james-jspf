@@ -88,6 +88,12 @@ public class SPFSession implements MacroData {
      */
     public SPFSession(String mailFrom, String heloDomain, String clientIP) {
         super();
+        if (containsCRLF(mailFrom)) {
+            throw new IllegalArgumentException("mailFrom must not contain CR or LF characters");
+        }
+        if (containsCRLF(heloDomain)) {
+            throw new IllegalArgumentException("heloDomain must not contain CR or LF characters");
+        }
         this.mailFrom = mailFrom.trim();
         this.hostName = heloDomain.trim();
        
@@ -398,6 +404,10 @@ public class SPFSession implements MacroData {
      */
     public String getCurrentResultExpanded() {
         return currentResultExpanded;
+    }
+
+    private static boolean containsCRLF(String s) {
+        return s.indexOf('\r') >= 0 || s.indexOf('\n') >= 0;
     }
 
     @Override

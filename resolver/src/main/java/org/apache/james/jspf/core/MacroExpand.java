@@ -239,6 +239,9 @@ public class MacroExpand {
         }
         
         String domainName = expandMacroString(input, macroData, false);
+        if (domainName.indexOf('\r') >= 0 || domainName.indexOf('\n') >= 0) {
+            throw new PermErrorException("Macro-expanded domain contains illegal CR or LF characters");
+        }
         // reduce to less than 255 characters, deleting subdomains from left
         int split = 0;
         while (domainName.length() > 255 && split > -1) {
