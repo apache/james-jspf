@@ -1,0 +1,5 @@
+= Frequently asked questions
+
+== Can I run jSPF from the command line?
+
+Sure you can. Just enter `java -jar jspf-xxx.jar` to get the usage.

@@ -1,0 +1,6 @@
+* xref:index.adoc[Overview]
+* xref:faq.adoc[jSPF FAQ]
+* xref:rfclist.adoc[Useful RFCs]
+* xref:code-standards.adoc[Coding standards]
+* https://issues.apache.org/jira/browse/JSPF[Issue Tracker]
+* https://james.apache.org/download.cgi#Apache_jSPF[Download Releases]

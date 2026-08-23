@@ -1,4 +1,73 @@
-= Apache James jSPF documentation
+= Apache James jSPF
 
+== What is it?
 
-TODO: This is a placeholder. Migrate older documentation.
+The jSPF library is a pure Java SPF implementation. It was designed to match the
+SPF specifications of 2006-2009 (see xref:rfclist.adoc[Useful RFCs]). SPF is also known as
+Sender Policy Framework. It was designed to detect email spoofing. This is the
+solution if you ever were tired of getting spam from yourself. For more information
+see the http://www.open-spf.org/[Open SPF website].
+
+== Releases
+
+Both binary and source distributions are available from the
+https://james.apache.org/download.cgi#Apache_jSPF[James download page].
+
+jSPF passes all YAML tests published by openspf.org, so it should be fully
+RFC 4408 compliant.
+
+== News
+
+=== 2010
+
+*Jun/2010 - jSPF-0.9.8 released*
+
+The JAMES Developer Team is proud to announce the
+https://james.apache.org/download.cgi#Apache_jSPF[availability] of APACHE jSPF-0.9.8.
+This release includes fixes for correct handling of TXT record escapings and passes
+the rfc4408-tests-2009.10 test suite.
+
+=== 2009
+
+*Jun/2009 - jSPF-0.9.7 released*
+
+After 1 year we are proud to announce the
+https://james.apache.org/download.cgi#Apache_jSPF[availability] of APACHE jSPF-0.9.7.
+This release includes fixes for correct handling of `$` signs in the local-part of
+email addresses and quotes in SPF records. It also includes a new version of dnsjnio
+which fixes a race condition when using the async mode of jSPF.
+
+=== 2008
+
+*Apr/2008 - jSPF-0.9.6 released*
+
+We are proud to announce the
+https://james.apache.org/download.cgi#Apache_jSPF[availability] of APACHE jSPF-0.9.6.
+This release fixes two possible NullPointerExceptions and handles the `exp=` modifier
+correctly.
+
+=== 2007
+
+*Sept/2007 - jSPF-0.9.5 released*
+
+We are proud to announce the
+https://james.apache.org/download.cgi#Apache_jSPF[availability] of APACHE jSPF-0.9.5.
+This release spots an initial support for asynchronous processing and is fully
+RFC 4408 compliant.
+
+*Feb/2007 - jSPF-0.9b4 released*
+
+After some more work was done, we are proud to announce the release of jSPF-0.9b4.
+0.9b4 correctly supports the SPF DNS record type (previously we only supported the TXT
+record type) and introduces support for SPF extension policies like fallback, override
+and trusted forwarder.
+
+=== 2006
+
+*Sep/2006 - jSPF-0.9b3 released*
+
+0.9b3 introduces YAML based unit tests to check RFC compliance and a couple of minor fixes.
+
+*Jul/2006 - First public release of jSPF*
+
+After a full rewrite of spf-java we finally release jSPF.
