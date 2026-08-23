@@ -1,4 +1,5 @@
 * xref:index.adoc[Overview]
+* xref:usage.adoc[How to use jSPF in your project]
 * xref:faq.adoc[jSPF FAQ]
 * xref:rfclist.adoc[Useful RFCs]
 * xref:code-standards.adoc[Coding standards]
