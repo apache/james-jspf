@@ -8,6 +8,9 @@ Sender Policy Framework. It was designed to detect email spoofing. This is the
 solution if you ever were tired of getting spam from yourself. For more information
 see the http://www.open-spf.org/[Open SPF website].
 
+To check an SPF record from your own code, see
+xref:usage.adoc[How to use jSPF in your project].
+
 == Releases
 
 Both binary and source distributions are available from the

@@ -1,0 +1,196 @@
+= How to use jSPF in your project
+
+jSPF checks whether a given IP address is allowed to send mail on behalf of a
+given envelope sender, as specified by the domain's SPF record. This page shows
+how to add the library to a project, run a check, and interpret its result.
+
+== Adding the dependency
+
+The library lives in the `apache-jspf-resolver` artifact, published on Maven Central.
+
+[source,xml,subs=attributes+]
+----
+<dependency>
+    <groupId>org.apache.james.jspf</groupId>
+    <artifactId>apache-jspf-resolver</artifactId>
+    <version>{jspf-version}</version>
+</dependency>
+----
+
+With Gradle:
+
+[source,groovy,subs=attributes+]
+----
+implementation 'org.apache.james.jspf:apache-jspf-resolver:{jspf-version}'
+----
+
+jSPF pulls in `dnsjava` (the DNS resolver it uses by default), `commons-cli` (used by
+the command line tool) and `slf4j-api`. Logging goes through SLF4J, so add the binding
+of your choice - for instance `logback-classic` - to actually see log output.
+
+== Running a check
+
+`SPF` is the entry point. `DefaultSPF` wires it with the default dnsjava based
+resolver and a synchronous executor:
+
+[source,java]
+----
+SPF spf = new DefaultSPF();
+
+SPFResult result = spf.checkSPF(
+    "192.0.2.25",             // <1>
+    "sender@example.com",     // <2>
+    "smtp.example.com");      // <3>
+
+System.out.println(result.getResult());
+----
+<1> The IP address the connection comes from.
+<2> The envelope sender, as provided in `MAIL FROM`.
+<3> The host name provided in `HELO` / `EHLO`.
+
+`SPF` instances are meant to be created once and reused for many checks.
+
+== Interpreting the result
+
+`SPFResult.getResult()` returns one of the seven RFC 4408 result strings. Compare it
+against the constants of `SPFErrorConstants` rather than against string literals:
+
+[cols="1,1,3"]
+|===
+|Constant |Value |Meaning
+
+|`PASS_CONV` |`pass` |The IP address is authorized for that sender.
+|`FAIL_CONV` |`fail` |The IP address is explicitly not authorized.
+|`SOFTFAIL_CONV` |`softfail` |Not authorized, but the domain is still transitioning.
+|`NEUTRAL_CONV` |`neutral` |The domain makes no assertion about this IP address.
+|`NONE_CONV` |`none` |No SPF record was published for that domain.
+|`TEMP_ERROR_CONV` |`temperror` |A transient error, typically a DNS failure. Retry later.
+|`PERM_ERROR_CONV` |`permerror` |The SPF record could not be processed, e.g. it is malformed.
+|===
+
+[source,java]
+----
+SPFResult result = spf.checkSPF(ip, mailFrom, helo);
+
+if (SPFErrorConstants.FAIL_CONV.equals(result.getResult())) {
+    // reject the mail, and tell the sender why
+    System.out.println(result.getExplanation());
+} else if (SPFErrorConstants.TEMP_ERROR_CONV.equals(result.getResult())) {
+    // ask the sender to try again later
+}
+----
+
+Beyond the raw result, `SPFResult` builds a ready to use `Received-SPF` header:
+
+* `getHeaderName()` returns `Received-SPF`.
+* `getHeaderText()` returns the header value alone.
+* `getHeader()` returns the full header line, for instance:
++
+----
+Received-SPF: pass (spfCheck: domain of example.com designates 192.0.2.25 as permitted
+sender) client-ip=192.0.2.25; envelope-from=sender@example.com; helo=example.com;
+----
+
+`getExplanation()` returns the explanation published by the domain through the `exp=`
+modifier, or the empty string when there is none.
+
+== Checking asynchronously
+
+`DefaultSPF.createAsync()` builds an `SPF` backed by an asynchronous executor, so DNS
+lookups do not block the calling thread. `checkSPF` then returns immediately, and the
+returned object is a `FutureSPFResult`:
+
+[source,java]
+----
+SPF spf = DefaultSPF.createAsync();
+
+FutureSPFResult result = (FutureSPFResult) spf.checkSPF(ip, mailFrom, helo);
+
+result.addListener(spfResult -> {
+    // called once the result is available
+    System.out.println(spfResult.getResult());
+});
+----
+
+`isReady()` tells whether the result has been computed already. Note that every getter
+of `FutureSPFResult` blocks until the result is ready, so calling `getResult()` right
+away turns the asynchronous check back into a blocking one.
+
+`DefaultSPF.createSync()` is the explicit counterpart, equivalent to `new DefaultSPF()`.
+
+== Tuning the checks
+
+`SPF` exposes a few knobs, all of them optional:
+
+[source,java]
+----
+SPF spf = new DefaultSPF();
+
+spf.setTimeOut(20);                                     // <1>
+spf.setDefaultExplanation("Blocked by SPF, see %{d}");  // <2>
+spf.setUseBestGuess(true);                              // <3>
+spf.setSPFMustEqualsTXT(true);                          // <4>
+----
+<1> DNS timeout in seconds, before a `temperror` is returned. Defaults to 20.
+<2> Explanation used when the domain publishes no `exp=` modifier. Macros are expanded.
+<3> When no SPF record is found, evaluate `v=spf1 a/24 mx/24 ptr ?all` instead of
+returning `none`. Only `pass` or `neutral` can result from a best guess. Defaults to false.
+<4> Return a `permerror` when a domain publishes both an SPF-type and a TXT-type record
+and the two disagree. Defaults to false.
+
+Two policy objects let you supply records jSPF would not otherwise see:
+
+* `getFallbackPolicy()` provides records for domains that publish none.
+* `getOverridePolicy()` replaces the records published by given domains.
+
+== Using your own DNS resolver
+
+`DefaultSPF` uses dnsjava with its default system resolver. To point jSPF at a specific
+DNS server, pass your own `Resolver` to `DNSServiceXBillImpl` and build the `SPF`
+instance yourself:
+
+[source,java]
+----
+Resolver resolver = new SimpleResolver("192.0.2.53");
+DNSService dnsService = new DNSServiceXBillImpl(resolver);
+
+SPF syncSpf = new SPF(dnsService);
+SPF asyncSpf = new SPF(dnsService, new AsynchronousSPFExecutor(dnsService));
+----
+
+If you already have a DNS layer of your own, implement the `DNSService` interface
+instead - it is the only contract jSPF needs in order to resolve records.
+
+== Running jSPF from the command line
+
+The `SPFQuery` class is a standalone entry point. Run it with the resolver jar and its
+dependencies on the classpath:
+
+[source,bash,subs=attributes+]
+----
+java -cp "apache-jspf-resolver-{jspf-version}.jar:dnsjava.jar:commons-cli.jar:slf4j-api.jar" \
+    org.apache.james.jspf.impl.SPFQuery \
+    -i 192.0.2.25 -s sender@example.com -h smtp.example.com
+----
+
+The three options `-i` / `--ip`, `-s` / `--sender` and `-h` / `--helo` are required;
+running the tool without them prints the full usage. Also available are
+`-e` / `--default-explanation`, `-b` / `--enable-best-guess`,
+`-t` / `--enable-trusted-forwarder`, `-d` / `--debug` and `-v` / `--verbose`.
+
+The tool prints the result and the `Received-SPF` header on standard output, and
+reports the outcome through its exit code:
+
+[cols="1,3"]
+|===
+|Exit code |Result
+
+|0 |`pass`
+|1 |`fail`
+|2 |`softfail`
+|3 |`neutral`
+|4 |`temperror`
+|5 |`permerror`
+|6 |`none`
+|255 |Unknown result, or wrong command line arguments
+|===

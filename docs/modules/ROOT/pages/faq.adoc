@@ -2,4 +2,10 @@
 
 == Can I run jSPF from the command line?
 
-Sure you can. Just enter `java -jar jspf-xxx.jar` to get the usage.
+Sure you can. The `org.apache.james.jspf.impl.SPFQuery` class is a standalone entry
+point; run it with the resolver jar and its dependencies on the classpath, and without
+arguments to get the usage. See xref:usage.adoc#_running_jspf_from_the_command_line[Running jSPF from the command line].
+
+== How do I use jSPF from my own code?
+
+See xref:usage.adoc[How to use jSPF in your project].
