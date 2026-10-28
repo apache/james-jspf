@@ -1,5 +1,6 @@
 package org.apache.james.jspf;
 
+import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.exceptions.SPFErrorConstants;
 import org.apache.james.jspf.executor.SPFResult;
@@ -20,7 +21,12 @@ import org.xbill.DNS.TextParseException;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -279,5 +285,53 @@ public abstract class SPFExecutorBaseTest {
                         "Received-SPF: %3$s (spfCheck: domain of x\\)client-ip=203.0.113.9;\\(.%2$s does not designate %1$s as permitted sender) client-ip=%1$s; envelope-from=a_user@%2$s; helo=%2$s;",
                         ip, hostname, SPFErrorConstants.FAIL_CONV),
                 result.getHeader());
+    }
+
+    /**
+     * Test the limit described in RFC7208 section "4.6.4.  DNS Lookup Limits"
+     */
+    @Test
+    public void shouldLookUpNoMoreThan10MxNames() {
+        AtomicInteger addressLookups = new AtomicInteger();
+        DNSService dns = new DNSService() {
+            public List<String> getRecords(DNSRequest request) {
+                switch (request.getRecordType()) {
+                    case DNSRequest.TXT:
+                        return request.getHostname().equals("example.com")
+                            ? new ArrayList<>(List.of("v=spf1 mx -all")) : null;
+                    case DNSRequest.MX:
+                        return IntStream.range(0, 400).mapToObj(i -> "m" + i + ".example.net")
+                            .collect(Collectors.toCollection(ArrayList::new));
+                    case DNSRequest.A:
+                        addressLookups.incrementAndGet();
+                        return null;
+                    default:
+                        return null;
+                }
+            }
+
+            public CompletionStage<List<String>> getRecordsAsync(DNSRequest request) {
+                return CompletableFuture.completedFuture(getRecords(request));
+            }
+
+            public List<String> getLocalDomainNames() {
+                return List.of("localhost");
+            }
+
+            public void setTimeOut(int timeOut) {
+            }
+
+            public int getRecordLimit() {
+                return 10;
+            }
+
+            public void setRecordLimit(int recordLimit) {
+            }
+        };
+
+        SPFResult result = createCustomSPF(dns).checkSPF("1.2.3.4", "foo@example.com", "example.com");
+
+        assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+        assertEquals(10, addressLookups.get());
     }
 }
