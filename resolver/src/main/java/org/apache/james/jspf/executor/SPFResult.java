@@ -101,21 +101,21 @@ public class SPFResult  {
 
         if (result.equals(SPFErrorConstants.PASS_CONV)) {
             headerText.append(result + " (spfCheck: domain of "
-                    + spfData.getCurrentDomain() + " designates "
+                    + escapeComment(spfData.getCurrentDomain()) + " designates "
                     + spfData.getIpAddress() + " as permitted sender) ");
         } else if (result.equals(SPFErrorConstants.FAIL_CONV)) {
             headerText.append(result + " (spfCheck: domain of "
-                    + spfData.getCurrentDomain() + " does not designate "
+                    + escapeComment(spfData.getCurrentDomain()) + " does not designate "
                     + spfData.getIpAddress() + " as permitted sender) ");
         } else if (result.equals(SPFErrorConstants.NEUTRAL_CONV)
                 || result.equals(SPFErrorConstants.NONE_CONV)) {
             headerText.append(result + " (spfCheck: " + spfData.getIpAddress()
                     + " is neither permitted nor denied by domain of "
-                    + spfData.getCurrentDomain() + ") ");
+                    + escapeComment(spfData.getCurrentDomain()) + ") ");
 
         } else if (result.equals(SPFErrorConstants.SOFTFAIL_CONV)) {
             headerText.append(result + " (spfCheck: transitioning domain of "
-                    + spfData.getCurrentDomain() + " does not designate "
+                    + escapeComment(spfData.getCurrentDomain()) + " does not designate "
                     + spfData.getIpAddress() + " as permitted sender) ");
         } else if (result.equals(SPFErrorConstants.PERM_ERROR_CONV)) {
             headerText.append(result
@@ -137,6 +137,28 @@ public class SPFResult  {
             headerTextAsString = "";
         }
         return headerTextAsString;
+    }
+
+    /**
+     * Escape a value written inside the comment of the header: "(", ")" and
+     * "\\" become RFC 5322 quoted-pairs, and characters that are neither
+     * ctext nor space are dropped, so that the value cannot close the comment.
+     *
+     * @param value The value to escape, possibly taken from DNS
+     */
+    private static String escapeComment(String value) {
+        if (value == null) {
+            return null;
+        }
+        StringBuilder escaped = new StringBuilder(value.length());
+        for (char c : value.toCharArray()) {
+            if (c == '(' || c == ')' || c == '\\') {
+                escaped.append('\\').append(c);
+            } else if (c >= ' ' && c <= '~') {
+                escaped.append(c);
+            }
+        }
+        return escaped.toString();
     }
 
     /**

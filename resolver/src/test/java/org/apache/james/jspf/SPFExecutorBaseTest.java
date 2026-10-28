@@ -261,4 +261,23 @@ public abstract class SPFExecutorBaseTest {
                 result.getHeader());
         assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
     }
+
+    @Test
+    public void headerCommentShouldNotBeClosedByTheRedirectDomain() throws IOException {
+        String hostname = "headerCommentShouldNotBeClosedByTheRedirectDomain.spfexecutor.fake";
+        String target = "x)client-ip=203.0.113.9;(." + hostname;
+        String ip = "192.0.2.127";
+
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, "v=spf1 redirect=" + target));
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(target + "."), DClass.IN, 30L, "v=spf1 -all"));
+
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+        SPFResult result = spf.checkSPF(ip, "a_user@" + hostname, hostname);
+        assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+        assertEquals(String.format(
+                        "Received-SPF: %3$s (spfCheck: domain of x\\)client-ip=203.0.113.9;\\(.%2$s does not designate %1$s as permitted sender) client-ip=%1$s; envelope-from=a_user@%2$s; helo=%2$s;",
+                        ip, hostname, SPFErrorConstants.FAIL_CONV),
+                result.getHeader());
+    }
 }
