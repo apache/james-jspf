@@ -26,6 +26,8 @@ import java.util.List;
 import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSResponse;
+import org.apache.james.jspf.core.DNSService;
+import org.apache.james.jspf.core.DNSServiceEnabled;
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.MacroExpand;
 import org.apache.james.jspf.core.SPFChecker;
@@ -44,7 +46,7 @@ import org.slf4j.LoggerFactory;
  * This class represent the mx mechanism
  * 
  */
-public class MXMechanism extends AMechanism implements SPFCheckerDNSResponseListener {
+public class MXMechanism extends AMechanism implements DNSServiceEnabled, SPFCheckerDNSResponseListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(MXMechanism.class);
 
     private final class ExpandedChecker implements SPFChecker {
@@ -72,6 +74,15 @@ public class MXMechanism extends AMechanism implements SPFCheckerDNSResponseList
             + DUAL_CIDR_LENGTH_REGEX + ")?";
     
     private SPFChecker expandedChecker = new ExpandedChecker();
+
+    private DNSService dnsService;
+
+    /**
+     * @see org.apache.james.jspf.core.DNSServiceEnabled#enableDNSService(org.apache.james.jspf.core.DNSService)
+     */
+    public void enableDNSService(DNSService service) {
+        this.dnsService = service;
+    }
     
     /**
      * @see org.apache.james.jspf.terms.AMechanism#checkSPF(org.apache.james.jspf.core.SPFSession)
@@ -105,6 +116,12 @@ public class MXMechanism extends AMechanism implements SPFCheckerDNSResponseList
                     // no mx record found
                     spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
                     return null;
+                }
+
+                // RFC 7208 4.6.4: no more than 10 MX names get an address lookup.
+                // Truncate rather than permerror, see #mx-limit rfc4408 test
+                if (dnsService != null && dnsService.getRecordLimit() > 0 && records.size() > dnsService.getRecordLimit()) {
+                    records = new ArrayList<String>(records.subList(0, dnsService.getRecordLimit()));
                 }
                 
                 spfSession.setAttribute(ATTRIBUTE_CHECK_RECORDS, records);
