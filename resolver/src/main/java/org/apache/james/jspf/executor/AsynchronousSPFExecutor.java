@@ -29,11 +29,8 @@ import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.core.SPFCheckerExceptionCatcher;
 import org.apache.james.jspf.core.SPFSession;
-import org.apache.james.jspf.core.exceptions.NeutralException;
-import org.apache.james.jspf.core.exceptions.NoneException;
-import org.apache.james.jspf.core.exceptions.PermErrorException;
+import org.apache.james.jspf.core.exceptions.SPFErrorConstants;
 import org.apache.james.jspf.core.exceptions.SPFResultException;
-import org.apache.james.jspf.core.exceptions.TempErrorException;
 import org.apache.james.jspf.core.exceptions.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,8 +63,7 @@ public class AsynchronousSPFExecutor implements SPFExecutor {
             DNSLookupContinuation cont = checker.checkSPF(session);
             handleCont(session, result, cont, checker);
         } catch (Exception e) {
-            handleError(session, e);
-            result.setSPFResult(session);
+            handleErrorAndComplete(session, result, e);
         }
     }
 
@@ -75,15 +71,7 @@ public class AsynchronousSPFExecutor implements SPFExecutor {
         if (cont != null) {
             // if the checker returns a continuation we return it
             dnsProbe.getRecordsAsync(cont.getRequest())
-                .thenAccept(results -> {
-                    try {
-                        DNSLookupContinuation dnsLookupContinuation = cont.getListener().onDNSResponse(new DNSResponse(results), session);
-                        handleCont(session, result, dnsLookupContinuation, checker);
-                    } catch (PermErrorException | NoneException | TempErrorException | NeutralException e) {
-                        handleError(session, e);
-                        result.setSPFResult(session);
-                    }
-                })
+                .thenAccept(results -> onResponse(session, result, cont, new DNSResponse(results), checker))
                 .exceptionally(e -> {
                     if (e instanceof CompletionException && e.getCause() != null) {
                         e = e.getCause();
@@ -92,24 +80,12 @@ public class AsynchronousSPFExecutor implements SPFExecutor {
                         e = new TimeoutException(e.getMessage());
                     }
                     if (e instanceof LookupFailedException) {
-                        try {
-                            DNSLookupContinuation dnsLookupContinuation = cont.getListener().onDNSResponse(new DNSResponse(new ArrayList<>()), session);
-                            handleCont(session, result, dnsLookupContinuation, checker);
-                            result.setSPFResult(session);
-                            return null;
-                        } catch (PermErrorException | NoneException | TempErrorException | NeutralException ex2) {
-                            handleError(session, ex2);
-                            result.setSPFResult(session);
-                            return null;
-                        }
+                        onResponse(session, result, cont, new DNSResponse(new ArrayList<>()), checker);
+                    } else if (e instanceof TimeoutException) {
+                        onResponse(session, result, cont, new DNSResponse((TimeoutException) e), checker);
+                    } else {
+                        handleErrorAndComplete(session, result, e);
                     }
-                    if (e instanceof TimeoutException) {
-                        handleTimeout(cont, new DNSResponse((TimeoutException) e), session, result, checker);
-                        result.setSPFResult(session);
-                        return null;
-                    }
-                    handleError(session, e);
-                    result.setSPFResult(session);
                     return null;
                 });
         } else {
@@ -117,12 +93,26 @@ public class AsynchronousSPFExecutor implements SPFExecutor {
         }
     }
 
-    private void handleTimeout(DNSLookupContinuation cont, DNSResponse e, SPFSession session, FutureSPFResult result, SPFChecker checker) {
+    private void onResponse(SPFSession session, FutureSPFResult result, DNSLookupContinuation cont, DNSResponse response, SPFChecker checker) {
         try {
-            DNSLookupContinuation dnsLookupContinuation = cont.getListener().onDNSResponse(e, session);
+            DNSLookupContinuation dnsLookupContinuation = cont.getListener().onDNSResponse(response, session);
+            // The result is set once no checker is left, or by the error handling
             handleCont(session, result, dnsLookupContinuation, checker);
-        } catch (PermErrorException | NoneException | TempErrorException | NeutralException ex2) {
-            handleError(session, ex2);
+        } catch (Exception e) {
+            handleErrorAndComplete(session, result, e);
+        }
+    }
+
+    private void handleErrorAndComplete(SPFSession session, FutureSPFResult result, Throwable e) {
+        try {
+            handleError(session, e);
+        } catch (RuntimeException ex) {
+            // Never leave the future pending: an unexpected error is a temperror
+            LOGGER.error("Unexpected error during the asynchronous SPF check", ex);
+            session.setCurrentResult(SPFErrorConstants.TEMP_ERROR_CONV);
+            session.setCurrentResultExpanded(SPFErrorConstants.TEMP_ERROR_CONV);
+        } finally {
+            result.setSPFResult(session);
         }
     }
 

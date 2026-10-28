@@ -158,7 +158,7 @@ public class ExpModifier extends GenericModifier implements MacroExpandEnabled, 
         try {
             List<String> records = lookup.getResponse();
         
-            if (records == null) {
+            if (records == null || records.isEmpty()) {
                 return null;
             }
     
