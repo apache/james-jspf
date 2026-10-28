@@ -334,4 +334,17 @@ public abstract class SPFExecutorBaseTest {
         assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
         assertEquals(10, addressLookups.get());
     }
+
+    @Test(timeout = 10000)
+    public void shouldReturnFailWhenExplanationDomainHasNoTxtRecord() throws IOException {
+        String hostname = "shouldReturnFailWhenExplanationDomainHasNoTxtRecord.spfexecutor.fake";
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L,
+                "v=spf1 -all exp=explain." + hostname));
+
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+        SPFResult result = spf.checkSPF("192.0.2.127", "a_user@" + hostname, hostname);
+
+        assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+    }
 }
