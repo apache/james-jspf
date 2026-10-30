@@ -65,11 +65,10 @@ public class NeutralIfNotMatchPolicy implements PolicyPostFilter {
      */
     public SPF1Record getSPFRecord(String currentDomain, SPF1Record spfRecord) throws PermErrorException, TempErrorException, NoneException, NeutralException {
         if (spfRecord == null) return null;
-        // Set the result to NEUTRAL if at least a directive is present and it didn't match
+        // Set the result to NEUTRAL if no directive matched, also when there is none: an included record
+        // without directive does not match instead of giving no result (RFC 7208 4.7, 5.2)
         // Maybe we should simply append a "?all" at the end, as modifier
-        if (spfRecord.getDirectives().size() > 0) {
-            spfRecord.getModifiers().add(new NeutralIfNotMatchModifier());
-        }
+        spfRecord.getModifiers().add(new NeutralIfNotMatchModifier());
         return spfRecord;
     }
 }

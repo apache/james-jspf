@@ -70,6 +70,15 @@ public abstract class SPFExecutorBaseTest {
         return createCustomSPF(new DNSServiceXBillImpl(fakeResolver)).checkSPF(ipAddress, "a_user@" + hostname, hostname);
     }
 
+    // record refers (%s) to target.<hostname>, of record targetRecord
+    private SPFResult checkRecordWithTarget(String hostname, String record, String targetRecord) throws IOException {
+        String target = "target." + hostname;
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, String.format(record, target)));
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(target + "."), DClass.IN, 30L, targetRecord));
+        return createCustomSPF(new DNSServiceXBillImpl(fakeResolver)).checkSPF("192.0.2.10", "a_user@" + hostname, hostname);
+    }
+
     // the lookups of broken.<hostname> fail with an unchecked exception, as dnsjava may do on an answer it cannot handle
     private SPFResult checkRecordWithBrokenHost(String hostname, String record) throws IOException {
         FakeResolver fakeResolver = new FakeResolver();
@@ -622,6 +631,31 @@ public abstract class SPFExecutorBaseTest {
         String hostname = "unexpectedErrorInRedirect.spfexecutor.fake";
         SPFResult result = checkRecordWithBrokenHost(hostname, "v=spf1 redirect=broken." + hostname);
 
+        assertEquals(SPFErrorConstants.NEUTRAL_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void includeOfARecordWithoutTermShouldNotMatch() throws IOException {
+        // RFC 7208 4.5: "v=spf1" is a record without terms, of result neutral (4.7)
+        SPFResult result = checkRecordWithTarget("includeWithoutTerm.spfexecutor.fake", "v=spf1 include:%s -all", "v=spf1");
+
+        // RFC 7208 5.2: an included neutral does not match
+        assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void includeOfARecordWithoutDirectiveShouldNotMatch() throws IOException {
+        SPFResult result = checkRecordWithTarget("includeWithoutDirective.spfexecutor.fake", "v=spf1 include:%s -all",
+            "v=spf1 exp=explain.example.com");
+
+        assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void redirectToARecordWithoutTermShouldBeNeutral() throws IOException {
+        SPFResult result = checkRecordWithTarget("redirectWithoutTerm.spfexecutor.fake", "v=spf1 redirect=%s", "v=spf1");
+
+        // RFC 7208 6.1: the result of the redirect target
         assertEquals(SPFErrorConstants.NEUTRAL_CONV, result.getResult());
     }
 }

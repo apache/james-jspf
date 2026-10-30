@@ -255,9 +255,11 @@ public class RFC4408SPF1Parser implements SPFRecordParser {
         SPF1Record result = new SPF1Record();
 
         // check the version "header"
-        if (spfRecord.toLowerCase().startsWith(SPF1Constants.SPF_VERSION1 + " ") || spfRecord.equalsIgnoreCase(SPF1Constants.SPF_VERSION1)) {
-            if (!spfRecord.toLowerCase().startsWith(SPF1Constants.SPF_VERSION1 + " ")) throw new NeutralException("Empty SPF Record");
-        } else {
+        if (spfRecord.equalsIgnoreCase(SPF1Constants.SPF_VERSION1)) {
+            // a record without terms, as "v=spf1 " (RFC 7208 4.5)
+            return result;
+        }
+        if (!spfRecord.toLowerCase().startsWith(SPF1Constants.SPF_VERSION1 + " ")) {
             throw new NoneException("No valid SPF Record: " + spfRecord);
         }
 
