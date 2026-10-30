@@ -73,7 +73,8 @@ public class SynchronousSPFExecutor implements SPFExecutor {
                     try {
                         ((SPFCheckerExceptionCatcher) checker).onException(e, session);
                         e = null;
-                    } catch (SPFResultException ex) {
+                    } catch (SPFResultException | RuntimeException ex) {
+                        // IncludeMechanism and RedirectModifier rethrow an unexpected exception: the next catcher handles it
                         e = ex;
                     }
                 }
