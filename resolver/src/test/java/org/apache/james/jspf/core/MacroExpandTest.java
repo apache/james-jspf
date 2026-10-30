@@ -145,6 +145,20 @@ public class MacroExpandTest extends TestCase {
         assertEquals("strong", defIp4me.expand("%{l1r-}", new rfcIP4MacroData(), MacroExpand.DOMAIN));
     }
 
+    public void testLongDomainSpecIsTruncatedWithoutOverflowingTheStack() throws PermErrorException {
+        String domain = defIp4me.expand("%{d}.".repeat(5000) + "com", new rfcIP4MacroData(), MacroExpand.DOMAIN);
+
+        assertTrue(domain.length() <= 255);
+        assertTrue(domain.endsWith(".email.example.com.com"));
+    }
+
+    public void testLongLiteralDomainSpecIsTruncatedWithoutOverflowingTheStack() throws PermErrorException {
+        String domain = defIp4me.expand("a.".repeat(5000) + "com", new rfcIP4MacroData(), MacroExpand.DOMAIN);
+
+        assertTrue(domain.length() <= 255);
+        assertTrue(domain.endsWith(".a.com"));
+    }
+
     public void testExample1() throws PermErrorException {
         assertEquals("3.2.0.192.in-addr._spf.example.com", defIp4me
                 .expand("%{ir}.%{v}._spf.%{d2}", new rfcIP4MacroData(), MacroExpand.DOMAIN));

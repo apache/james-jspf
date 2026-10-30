@@ -37,7 +37,7 @@ public class UnknownModifier implements Modifier, ConfigurationEnabled {
      */
     public static final String REGEX = "(" + SPFTermsRegexps.ALPHA_PATTERN + "{1}"
             + "[A-Za-z0-9\\-\\_\\.]*" + ")" + "\\=("
-            + SPFTermsRegexps.MACRO_STRING_REGEX + ")";
+            + SPFTermsRegexps.POSSESSIVE_MACRO_STRING_REGEX + ")";
 
     /**
      * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)

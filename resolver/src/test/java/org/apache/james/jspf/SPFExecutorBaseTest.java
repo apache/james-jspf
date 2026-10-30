@@ -36,6 +36,14 @@ import static org.junit.Assert.assertEquals;
 public abstract class SPFExecutorBaseTest {
     protected final String zonesDir = "src/test/resources/dnszones";
 
+    // one TXT record made of 255 byte strings, as DNS carries a long record
+    private static TXTRecord longTxtRecord(String hostname, String record) throws TextParseException {
+        List<String> strings = IntStream.range(0, (record.length() + 254) / 255)
+            .mapToObj(i -> record.substring(i * 255, Math.min(record.length(), (i + 1) * 255)))
+            .collect(Collectors.toList());
+        return new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, strings);
+    }
+
     protected abstract SPF createSPF();
 
     protected abstract SPF createCustomSPF(DNSService dnsService);
@@ -352,17 +360,27 @@ public abstract class SPFExecutorBaseTest {
     @Test(timeout = 10000)
     public void shouldHandleRecordWithManyTerms() throws IOException {
         String hostname = "shouldHandleRecordWithManyTerms.spfexecutor.fake";
-        String record = "v=spf1 " + String.join(" ", Collections.nCopies(3000, "ip4:192.0.2.1")) + " -all";
-        // one TXT record made of 255 byte strings, as DNS carries it
-        List<String> strings = IntStream.range(0, (record.length() + 254) / 255)
-            .mapToObj(i -> record.substring(i * 255, Math.min(record.length(), (i + 1) * 255)))
-            .collect(Collectors.toList());
         FakeResolver fakeResolver = new FakeResolver();
-        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, strings));
+        fakeResolver.addRecord(longTxtRecord(hostname,
+            "v=spf1 " + String.join(" ", Collections.nCopies(3000, "ip4:192.0.2.1")) + " -all"));
 
         SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
         SPFResult result = spf.checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
 
         assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void shouldHandleRecordWithLongDomainSpec() throws IOException {
+        String hostname = "shouldHandleRecordWithLongDomainSpec.spfexecutor.fake";
+        FakeResolver fakeResolver = new FakeResolver();
+        // the include target, truncated to 255 characters from the left, is a subdomain of hostname,
+        // with no record: FakeResolver answers it without querying the real DNS
+        fakeResolver.addRecord(longTxtRecord(hostname, "v=spf1 include:" + "%{d}.".repeat(5000) + hostname + " -all"));
+
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+        SPFResult result = spf.checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
+
+        assertEquals(SPFErrorConstants.PERM_ERROR_CONV, result.getResult());
     }
 }
