@@ -7,6 +7,7 @@ import org.apache.james.jspf.executor.SPFResult;
 import org.apache.james.jspf.helpers.FakeResolver;
 import org.apache.james.jspf.impl.DNSServiceXBillImpl;
 import org.apache.james.jspf.impl.SPF;
+import org.apache.james.jspf.policies.local.TrustedForwarderPolicy;
 import org.junit.Before;
 import org.junit.Test;
 import org.xbill.DNS.DClass;
@@ -382,5 +383,71 @@ public abstract class SPFExecutorBaseTest {
         SPFResult result = spf.checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
 
         assertEquals(SPFErrorConstants.PERM_ERROR_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void trustedForwarderShouldNotBeAddedToARedirectAfterANestedInclude() throws IOException {
+        String hostname = "trustedForwarderRedirectAfterInclude.spfexecutor.fake";
+        String child = "child." + TrustedForwarderPolicy.TRUSTED_FORWARDER_HOST;
+        String destination = "destination." + TrustedForwarderPolicy.TRUSTED_FORWARDER_HOST;
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, "v=spf1 -all"));
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(TrustedForwarderPolicy.TRUSTED_FORWARDER_HOST + "."), DClass.IN, 30L,
+            "v=spf1 include:" + child + " redirect=" + destination));
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(child + "."), DClass.IN, 30L, "v=spf1 -all"));
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(destination + "."), DClass.IN, 30L, "v=spf1 ip4:192.0.2.202 -all"));
+
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+        spf.setUseTrustedForwarder(true);
+
+        assertEquals(SPFErrorConstants.FAIL_CONV, spf.checkSPF("1.2.3.4", "a_user@" + hostname, hostname).getResult());
+        assertEquals(SPFErrorConstants.PASS_CONV, spf.checkSPF("192.0.2.202", "a_user@" + hostname, hostname).getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void trustedForwarderShouldKeepTheResultOfTheRecord() throws IOException {
+        String hostname = "trustedForwarderShouldKeepTheResultOfTheRecord.spfexecutor.fake";
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, "v=spf1 -all"));
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(TrustedForwarderPolicy.TRUSTED_FORWARDER_HOST + "."), DClass.IN, 30L,
+            "v=spf1 ip4:192.0.2.200 -all"));
+
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+        spf.setUseTrustedForwarder(true);
+        SPFResult result = spf.checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
+
+        assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void trustedForwarderShouldPassTheForwarderListedByTheTrustedForwarderHost() throws IOException {
+        String hostname = "trustedForwarderShouldPassListedForwarder.spfexecutor.fake";
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, "v=spf1 -all"));
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(TrustedForwarderPolicy.TRUSTED_FORWARDER_HOST + "."), DClass.IN, 30L,
+            "v=spf1 ip4:192.0.2.200 -all"));
+
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+        spf.setUseTrustedForwarder(true);
+        SPFResult result = spf.checkSPF("192.0.2.200", "a_user@" + hostname, hostname);
+
+        assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void trustedForwarderShouldNotBeAddedToTheRecordsItIncludes() throws IOException {
+        String hostname = "trustedForwarderNotAddedToIncluded.spfexecutor.fake";
+        String child = "child." + TrustedForwarderPolicy.TRUSTED_FORWARDER_HOST;
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, "v=spf1 -all"));
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(TrustedForwarderPolicy.TRUSTED_FORWARDER_HOST + "."), DClass.IN, 30L,
+            "v=spf1 include:" + child + " ip4:192.0.2.201 -all"));
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(child + "."), DClass.IN, 30L, "v=spf1 -all"));
+
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+        spf.setUseTrustedForwarder(true);
+        SPFResult result = spf.checkSPF("192.0.2.201", "a_user@" + hostname, hostname);
+
+        assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
     }
 }

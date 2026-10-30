@@ -19,7 +19,13 @@
 
 package org.apache.james.jspf.policies.local;
 
+import java.util.List;
+
+import org.apache.james.jspf.core.MacroExpand;
+import org.apache.james.jspf.core.MacroExpandEnabled;
 import org.apache.james.jspf.core.SPF1Record;
+import org.apache.james.jspf.core.SPFCheckEnabled;
+import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.core.exceptions.NeutralException;
 import org.apache.james.jspf.core.exceptions.NoneException;
 import org.apache.james.jspf.core.exceptions.PermErrorException;
@@ -35,7 +41,7 @@ import org.slf4j.LoggerFactory;
  * See http://www.trusted-forwarder.org for more informations
  *
  */
-public class TrustedForwarderPolicy implements PolicyPostFilter {
+public class TrustedForwarderPolicy implements PolicyPostFilter, MacroExpandEnabled, SPFCheckEnabled {
     private static final Logger LOGGER = LoggerFactory.getLogger(TrustedForwarderPolicy.class);
 
     /**
@@ -44,11 +50,39 @@ public class TrustedForwarderPolicy implements PolicyPostFilter {
     public static final String TRUSTED_FORWARDER_HOST = "spf.trusted-forwarder.org";
 
     /**
+     * The MacroExpand the include mechanism expands its host with
+     */
+    private MacroExpand macroExpand;
+
+    /**
+     * The SPFChecker the include mechanism checks the included domain with
+     */
+    private SPFChecker spfChecker;
+
+    /**
+     * @see org.apache.james.jspf.core.MacroExpandEnabled#enableMacroExpand(org.apache.james.jspf.core.MacroExpand)
+     */
+    public void enableMacroExpand(MacroExpand macroExpand) {
+        this.macroExpand = macroExpand;
+    }
+
+    /**
+     * @see org.apache.james.jspf.core.SPFCheckEnabled#enableSPFChecking(org.apache.james.jspf.core.SPFChecker)
+     */
+    public void enableSPFChecking(SPFChecker checker) {
+        this.spfChecker = checker;
+    }
+
+    /**
      * @see org.apache.james.jspf.policies.PolicyPostFilter#getSPFRecord(java.lang.String, org.apache.james.jspf.core.SPF1Record)
      */
     public SPF1Record getSPFRecord(String currentDomain, SPF1Record spfRecord) throws PermErrorException, TempErrorException, NoneException, NeutralException {
         if (spfRecord == null) return null;
-        String mechanism = ((Directive) spfRecord.getDirectives().get(spfRecord.getDirectives().size())).toString();
+        List<Directive> directives = spfRecord.getDirectives();
+        if (directives.isEmpty()) {
+            return spfRecord;
+        }
+        String mechanism = directives.get(directives.size() - 1).toString();
         if (mechanism.equals("-all") || mechanism.equals("?all")) {
             LOGGER.debug("Add TrustedForwarderPolicy = include:{}", TRUSTED_FORWARDER_HOST);
             try {
@@ -63,7 +97,15 @@ public class TrustedForwarderPolicy implements PolicyPostFilter {
                         return this;
                     }
                 }.setHost(TRUSTED_FORWARDER_HOST);
-                spfRecord.getDirectives().add(spfRecord.getDirectives().size()-1, new Directive(null, trusted));
+                trusted.enableMacroExpand(macroExpand);
+                trusted.enableSPFChecking(spfChecker);
+                // a copy: the record can be shared, as the cached ones of FallbackPolicy
+                SPF1Record filtered = new SPF1Record(spfRecord.getRecord());
+                filtered.getDirectives().addAll(directives);
+                filtered.getModifiers().addAll(spfRecord.getModifiers());
+                // no qualifier, as the parser gives an "include:" term
+                filtered.getDirectives().add(directives.size() - 1, new Directive("", trusted));
+                return filtered;
             } catch (PermErrorException e) {
                 // will never happen
             }
