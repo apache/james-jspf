@@ -23,18 +23,22 @@ package org.apache.james.jspf;
 import org.apache.james.jspf.impl.DNSServiceXBillImpl;
 import org.junit.Test;
 import org.xbill.DNS.DClass;
+import org.xbill.DNS.Message;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.SPFRecord;
+import org.xbill.DNS.Section;
 import org.xbill.DNS.TXTRecord;
 import org.xbill.DNS.Type;
 
 import java.net.UnknownHostException;
+import java.util.Base64;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public class DNSServiceXBillImplTest {
     @Test
@@ -71,6 +75,16 @@ public class DNSServiceXBillImplTest {
         records = DNSServiceXBillImpl.convertRecordsToList(rr);
         assertNotNull(records);
         assertEquals("quoted string", records.get(0));
+    }
+
+    @Test
+    public void convertRecordsToListShouldIgnoreAnswersWithoutData() throws Exception {
+        // an UPDATE message holding a TXT answer of RDLENGTH 0: dnsjava parses it as an EmptyRecord of type TXT
+        byte[] message = Base64.getDecoder().decode("AAEpgAABAAEAAAAAB2V4YW1wbGUDY29tAIGDAAHADAAQAAEAAA4QAABs");
+        Record[] answer = new Message(message).getSection(Section.ANSWER).toArray(new Record[0]);
+
+        assertEquals(Type.TXT, answer[0].getType());
+        assertNull(DNSServiceXBillImpl.convertRecordsToList(answer));
     }
 
 }
