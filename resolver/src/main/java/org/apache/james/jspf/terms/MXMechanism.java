@@ -153,6 +153,9 @@ public class MXMechanism extends AMechanism implements DNSServiceEnabled, SPFChe
                 
             // no mx record found
             if (mxR == null || mxR.size() == 0) {
+                // clean up attributes: the next mx mechanism would take its MX names for the addresses of these
+                spfSession.removeAttribute(ATTRIBUTE_CHECK_RECORDS);
+                spfSession.removeAttribute(ATTRIBUTE_MX_RECORDS);
                 spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
                 return null;
             }
