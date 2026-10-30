@@ -50,9 +50,31 @@ public interface SPFTermsRegexps {
 
 
     /**
-     * ABNF: macro-string = *( macro-expand / macro-literal )
+     * The macro-expands of a macro-string, with the macro-literals before each of them.
+     *
+     * Possessive: java.util.regex recurses once per iteration of a repeated group it may backtrack
+     * into, which overflows the stack on a long macro-string, but loops over a possessive one. A
+     * macro-literal is never "%", so a macro-string splits into its tokens one way only: there is
+     * nothing to backtrack.
      */
+    final String MACRO_EXPANDS_REGEX = "(?:" + MACRO_LITERAL_REGEX + "*+" + MACRO_EXPAND_REGEX + ")*+";
+
+    /**
+     * ABNF: macro-string = *( macro-expand / macro-literal )
+     *
+     * @deprecated not used by jSPF any more: it recurses once per character, which overflows the
+     *             stack on a long macro-string. Use POSSESSIVE_MACRO_STRING_REGEX where nothing
+     *             follows it, or DOMAIN_SPEC_REGEX.
+     */
+    @Deprecated
     final String MACRO_STRING_REGEX = "(?:" + MACRO_STRING_REGEX_TOKEN +")*";
+
+    /**
+     * ABNF: macro-string = *( macro-expand / macro-literal ), matched possessively (see
+     * MACRO_EXPANDS_REGEX): it never gives a character back, so nothing that can be a macro-literal
+     * or a macro-expand may follow it, as at the end of a term.
+     */
+    final String POSSESSIVE_MACRO_STRING_REGEX = MACRO_EXPANDS_REGEX + MACRO_LITERAL_REGEX + "*+";
 
     final String ALPHA_DIGIT_PATTERN = "[a-zA-Z0-9]";
 
@@ -64,8 +86,7 @@ public interface SPFTermsRegexps {
     final String TOP_LABEL_REGEX = "(?:"
             + ALPHA_DIGIT_PATTERN + "*" + SPFTermsRegexps.ALPHA_PATTERN
             + "{1}" + ALPHA_DIGIT_PATTERN + "*|(?:"
-            + ALPHA_DIGIT_PATTERN + "+" + "\\-" + "(?:"
-            + ALPHA_DIGIT_PATTERN + "|\\-)*"
+            + ALPHA_DIGIT_PATTERN + "+" + "\\-" + "[a-zA-Z0-9\\-]*"
             + ALPHA_DIGIT_PATTERN + "))";
 
     /**
@@ -76,13 +97,22 @@ public interface SPFTermsRegexps {
 
     /**
      * ABNF: domain-spec = macro-string domain-end
+     *
+     * Matched without backtracking into the macro-expands (see MACRO_EXPANDS_REGEX): either the
+     * macro-expands then macro-literals ending with "." toplabel [ "." ], or macro-literals and
+     * macro-expands ending with a macro-expand. So a pattern appended to it cannot take a
+     * macro-expand back: what follows must hold none, as the CIDR lengths the terms append.
      */
-    final String DOMAIN_SPEC_REGEX = "("
-            + SPFTermsRegexps.MACRO_STRING_REGEX + DOMAIN_END_REGEX + ")";
+    final String DOMAIN_SPEC_REGEX = "((?:" + MACRO_EXPANDS_REGEX + MACRO_LITERAL_REGEX + "*\\."
+            + TOP_LABEL_REGEX + "\\.?" + "|(?:" + MACRO_LITERAL_REGEX + "*+" + MACRO_EXPAND_REGEX + ")++))";
 
     /**
      * Spring MACRO_STRING from DOMAIN_END (domain end starts with .)
+     *
+     * @deprecated not used by jSPF any more: its macro-string group recurses once per character,
+     *             which overflows the stack on a long domain-spec. Use DOMAIN_SPEC_REGEX.
      */
+    @Deprecated
     final String DOMAIN_SPEC_REGEX_R = "("
             + SPFTermsRegexps.MACRO_STRING_REGEX + ")(" + DOMAIN_END_REGEX + ")";
 

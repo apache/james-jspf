@@ -73,8 +73,7 @@ public class MacroExpand {
      * @param dnsProbe the dns service to use
      */
     public MacroExpand(DNSService dnsProbe) {
-        // This matches 2 groups
-        domainSpecPattern = Pattern.compile(SPFTermsRegexps.DOMAIN_SPEC_REGEX_R);
+        domainSpecPattern = Pattern.compile(SPFTermsRegexps.DOMAIN_SPEC_REGEX);
         // The real pattern replacer
         macroStringPattern = Pattern.compile(SPFTermsRegexps.MACRO_STRING_REGEX_TOKEN);
         // The macro letters pattern
@@ -221,23 +220,10 @@ public class MacroExpand {
 
         LOGGER.debug("Start expand domain: {}", input);
 
-        Matcher inputMatcher = domainSpecPattern.matcher(input);
-        if (!inputMatcher.matches() || inputMatcher.groupCount() != 2) {
+        if (!domainSpecPattern.matcher(input).matches()) {
             throw new PermErrorException("Invalid DomainSpec: "+input);
         }
 
-        StringBuffer res = new StringBuffer();
-        if (inputMatcher.group(1) != null && inputMatcher.group(1).length() > 0) {
-            res.append(expandMacroString(inputMatcher.group(1), macroData, false));
-        }
-        if (inputMatcher.group(2) != null && inputMatcher.group(2).length() > 0) {
-            if (inputMatcher.group(2).startsWith(".")) {
-                res.append(inputMatcher.group(2));
-            } else {
-                res.append(expandMacroString(inputMatcher.group(2), macroData, false));
-            }
-        }
-        
         String domainName = expandMacroString(input, macroData, false);
         if (domainName.indexOf('\r') >= 0 || domainName.indexOf('\n') >= 0) {
             throw new PermErrorException("Macro-expanded domain contains illegal CR or LF characters");
