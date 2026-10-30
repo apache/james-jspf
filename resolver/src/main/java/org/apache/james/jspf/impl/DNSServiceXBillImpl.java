@@ -22,6 +22,7 @@ package org.apache.james.jspf.impl;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -53,6 +54,16 @@ import org.xbill.DNS.lookup.LookupSession;
  */
 public class DNSServiceXBillImpl implements DNSService {
     private static final Logger LOGGER = LoggerFactory.getLogger(DNSServiceXBillImpl.class);
+
+    /**
+     * @return the records of the given type: an answer can hold others
+     */
+    private static Record[] ofType(Record[] rr, int type) {
+        if (rr == null) {
+            return null;
+        }
+        return Arrays.stream(rr).filter(record -> record.getType() == type).toArray(Record[]::new);
+    }
 
     // The record limit for lookups
     protected int recordLimit;
@@ -161,7 +172,7 @@ public class DNSServiceXBillImpl implements DNSService {
                 throw new TimeoutException(query.getErrorString());
             }
             
-            List<String> records = convertRecordsToList(rr);
+            List<String> records = convertRecordsToList(ofType(rr, dnsJavaType));
             
             LOGGER.debug("Found {} {}-Records", (rr != null ? rr.length : 0), recordTypeDescription);
             return records;
@@ -191,7 +202,7 @@ public class DNSServiceXBillImpl implements DNSService {
 
         try {
             return lookupSession.lookupAsync(Name.fromString(request.getHostname()), dnsJavaType)
-                .thenApply(result -> convertRecordsToList(result.getRecords().toArray(new Record[0])));
+                .thenApply(result -> convertRecordsToList(ofType(result.getRecords().toArray(new Record[0]), dnsJavaType)));
         } catch (TextParseException e) {
             // no record, as getRecords answers
             LOGGER.debug("No {} Record found for host: {}", recordTypeDescription, request.getHostname());
@@ -211,6 +222,12 @@ public class DNSServiceXBillImpl implements DNSService {
         if (rr != null && rr.length > 0) {
             records = new ArrayList<String>();
             for (int i = 0; i < rr.length; i++) {
+                // a record without data (dnsjava's EmptyRecord) has the type of the record it stands for,
+                // not its class: as a record of another type, it makes no data
+                if (!(rr[i] instanceof ARecord || rr[i] instanceof AAAARecord || rr[i] instanceof MXRecord
+                        || rr[i] instanceof PTRRecord || rr[i] instanceof TXTRecord || rr[i] instanceof SPFRecord)) {
+                    return null;
+                }
                 switch (rr[i].getType()) {
                     case Type.A:
                         ARecord a = (ARecord) rr[i];
