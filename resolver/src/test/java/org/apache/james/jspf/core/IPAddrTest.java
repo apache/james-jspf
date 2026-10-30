@@ -53,6 +53,20 @@ public class IPAddrTest extends TestCase {
         assertEquals("ip6", IPAddr.getInAddress("::"));
     }
 
+    public void testIsValidIP6AddressCountsTheGroups() {
+        assertTrue(Inet6Util.isValidIP6Address("1:2:3:4:5:6:7::"));
+        assertTrue(Inet6Util.isValidIP6Address("::2:3:4:5:6:7:8"));
+        assertTrue(Inet6Util.isValidIP6Address("1:2:3:4:5::7:8"));
+        assertTrue(Inet6Util.isValidIP6Address("1:2:3:4:5:6:1.2.3.4"));
+        assertTrue(Inet6Util.isValidIP6Address("1:2:3:4:5::1.2.3.4"));
+        assertTrue(Inet6Util.isValidIP6Address("::1.2.3.4"));
+        assertFalse(Inet6Util.isValidIP6Address("1:2:3:4:5:6:7:8:9"));
+        assertFalse(Inet6Util.isValidIP6Address("1:2:3:4::5:6:7:8"));
+        assertFalse(Inet6Util.isValidIP6Address("1:2:3::5:6:7:81.2.3.4"));
+        assertFalse(Inet6Util.isValidIP6Address("1:2:3:4:5:6:7:1.2.3.4"));
+        assertFalse(Inet6Util.isValidIP6Address("1:2:3:4:5:6:7"));
+    }
+
     public void testInvalidIp6Address() throws PermErrorException {
         try {
             assertEquals("ip6", IPAddr.getInAddress("12AB:0:0:CD3"));

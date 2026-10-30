@@ -298,7 +298,8 @@ public class Inet6Util {
                 }
                 // END FIX "IP6 mechanism syntax #ip6-bad1"
                 numberOfColons++;
-                if (numberOfColons > 7)
+                // 8 when a "::" starts or ends x:x:x:x:x:x:x: the groups are counted below
+                if (numberOfColons > 8)
                     return false;
                 if (numberOfPeriods > 0)
                     return false;
@@ -363,7 +364,27 @@ public class Inet6Util {
             }
         }
 
-        return true;
+        String address = ipAddress.substring(offset, length - offset);
+        if (address.indexOf('%') >= 0) {
+            address = address.substring(0, address.indexOf('%'));
+        }
+        return hasValidGroupCount(address, doubleColon);
+    }
+
+    /**
+     * RFC 4291 2.2: 8 groups of 16 bits, the last 2 of which can be written as an IPv4 address. A "::"
+     * stands for one or more groups of zeros, so it leaves at most 7.
+     */
+    private static boolean hasValidGroupCount(String address, boolean doubleColon) {
+        int groups = 0;
+        for (String group : address.split(":")) {
+            if (group.indexOf('.') >= 0) {
+                groups += 2;
+            } else if (!group.isEmpty()) {
+                groups++;
+            }
+        }
+        return doubleColon ? groups <= 7 : groups == 8;
     }
 
     public static boolean isValidIP4Word(String word) {
