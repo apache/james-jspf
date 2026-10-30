@@ -67,6 +67,16 @@ public class IPAddrTest extends TestCase {
         assertFalse(Inet6Util.isValidIP6Address("1:2:3:4:5:6:7"));
     }
 
+    public void testIsIPAddrRejectsWhatIsNoAddress() {
+        assertFalse(IPAddr.isIPAddr(""));
+        assertFalse(IPAddr.isIPAddr("["));
+        assertFalse(IPAddr.isIPAddr("2"));
+        assertFalse(IPAddr.isIPAddr("1:2:3:4:5:6:7:8:9"));
+        assertFalse(IPAddr.isIPAddr("1.2.3.4.5"));
+        assertTrue(IPAddr.isIPAddr("192.0.2.1"));
+        assertTrue(IPAddr.isIPAddr("2001:db8::1"));
+    }
+
     public void testInvalidIp6Address() throws PermErrorException {
         try {
             assertEquals("ip6", IPAddr.getInAddress("12AB:0:0:CD3"));
