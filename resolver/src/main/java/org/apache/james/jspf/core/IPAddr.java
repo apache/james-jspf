@@ -180,6 +180,11 @@ public class IPAddr {
      */
     private void stringToInternal(String netAddress) throws PermErrorException {
         netAddress = stripDot(netAddress);
+        // createByteArrayFromIPAddressString expects a valid address: it fails on "" or "[", ignores
+        // a group without ":" or "." ("2" read as ::), and writes past its array on too many groups
+        if (!isValidIP(netAddress)) {
+            throw new PermErrorException("Not a valid address: " + netAddress);
+        }
 
         try {
             byte[] bytes = Inet6Util.createByteArrayFromIPAddressString(netAddress);
