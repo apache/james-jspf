@@ -134,7 +134,11 @@ public class AMechanism extends GenericMechanism implements SPFCheckerDNSRespons
      */
     public synchronized void config(Configuration params) throws PermErrorException {
         super.config(params);
+        // the regex accepts any number of digits: more than 3 are invalid, and could overflow an int
         if (params.groupCount() >= 2 && params.group(2) != null) {
+            if (params.group(2).length() > 3) {
+                throw new PermErrorException("Ivalid IP4 CIDR length");
+            }
             ip4cidr = Integer.parseInt(params.group(2));
             if (ip4cidr > 32) {
                 throw new PermErrorException("Ivalid IP4 CIDR length");
@@ -143,6 +147,9 @@ public class AMechanism extends GenericMechanism implements SPFCheckerDNSRespons
             ip4cidr = 32;
         }
         if (params.groupCount() >= 3 && params.group(3) != null) {
+            if (params.group(3).length() > 3) {
+                throw new PermErrorException("Ivalid IP6 CIDR length");
+            }
             ip6cidr = Integer.parseInt(params.group(3).toString());
             if (ip6cidr > 128) {
                 throw new PermErrorException("Ivalid IP6 CIDR length");
