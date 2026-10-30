@@ -52,19 +52,24 @@ public class AsynchronousSPFExecutor implements SPFExecutor {
      * @see SPFExecutor#execute(SPFSession, FutureSPFResult)
      */
     public void execute(SPFSession session, FutureSPFResult result) {
-        SPFChecker checker = session.popChecker();
-        if (checker == null) {
-            result.setSPFResult(session);
-            return;
+        // Loop over the checkers needing no DNS lookup: recursing once per checker overflows the stack
+        // on a record of a few thousand terms
+        SPFChecker checker;
+        while ((checker = session.popChecker()) != null) {
+            // only execute checkers we added (better recursivity)
+            LOGGER.debug("Executing checker: {}", checker);
+            try {
+                DNSLookupContinuation cont = checker.checkSPF(session);
+                if (cont != null) {
+                    handleCont(session, result, cont, checker);
+                    return;
+                }
+            } catch (Exception e) {
+                handleErrorAndComplete(session, result, e);
+                return;
+            }
         }
-        // only execute checkers we added (better recursivity)
-        LOGGER.debug("Executing checker: {}", checker);
-        try {
-            DNSLookupContinuation cont = checker.checkSPF(session);
-            handleCont(session, result, cont, checker);
-        } catch (Exception e) {
-            handleErrorAndComplete(session, result, e);
-        }
+        result.setSPFResult(session);
     }
 
     private void handleCont(SPFSession session, FutureSPFResult result, DNSLookupContinuation cont, SPFChecker checker) {
