@@ -29,6 +29,7 @@ import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.core.SPFCheckerExceptionCatcher;
 import org.apache.james.jspf.core.SPFSession;
+import org.apache.james.jspf.core.exceptions.SPFErrorConstants;
 import org.apache.james.jspf.core.exceptions.SPFResultException;
 import org.apache.james.jspf.core.exceptions.TimeoutException;
 import org.slf4j.Logger;
@@ -127,22 +128,27 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
                     return;
                 }
             } catch (Exception e) {
-                while (e != null) {
-                    checker = session.popChecker(c -> c instanceof SPFCheckerExceptionCatcher);
-                    if (checker == null) {
-                        // Error case not handled by JSPF. Throw to avoid infinite loop. See JSPF-110.
-                        throw new RuntimeException("SPFCheckerExceptionCatcher implementation not found, session: " + session, e);
-                    }
-                    try {
-                        ((SPFCheckerExceptionCatcher) checker).onException(e, session);
-                        e = null;
-                    } catch (SPFResultException ex) {
-                        e = ex;
-                    }
-                }
+                handleError(session, e);
             }
         }
         result.setSPFResult(session);
+    }
+
+    private void handleError(SPFSession session, Exception e) {
+        while (e != null) {
+            SPFChecker checker = session.popChecker(c -> c instanceof SPFCheckerExceptionCatcher);
+            if (checker == null) {
+                // Error case not handled by JSPF. Throw to avoid infinite loop. See JSPF-110.
+                throw new RuntimeException("SPFCheckerExceptionCatcher implementation not found, session: " + session, e);
+            }
+            try {
+                ((SPFCheckerExceptionCatcher) checker).onException(e, session);
+                e = null;
+            } catch (SPFResultException | RuntimeException ex) {
+                // IncludeMechanism and RedirectModifier rethrow an unexpected exception: the next catcher handles it
+                e = ex;
+            }
+        }
     }
 
     /**
@@ -175,44 +181,41 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
             Integer respId = (Integer)resp.getId();
             SPFSession session = sessions.remove(respId);
             FutureSPFResult result = results.remove(respId);
-            
-            DNSLookupContinuation cont = (DNSLookupContinuation) session.getAttribute(ATTRIBUTE_STAGED_EXECUTOR_CONTINUATION);
-            
+
+            try {
+                onResponse(session, result, resp);
+            } catch (RuntimeException e) {
+                // Never leave the result pending nor end this thread: an unexpected error is a temperror
+                LOGGER.error("Unexpected error during the staged SPF check", e);
+                session.setCurrentResult(SPFErrorConstants.TEMP_ERROR_CONV);
+                session.setCurrentResultExpanded(SPFErrorConstants.TEMP_ERROR_CONV);
+                result.setSPFResult(session);
+            }
+        }
+    }
+
+    private void onResponse(SPFSession session, FutureSPFResult result, IResponse resp) {
+        DNSLookupContinuation cont = (DNSLookupContinuation) session.getAttribute(ATTRIBUTE_STAGED_EXECUTOR_CONTINUATION);
+        try {
             DNSResponse response;
-            if (resp.getException() != null) {
+            if (resp.getException() instanceof TimeoutException) {
                 response = new DNSResponse((TimeoutException) resp.getException());
+            } else if (resp.getException() != null) {
+                // any other lookup error goes to the exception catcher
+                throw resp.getException();
             } else {
                 response = new DNSResponse(resp.getValue());
             }
-            
-            
-            try {
-                cont = cont.getListener().onDNSResponse(response, session);
-                
-                if (cont != null) {
-                    invokeAsynchService(session, result, cont, false);
-                } else {
-                    execute(session, result, false);
-                }
 
-            } catch (Exception e) {
-                SPFChecker checker = null;
-                while (e != null) {
-                    while (checker == null || !(checker instanceof SPFCheckerExceptionCatcher)) {
-                        checker = session.popChecker();
-                    }
-                    try {
-                        ((SPFCheckerExceptionCatcher) checker).onException(e, session);
-                        e = null;
-                    } catch (SPFResultException ex) {
-                        e = ex;
-                    } finally {
-                        checker = null;
-                    }
-                }
-                execute(session, result, false);
+            cont = cont.getListener().onDNSResponse(response, session);
+            if (cont != null) {
+                invokeAsynchService(session, result, cont, false);
+                return;
             }
+        } catch (Exception e) {
+            handleError(session, e);
         }
+        execute(session, result, false);
     }
 
 }
