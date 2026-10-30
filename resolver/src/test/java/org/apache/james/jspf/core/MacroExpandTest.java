@@ -137,6 +137,19 @@ public class MacroExpandTest extends TestCase {
         assertEquals("example.email", defIp4me.expand("%{d2r}", new rfcIP4MacroData(), MacroExpand.DOMAIN));
     }
 
+    public void testDigitTransformerAboveAnIntKeepsAllTheParts() throws PermErrorException {
+        assertEquals("email.example.com", defIp4me.expand("%{d99999999999}", new rfcIP4MacroData(), MacroExpand.DOMAIN));
+        assertEquals("com.example.email", defIp4me.expand("%{d99999999999r}", new rfcIP4MacroData(), MacroExpand.DOMAIN));
+    }
+
+    public void testLongZeroDigitTransformerIsError() {
+        try {
+            defIp4me.expand("%{d00000000000}", new rfcIP4MacroData(), MacroExpand.DOMAIN);
+            fail("zero digit transformer");
+        } catch (PermErrorException e) {
+        }
+    }
+
     public void testPercL() throws PermErrorException {
         assertEquals("strong-bad", defIp4me.expand("%{l}", new rfcIP4MacroData(), MacroExpand.DOMAIN));
         assertEquals("strong.bad", defIp4me.expand("%{l-}", new rfcIP4MacroData(), MacroExpand.DOMAIN));
