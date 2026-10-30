@@ -472,6 +472,14 @@ public abstract class SPFExecutorBaseTest {
     }
 
     @Test(timeout = 10000)
+    public void shouldReturnPermErrorWhenIncludeHostIsNotADomainName() throws IOException {
+        String hostname = "includeHostNotADomainName.spfexecutor.fake";
+        SPFResult result = checkRecord(hostname, "v=spf1 include:a.." + hostname + " -all", "192.0.2.127");
+
+        assertEquals(SPFErrorConstants.PERM_ERROR_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
     public void ipv4MappedIp6NetworkShouldNotMatchAnIp4Client() throws IOException {
         SPFResult result = checkRecord("ipv4MappedIp6Network.spfexecutor.fake", "v=spf1 ip6:::ffff:0.2.3.4/3 -all", "1.2.3.4");
 
