@@ -470,4 +470,18 @@ public abstract class SPFExecutorBaseTest {
 
         assertEquals(SPFErrorConstants.PERM_ERROR_CONV, result.getResult());
     }
+
+    @Test(timeout = 10000)
+    public void shouldReturnPermErrorOnAIp4CidrOverflowingAnInt() throws IOException {
+        SPFResult result = checkRecord("aIp4CidrOverflow.spfexecutor.fake", "v=spf1 a/4294967296 -all", "1.2.3.4");
+
+        assertEquals(SPFErrorConstants.PERM_ERROR_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void shouldReturnPermErrorOnMxIp6CidrOverflowingAnInt() throws IOException {
+        SPFResult result = checkRecord("mxIp6CidrOverflow.spfexecutor.fake", "v=spf1 mx//99999999999 -all", "1.2.3.4");
+
+        assertEquals(SPFErrorConstants.PERM_ERROR_CONV, result.getResult());
+    }
 }
