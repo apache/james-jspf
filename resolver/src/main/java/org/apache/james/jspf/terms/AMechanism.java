@@ -222,7 +222,7 @@ public class AMechanism extends GenericMechanism implements SPFCheckerDNSRespons
             res.append("/"+getIp4cidr());
         }
         if (getIp6cidr() != 128) {
-            res.append("//"+getIp4cidr());
+            res.append("//"+getIp6cidr());
         }
         return res.toString();
     }
