@@ -10,16 +10,21 @@ import org.apache.james.jspf.impl.SPF;
 import org.apache.james.jspf.policies.local.TrustedForwarderPolicy;
 import org.junit.Before;
 import org.junit.Test;
+import org.xbill.DNS.ARecord;
 import org.xbill.DNS.DClass;
 import org.xbill.DNS.Lookup;
+import org.xbill.DNS.MXRecord;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.Resolver;
 import org.xbill.DNS.SPFRecord;
 import org.xbill.DNS.SimpleResolver;
 import org.xbill.DNS.TXTRecord;
 import org.xbill.DNS.TextParseException;
+import org.xbill.DNS.Type;
+import org.xbill.DNS.lookup.NoSuchRRSetException;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -506,5 +511,74 @@ public abstract class SPFExecutorBaseTest {
         SPFResult result = checkRecord("mxIp6CidrOverflow.spfexecutor.fake", "v=spf1 mx//99999999999 -all", "1.2.3.4");
 
         assertEquals(SPFErrorConstants.PERM_ERROR_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void mxShouldMatchAfterAnMxWhoseHostsHaveNoAddress() throws IOException {
+        String hostname = "mxAfterMxWithoutAddress.spfexecutor.fake";
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L,
+            "v=spf1 mx:a." + hostname + " mx:b." + hostname + " -all"));
+        fakeResolver.addRecord(new MXRecord(Name.fromString("a." + hostname + "."), DClass.IN, 30L, 10,
+            Name.fromString("mail.a." + hostname + ".")));
+        fakeResolver.addRecord(new MXRecord(Name.fromString("b." + hostname + "."), DClass.IN, 30L, 10,
+            Name.fromString("mail.b." + hostname + ".")));
+        fakeResolver.addRecord(new ARecord(Name.fromString("mail.b." + hostname + "."), DClass.IN, 30L,
+            InetAddress.getByName("192.0.2.10")));
+
+        SPFResult result = createCustomSPF(new DNSServiceXBillImpl(fakeResolver))
+            .checkSPF("192.0.2.10", "a_user@" + hostname, hostname);
+
+        assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void mxShouldMatchAfterAnMxOfADomainWithoutMx() {
+        DNSService dns = new DNSService() {
+            public List<String> getRecords(DNSRequest request) {
+                switch (request.getRecordType()) {
+                    case DNSRequest.TXT:
+                        return request.getHostname().equals("example.com")
+                            ? new ArrayList<>(List.of("v=spf1 mx:nomx.example.com mx -all")) : null;
+                    case DNSRequest.MX:
+                        return request.getHostname().equals("example.com")
+                            ? new ArrayList<>(List.of("mail.example.com")) : null;
+                    case DNSRequest.A:
+                        return request.getHostname().equals("mail.example.com")
+                            ? new ArrayList<>(List.of("192.0.2.10")) : null;
+                    default:
+                        return null;
+                }
+            }
+
+            // as DNSServiceXBillImpl: an asynchronous lookup without data fails
+            public CompletionStage<List<String>> getRecordsAsync(DNSRequest request) {
+                List<String> records = getRecords(request);
+                if (records == null) {
+                    CompletableFuture<List<String>> noData = new CompletableFuture<>();
+                    noData.completeExceptionally(new NoSuchRRSetException(Name.root, Type.MX));
+                    return noData;
+                }
+                return CompletableFuture.completedFuture(records);
+            }
+
+            public List<String> getLocalDomainNames() {
+                return List.of("localhost");
+            }
+
+            public void setTimeOut(int timeOut) {
+            }
+
+            public int getRecordLimit() {
+                return 10;
+            }
+
+            public void setRecordLimit(int recordLimit) {
+            }
+        };
+
+        SPFResult result = createCustomSPF(dns).checkSPF("192.0.2.10", "foo@example.com", "example.com");
+
+        assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
     }
 }
