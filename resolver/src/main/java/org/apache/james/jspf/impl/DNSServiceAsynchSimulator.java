@@ -111,7 +111,8 @@ public class DNSServiceAsynchSimulator implements Runnable, DNSAsynchLookupServi
                     IResponseImpl response;
                     try {
                         response = new IResponseImpl(req.getId(), dnsService.getRecords(req.getValue()));
-                    } catch (TimeoutException e) {
+                    } catch (TimeoutException | RuntimeException e) {
+                        // an unchecked exception would end the thread: no later lookup would get an answer
                         response = new IResponseImpl(req.getId(), e);
                     }
 
