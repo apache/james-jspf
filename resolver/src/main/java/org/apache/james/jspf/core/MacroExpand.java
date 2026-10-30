@@ -64,7 +64,20 @@ public class MacroExpand {
     public static class RequireClientDomainException extends Exception {
 
         private static final long serialVersionUID = 3834282981657676530L;
-        
+
+    }
+
+    /**
+     * @param digits the DIGIT transformer of a macro, of any length
+     * @return its value, Integer.MAX_VALUE for a larger one: more parts than there are means all of
+     *         them (RFC 7208 7.1)
+     */
+    private static int parseDigitTransformer(String digits) {
+        String value = digits.replaceFirst("^0+", "");
+        if (value.length() > 9) {
+            return Integer.MAX_VALUE;
+        }
+        return value.isEmpty() ? 0 : Integer.parseInt(value);
     }
 
     /**
@@ -345,7 +358,7 @@ public class MacroExpand {
         cellMatcher = cellPattern.matcher(replaceValue);
         while (cellMatcher.find()) {
             domainNumber = cellMatcher.group();
-            if (Integer.parseInt(domainNumber) == 0) {
+            if (parseDigitTransformer(domainNumber) == 0) {
                 throw new PermErrorException(
                         "Digit transformer must be non-zero");
             }
@@ -373,7 +386,7 @@ public class MacroExpand {
         // Truncate domain name to number of sub sections
         String returnData;
         if (!domainNumber.equals("")) {
-            returnData = subset(data, Integer.parseInt(domainNumber));
+            returnData = subset(data, parseDigitTransformer(domainNumber));
         } else {
             returnData = subset(data);
         }
