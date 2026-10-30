@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -344,6 +345,23 @@ public abstract class SPFExecutorBaseTest {
 
         SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
         SPFResult result = spf.checkSPF("192.0.2.127", "a_user@" + hostname, hostname);
+
+        assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void shouldHandleRecordWithManyTerms() throws IOException {
+        String hostname = "shouldHandleRecordWithManyTerms.spfexecutor.fake";
+        String record = "v=spf1 " + String.join(" ", Collections.nCopies(3000, "ip4:192.0.2.1")) + " -all";
+        // one TXT record made of 255 byte strings, as DNS carries it
+        List<String> strings = IntStream.range(0, (record.length() + 254) / 255)
+            .mapToObj(i -> record.substring(i * 255, Math.min(record.length(), (i + 1) * 255)))
+            .collect(Collectors.toList());
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, strings));
+
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+        SPFResult result = spf.checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
 
         assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
     }
