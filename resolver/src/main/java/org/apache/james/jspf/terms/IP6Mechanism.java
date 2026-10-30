@@ -20,7 +20,9 @@
 
 package org.apache.james.jspf.terms;
 
+import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.Inet6Util;
+import org.apache.james.jspf.core.exceptions.PermErrorException;
 
 /**
  * This class represent the ip6 mechanism
@@ -39,6 +41,16 @@ public class IP6Mechanism extends IP4Mechanism {
      */
     protected boolean isValidAddress(String ipString) {
         return Inet6Util.isValidIP6Address(ipString);
+    }
+
+    /**
+     * An IPv4-mapped network (::ffff:a.b.c.d) stays an IPv6 network, of an IPv6 prefix length: as
+     * any ip6 network, it does not match an IPv4 client (RFC 7208 5.6).
+     *
+     * @see org.apache.james.jspf.terms.IP4Mechanism#createNetwork(String, int)
+     */
+    protected IPAddr createNetwork(String ipString, int maskLength) throws PermErrorException {
+        return IPAddr.getIP6Address(ipString, maskLength);
     }
 
     /**

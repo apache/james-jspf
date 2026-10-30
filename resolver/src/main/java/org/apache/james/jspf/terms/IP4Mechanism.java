@@ -78,7 +78,17 @@ public class IP4Mechanism extends GenericMechanism {
                 throw new PermErrorException("Invalid CIDR: " + maskLengthString);
             }
         }
-        ip = IPAddr.getAddress(ipString, maskLength);
+        ip = createNetwork(ipString, maskLength);
+    }
+
+    /**
+     * @param ipString the address of the network
+     * @param maskLength its prefix length
+     * @return the network
+     * @throws PermErrorException if the address is not valid
+     */
+    protected IPAddr createNetwork(String ipString, int maskLength) throws PermErrorException {
+        return IPAddr.getAddress(ipString, maskLength);
     }
 
     /**
