@@ -193,8 +193,9 @@ public class DNSServiceXBillImpl implements DNSService {
             return lookupSession.lookupAsync(Name.fromString(request.getHostname()), dnsJavaType)
                 .thenApply(result -> convertRecordsToList(result.getRecords().toArray(new Record[0])));
         } catch (TextParseException e) {
+            // no record, as getRecords answers
             LOGGER.debug("No {} Record found for host: {}", recordTypeDescription, request.getHostname());
-            throw new IllegalArgumentException();
+            return CompletableFuture.completedFuture(null);
         }
     }
 
