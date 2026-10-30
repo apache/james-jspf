@@ -3,6 +3,7 @@ package org.apache.james.jspf;
 import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.exceptions.SPFErrorConstants;
+import org.apache.james.jspf.core.exceptions.TimeoutException;
 import org.apache.james.jspf.executor.SPFResult;
 import org.apache.james.jspf.helpers.FakeResolver;
 import org.apache.james.jspf.impl.DNSServiceXBillImpl;
@@ -67,6 +68,31 @@ public abstract class SPFExecutorBaseTest {
         FakeResolver fakeResolver = new FakeResolver();
         fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, record));
         return createCustomSPF(new DNSServiceXBillImpl(fakeResolver)).checkSPF(ipAddress, "a_user@" + hostname, hostname);
+    }
+
+    // the lookups of broken.<hostname> fail with an unchecked exception, as dnsjava may do on an answer it cannot handle
+    private SPFResult checkRecordWithBrokenHost(String hostname, String record) throws IOException {
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, record));
+        String brokenHost = "broken." + hostname;
+        DNSService dns = new DNSServiceXBillImpl(fakeResolver) {
+            @Override
+            public List<String> getRecords(DNSRequest request) throws TimeoutException {
+                if (request.getHostname().equals(brokenHost)) {
+                    throw new IllegalStateException("answer dnsjava cannot handle");
+                }
+                return super.getRecords(request);
+            }
+
+            @Override
+            public CompletionStage<List<String>> getRecordsAsync(DNSRequest request) {
+                if (request.getHostname().equals(brokenHost)) {
+                    return CompletableFuture.failedFuture(new IllegalStateException("answer dnsjava cannot handle"));
+                }
+                return super.getRecordsAsync(request);
+            }
+        };
+        return createCustomSPF(dns).checkSPF("192.0.2.10", "a_user@" + hostname, hostname);
     }
 
     @Test
@@ -580,5 +606,22 @@ public abstract class SPFExecutorBaseTest {
         SPFResult result = createCustomSPF(dns).checkSPF("192.0.2.10", "foo@example.com", "example.com");
 
         assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void shouldEndAsNeutralOnAnUnexpectedLookupErrorInAnInclude() throws IOException {
+        String hostname = "unexpectedErrorInInclude.spfexecutor.fake";
+        SPFResult result = checkRecordWithBrokenHost(hostname, "v=spf1 include:broken." + hostname + " -all");
+
+        // as at the top level, the exception catcher of SPF makes the unexpected error neutral
+        assertEquals(SPFErrorConstants.NEUTRAL_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void shouldEndAsNeutralOnAnUnexpectedLookupErrorInARedirect() throws IOException {
+        String hostname = "unexpectedErrorInRedirect.spfexecutor.fake";
+        SPFResult result = checkRecordWithBrokenHost(hostname, "v=spf1 redirect=broken." + hostname);
+
+        assertEquals(SPFErrorConstants.NEUTRAL_CONV, result.getResult());
     }
 }
