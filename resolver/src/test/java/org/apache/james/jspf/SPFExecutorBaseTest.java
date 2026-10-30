@@ -58,6 +58,12 @@ public abstract class SPFExecutorBaseTest {
         return Paths.get(zonesDir, zoneFile).toAbsolutePath().toString();
     }
 
+    private SPFResult checkRecord(String hostname, String record, String ipAddress) throws IOException {
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, record));
+        return createCustomSPF(new DNSServiceXBillImpl(fakeResolver)).checkSPF(ipAddress, "a_user@" + hostname, hostname);
+    }
+
     @Test
     public void test() {
         SPF spf = createSPF();
@@ -449,5 +455,19 @@ public abstract class SPFExecutorBaseTest {
         SPFResult result = spf.checkSPF("192.0.2.201", "a_user@" + hostname, hostname);
 
         assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void shouldReturnPermErrorOnIp4CidrOverflowingAnInt() throws IOException {
+        SPFResult result = checkRecord("ip4CidrOverflow.spfexecutor.fake", "v=spf1 ip4:192.0.2.1/4294967296 -all", "1.2.3.4");
+
+        assertEquals(SPFErrorConstants.PERM_ERROR_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void shouldReturnPermErrorOnIp6CidrOverflowingAnInt() throws IOException {
+        SPFResult result = checkRecord("ip6CidrOverflow.spfexecutor.fake", "v=spf1 ip6:2001:db8::/99999999999 -all", "1.2.3.4");
+
+        assertEquals(SPFErrorConstants.PERM_ERROR_CONV, result.getResult());
     }
 }

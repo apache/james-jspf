@@ -68,6 +68,10 @@ public class IP4Mechanism extends GenericMechanism {
         int maskLength = getMaxCidr();
         if (params.groupCount() >= 2 && params.group(2) != null) {
             String maskLengthString = params.group(2);
+            // the regex accepts any number of digits: more than 3 are invalid, and could overflow an int
+            if (maskLengthString.length() > 3) {
+                throw new PermErrorException("Invalid CIDR: " + maskLengthString);
+            }
             maskLength = Integer.parseInt(maskLengthString);
 
             if (maskLength > getMaxCidr() || (maskLengthString.length() > 1 && maskLengthString.startsWith("0"))) {
