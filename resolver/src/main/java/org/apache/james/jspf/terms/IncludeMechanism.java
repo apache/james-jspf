@@ -69,9 +69,11 @@ public class IncludeMechanism implements Mechanism, ConfigurationEnabled, SPFChe
         private String previousResult;
         private String previousResultExpanded;
         private String previousDomain;
+        private boolean previousIgnoreExplanation;
 
         private void restoreSession(SPFSession spfData) {
-            spfData.setIgnoreExplanation(false);
+            // true again when this include is nested in another one
+            spfData.setIgnoreExplanation(previousIgnoreExplanation);
             spfData.setCurrentDomain(previousDomain);
             spfData.setCurrentResult(previousResult);
             spfData.setCurrentResultExpanded(previousResultExpanded);
@@ -134,6 +136,7 @@ public class IncludeMechanism implements Mechanism, ConfigurationEnabled, SPFChe
             this.previousResult = spfSession.getCurrentResult();
             this.previousDomain = spfSession.getCurrentDomain();
             this.previousResultExpanded = spfSession.getCurrentResultExpanded();
+            this.previousIgnoreExplanation = spfSession.ignoreExplanation();
             return this;
         }
     }

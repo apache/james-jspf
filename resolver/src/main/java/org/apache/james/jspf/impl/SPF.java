@@ -182,6 +182,36 @@ public class SPF implements SPFChecker {
 
     }
 
+    /**
+     * Applies the TrustedForwarderPolicy to the record of the checked domain, and of its redirect=,
+     * not to the included ones: the trusted forwarder host would be included again from its own
+     * record, and from the records it includes.
+     */
+    private static final class TrustedForwarderPolicyChecker implements SPFChecker {
+        private final SPFChecker policyChecker;
+
+        public TrustedForwarderPolicyChecker(TrustedForwarderPolicy policy) {
+            this.policyChecker = new SPFPolicyPostFilterChecker(policy);
+        }
+
+        /**
+         * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
+         */
+        public DNSLookupContinuation checkSPF(SPFSession spfData)
+                throws PermErrorException, TempErrorException,
+                NeutralException, NoneException {
+            // only an include ignores the explanation of the record it checks
+            if (spfData.ignoreExplanation()) {
+                return null;
+            }
+            return policyChecker.checkSPF(spfData);
+        }
+
+        public String toString() {
+            return "TFC:" + policyChecker.toString();
+        }
+    }
+
     private DNSService dnsProbe;
 
     private SPFRecordParser parser;
@@ -390,7 +420,10 @@ public class SPF implements SPFChecker {
         
         // trustedForwarder support is enabled
         if (useTrustedForwarder) {
-            policies.add(new SPFPolicyPostFilterChecker(new TrustedForwarderPolicy()));
+            TrustedForwarderPolicy trustedForwarderPolicy = new TrustedForwarderPolicy();
+            trustedForwarderPolicy.enableMacroExpand(macroExpand);
+            trustedForwarderPolicy.enableSPFChecking(this);
+            policies.add(new TrustedForwarderPolicyChecker(trustedForwarderPolicy));
         }
 
         policies.add(new SPFPolicyPostFilterChecker(new NeutralIfNotMatchPolicy()));
