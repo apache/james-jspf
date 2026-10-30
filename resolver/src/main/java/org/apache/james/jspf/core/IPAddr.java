@@ -83,6 +83,34 @@ public class IPAddr {
     }
 
     /**
+     * Get the address of an ip6 network. Unlike {@link #getAddress(String, int)}, an IPv4-mapped
+     * address (::ffff:a.b.c.d) stays an IPv6 address: its prefix length counts the 96 bits before
+     * the IPv4 part.
+     *
+     * @param netAddress
+     *            The IPv6 address
+     * @param maskLength
+     *            The netmask
+     * @return the IPv6 address
+     * @throws PermErrorException
+     *             on error
+     */
+    public static IPAddr getIP6Address(String netAddress, int maskLength)
+            throws PermErrorException {
+        IPAddr returnAddress = new IPAddr();
+        returnAddress.stringToInternal(netAddress);
+        if (returnAddress.ipLength == 4) {
+            int[] ip4Address = returnAddress.address;
+            returnAddress.setIP6Defaults();
+            returnAddress.address[5] = 0xffff;
+            returnAddress.address[6] = (ip4Address[0] & 0xff) * 256 + (ip4Address[1] & 0xff);
+            returnAddress.address[7] = (ip4Address[2] & 0xff) * 256 + (ip4Address[3] & 0xff);
+        }
+        returnAddress.setMask(maskLength);
+        return returnAddress;
+    }
+
+    /**
      * Check if a the Object is instance of this class
      * 
      * @param data

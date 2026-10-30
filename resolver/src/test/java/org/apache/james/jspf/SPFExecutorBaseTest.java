@@ -472,6 +472,21 @@ public abstract class SPFExecutorBaseTest {
     }
 
     @Test(timeout = 10000)
+    public void ipv4MappedIp6NetworkShouldNotMatchAnIp4Client() throws IOException {
+        SPFResult result = checkRecord("ipv4MappedIp6Network.spfexecutor.fake", "v=spf1 ip6:::ffff:0.2.3.4/3 -all", "1.2.3.4");
+
+        assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void ipv4MappedIp6NetworkShouldKeepItsIp6PrefixLength() throws IOException {
+        // ::ffff:0.2.3.4/3 is ::/3
+        SPFResult result = checkRecord("ipv4MappedIp6Prefix.spfexecutor.fake", "v=spf1 ip6:::ffff:0.2.3.4/3 -all", "::1");
+
+        assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
     public void shouldReturnPermErrorOnAIp4CidrOverflowingAnInt() throws IOException {
         SPFResult result = checkRecord("aIp4CidrOverflow.spfexecutor.fake", "v=spf1 a/4294967296 -all", "1.2.3.4");
 
