@@ -36,6 +36,8 @@ import org.apache.james.jspf.core.exceptions.NoneException;
 import org.apache.james.jspf.core.exceptions.PermErrorException;
 import org.apache.james.jspf.core.exceptions.TempErrorException;
 import org.apache.james.jspf.core.exceptions.TimeoutException;
+import org.xbill.DNS.Name;
+import org.xbill.DNS.TextParseException;
 
 import java.util.List;
 
@@ -93,6 +95,22 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled,
      */
     public static final String REGEX = "[pP][tT][rR]" + "(?:\\:"
             + SPFTermsRegexps.DOMAIN_SPEC_REGEX + ")?";
+
+    /**
+     * @param validated a validated domain name
+     * @param target the target domain
+     * @return true if the validated name is the target or a subdomain of it, label by label and
+     *         whatever the case and a trailing dot (RFC 4343, RFC 7208 5.5)
+     */
+    private static boolean isSubdomain(String validated, String target) {
+        try {
+            Name targetName = Name.fromString(target, Name.root);
+            // the root is no target: every name is under it
+            return !targetName.equals(Name.root) && Name.fromString(validated, Name.root).subdomain(targetName);
+        } catch (TextParseException e) {
+            return false;
+        }
+    }
     
     private DNSService dnsService;
 
@@ -159,8 +177,7 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled,
                         // Added the IPAddr parsing/toString to have matching in IPV6 multiple ways to 
                         if (IPAddr.getAddress((String) aList.get(j)).getIPAddress().equals(IPAddr.getAddress(spfSession.getIpAddress()).getIPAddress())) {
                             
-                            if (compareDomain.equals(host)
-                                    || compareDomain.endsWith("." + host)) {
+                            if (isSubdomain(compareDomain, host)) {
                                 spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.TRUE);
                                 return null;
                             }

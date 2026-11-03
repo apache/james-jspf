@@ -16,6 +16,7 @@ import org.xbill.DNS.DClass;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.MXRecord;
 import org.xbill.DNS.Name;
+import org.xbill.DNS.PTRRecord;
 import org.xbill.DNS.Resolver;
 import org.xbill.DNS.SPFRecord;
 import org.xbill.DNS.SimpleResolver;
@@ -31,6 +32,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ThreadLocalRandom;
@@ -58,6 +60,18 @@ public abstract class SPFExecutorBaseTest {
         fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L,
             "v=spf1 include:" + target + " " + lastTerm));
         fakeResolver.addRecord(new TXTRecord(Name.fromString(target + "."), DClass.IN, 30L, "v=spf1 -all"));
+        return fakeResolver;
+    }
+
+    // hostname has "v=spf1 <ptrTerm> -all", and 1.2.3.4 the validated name <ptrName>
+    private static FakeResolver ptrOfTheClient(String hostname, String ptrTerm, String ptrName) throws IOException {
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L,
+            "v=spf1 " + ptrTerm + " -all"));
+        fakeResolver.addRecord(new PTRRecord(Name.fromString("4.3.2.1.in-addr.arpa."), DClass.IN, 30L,
+            Name.fromString(ptrName)));
+        fakeResolver.addRecord(new ARecord(Name.fromString(ptrName), DClass.IN, 30L,
+            InetAddress.getByName("1.2.3.4")));
         return fakeResolver;
     }
 
@@ -614,6 +628,40 @@ public abstract class SPFExecutorBaseTest {
         spf.getOverridePolicy().addEntry("*." + domain, "v=spf1 +all");
 
         SPFResult result = spf.checkSPF("192.0.2.10", "a_user@" + hostname, hostname);
+
+        assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void ptrShouldMatchADomainInUpperCase() throws IOException {
+        String hostname = "ptrcase.spfexecutor.fake";
+        FakeResolver fakeResolver = ptrOfTheClient(hostname, "ptr:" + hostname.toUpperCase(Locale.ROOT),
+            "mail." + hostname + ".");
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+
+        SPFResult result = spf.checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
+
+        assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void ptrShouldMatchASenderDomainWithATrailingDot() throws IOException {
+        String hostname = "ptrdot.spfexecutor.fake";
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(ptrOfTheClient(hostname, "ptr", "mail." + hostname + ".")));
+
+        SPFResult result = spf.checkSPF("1.2.3.4", "a_user@" + hostname + ".", hostname);
+
+        assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void ptrShouldNotMatchALabelHoldingADotAsASubdomain() throws IOException {
+        String hostname = "ptrlabel.spfexecutor.fake";
+        // the labels "mail.ptrlabel", "spfexecutor" and "fake": a sibling of hostname, not a subdomain
+        FakeResolver fakeResolver = ptrOfTheClient(hostname, "ptr", "mail\\." + hostname + ".");
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+
+        SPFResult result = spf.checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
 
         assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
     }
