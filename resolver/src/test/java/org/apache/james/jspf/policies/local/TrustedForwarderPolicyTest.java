@@ -40,7 +40,6 @@ public class TrustedForwarderPolicyTest {
 
     @Test
     public void getSPFRecordShouldNotChangeTheGivenRecord() throws Exception {
-        // FallbackPolicy hands the same record to every check
         SPF1Record record = new RFC4408SPF1Parser(new DefaultTermsFactory()).parse("v=spf1 -all");
 
         new TrustedForwarderPolicy().getSPFRecord("example.com", record);

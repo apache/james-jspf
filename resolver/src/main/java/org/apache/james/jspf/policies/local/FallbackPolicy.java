@@ -41,6 +41,18 @@ import org.slf4j.LoggerFactory;
 public class FallbackPolicy implements PolicyPostFilter {
     private static final Logger LOGGER = LoggerFactory.getLogger(FallbackPolicy.class);
 
+    /**
+     * @param record the record of an entry
+     * @return a record of the same terms, for one check: the policies after this one add their
+     *         modifiers to the record they get
+     */
+    private static SPF1Record copyOf(SPF1Record record) {
+        SPF1Record copy = new SPF1Record(record.getRecord());
+        copy.getDirectives().addAll(record.getDirectives());
+        copy.getModifiers().addAll(record.getModifiers());
+        return copy;
+    }
+
     private Map<String,SPF1Record> entryMap;
 
     private SPFRecordParser parser;
@@ -134,7 +146,7 @@ public class FallbackPolicy implements PolicyPostFilter {
         }
 
         if (entry != null) {
-            return entry;
+            return copyOf(entry);
         } else {
             return null;
         }
