@@ -82,9 +82,13 @@ public interface SPFTermsRegexps {
      * ABNF: toplabel = ( *alphanum ALPHA *alphanum ) / ( 1*alphanum "-" *(
      * alphanum / "-" ) alphanum ) ; LDH rule plus additional TLD restrictions ;
      * (see [RFC3696], Section 2)
+     *
+     * The first alternative splits the label before its first letter, so it matches one way only:
+     * *alphanum ALPHA *alphanum can split it around any of its letters, and trying them all when
+     * the rest of the term does not match is quadratic in the length of the label.
      */
     final String TOP_LABEL_REGEX = "(?:"
-            + ALPHA_DIGIT_PATTERN + "*" + SPFTermsRegexps.ALPHA_PATTERN
+            + "[0-9]*" + SPFTermsRegexps.ALPHA_PATTERN
             + "{1}" + ALPHA_DIGIT_PATTERN + "*|(?:"
             + ALPHA_DIGIT_PATTERN + "+" + "\\-" + "[a-zA-Z0-9\\-]*"
             + ALPHA_DIGIT_PATTERN + "))";
