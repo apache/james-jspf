@@ -43,8 +43,6 @@ public class IPAddr {
     private int ipRun = 4;
 
     private String ipJoiner = ".";
-    
-    private static String ipv4MappedRegex = "::FFFF:[1-9][0-9]{0,2}\\.[1-9][0-9]{0,2}\\.[1-9][0-9]{0,2}\\.[1-9][0-9]{0,2}";
 
     // Allow factory creates only
     private IPAddr() {
@@ -494,24 +492,17 @@ public class IPAddr {
      * @throws PermErrorException if the given ipAddress is invalid
      */
     public static String getProperIpAddress(String ip) throws PermErrorException {
-        if (isIPV6(ip) && isIPV4MappedIP(ip)) {
-            try {
-                return getConvertedIP(ip);
-            } catch (UnknownHostException e) {
-                throw new PermErrorException("Invalid ipAddress: " + ip);
+        // a zoned address (fe80::1%1, RFC 4007) is not global, so not IPv4-mapped: kept as given
+        if (isIPV6(ip) && ip.indexOf('%') < 0) {
+            // read as an IPv4 address when in ::ffff:0:0/96, whatever its form: with a 0 octet, its
+            // last 32 bits in hex (::ffff:c000:201), or without "::" (0:0:0:0:0:ffff:192.0.2.1)
+            IPAddr address = getAddress(ip);
+            if (address.ipLength == 4) {
+                return address.getIPAddress();
             }
         }
         return ip;
         
-    }
-    
-    /**
-     * Return true if the given ipAddress is a ipv4-mapped-address
-     * @param ip
-     * @return
-     */
-    private static boolean isIPV4MappedIP(String ip) {
-        return ip.toUpperCase().matches(ipv4MappedRegex);
     }
 
 }
