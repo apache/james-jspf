@@ -158,13 +158,11 @@ public class FallbackPolicy implements PolicyPostFilter {
      * Remove entry
      * 
      * @param host
-     *            The host
+     *            The host, as given to {@link #addEntry(String, String)}
      */
     public void removeEntry(String host) {
         LOGGER.debug("Remove fallback entry for host: {}", host);
-        synchronized (entryMap) {
-            entryMap.remove(getRawEntry(host));
-        }
+        entryMap.remove(normalize(host));
     }
 
     /**

@@ -179,4 +179,26 @@ public class FallbackPolicyTest {
 
         assertNotNull(policy.getSPFRecord("foo.example.com"));
     }
+
+    @Test
+    public void removeEntryShouldRemoveTheEntry() throws Exception {
+        FallbackPolicy policy = new FallbackPolicy(PARSER);
+        policy.addEntry("example.com.", "v=spf1 +all");
+
+        policy.removeEntry("example.com.");
+
+        assertNull(policy.getSPFRecord("example.com.", null));
+    }
+
+    @Test
+    public void removeEntryShouldRemoveAWildcardEntry() throws Exception {
+        FallbackPolicy policy = new FallbackPolicy(PARSER);
+        policy.addEntry("*.example.com", "v=spf1 +all");
+        policy.addEntry("foo.example.com", "v=spf1 -all");
+
+        policy.removeEntry("*.example.com");
+
+        assertNull(policy.getSPFRecord("bar.example.com", null));
+        assertNotNull(policy.getSPFRecord("foo.example.com", null));
+    }
 }
