@@ -431,7 +431,7 @@ public abstract class SPFExecutorBaseTest {
     public void shouldHandleRecordWithLongDomainSpec() throws IOException {
         String hostname = "shouldHandleRecordWithLongDomainSpec.spfexecutor.fake";
         FakeResolver fakeResolver = new FakeResolver();
-        // the include target, truncated to 255 characters from the left, is a subdomain of hostname,
+        // the include target, truncated to 253 characters from the left, is a subdomain of hostname,
         // with no record: FakeResolver answers it without querying the real DNS
         fakeResolver.addRecord(longTxtRecord(hostname, "v=spf1 include:" + "%{d}.".repeat(5000) + hostname + " -all"));
 
@@ -719,5 +719,37 @@ public abstract class SPFExecutorBaseTest {
         SPFResult result = spf.checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
 
         assertEquals(SPFErrorConstants.PERM_ERROR_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void shouldTruncateAnIncludeTargetOf254CharactersTo253() throws IOException {
+        String hostname = "includeTargetOf254Characters.spfexecutor.fake";
+        // 252 characters, the include target without its first label, under hostname: FakeResolver answers it
+        String target = "bb." + "b.".repeat(102) + hostname;
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(longTxtRecord(hostname, "v=spf1 include:a." + target + " -all"));
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(target + "."), DClass.IN, 30L, "v=spf1 +all"));
+
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+        SPFResult result = spf.checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
+
+        // RFC 7208 7.3: the left side is truncated to 253 characters, the longest domain name
+        assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void shouldKeepAnIncludeTargetOf253CharactersAndATrailingDot() throws IOException {
+        String hostname = "includeTargetWithTrailingDot.spfexecutor.fake";
+        // 253 characters, the longest domain name, under hostname: FakeResolver answers it, cut or not
+        String target = "ccc." + "b.".repeat(102) + hostname;
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(longTxtRecord(hostname, "v=spf1 include:" + target + ". -all"));
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(target + "."), DClass.IN, 30L, "v=spf1 +all"));
+
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+        SPFResult result = spf.checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
+
+        // RFC 7208 7.3: 253 characters "in this format", without the trailing dot of a fully qualified name
+        assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
     }
 }

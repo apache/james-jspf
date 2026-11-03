@@ -241,10 +241,11 @@ public class MacroExpand {
         if (domainName.indexOf('\r') >= 0 || domainName.indexOf('\n') >= 0) {
             throw new PermErrorException("Macro-expanded domain contains illegal CR or LF characters");
         }
-        // reduce to less than 255 characters, deleting subdomains from left: at once, after the first
-        // dot that leaves at most 255 characters, or else after the last dot
-        if (domainName.length() > 255) {
-            int split = domainName.indexOf('.', domainName.length() - 256);
+        // reduce to 253 characters at most, not counting a trailing dot, deleting subdomains from left
+        // (RFC 7208 7.3): at once, after the first dot that leaves at most that many, or else after the last dot
+        int maxLength = domainName.endsWith(".") ? 254 : 253;
+        if (domainName.length() > maxLength) {
+            int split = domainName.indexOf('.', domainName.length() - maxLength - 1);
             if (split < 0) {
                 split = domainName.lastIndexOf('.');
             }
