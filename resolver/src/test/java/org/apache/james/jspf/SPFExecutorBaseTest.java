@@ -576,6 +576,49 @@ public abstract class SPFExecutorBaseTest {
     }
 
     @Test(timeout = 10000)
+    public void overrideEntryShouldReplaceTheRecordOfTheDomainItNames() throws IOException {
+        String hostname = "override.spfexecutor.fake";
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, "v=spf1 -all"));
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+        spf.getOverridePolicy().addEntry(hostname, "v=spf1 +all");
+
+        SPFResult result = spf.checkSPF("192.0.2.10", "a_user@" + hostname, hostname);
+
+        assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void fallbackEntryShouldGiveARecordToTheDomainsUnderItsDomain() throws IOException {
+        String hostname = "fallback.spfexecutor.fake";
+        FakeResolver fakeResolver = new FakeResolver();
+        // no SPF record: an address only, so that FakeResolver answers the name
+        fakeResolver.addRecord(new ARecord(Name.fromString(hostname + "."), DClass.IN, 30L,
+            InetAddress.getByName("192.0.2.1")));
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+        spf.getFallbackPolicy().addEntry("*.spfexecutor.fake", "v=spf1 +all");
+
+        SPFResult result = spf.checkSPF("192.0.2.10", "a_user@" + hostname, hostname);
+
+        assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void overrideWildcardEntryShouldNotApplyToALabelHoldingADot() throws IOException {
+        String domain = "wildcard.spfexecutor.fake";
+        // the labels "mail.wildcard", "spfexecutor" and "fake": not under domain
+        String hostname = "mail\\." + domain;
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, "v=spf1 -all"));
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+        spf.getOverridePolicy().addEntry("*." + domain, "v=spf1 +all");
+
+        SPFResult result = spf.checkSPF("192.0.2.10", "a_user@" + hostname, hostname);
+
+        assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
     public void shouldReturnPermErrorOnAIp4CidrOverflowingAnInt() throws IOException {
         SPFResult result = checkRecord("aIp4CidrOverflow.spfexecutor.fake", "v=spf1 a/4294967296 -all", "1.2.3.4");
 

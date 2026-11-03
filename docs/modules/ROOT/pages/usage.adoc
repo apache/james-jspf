@@ -143,6 +143,17 @@ Two policy objects let you supply records jSPF would not otherwise see:
 * `getFallbackPolicy()` provides records for domains that publish none.
 * `getOverridePolicy()` replaces the records published by given domains.
 
+[source,java]
+----
+spf.getOverridePolicy().addEntry("example.com", "v=spf1 ip4:192.0.2.0/24 -all"); // <1>
+spf.getFallbackPolicy().addEntry("*.example.org", "v=spf1 mx -all");             // <2>
+----
+<1> The domain `example.com` only.
+<2> The domains under `example.org`. `mail.*` would be the domains whose first label is `mail`.
+
+Case and a trailing dot do not matter. When several entries match a domain, its own entry wins,
+then the longest pattern.
+
 == Using your own DNS resolver
 
 `DefaultSPF` uses dnsjava with its default system resolver. To point jSPF at a specific
