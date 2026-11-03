@@ -99,7 +99,7 @@ public class TrustedForwarderPolicy implements PolicyPostFilter, MacroExpandEnab
                 }.setHost(TRUSTED_FORWARDER_HOST);
                 trusted.enableMacroExpand(macroExpand);
                 trusted.enableSPFChecking(spfChecker);
-                // a copy: the record can be shared, as the cached ones of FallbackPolicy
+                // a copy: the given record stays as it is
                 SPF1Record filtered = new SPF1Record(spfRecord.getRecord());
                 filtered.getDirectives().addAll(directives);
                 filtered.getModifiers().addAll(spfRecord.getModifiers());
