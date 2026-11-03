@@ -560,6 +560,22 @@ public abstract class SPFExecutorBaseTest {
     }
 
     @Test(timeout = 10000)
+    public void inAddressShouldBeThatOfAnIpv4MappedClient() throws IOException {
+        String hostname = "ipv4MappedInAddress.spfexecutor.fake";
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L,
+            "v=spf1 exists:%{v}." + hostname + " -all"));
+        fakeResolver.addRecord(new ARecord(Name.fromString("in-addr." + hostname + "."), DClass.IN, 30L,
+            InetAddress.getByName("127.0.0.2")));
+
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+        SPFResult result = spf.checkSPF("::ffff:1.2.3.4", "a_user@" + hostname, hostname);
+
+        // RFC 7208 7.3: %{v} is "in-addr" for an IPv4 client, which an IPv4-mapped one is (RFC 7208 5)
+        assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
     public void shouldReturnPermErrorOnAIp4CidrOverflowingAnInt() throws IOException {
         SPFResult result = checkRecord("aIp4CidrOverflow.spfexecutor.fake", "v=spf1 a/4294967296 -all", "1.2.3.4");
 
