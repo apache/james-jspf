@@ -73,6 +73,11 @@ public final class DefaultExplanationPolicy implements PolicyPostFilter {
          */
         public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException, NoneException, TempErrorException, NeutralException {
             
+            // as for exp=, not the explanation of an included record
+            if (spfData.ignoreExplanation()) {
+                return null;
+            }
+
             if (SPF1Constants.FAIL.equals(spfData.getCurrentResult())) {  
                 if (spfData.getExplanation()==null || spfData.getExplanation().equals("")) {
                     String explanation;
