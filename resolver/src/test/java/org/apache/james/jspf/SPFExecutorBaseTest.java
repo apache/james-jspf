@@ -658,4 +658,17 @@ public abstract class SPFExecutorBaseTest {
         // RFC 7208 6.1: the result of the redirect target
         assertEquals(SPFErrorConstants.NEUTRAL_CONV, result.getResult());
     }
+
+    @Test(timeout = 10000)
+    public void shouldReturnPermErrorOnLongInvalidTopLabel() throws IOException {
+        String hostname = "shouldReturnPermErrorOnLongInvalidTopLabel.spfexecutor.fake";
+        FakeResolver fakeResolver = new FakeResolver();
+        // a toplabel of 50000 letters, then "!", which no toplabel holds: no term matches
+        fakeResolver.addRecord(longTxtRecord(hostname, "v=spf1 include:x." + "a".repeat(50000) + "! -all"));
+
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+        SPFResult result = spf.checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
+
+        assertEquals(SPFErrorConstants.PERM_ERROR_CONV, result.getResult());
+    }
 }
