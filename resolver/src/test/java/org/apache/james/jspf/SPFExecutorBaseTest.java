@@ -51,6 +51,16 @@ public abstract class SPFExecutorBaseTest {
         return new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, strings);
     }
 
+    // hostname includes target.<hostname>, whose record fails, then ends with lastTerm
+    private static FakeResolver includeOfAFailingRecord(String hostname, String lastTerm) throws IOException {
+        String target = "target." + hostname;
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L,
+            "v=spf1 include:" + target + " " + lastTerm));
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(target + "."), DClass.IN, 30L, "v=spf1 -all"));
+        return fakeResolver;
+    }
+
     protected abstract SPF createSPF();
 
     protected abstract SPF createCustomSPF(DNSService dnsService);
@@ -670,5 +680,30 @@ public abstract class SPFExecutorBaseTest {
         SPFResult result = spf.checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
 
         assertEquals(SPFErrorConstants.PERM_ERROR_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void defaultExplanationShouldNameTheCheckedDomainAfterAFailingInclude() throws IOException {
+        String hostname = "defaultExplanationAfterFailingInclude.spfexecutor.fake";
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(includeOfAFailingRecord(hostname, "-all")));
+        spf.setDefaultExplanation("Denied %{d}");
+
+        SPFResult result = spf.checkSPF("192.0.2.10", "a_user@" + hostname, hostname);
+
+        assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+        assertEquals("Denied " + hostname, result.getExplanation());
+    }
+
+    @Test(timeout = 10000)
+    public void passShouldHaveNoExplanationAfterAFailingInclude() throws IOException {
+        String hostname = "passAfterFailingInclude.spfexecutor.fake";
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(includeOfAFailingRecord(hostname, "+all")));
+        spf.setDefaultExplanation("Denied %{d}");
+
+        SPFResult result = spf.checkSPF("192.0.2.10", "a_user@" + hostname, hostname);
+
+        assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
+        // SPFResult gives "" when there is no explanation
+        assertEquals("", result.getExplanation());
     }
 }
