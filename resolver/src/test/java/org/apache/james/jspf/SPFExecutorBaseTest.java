@@ -706,4 +706,18 @@ public abstract class SPFExecutorBaseTest {
         // SPFResult gives "" when there is no explanation
         assertEquals("", result.getExplanation());
     }
+
+    @Test(timeout = 10000)
+    public void shouldTruncateALongExpandedIncludeTarget() throws IOException {
+        // 225 characters and 102 dots, expanded 8000 times: the include target is close to 2 MB before
+        // its truncation to a subdomain of hostname, with no record
+        String hostname = "a.".repeat(100) + "truncate.spfexecutor.fake";
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(longTxtRecord(hostname, "v=spf1 include:" + "%{d}.".repeat(8000) + hostname + " -all"));
+
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+        SPFResult result = spf.checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
+
+        assertEquals(SPFErrorConstants.PERM_ERROR_CONV, result.getResult());
+    }
 }
