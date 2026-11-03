@@ -165,6 +165,18 @@ public class MacroExpandTest extends TestCase {
         assertTrue(domain.endsWith(".email.example.com.com"));
     }
 
+    public void testLongDomainIsCutAfterTheFirstDotThatLeavesAtMost255Characters() throws PermErrorException {
+        String domain = defIp4me.expand("a.".repeat(200) + "com", new rfcIP4MacroData(), MacroExpand.DOMAIN);
+
+        assertEquals("a.".repeat(126) + "com", domain);
+    }
+
+    public void testLongLastLabelOfALongDomainIsKeptWhole() throws PermErrorException {
+        String domain = defIp4me.expand("%{d}." + "a".repeat(300), new rfcIP4MacroData(), MacroExpand.DOMAIN);
+
+        assertEquals("a".repeat(300), domain);
+    }
+
     public void testLongLiteralDomainSpecIsTruncatedWithoutOverflowingTheStack() throws PermErrorException {
         String domain = defIp4me.expand("a.".repeat(5000) + "com", new rfcIP4MacroData(), MacroExpand.DOMAIN);
 
