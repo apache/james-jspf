@@ -99,8 +99,8 @@ public class SPFSession implements MacroData {
        
         try {
             this.ipAddress = IPAddr.getProperIpAddress(clientIP.trim());
-            // get the in Address
-            this.inAddress = IPAddr.getInAddress(clientIP);
+            // get the in Address, of the address checked: trimmed, and IPv4 when IPv4-mapped
+            this.inAddress = IPAddr.getInAddress(this.ipAddress);
         } catch (PermErrorException e) {
             // ip was not rfc conform
             this.setCurrentResultExpanded(e.getResult());

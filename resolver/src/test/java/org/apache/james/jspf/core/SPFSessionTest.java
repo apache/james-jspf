@@ -22,6 +22,7 @@ package org.apache.james.jspf.core;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class SPFSessionTest {
     @Test
@@ -54,6 +55,20 @@ public class SPFSessionTest {
     @Test
     public void shouldReturnIPv4Mapped() {
         SPFSession spfSession = new SPFSession("", "", "::ffff:192.168.1.1");
+        assertEquals("in-addr", spfSession.getInAddress());
+    }
+
+    @Test
+    public void shouldReturnIPv4OfAnAddressWithSpaces() {
+        SPFSession spfSession = new SPFSession("", "", " 192.168.1.1 ");
+        assertNull(spfSession.getCurrentResultExpanded());
+        assertEquals("in-addr", spfSession.getInAddress());
+    }
+
+    @Test
+    public void shouldReturnValidIP6OfAnAddressWithSpaces() {
+        SPFSession spfSession = new SPFSession("", "", " 2001:db8::1 ");
+        assertNull(spfSession.getCurrentResultExpanded());
         assertEquals("ip6", spfSession.getInAddress());
     }
 
