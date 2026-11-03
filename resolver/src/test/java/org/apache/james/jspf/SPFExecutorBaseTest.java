@@ -545,6 +545,21 @@ public abstract class SPFExecutorBaseTest {
     }
 
     @Test(timeout = 10000)
+    public void aShouldMatchAnIpv4MappedClientWithAZeroOctet() throws IOException {
+        String hostname = "ipv4MappedClient.spfexecutor.fake";
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, "v=spf1 a -all"));
+        fakeResolver.addRecord(new ARecord(Name.fromString(hostname + "."), DClass.IN, 30L,
+            InetAddress.getByName("10.0.0.1")));
+
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+        SPFResult result = spf.checkSPF("::ffff:10.0.0.1", "a_user@" + hostname, hostname);
+
+        // RFC 7208 5: an IPv4-mapped address is an IPv4 address
+        assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
     public void shouldReturnPermErrorOnAIp4CidrOverflowingAnInt() throws IOException {
         SPFResult result = checkRecord("aIp4CidrOverflow.spfexecutor.fake", "v=spf1 a/4294967296 -all", "1.2.3.4");
 

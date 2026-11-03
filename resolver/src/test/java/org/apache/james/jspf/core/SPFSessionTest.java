@@ -58,6 +58,41 @@ public class SPFSessionTest {
     }
 
     @Test
+    public void everyFormOfAnIpv4MappedAddressShouldBeAnIpv4Client() {
+        String[][] forms = {
+            {"::ffff:10.0.0.1", "10.0.0.1"},
+            {"::FFFF:192.0.2.200", "192.0.2.200"},
+            {"0:0:0:0:0:ffff:1.2.3.4", "1.2.3.4"},
+            {"::ffff:102:304", "1.2.3.4"},
+            {"::ffff:c000:2c8", "192.0.2.200"}};
+
+        for (String[] form : forms) {
+            SPFSession spfSession = new SPFSession("", "", form[0]);
+
+            assertEquals(form[0], form[1], spfSession.getIpAddress());
+            assertEquals(form[0], form[1], spfSession.getMacroIpAddress());
+        }
+    }
+
+    @Test
+    public void anIpv6AddressOutOfTheIpv4MappedRangeShouldStayIpv6() {
+        for (String address : new String[] {"2001:db8::1", "::1.2.3.4", "::fffe:1.2.3.4", "1::ffff:1.2.3.4"}) {
+            SPFSession spfSession = new SPFSession("", "", address);
+
+            assertEquals(address, spfSession.getIpAddress());
+        }
+    }
+
+    @Test
+    public void aZonedIpv6AddressShouldStayAsGiven() {
+        for (String address : new String[] {"fe80::1%1", "2001:db8::1.2.3.4%1", "::ffff:102:304%1"}) {
+            SPFSession spfSession = new SPFSession("", "", address);
+
+            assertEquals(address, spfSession.getIpAddress());
+        }
+    }
+
+    @Test
     public void shouldReturnIPv4() {
         SPFSession spfSession = new SPFSession("", "", "192.168.1.1");
         assertEquals("in-addr", spfSession.getInAddress());
