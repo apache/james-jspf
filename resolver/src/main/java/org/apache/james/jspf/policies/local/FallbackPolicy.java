@@ -20,8 +20,9 @@
 package org.apache.james.jspf.policies.local;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.james.jspf.core.SPF1Record;
@@ -34,6 +35,8 @@ import org.apache.james.jspf.core.exceptions.TempErrorException;
 import org.apache.james.jspf.policies.PolicyPostFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xbill.DNS.Name;
+import org.xbill.DNS.TextParseException;
 
 /**
  * Class to support Fallback feature
@@ -53,6 +56,58 @@ public class FallbackPolicy implements PolicyPostFilter {
         return copy;
     }
 
+    /**
+     * @param host a host, or the host of an entry
+     * @return the host as domain names compare: in lower case, without its trailing dot, and with
+     *         its escapes read (ex\097mple.com is example.com, a dot inside a label stays \.)
+     */
+    private static String normalize(String host) {
+        try {
+            Name name = Name.fromString(host, Name.root);
+            // the root without its dot, as the text below
+            return name.equals(Name.root) ? "" : name.canonicalize().toString(true);
+        } catch (TextParseException e) {
+            // no domain name: compared as text
+            String name = host.toLowerCase(Locale.ROOT);
+            return name.endsWith(".") ? name.substring(0, name.length() - 1) : name;
+        }
+    }
+
+    /**
+     * @param host a normalized host
+     * @param domain a normalized domain
+     * @return true if the host is a domain under the domain, label by label: the dot before the
+     *         domain separates labels, it is not escaped (mail\.example.com is not under example.com)
+     */
+    private static boolean isUnder(String host, String domain) {
+        int dot = host.length() - domain.length() - 1;
+        if (dot < 0 || !host.endsWith(domain) || host.charAt(dot) != '.') {
+            return false;
+        }
+        int backslashes = 0;
+        while (backslashes < dot && host.charAt(dot - 1 - backslashes) == '\\') {
+            backslashes++;
+        }
+        return backslashes % 2 == 0;
+    }
+
+    /**
+     * @param entryHost the normalized host of an entry
+     * @param host a normalized host
+     * @return true if the entry is for the host
+     */
+    private static boolean matches(String entryHost, String host) {
+        if (entryHost.startsWith("*.")) {
+            return isUnder(host, entryHost.substring(2));
+        } else if (entryHost.startsWith("*")) {
+            return host.endsWith(entryHost.substring(1));
+        } else if (entryHost.endsWith("*")) {
+            return host.startsWith(entryHost.substring(0, entryHost.length() - 1));
+        } else {
+            return host.equals(entryHost);
+        }
+    }
+
     private Map<String,SPF1Record> entryMap;
 
     private SPFRecordParser parser;
@@ -66,7 +121,9 @@ public class FallbackPolicy implements PolicyPostFilter {
      * Add a entry.
      * 
      * @param rawHost
-     *            the host or ipaddress for which the entry should be added.
+     *            the host for which the entry should be added: a domain (example.com), the
+     *            domains under a domain (*.example.com), or the domains starting with a label
+     *            (mail.*). Case and a trailing dot do not matter.
      * @param rawSpfRecord
      *            the spfRecord to add
      * @throws IllegalArgumentException
@@ -74,20 +131,11 @@ public class FallbackPolicy implements PolicyPostFilter {
      */
     public void addEntry(String rawHost, String rawSpfRecord)
             throws IllegalArgumentException {
-        String host;
         try {
             LOGGER.debug("Start parsing SPF-Record: {}", rawSpfRecord);
             SPF1Record spfRecord = parser.parse(rawSpfRecord);
-            if (rawHost.startsWith("*")) {
-                host = rawHost.substring(1);
-                LOGGER.debug("Convert host {} to {}", rawHost, host);
-            } else if (rawHost.endsWith("*")) {
-                int length = rawHost.length();
-                host = rawHost.substring(length - 1, length);
-                LOGGER.debug("Convert host {} to {}", rawHost, host);
-            } else {
-                host = rawHost;
-            }
+            String host = normalize(rawHost);
+            LOGGER.debug("Convert host {} to {}", rawHost, host);
 
             entryMap.put(host, spfRecord);
         } catch (SPFResultException e) {
@@ -159,20 +207,22 @@ public class FallbackPolicy implements PolicyPostFilter {
      * 
      * @param host
      *            the host
-     * @return the stored object for the given host or null
+     * @return the stored object for the given host or null: the entry of the host
+     *         itself, else the one of the longest pattern matching it (of patterns of the same
+     *         length, the last in alphabetical order, whatever the order they were added in)
      */
     private SPF1Record getRawEntry(String host) {
-        Iterator<String> fallBackIt = entryMap.keySet().iterator();
-
-        while (fallBackIt.hasNext()) {
-            String rawHost = fallBackIt.next();
-
-            if ((rawHost.startsWith(".") && host.startsWith(rawHost))
-                    || rawHost.endsWith(".") && host.endsWith(rawHost)) {
-                return entryMap.get(rawHost);
-            }
+        String name = normalize(host);
+        SPF1Record entry = entryMap.get(name);
+        if (entry != null) {
+            return entry;
         }
-        return null;
+        return entryMap.entrySet().stream()
+            .filter(candidate -> matches(candidate.getKey(), name))
+            .max(Comparator.comparingInt((Map.Entry<String, SPF1Record> candidate) -> candidate.getKey().length())
+                .thenComparing(Map.Entry::getKey))
+            .map(Map.Entry::getValue)
+            .orElse(null);
     }
 
 }
