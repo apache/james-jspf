@@ -169,7 +169,12 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
         sessions.put(new Integer(nextId), session);
         results.put(new Integer(nextId), result);
         session.setAttribute(ATTRIBUTE_STAGED_EXECUTOR_CONTINUATION, cont);
-        dnsProbe.getRecordsAsynch(cont.getRequest(), nextId, responseQueue);
+        try {
+            dnsProbe.getRecordsAsynch(cont.getRequest(), nextId, responseQueue);
+        } catch (RuntimeException e) {
+            // the lookup service failed instead of answering: the error is its answer
+            responseQueue.insertResponse(new IResponseImpl(new Integer(nextId), e));
+        }
     }
 
     public void run() {
@@ -181,6 +186,11 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
             Integer respId = (Integer)resp.getId();
             SPFSession session = sessions.remove(respId);
             FutureSPFResult result = results.remove(respId);
+            if (session == null) {
+                // a second answer to the same lookup, as from a lookup service that queued it, then threw
+                LOGGER.warn("No check waits for the DNS answer {}", respId);
+                continue;
+            }
 
             try {
                 onResponse(session, result, resp);
@@ -201,8 +211,9 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
             if (resp.getException() instanceof TimeoutException) {
                 response = new DNSResponse((TimeoutException) resp.getException());
             } else if (resp.getException() != null) {
-                // any other lookup error goes to the exception catcher
-                throw resp.getException();
+                // a lookup error, as dnsjava's on an answer it cannot handle: temperror (RFC 7208 4.4)
+                LOGGER.warn("Unexpected error of the DNS lookup of {}", cont.getRequest().getHostname(), resp.getException());
+                response = new DNSResponse(new TimeoutException(resp.getException().toString()));
             } else {
                 response = new DNSResponse(resp.getValue());
             }

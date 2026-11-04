@@ -72,40 +72,74 @@ public class StagedMultipleSPFExecutorIntegrationTest {
     };
 
     @Test(timeout = 10000)
-    public void shouldEndAsNeutralOnAnUnexpectedLookupError() {
+    public void shouldReturnTempErrorOnAnUnexpectedLookupError() {
         checkUnexpectedLookupError(false, "broken.example.com");
     }
 
     @Test(timeout = 10000)
-    public void shouldEndAsNeutralOnAnUnexpectedLookupErrorWhenMultiThreaded() {
+    public void shouldReturnTempErrorOnAnUnexpectedLookupErrorWhenMultiThreaded() {
         checkUnexpectedLookupError(true, "broken.example.com");
     }
 
     @Test(timeout = 10000)
-    public void shouldEndAsNeutralOnAnUnexpectedLookupErrorInAnInclude() {
+    public void shouldReturnTempErrorOnAnUnexpectedLookupErrorInAnInclude() {
         checkUnexpectedLookupError(false, "include.example.com");
     }
 
     @Test(timeout = 10000)
-    public void shouldEndAsNeutralOnAnUnexpectedLookupErrorInAnIncludeWhenMultiThreaded() {
+    public void shouldReturnTempErrorOnAnUnexpectedLookupErrorInAnIncludeWhenMultiThreaded() {
         checkUnexpectedLookupError(true, "include.example.com");
     }
 
     @Test(timeout = 10000)
-    public void shouldEndAsNeutralOnAnUnexpectedLookupErrorInARedirect() {
+    public void shouldReturnTempErrorOnAnUnexpectedLookupErrorInARedirect() {
         checkUnexpectedLookupError(false, "redirect.example.com");
     }
 
     @Test(timeout = 10000)
-    public void shouldEndAsNeutralOnAnUnexpectedLookupErrorInARedirectWhenMultiThreaded() {
+    public void shouldReturnTempErrorOnAnUnexpectedLookupErrorInARedirectWhenMultiThreaded() {
         checkUnexpectedLookupError(true, "redirect.example.com");
+    }
+
+    @Test(timeout = 10000)
+    public void shouldReturnTempErrorWhenTheLookupServiceThrows() {
+        DNSAsynchLookupService simulator = new DNSServiceAsynchSimulator(DNS, false);
+        // fails instead of answering an error
+        DNSAsynchLookupService throwing = (request, id, responseQueue) -> {
+            if (request.getHostname().equals("broken.example.com")) {
+                throw new IllegalStateException("lookup service failure");
+            }
+            simulator.getRecordsAsynch(request, id, responseQueue);
+        };
+        SPF spf = new SPF(DNS, new StagedMultipleSPFExecutor(throwing));
+
+        assertEquals(SPFErrorConstants.TEMP_ERROR_CONV, spf.checkSPF("1.2.3.4", "foo@broken.example.com", "broken.example.com").getResult());
+        assertEquals(SPFErrorConstants.TEMP_ERROR_CONV, spf.checkSPF("1.2.3.4", "foo@include.example.com", "include.example.com").getResult());
+        assertEquals(SPFErrorConstants.PASS_CONV, spf.checkSPF("1.2.3.4", "foo@example.com", "example.com").getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void shouldGoOnWhenTheLookupServiceThrowsAfterQueuingTheLookup() {
+        DNSAsynchLookupService simulator = new DNSServiceAsynchSimulator(DNS, false);
+        // queues the lookup, so that it is answered, then fails
+        DNSAsynchLookupService throwing = (request, id, responseQueue) -> {
+            simulator.getRecordsAsynch(request, id, responseQueue);
+            if (request.getHostname().equals("broken.example.com")) {
+                throw new IllegalStateException("lookup service failure");
+            }
+        };
+        SPF spf = new SPF(DNS, new StagedMultipleSPFExecutor(throwing));
+
+        assertEquals(SPFErrorConstants.TEMP_ERROR_CONV, spf.checkSPF("1.2.3.4", "foo@broken.example.com", "broken.example.com").getResult());
+        // the second answer of the failed lookup does not end the executor
+        assertEquals(SPFErrorConstants.PASS_CONV, spf.checkSPF("1.2.3.4", "foo@example.com", "example.com").getResult());
     }
 
     private void checkUnexpectedLookupError(boolean multiThread, String domain) {
         SPF spf = new SPF(DNS, new StagedMultipleSPFExecutor(new DNSServiceAsynchSimulator(DNS, multiThread)));
 
-        // the exception catcher of SPF makes an unexpected error neutral, as with AsynchronousSPFExecutor
-        assertEquals(SPFErrorConstants.NEUTRAL_CONV, spf.checkSPF("1.2.3.4", "foo@" + domain, domain).getResult());
+        // RFC 7208 4.4: a DNS error ends the check as temperror, as with the two other executors
+        assertEquals(SPFErrorConstants.TEMP_ERROR_CONV, spf.checkSPF("1.2.3.4", "foo@" + domain, domain).getResult());
         // the executor still checks
         assertEquals(SPFErrorConstants.PASS_CONV, spf.checkSPF("1.2.3.4", "foo@example.com", "example.com").getResult());
     }

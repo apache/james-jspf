@@ -15,6 +15,7 @@ import org.junit.Test;
 import org.xbill.DNS.ARecord;
 import org.xbill.DNS.CNAMERecord;
 import org.xbill.DNS.DClass;
+import org.xbill.DNS.DNAMERecord;
 import org.xbill.DNS.Flags;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.MXRecord;
@@ -127,6 +128,31 @@ public abstract class SPFExecutorBaseTest {
             public CompletionStage<List<String>> getRecordsAsync(DNSRequest request) {
                 if (request.getHostname().equals(brokenHost)) {
                     return CompletableFuture.failedFuture(new IllegalStateException("answer dnsjava cannot handle"));
+                }
+                return super.getRecordsAsync(request);
+            }
+        };
+        return createCustomSPF(dns).checkSPF("192.0.2.10", "a_user@" + hostname, hostname);
+    }
+
+    // the lookups of broken.<hostname> throw, instead of failing, an unchecked exception
+    private SPFResult checkRecordWithThrowingHost(String hostname, String record) throws IOException {
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, record));
+        String brokenHost = "broken." + hostname;
+        DNSService dns = new DNSServiceXBillImpl(fakeResolver) {
+            @Override
+            public List<String> getRecords(DNSRequest request) throws TimeoutException {
+                if (request.getHostname().equals(brokenHost)) {
+                    throw new IllegalStateException("lookup service failure");
+                }
+                return super.getRecords(request);
+            }
+
+            @Override
+            public CompletionStage<List<String>> getRecordsAsync(DNSRequest request) {
+                if (request.getHostname().equals(brokenHost)) {
+                    throw new IllegalStateException("lookup service failure");
                 }
                 return super.getRecordsAsync(request);
             }
@@ -800,20 +826,54 @@ public abstract class SPFExecutorBaseTest {
     }
 
     @Test(timeout = 10000)
-    public void shouldEndAsNeutralOnAnUnexpectedLookupErrorInAnInclude() throws IOException {
-        String hostname = "unexpectedErrorInInclude.spfexecutor.fake";
-        SPFResult result = checkRecordWithBrokenHost(hostname, "v=spf1 include:broken." + hostname + " -all");
+    public void shouldReturnTempErrorOnAnUnexpectedLookupError() throws IOException {
+        String hostname = "unexpectedError.spfexecutor.fake";
+        SPFResult result = checkRecordWithBrokenHost(hostname, "v=spf1 a:broken." + hostname + " -all");
 
-        // as at the top level, the exception catcher of SPF makes the unexpected error neutral
-        assertEquals(SPFErrorConstants.NEUTRAL_CONV, result.getResult());
+        // RFC 7208 4.4: a DNS error "other than 0 or 3" ends the check as temperror
+        assertEquals(SPFErrorConstants.TEMP_ERROR_CONV, result.getResult());
     }
 
     @Test(timeout = 10000)
-    public void shouldEndAsNeutralOnAnUnexpectedLookupErrorInARedirect() throws IOException {
+    public void shouldReturnTempErrorWhenTheLookupServiceThrows() throws IOException {
+        String hostname = "throwingLookup.spfexecutor.fake";
+        SPFResult result = checkRecordWithThrowingHost(hostname, "v=spf1 a:broken." + hostname + " -all");
+
+        assertEquals(SPFErrorConstants.TEMP_ERROR_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void shouldReturnTempErrorOnAnAnswerDnsjavaCannotNormalize() throws IOException {
+        String hostname = "x.dname.spfexecutor.fake";
+        // two DNAME records of a parent of the name queried: invalid zone data (RFC 6672 2.4)
+        Message answer = new Message();
+        answer.getHeader().setFlag(Flags.QR);
+        answer.addRecord(new DNAMERecord(Name.fromString("dname.spfexecutor.fake."), DClass.IN, 30L,
+            Name.fromString("a.example.")), Section.ANSWER);
+        answer.addRecord(new DNAMERecord(Name.fromString("dname.spfexecutor.fake."), DClass.IN, 30L,
+            Name.fromString("b.example.")), Section.ANSWER);
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(new AnsweringResolver(answer.toWire())));
+
+        SPFResult result = spf.checkSPF("192.0.2.10", "a_user@" + hostname, hostname);
+
+        assertEquals(SPFErrorConstants.TEMP_ERROR_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void shouldReturnTempErrorOnAnUnexpectedLookupErrorInAnInclude() throws IOException {
+        String hostname = "unexpectedErrorInInclude.spfexecutor.fake";
+        SPFResult result = checkRecordWithBrokenHost(hostname, "v=spf1 include:broken." + hostname + " -all");
+
+        // RFC 7208 5.2: a temperror of the included record is the result
+        assertEquals(SPFErrorConstants.TEMP_ERROR_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void shouldReturnTempErrorOnAnUnexpectedLookupErrorInARedirect() throws IOException {
         String hostname = "unexpectedErrorInRedirect.spfexecutor.fake";
         SPFResult result = checkRecordWithBrokenHost(hostname, "v=spf1 redirect=broken." + hostname);
 
-        assertEquals(SPFErrorConstants.NEUTRAL_CONV, result.getResult());
+        assertEquals(SPFErrorConstants.TEMP_ERROR_CONV, result.getResult());
     }
 
     @Test(timeout = 10000)
