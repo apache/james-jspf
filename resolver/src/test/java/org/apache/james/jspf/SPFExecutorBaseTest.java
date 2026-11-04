@@ -5,6 +5,7 @@ import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.exceptions.SPFErrorConstants;
 import org.apache.james.jspf.core.exceptions.TimeoutException;
 import org.apache.james.jspf.executor.SPFResult;
+import org.apache.james.jspf.helpers.AnsweringResolver;
 import org.apache.james.jspf.helpers.FakeResolver;
 import org.apache.james.jspf.impl.DNSServiceXBillImpl;
 import org.apache.james.jspf.impl.SPF;
@@ -12,13 +13,18 @@ import org.apache.james.jspf.policies.local.TrustedForwarderPolicy;
 import org.junit.Before;
 import org.junit.Test;
 import org.xbill.DNS.ARecord;
+import org.xbill.DNS.CNAMERecord;
 import org.xbill.DNS.DClass;
+import org.xbill.DNS.Flags;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.MXRecord;
+import org.xbill.DNS.Message;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.PTRRecord;
+import org.xbill.DNS.Rcode;
 import org.xbill.DNS.Resolver;
 import org.xbill.DNS.SPFRecord;
+import org.xbill.DNS.Section;
 import org.xbill.DNS.SimpleResolver;
 import org.xbill.DNS.TXTRecord;
 import org.xbill.DNS.TextParseException;
@@ -664,6 +670,50 @@ public abstract class SPFExecutorBaseTest {
         SPFResult result = spf.checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
 
         assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void shouldReturnTempErrorWhenTheLookupGetsAServerFailure() {
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(AnsweringResolver.withRcode(Rcode.SERVFAIL)));
+
+        SPFResult result = spf.checkSPF("192.0.2.10", "a_user@servfail.spfexecutor.fake", "servfail.spfexecutor.fake");
+
+        // RFC 7208 4.4: "a server failure (RCODE 2) or some other error (RCODE other than 0 or 3)"
+        assertEquals(SPFErrorConstants.TEMP_ERROR_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void shouldReturnTempErrorWhenTheLookupGetsAnotherErrorRcode() {
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(AnsweringResolver.withRcode(Rcode.NXRRSET)));
+
+        SPFResult result = spf.checkSPF("192.0.2.10", "a_user@nxrrset.spfexecutor.fake", "nxrrset.spfexecutor.fake");
+
+        assertEquals(SPFErrorConstants.TEMP_ERROR_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void shouldReturnTempErrorWhenTheLookupGetsANetworkError() {
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(AnsweringResolver.unreachable()));
+
+        SPFResult result = spf.checkSPF("192.0.2.10", "a_user@unreachable.spfexecutor.fake", "unreachable.spfexecutor.fake");
+
+        assertEquals(SPFErrorConstants.TEMP_ERROR_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void shouldReturnNoneWhenTheLookupGetsACnameOfAnotherClass() throws IOException {
+        String hostname = "cnameOfAnotherClass.spfexecutor.fake";
+        // NOERROR, and a CNAME of the name queried in class CH: no record of class IN
+        Message answer = new Message();
+        answer.getHeader().setFlag(Flags.QR);
+        answer.addRecord(new CNAMERecord(Name.fromString(hostname + "."), DClass.CH, 30L,
+            Name.fromString("other." + hostname + ".")), Section.ANSWER);
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(new AnsweringResolver(answer.toWire())));
+
+        SPFResult result = spf.checkSPF("192.0.2.10", "a_user@" + hostname, hostname);
+
+        // as for a domain without SPF record (RFC 7208 4.5)
+        assertEquals(SPFErrorConstants.NONE_CONV, result.getResult());
     }
 
     @Test(timeout = 10000)

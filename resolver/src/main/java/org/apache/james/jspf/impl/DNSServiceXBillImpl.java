@@ -46,6 +46,7 @@ import org.xbill.DNS.MXRecord;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.PTRRecord;
+import org.xbill.DNS.Rcode;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.Resolver;
 import org.xbill.DNS.SPFRecord;
@@ -55,6 +56,7 @@ import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
 import org.xbill.DNS.lookup.LookupFailedException;
 import org.xbill.DNS.lookup.LookupSession;
+import org.xbill.DNS.lookup.NoSuchRRSetException;
 
 /**
  * This class contains helper to get all neccassary DNS infos that are needed
@@ -74,14 +76,35 @@ public class DNSServiceXBillImpl implements DNSService {
      * 3.6 LookupSession asks the same question again, without end and without counting a redirect,
      * for an answer holding a CNAME it does not follow: of another name than the one queried (with
      * an error rcode, as YXRRSET), or of another class.
+     * It also fails, as Lookup does, an answer with an rcode other than NOERROR and NXDOMAIN (with its
+     * extended bits, RFC 6891 6.1.3), or for another question: LookupSession would read an NXRRSET
+     * answer as no record.
      */
     private static final class BoundedResolver implements Resolver {
         /**
-         * @return a failed lookup, as the other lookup errors of LookupSession
+         * @return a lookup that found no record, as Lookup ends (TYPE_NOT_FOUND) on the answers that make
+         *         LookupSession ask again without end
          */
         private static CompletionStage<Message> tooManyQueries(Message query) {
-            return CompletableFuture.failedFuture(new LookupFailedException(
-                "More than " + MAX_QUERIES_PER_LOOKUP + " queries for " + query.getQuestion()));
+            LOGGER.debug("More than {} queries for {}", MAX_QUERIES_PER_LOOKUP, query.getQuestion());
+            return CompletableFuture.failedFuture(new NoSuchRRSetException(query.getQuestion().getName(),
+                query.getQuestion().getType()));
+        }
+
+        /**
+         * @return the answer, or a failed lookup when it is a DNS error (RFC 7208 4.4)
+         */
+        private static CompletionStage<Message> checked(Message query, Message answer) {
+            int rcode = answer.getRcode();
+            if (rcode != Rcode.NOERROR && rcode != Rcode.NXDOMAIN) {
+                return CompletableFuture.failedFuture(new LookupFailedException(
+                    "Answer " + Rcode.string(rcode) + " for " + query.getQuestion()));
+            }
+            if (!query.getQuestion().equals(answer.getQuestion())) {
+                return CompletableFuture.failedFuture(new LookupFailedException(
+                    "Answer for another question than " + query.getQuestion()));
+            }
+            return CompletableFuture.completedFuture(answer);
         }
 
         private final Resolver resolver;
@@ -154,7 +177,7 @@ public class DNSServiceXBillImpl implements DNSService {
             if (queries.incrementAndGet() > MAX_QUERIES_PER_LOOKUP) {
                 return tooManyQueries(query);
             }
-            return resolver.sendAsync(query);
+            return resolver.sendAsync(query).thenCompose(answer -> checked(query, answer));
         }
 
         /**
@@ -164,7 +187,7 @@ public class DNSServiceXBillImpl implements DNSService {
             if (queries.incrementAndGet() > MAX_QUERIES_PER_LOOKUP) {
                 return tooManyQueries(query);
             }
-            return resolver.sendAsync(query, executor);
+            return resolver.sendAsync(query, executor).thenCompose(answer -> checked(query, answer));
         }
 
         /**
