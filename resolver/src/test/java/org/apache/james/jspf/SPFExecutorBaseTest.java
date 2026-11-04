@@ -743,6 +743,33 @@ public abstract class SPFExecutorBaseTest {
     }
 
     @Test(timeout = 10000)
+    public void aShouldLookUpATargetThatReadsAsAnAddress() throws IOException {
+        String hostname = "aTargetAddress.spfexecutor.fake";
+        // the names of no record of fakeResolver do not exist
+        FakeResolver fakeResolver = new FakeResolver(AnsweringResolver.withRcode(Rcode.NXDOMAIN));
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, "v=spf1 a:%{i} -all"));
+
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+        SPFResult result = spf.checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
+
+        // RFC 7208 5.3: the target 1.2.3.4 is a domain name, of no A record
+        assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void aShouldLookUpATargetThatReadsAsAnIp6Address() throws IOException {
+        String hostname = "aTargetIp6Address.spfexecutor.fake";
+        FakeResolver fakeResolver = new FakeResolver(AnsweringResolver.withRcode(Rcode.NXDOMAIN));
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, "v=spf1 a:%{h} -all"));
+
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+        SPFResult result = spf.checkSPF("2001:db8::1", "a_user@" + hostname, "2001:db8::1");
+
+        // RFC 7208 5.3: the target is the HELO name, not the address it reads as
+        assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
     public void shouldReturnPermErrorOnAIp4CidrOverflowingAnInt() throws IOException {
         SPFResult result = checkRecord("aIp4CidrOverflow.spfexecutor.fake", "v=spf1 a/4294967296 -all", "1.2.3.4");
 
