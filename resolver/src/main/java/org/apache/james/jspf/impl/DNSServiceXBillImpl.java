@@ -305,7 +305,8 @@ public class DNSServiceXBillImpl implements DNSService {
 
             LOGGER.debug("Start {}-Record lookup for : {}", recordTypeDescription, request.getHostname());
 
-            Lookup query = new Lookup(request.getHostname(), dnsJavaType);
+            // RFC 7208 4.3: a fully qualified name, not looked up under the search path of the host
+            Lookup query = new Lookup(Name.fromString(request.getHostname(), Name.root), dnsJavaType);
             query.setResolver(resolver);
 
             Record[] rr = query.run();
@@ -345,7 +346,7 @@ public class DNSServiceXBillImpl implements DNSService {
         final LookupSession lookupSession = LookupSession.defaultBuilder().resolver(new BoundedResolver(this.resolver)).build();
 
         try {
-            return lookupSession.lookupAsync(Name.fromString(request.getHostname()), dnsJavaType)
+            return lookupSession.lookupAsync(Name.fromString(request.getHostname(), Name.root), dnsJavaType)
                 .thenApply(result -> convertRecordsToList(ofType(result.getRecords().toArray(new Record[0]), dnsJavaType)));
         } catch (TextParseException e) {
             // no record, as getRecords answers
