@@ -961,6 +961,26 @@ public abstract class SPFExecutorBaseTest {
     }
 
     @Test(timeout = 10000)
+    public void shouldNotLookUpTheDomainUnderTheSearchPath() throws IOException {
+        String hostname = "searchPath.spfexecutor.fake";
+        FakeResolver fakeResolver = new FakeResolver(AnsweringResolver.withRcode(Rcode.NXDOMAIN));
+        // the domain under a search path of the host, of a record that would pass
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + ".search.fake."), DClass.IN, 30L, "v=spf1 +all"));
+        List<Name> searchPath = Lookup.getDefaultSearchPath();
+        Lookup.setDefaultSearchPath(Name.fromString("search.fake."));
+        try {
+            SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+
+            SPFResult result = spf.checkSPF("192.0.2.10", "a_user@" + hostname, hostname);
+
+            // RFC 7208 4.3: the domain is fully qualified, and does not exist
+            assertEquals(SPFErrorConstants.NONE_CONV, result.getResult());
+        } finally {
+            Lookup.setDefaultSearchPath(searchPath);
+        }
+    }
+
+    @Test(timeout = 10000)
     public void shouldReturnPermErrorOnAIp4CidrOverflowingAnInt() throws IOException {
         SPFResult result = checkRecord("aIp4CidrOverflow.spfexecutor.fake", "v=spf1 a/4294967296 -all", "1.2.3.4");
 
