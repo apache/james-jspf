@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -55,6 +56,7 @@ import org.xbill.DNS.TXTRecord;
 import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
 import org.xbill.DNS.lookup.LookupFailedException;
+import org.xbill.DNS.lookup.LookupResult;
 import org.xbill.DNS.lookup.LookupSession;
 import org.xbill.DNS.lookup.NoSuchRRSetException;
 
@@ -215,6 +217,32 @@ public class DNSServiceXBillImpl implements DNSService {
     }
 
     /**
+     * @return the failure of an asynchronous lookup, as LookupSession reports one: an unchecked exception dnsjava
+     *         throws on an answer it cannot handle becomes a LookupFailedException, as getRecords reports it as
+     *         a TimeoutException
+     */
+    private static CompletionException asLookupFailure(Throwable e, Name name, int type) {
+        Throwable cause = e instanceof CompletionException && e.getCause() != null ? e.getCause() : e;
+        if (cause instanceof RuntimeException && !(cause instanceof LookupFailedException)) {
+            LOGGER.warn("Unexpected error of the DNS lookup of {} (type {})", name, Type.string(type), cause);
+            return new CompletionException(new LookupFailedException(cause.toString(), name, type));
+        }
+        return e instanceof CompletionException ? (CompletionException) e : new CompletionException(e);
+    }
+
+    /**
+     * @return the lookup of the name and type: an unchecked exception thrown before the stage is returned, as
+     *         by a resolver whose executor is shut down (RejectedExecutionException), fails the stage instead
+     */
+    private static CompletionStage<LookupResult> startLookup(LookupSession session, Name name, int type) {
+        try {
+            return session.lookupAsync(name, type);
+        } catch (RuntimeException e) {
+            return CompletableFuture.failedFuture(e);
+        }
+    }
+
+    /**
      * @return the records of the given type: an answer can hold others
      */
     private static Record[] ofType(Record[] rr, int type) {
@@ -362,8 +390,12 @@ public class DNSServiceXBillImpl implements DNSService {
         final LookupSession lookupSession = LookupSession.defaultBuilder().resolver(new BoundedResolver(this.resolver)).build();
 
         try {
-            return lookupSession.lookupAsync(Name.fromString(request.getHostname(), Name.root), dnsJavaType)
-                .thenApply(result -> convertRecordsToList(ofType(result.getRecords().toArray(new Record[0]), dnsJavaType)));
+            Name name = Name.fromString(request.getHostname(), Name.root);
+            return startLookup(lookupSession, name, dnsJavaType)
+                .thenApply(result -> convertRecordsToList(ofType(result.getRecords().toArray(new Record[0]), dnsJavaType)))
+                .exceptionally(e -> {
+                    throw asLookupFailure(e, name, dnsJavaType);
+                });
         } catch (TextParseException e) {
             // no record, as getRecords answers
             LOGGER.debug("No {} Record found for host: {}", recordTypeDescription, request.getHostname());

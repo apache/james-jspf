@@ -111,7 +111,7 @@ public class AsynchronousSPFExecutor implements SPFExecutor {
                     if (e instanceof TimeoutException) {
                         onResponse(session, result, cont, new DNSResponse((TimeoutException) e), checker);
                     } else if (e instanceof Exception) {
-                        // a lookup error, as dnsjava's on an answer it cannot handle: temperror (RFC 7208 4.4)
+                        // another lookup error, as an unchecked exception of a DNSService: temperror (RFC 7208 4.4)
                         LOGGER.warn("Unexpected error of the DNS lookup of {}", cont.getRequest().getHostname(), e);
                         onResponse(session, result, cont, new DNSResponse(new TimeoutException(e.toString())), checker);
                     } else {
