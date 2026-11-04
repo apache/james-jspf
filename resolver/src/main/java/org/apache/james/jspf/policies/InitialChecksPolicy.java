@@ -37,6 +37,15 @@ import org.xbill.DNS.TextParseException;
  * so it should be added as the last filter.
  */
 public final class InitialChecksPolicy implements SPFChecker {
+    /**
+     * @param domain a domain of the SMTP session
+     * @return true if it holds only the characters of a host name: letters, digits, "-" and ".",
+     *         and "_", seen in names; an internationalized name is given as A-labels (RFC 7208 4.3)
+     */
+    private static boolean holdsOnlyHostNameCharacters(String domain) {
+        return domain.chars().allMatch(c -> (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')
+            || (c >= '0' && c <= '9') || c == '-' || c == '.' || c == '_');
+    }
     
     /**
      * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
@@ -44,6 +53,12 @@ public final class InitialChecksPolicy implements SPFChecker {
     public DNSLookupContinuation checkSPF(SPFSession spfData)
             throws PermErrorException, TempErrorException, NeutralException,
             NoneException {
+        // not read as a DNS name, whose escapes would make it another domain: "escape\d" is no "escaped";
+        // checked also when a local policy gave the record, as it matches the domain read so
+        if (!holdsOnlyHostNameCharacters(spfData.getSenderDomain())) {
+            throw new NoneException("Sender domain " + spfData.getSenderDomain() + " is malformed.");
+        }
+
         SPF1Record res = (SPF1Record) spfData.getAttribute(SPF1Utils.ATTRIBUTE_SPF1_RECORD);
         if (res == null) {
 
