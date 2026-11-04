@@ -205,7 +205,6 @@ public class IPAddr {
      *             on error
      */
     private void stringToInternal(String netAddress) throws PermErrorException {
-        netAddress = stripDot(netAddress);
         // createByteArrayFromIPAddressString expects a valid address: it fails on "" or "[", ignores
         // a group without ":" or "." ("2" read as ::), and writes past its array on too many groups
         if (!isValidIP(netAddress)) {
