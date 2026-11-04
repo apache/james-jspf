@@ -73,6 +73,9 @@ public class IPAddrTest extends TestCase {
         assertFalse(IPAddr.isIPAddr("2"));
         assertFalse(IPAddr.isIPAddr("1:2:3:4:5:6:7:8:9"));
         assertFalse(IPAddr.isIPAddr("1.2.3.4.5"));
+        // RFC 791, RFC 4291 2.2: no trailing dot, as in a domain name
+        assertFalse(IPAddr.isIPAddr("192.0.2.1."));
+        assertFalse(IPAddr.isIPAddr("::."));
         assertTrue(IPAddr.isIPAddr("192.0.2.1"));
         assertTrue(IPAddr.isIPAddr("2001:db8::1"));
     }
