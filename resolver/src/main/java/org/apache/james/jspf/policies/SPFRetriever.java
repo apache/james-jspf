@@ -98,7 +98,9 @@ public class SPFRetriever implements SPFChecker {
                 return null;
                 
             } catch (TimeoutException e) {
-                throw new TempErrorException("Timeout querying dns");
+                // RFC 7208 4.4: the record is looked up as "type TXT only": a DNS error of the obsolete SPF type is not one
+                String currentDomain = session.getCurrentDomain();
+                return new DNSLookupContinuation(new DNSRequest(currentDomain, DNSRequest.TXT), new SPFRecordHandlerDNSResponseListener());
             }
         }
         

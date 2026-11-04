@@ -93,7 +93,10 @@ public class SPFStrictCheckerRetriever extends SPFRetriever {
                 return new DNSLookupContinuation(new DNSRequest(currentDomain, DNSRequest.TXT), new SPFStrictSPFRecordsDNSResponseListener());
                     
             } catch (TimeoutException e) {
-                throw new TempErrorException("Timeout querying dns");
+                // RFC 7208 4.4: the record is looked up as "type TXT only": a DNS error of the obsolete SPF type is not one
+                session.removeAttribute(ATTRIBUTE_SPFSTRICT_CHECK_SPFRECORDS);
+                String currentDomain = session.getCurrentDomain();
+                return new DNSLookupContinuation(new DNSRequest(currentDomain, DNSRequest.TXT), new SPFStrictSPFRecordsDNSResponseListener());
             }
         }
         
