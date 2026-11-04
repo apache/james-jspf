@@ -35,12 +35,27 @@ import org.apache.james.jspf.core.exceptions.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xbill.DNS.lookup.LookupFailedException;
+import org.xbill.DNS.lookup.NoSuchDomainException;
+import org.xbill.DNS.lookup.NoSuchRRSetException;
+import org.xbill.DNS.lookup.RedirectOverflowException;
 
 /**
  * Asynchronous implementation of SPFExecutor. All queries will get executed asynchronously
  */
 public class AsynchronousSPFExecutor implements SPFExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(AsynchronousSPFExecutor.class);
+
+    /**
+     * @return true if the lookup failed for want of a record, as when the synchronous Lookup of
+     *         dnsjava ends with HOST_NOT_FOUND, TYPE_NOT_FOUND or UNRECOVERABLE (a CNAME loop): the
+     *         domain or the record does not exist. Invalid zone data, which Lookup cannot normalize
+     *         either, is a DNS error.
+     */
+    private static boolean isNoData(Throwable e) {
+        return e instanceof NoSuchDomainException
+            || e instanceof NoSuchRRSetException
+            || e instanceof RedirectOverflowException;
+    }
 
     private DNSService dnsProbe;
 
@@ -81,12 +96,15 @@ public class AsynchronousSPFExecutor implements SPFExecutor {
                     if (e instanceof CompletionException && e.getCause() != null) {
                         e = e.getCause();
                     }
-                    if (e instanceof IOException && e.getMessage() != null && e.getMessage().startsWith("Timed out ")) {
+                    if (isNoData(e)) {
+                        onResponse(session, result, cont, new DNSResponse(new ArrayList<>()), checker);
+                        return null;
+                    }
+                    if (e instanceof IOException || e instanceof LookupFailedException) {
+                        // a DNS error, as a time out: temperror, as for the synchronous lookup (RFC 7208 4.4)
                         e = new TimeoutException(e.getMessage());
                     }
-                    if (e instanceof LookupFailedException) {
-                        onResponse(session, result, cont, new DNSResponse(new ArrayList<>()), checker);
-                    } else if (e instanceof TimeoutException) {
+                    if (e instanceof TimeoutException) {
                         onResponse(session, result, cont, new DNSResponse((TimeoutException) e), checker);
                     } else {
                         handleErrorAndComplete(session, result, e);
