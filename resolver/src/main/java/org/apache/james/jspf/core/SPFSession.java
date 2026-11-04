@@ -36,6 +36,23 @@ import java.util.function.Predicate;
 
 public class SPFSession implements MacroData {
 
+    /**
+     * @param s an identity of the SMTP session
+     * @return the identity without its leading and trailing spaces and tabs: unlike String.trim, a
+     *         control character stays, so that it makes a malformed domain instead of another one
+     */
+    private static String trimSpaces(String s) {
+        int start = 0;
+        int end = s.length();
+        while (start < end && (s.charAt(start) == ' ' || s.charAt(start) == '\t')) {
+            start++;
+        }
+        while (end > start && (s.charAt(end - 1) == ' ' || s.charAt(end - 1) == '\t')) {
+            end--;
+        }
+        return s.substring(start, end);
+    }
+
     private String ipAddress = ""; // also used for (i)<sending-host>
 
     private String mailFrom = ""; // (s)<responsible-sender>
@@ -94,10 +111,11 @@ public class SPFSession implements MacroData {
         if (containsCRLF(heloDomain)) {
             throw new IllegalArgumentException("heloDomain must not contain CR or LF characters");
         }
-        this.mailFrom = mailFrom.trim();
-        this.hostName = heloDomain.trim();
+        this.mailFrom = trimSpaces(mailFrom);
+        this.hostName = trimSpaces(heloDomain);
        
         try {
+            // an address holds no control character: String.trim gives the same address
             this.ipAddress = IPAddr.getProperIpAddress(clientIP.trim());
             // get the in Address, of the address checked: trimmed, and IPv4 when IPv4-mapped
             this.inAddress = IPAddr.getInAddress(this.ipAddress);
@@ -107,22 +125,22 @@ public class SPFSession implements MacroData {
         }
 
         // if nullsender is used postmaster@helo will be used as email
-        if (mailFrom.equals("")) {
+        if (this.mailFrom.equals("")) {
             this.currentSenderPart = "postmaster";
             this.senderDomain = hostName;
             this.mailFrom = currentSenderPart + "@" + hostName;
         } else {
-            String[] fromParts = mailFrom.split("@");
+            String[] fromParts = this.mailFrom.split("@");
             // What to do when mailFrom is "@example.com" ?
             if (fromParts.length > 1) {
                 this.senderDomain = fromParts[fromParts.length -1];
-                this.currentSenderPart = mailFrom.substring(0, mailFrom.length() - senderDomain.length() - 1);
+                this.currentSenderPart = this.mailFrom.substring(0, this.mailFrom.length() - senderDomain.length() - 1);
                 if (this.currentSenderPart.length() == 0) {
                     this.currentSenderPart = "postmaster";
                 }
             } else {
                 this.currentSenderPart = "postmaster";
-                this.senderDomain = mailFrom;
+                this.senderDomain = this.mailFrom;
             }
         }
         this.currentDomain = this.senderDomain;
