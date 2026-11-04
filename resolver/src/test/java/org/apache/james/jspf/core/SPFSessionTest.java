@@ -53,6 +53,42 @@ public class SPFSessionTest {
     }
 
     @Test
+    public void theSenderDomainShouldBeThatOfTheTrimmedMailFrom() {
+        SPFSession spfSession = new SPFSession(" foo@example.com\t", "mail.example.org", "192.0.2.1");
+
+        assertEquals("example.com", spfSession.getSenderDomain());
+        assertEquals("foo", spfSession.getCurrentSenderPart());
+        assertEquals("foo@example.com", spfSession.getMailFrom());
+    }
+
+    @Test
+    public void aMailFromOfSpacesShouldBeTheNullSender() {
+        SPFSession spfSession = new SPFSession("  ", "mail.example.org", "192.0.2.1");
+
+        // RFC 7208 2.4: "postmaster@" and the HELO identity
+        assertEquals("mail.example.org", spfSession.getSenderDomain());
+        assertEquals("postmaster@mail.example.org", spfSession.getMailFrom());
+    }
+
+    @Test
+    public void theClientAddressShouldBeTrimmedOfControlCharacters() {
+        // as read from a line of a protocol
+        SPFSession spfSession = new SPFSession("foo@example.com", "mail.example.org", "192.0.2.10\n");
+
+        assertEquals("192.0.2.10", spfSession.getIpAddress());
+        assertNull(spfSession.getCurrentResultExpanded());
+    }
+
+    @Test
+    public void controlCharactersShouldStayInTheIdentities() {
+        SPFSession spfSession = new SPFSession("foo@example.com\u0002", "mail.example.org\u0001", "192.0.2.1");
+
+        // only spaces and tabs are trimmed: a control character makes a malformed domain, not another one
+        assertEquals("example.com\u0002", spfSession.getSenderDomain());
+        assertEquals("mail.example.org\u0001", spfSession.getHostName());
+    }
+
+    @Test
     public void shouldReturnIPv4Mapped() {
         SPFSession spfSession = new SPFSession("", "", "::ffff:192.168.1.1");
         assertEquals("in-addr", spfSession.getInAddress());
