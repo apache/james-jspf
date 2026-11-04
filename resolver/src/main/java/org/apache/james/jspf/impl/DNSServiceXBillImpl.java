@@ -19,14 +19,18 @@
 
 package org.apache.james.jspf.impl;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSService;
@@ -36,16 +40,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xbill.DNS.AAAARecord;
 import org.xbill.DNS.ARecord;
+import org.xbill.DNS.EDNSOption;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.MXRecord;
+import org.xbill.DNS.Message;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.PTRRecord;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.Resolver;
 import org.xbill.DNS.SPFRecord;
+import org.xbill.DNS.TSIG;
 import org.xbill.DNS.TXTRecord;
 import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
+import org.xbill.DNS.lookup.LookupFailedException;
 import org.xbill.DNS.lookup.LookupSession;
 
 /**
@@ -54,6 +62,119 @@ import org.xbill.DNS.lookup.LookupSession;
  */
 public class DNSServiceXBillImpl implements DNSService {
     private static final Logger LOGGER = LoggerFactory.getLogger(DNSServiceXBillImpl.class);
+
+    /**
+     * The queries of one asynchronous lookup: the first, then one per CNAME or DNAME followed, of
+     * which LookupSession follows at most {@link LookupSession#DEFAULT_MAX_ITERATIONS}
+     */
+    private static final int MAX_QUERIES_PER_LOOKUP = LookupSession.DEFAULT_MAX_ITERATIONS + 1;
+
+    /**
+     * The resolver of one lookup: it fails the queries past {@link #MAX_QUERIES_PER_LOOKUP}. dnsjava
+     * 3.6 LookupSession asks the same question again, without end and without counting a redirect,
+     * for an answer holding a CNAME it does not follow: of another name than the one queried (with
+     * an error rcode, as YXRRSET), or of another class.
+     */
+    private static final class BoundedResolver implements Resolver {
+        /**
+         * @return a failed lookup, as the other lookup errors of LookupSession
+         */
+        private static CompletionStage<Message> tooManyQueries(Message query) {
+            return CompletableFuture.failedFuture(new LookupFailedException(
+                "More than " + MAX_QUERIES_PER_LOOKUP + " queries for " + query.getQuestion()));
+        }
+
+        private final Resolver resolver;
+        private final AtomicInteger queries = new AtomicInteger();
+
+        private BoundedResolver(Resolver resolver) {
+            this.resolver = resolver;
+        }
+
+        /**
+         * @see org.xbill.DNS.Resolver#setPort(int)
+         */
+        public void setPort(int port) {
+            resolver.setPort(port);
+        }
+
+        /**
+         * @see org.xbill.DNS.Resolver#setTCP(boolean)
+         */
+        public void setTCP(boolean flag) {
+            resolver.setTCP(flag);
+        }
+
+        /**
+         * @see org.xbill.DNS.Resolver#setIgnoreTruncation(boolean)
+         */
+        public void setIgnoreTruncation(boolean flag) {
+            resolver.setIgnoreTruncation(flag);
+        }
+
+        /**
+         * @see org.xbill.DNS.Resolver#setEDNS(int, int, int, List)
+         */
+        public void setEDNS(int version, int payloadSize, int flags, List<EDNSOption> options) {
+            resolver.setEDNS(version, payloadSize, flags, options);
+        }
+
+        /**
+         * @see org.xbill.DNS.Resolver#setTSIGKey(TSIG)
+         */
+        public void setTSIGKey(TSIG key) {
+            resolver.setTSIGKey(key);
+        }
+
+        /**
+         * @see org.xbill.DNS.Resolver#setTimeout(Duration)
+         */
+        public void setTimeout(Duration timeout) {
+            resolver.setTimeout(timeout);
+        }
+
+        /**
+         * @see org.xbill.DNS.Resolver#getTimeout()
+         */
+        public Duration getTimeout() {
+            return resolver.getTimeout();
+        }
+
+        /**
+         * @see org.xbill.DNS.Resolver#send(Message)
+         */
+        public Message send(Message query) throws IOException {
+            return resolver.send(query);
+        }
+
+        /**
+         * @see org.xbill.DNS.Resolver#sendAsync(Message)
+         */
+        public CompletionStage<Message> sendAsync(Message query) {
+            if (queries.incrementAndGet() > MAX_QUERIES_PER_LOOKUP) {
+                return tooManyQueries(query);
+            }
+            return resolver.sendAsync(query);
+        }
+
+        /**
+         * @see org.xbill.DNS.Resolver#sendAsync(Message, Executor)
+         */
+        public CompletionStage<Message> sendAsync(Message query, Executor executor) {
+            if (queries.incrementAndGet() > MAX_QUERIES_PER_LOOKUP) {
+                return tooManyQueries(query);
+            }
+            return resolver.sendAsync(query, executor);
+        }
+
+        /**
+         * @see java.lang.Object#toString()
+         */
+        public String toString() {
+            // the resolver asked, in the logs of LookupSession
+            return resolver.toString();
+        }
+    }
 
     /**
      * @return the records of the given type: an answer can hold others
@@ -198,7 +319,7 @@ public class DNSServiceXBillImpl implements DNSService {
                 throw new IllegalArgumentException();
         }
         LOGGER.debug("Start {}-Record lookup for : {}", recordTypeDescription, request.getHostname());
-        final LookupSession lookupSession = LookupSession.defaultBuilder().resolver(this.resolver).build();
+        final LookupSession lookupSession = LookupSession.defaultBuilder().resolver(new BoundedResolver(this.resolver)).build();
 
         try {
             return lookupSession.lookupAsync(Name.fromString(request.getHostname()), dnsJavaType)
