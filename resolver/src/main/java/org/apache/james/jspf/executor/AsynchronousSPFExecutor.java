@@ -21,9 +21,13 @@ package org.apache.james.jspf.executor;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.CompletionStage;
 
 import org.apache.james.jspf.core.DNSLookupContinuation;
+import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSResponse;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.SPFChecker;
@@ -90,7 +94,7 @@ public class AsynchronousSPFExecutor implements SPFExecutor {
     private void handleCont(SPFSession session, FutureSPFResult result, DNSLookupContinuation cont, SPFChecker checker) {
         if (cont != null) {
             // if the checker returns a continuation we return it
-            dnsProbe.getRecordsAsync(cont.getRequest())
+            lookUp(cont.getRequest())
                 .thenAccept(results -> onResponse(session, result, cont, new DNSResponse(results), checker))
                 .exceptionally(e -> {
                     if (e instanceof CompletionException && e.getCause() != null) {
@@ -106,6 +110,10 @@ public class AsynchronousSPFExecutor implements SPFExecutor {
                     }
                     if (e instanceof TimeoutException) {
                         onResponse(session, result, cont, new DNSResponse((TimeoutException) e), checker);
+                    } else if (e instanceof Exception) {
+                        // a lookup error, as dnsjava's on an answer it cannot handle: temperror (RFC 7208 4.4)
+                        LOGGER.warn("Unexpected error of the DNS lookup of {}", cont.getRequest().getHostname(), e);
+                        onResponse(session, result, cont, new DNSResponse(new TimeoutException(e.toString())), checker);
                     } else {
                         handleErrorAndComplete(session, result, e);
                     }
@@ -113,6 +121,21 @@ public class AsynchronousSPFExecutor implements SPFExecutor {
                 });
         } else {
             execute(session, result);
+        }
+    }
+
+    /**
+     * @return the lookup of the DNS service, failed when the service throws instead of failing it
+     */
+    private CompletionStage<List<String>> lookUp(DNSRequest request) {
+        try {
+            CompletionStage<List<String>> lookup = dnsProbe.getRecordsAsync(request);
+            if (lookup == null) {
+                return CompletableFuture.failedFuture(new IllegalStateException("No lookup of " + request.getHostname()));
+            }
+            return lookup;
+        } catch (RuntimeException e) {
+            return CompletableFuture.failedFuture(e);
         }
     }
 

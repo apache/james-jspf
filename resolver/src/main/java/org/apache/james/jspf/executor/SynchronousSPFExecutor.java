@@ -60,6 +60,10 @@ public class SynchronousSPFExecutor implements SPFExecutor {
                                 .getRequest()));
                     } catch (TimeoutException e) {
                         response = new DNSResponse(e);
+                    } catch (RuntimeException e) {
+                        // a lookup error, as dnsjava's on an answer it cannot handle: temperror (RFC 7208 4.4)
+                        LOGGER.warn("Unexpected error of the DNS lookup of {}", cont.getRequest().getHostname(), e);
+                        response = new DNSResponse(new TimeoutException(e.toString()));
                     }
                     cont = cont.getListener().onDNSResponse(response, session);
                 }
