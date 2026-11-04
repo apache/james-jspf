@@ -809,6 +809,41 @@ public abstract class SPFExecutorBaseTest {
     }
 
     @Test(timeout = 10000)
+    public void ptrShouldNotMatchWhenThePtrLookupFails() throws IOException {
+        String hostname = "ptrservfail.spfexecutor.fake";
+        // the names of no record of fakeResolver, as the reverse name of the client, answer SERVFAIL
+        FakeResolver fakeResolver = new FakeResolver(AnsweringResolver.withRcode(Rcode.SERVFAIL));
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L,
+            "v=spf1 ptr ip4:192.0.2.10 -all"));
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+
+        SPFResult result = spf.checkSPF("192.0.2.10", "a_user@" + hostname, hostname);
+
+        // RFC 7208 5.5: "If a DNS error occurs while doing the PTR RR lookup, then this mechanism fails to match"
+        assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void ptrShouldSkipANameWhoseAddressLookupFails() throws IOException {
+        String hostname = "ptrskip.spfexecutor.fake";
+        FakeResolver fakeResolver = new FakeResolver(AnsweringResolver.withRcode(Rcode.SERVFAIL));
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, "v=spf1 ptr -all"));
+        // the client is named by broken.servfail.fake, of no record here, then by mail.<hostname>
+        fakeResolver.addRecord(new PTRRecord(Name.fromString("10.2.0.192.in-addr.arpa."), DClass.IN, 30L,
+            Name.fromString("broken.servfail.fake.")));
+        fakeResolver.addRecord(new PTRRecord(Name.fromString("10.2.0.192.in-addr.arpa."), DClass.IN, 30L,
+            Name.fromString("mail." + hostname + ".")));
+        fakeResolver.addRecord(new ARecord(Name.fromString("mail." + hostname + "."), DClass.IN, 30L,
+            InetAddress.getByName("192.0.2.10")));
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+
+        SPFResult result = spf.checkSPF("192.0.2.10", "a_user@" + hostname, hostname);
+
+        // RFC 7208 5.5: "If a DNS error occurs while doing an A RR lookup, then that domain name is skipped"
+        assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
     public void shouldReturnPermErrorOnAIp4CidrOverflowingAnInt() throws IOException {
         SPFResult result = checkRecord("aIp4CidrOverflow.spfexecutor.fake", "v=spf1 a/4294967296 -all", "1.2.3.4");
 
