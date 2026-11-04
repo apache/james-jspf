@@ -92,8 +92,12 @@ Beyond the raw result, `SPFResult` builds a ready to use `Received-SPF` header:
 +
 ----
 Received-SPF: pass (spfCheck: domain of example.com designates 192.0.2.25 as permitted
-sender) client-ip=192.0.2.25; envelope-from=sender@example.com; helo=example.com;
+sender) client-ip=192.0.2.25; envelope-from="sender@example.com"; helo=example.com;
 ----
++
+Each value is written as a dot-atom when it is one, else as a quoted-string (RFC 7208 9.1): a
+mailbox, an IPv6 address, a HELO address literal (`[192.0.2.1]`) or a domain ending with a dot is
+quoted.
 
 `getExplanation()` returns the explanation published by the domain through the `exp=`
 modifier, or the empty string when there is none.

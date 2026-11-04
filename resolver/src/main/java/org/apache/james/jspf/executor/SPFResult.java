@@ -31,6 +31,70 @@ import org.apache.james.jspf.core.exceptions.SPFErrorConstants;
  */
 public class SPFResult  {
 
+    /**
+     * The atext characters of RFC 5322 3.2.3 other than letters and digits
+     */
+    private static final String ATEXT_SYMBOLS = "!#$%&'*+-/=?^_`{|}~";
+
+    /**
+     * @return true for a visible character: printable ASCII, or a non-ASCII one, as UTF-8 headers
+     *         hold (RFC 6532 3.2), but no control character (C0, DEL, C1)
+     */
+    private static boolean isVisible(int c) {
+        return (c > ' ' && c < 0x7F) || c >= 0xA0;
+    }
+
+    /**
+     * @return true for an atext character of RFC 5322 3.2.3, or a non-ASCII one (RFC 6532 3.2) other
+     *         than a control character
+     */
+    private static boolean isAtext(char c) {
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')
+            || ATEXT_SYMBOLS.indexOf(c) >= 0 || c >= 0xA0;
+    }
+
+    /**
+     * @return true for an RFC 5322 dot-atom-text: runs of atext separated by single dots, so neither
+     *         empty nor starting or ending with a dot
+     */
+    private static boolean isDotAtom(String value) {
+        boolean afterAtext = false;
+        for (char c : value.toCharArray()) {
+            if (c == '.' && afterAtext) {
+                afterAtext = false;
+            } else if (isAtext(c)) {
+                afterAtext = true;
+            } else {
+                return false;
+            }
+        }
+        return afterAtext;
+    }
+
+    /**
+     * Write the value of a key-value pair of the header, a dot-atom or a quoted-string (RFC 7208 9.1):
+     * as it is when it is a dot-atom, else as an RFC 5322 quoted-string, of which "\\" and "\"" become
+     * quoted-pairs and characters that are neither visible nor white space are dropped. A mailbox ("@",
+     * quoted in the examples of RFC 7208 9.1), an IPv6 address (":"), an address literal ("[") or a
+     * domain ending with a dot is quoted.
+     *
+     * @param value The value, given by the SMTP client
+     */
+    private static String keyValue(String value) {
+        if (isDotAtom(value)) {
+            return value;
+        }
+        StringBuilder quoted = new StringBuilder(value.length() + 2).append('"');
+        for (char c : value.toCharArray()) {
+            if (c == '"' || c == '\\') {
+                quoted.append('\\').append(c);
+            } else if (isVisible(c) || c == ' ' || c == '\t') {
+                quoted.append(c);
+            }
+        }
+        return quoted.append('"').toString();
+    }
+
     protected String headerTextAsString = "";
 
     protected final static String HEADER_NAME = "Received-SPF";
@@ -129,9 +193,9 @@ public class SPFResult  {
 
         String headerTextAsString;
         if (headerText.length() > 0) {
-            headerText.append("client-ip=" + spfData.getIpAddress()
-                    + "; envelope-from=" + spfData.getMailFrom() + "; helo="
-                    + spfData.getHostName() + ";");
+            headerText.append("client-ip=" + keyValue(spfData.getIpAddress())
+                    + "; envelope-from=" + keyValue(spfData.getMailFrom()) + "; helo="
+                    + keyValue(spfData.getHostName()) + ";");
             headerTextAsString = headerText.toString();
         } else {
             headerTextAsString = "";

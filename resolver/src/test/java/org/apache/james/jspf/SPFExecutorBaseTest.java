@@ -188,7 +188,7 @@ public abstract class SPFExecutorBaseTest {
         SPF spf = createSPF();
         SPFResult result = spf.checkSPF("109.197.176.25", "nico@linagora.com", "linagora.com");
         assertEquals("pass", result.getResult());
-        assertEquals("Received-SPF: pass (spfCheck: domain of linagora.com designates 109.197.176.25 as permitted sender) client-ip=109.197.176.25; envelope-from=nico@linagora.com; helo=linagora.com;",
+        assertEquals("Received-SPF: pass (spfCheck: domain of linagora.com designates 109.197.176.25 as permitted sender) client-ip=109.197.176.25; envelope-from=\"nico@linagora.com\"; helo=linagora.com;",
                 result.getHeader());
     }
 
@@ -199,7 +199,7 @@ public abstract class SPFExecutorBaseTest {
                 "do_not_reply@reyifglerifwukfvbdjhrkbvebvekvfulervkerkeruerbeb.de",
                 "reyifglerifwukfvbdjhrkbvebvekvfulervkerkeruerbeb.de");
         assertEquals("none", result.getResult());
-        assertEquals("Received-SPF: none (spfCheck: 207.54.72.202 is neither permitted nor denied by domain of reyifglerifwukfvbdjhrkbvebvekvfulervkerkeruerbeb.de) client-ip=207.54.72.202; envelope-from=do_not_reply@reyifglerifwukfvbdjhrkbvebvekvfulervkerkeruerbeb.de; helo=reyifglerifwukfvbdjhrkbvebvekvfulervkerkeruerbeb.de;",
+        assertEquals("Received-SPF: none (spfCheck: 207.54.72.202 is neither permitted nor denied by domain of reyifglerifwukfvbdjhrkbvebvekvfulervkerkeruerbeb.de) client-ip=207.54.72.202; envelope-from=\"do_not_reply@reyifglerifwukfvbdjhrkbvebvekvfulervkerkeruerbeb.de\"; helo=reyifglerifwukfvbdjhrkbvebvekvfulervkerkeruerbeb.de;",
                 result.getHeader());
     }
 
@@ -208,7 +208,7 @@ public abstract class SPFExecutorBaseTest {
         SPF spf = createSPF();
         SPFResult result = spf.checkSPF("207.54.72.202", "do_not_reply@com.br", "com.br");
         assertEquals("none", result.getResult());
-        assertEquals("Received-SPF: none (spfCheck: 207.54.72.202 is neither permitted nor denied by domain of com.br) client-ip=207.54.72.202; envelope-from=do_not_reply@com.br; helo=com.br;",
+        assertEquals("Received-SPF: none (spfCheck: 207.54.72.202 is neither permitted nor denied by domain of com.br) client-ip=207.54.72.202; envelope-from=\"do_not_reply@com.br\"; helo=com.br;",
                 result.getHeader());
     }
 
@@ -221,7 +221,7 @@ public abstract class SPFExecutorBaseTest {
                 "do_not_reply@reyifglerifwukfvbdjhrkbvebvekvfulervkerkeruerbeb.de",
                 "reyifglerifwukfvbdjhrkbvebvekvfulervkerkeruerbeb.de");
         assertEquals("temperror", result.getResult());
-        assertEquals("Received-SPF: temperror (spfCheck: Error in retrieving data from DNS) client-ip=207.54.72.202; envelope-from=do_not_reply@reyifglerifwukfvbdjhrkbvebvekvfulervkerkeruerbeb.de; helo=reyifglerifwukfvbdjhrkbvebvekvfulervkerkeruerbeb.de;",
+        assertEquals("Received-SPF: temperror (spfCheck: Error in retrieving data from DNS) client-ip=207.54.72.202; envelope-from=\"do_not_reply@reyifglerifwukfvbdjhrkbvebvekvfulervkerkeruerbeb.de\"; helo=reyifglerifwukfvbdjhrkbvebvekvfulervkerkeruerbeb.de;",
                 result.getHeader());
     }
 
@@ -239,7 +239,7 @@ public abstract class SPFExecutorBaseTest {
         SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
         SPFResult result = spf.checkSPF(ip, "a_user@" + hostname, hostname);
         assertEquals(String.format(
-                        "Received-SPF: %3$s (spfCheck: domain of %2$s designates %1$s as permitted sender) client-ip=%1$s; envelope-from=a_user@%2$s; helo=%2$s;",
+                        "Received-SPF: %3$s (spfCheck: domain of %2$s designates %1$s as permitted sender) client-ip=%1$s; envelope-from=\"a_user@%2$s\"; helo=%2$s;",
                         ip, hostname, SPFErrorConstants.PASS_CONV),
                 result.getHeader());
         assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
@@ -258,7 +258,7 @@ public abstract class SPFExecutorBaseTest {
         SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
         SPFResult result = spf.checkSPF(ip, "a_user@" + hostname, hostname);
         assertEquals(String.format(
-                        "Received-SPF: %3$s (spfCheck: Error in processing SPF Record) client-ip=%1$s; envelope-from=a_user@%2$s; helo=%2$s;",
+                        "Received-SPF: %3$s (spfCheck: Error in processing SPF Record) client-ip=%1$s; envelope-from=\"a_user@%2$s\"; helo=%2$s;",
                         ip, hostname, SPFErrorConstants.PERM_ERROR_CONV),
                 result.getHeader());
         assertEquals(SPFErrorConstants.PERM_ERROR_CONV, result.getResult());
@@ -281,7 +281,7 @@ public abstract class SPFExecutorBaseTest {
         SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
         SPFResult result = spf.checkSPF(ip, "a_user@" + hostname, hostname);
         assertEquals(String.format(
-                        "Received-SPF: %3$s (spfCheck: Error in processing SPF Record) client-ip=%1$s; envelope-from=a_user@%2$s; helo=%2$s;",
+                        "Received-SPF: %3$s (spfCheck: Error in processing SPF Record) client-ip=%1$s; envelope-from=\"a_user@%2$s\"; helo=%2$s;",
                         ip, hostname, SPFErrorConstants.PERM_ERROR_CONV),
                 result.getHeader());
         assertEquals(SPFErrorConstants.PERM_ERROR_CONV, result.getResult());
@@ -317,7 +317,7 @@ public abstract class SPFExecutorBaseTest {
         SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
         SPFResult result = spf.checkSPF(ip, "a_user@" + hostname, hostname);
         assertEquals(String.format(
-                        "Received-SPF: %3$s (spfCheck: Error in processing SPF Record) client-ip=%1$s; envelope-from=a_user@%2$s; helo=%2$s;",
+                        "Received-SPF: %3$s (spfCheck: Error in processing SPF Record) client-ip=%1$s; envelope-from=\"a_user@%2$s\"; helo=%2$s;",
                         ip, hostname, SPFErrorConstants.PERM_ERROR_CONV),
                 result.getHeader());
         assertEquals(SPFErrorConstants.PERM_ERROR_CONV, result.getResult());
@@ -359,7 +359,7 @@ public abstract class SPFExecutorBaseTest {
         SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
         SPFResult result = spf.checkSPF(ip, "a_user@" + hostname, hostname);
         assertEquals(String.format(
-                        "Received-SPF: %3$s (spfCheck: domain of %2$s designates %1$s as permitted sender) client-ip=%1$s; envelope-from=a_user@%2$s; helo=%2$s;",
+                        "Received-SPF: %3$s (spfCheck: domain of %2$s designates %1$s as permitted sender) client-ip=%1$s; envelope-from=\"a_user@%2$s\"; helo=%2$s;",
                         ip, hostname, SPFErrorConstants.PASS_CONV),
                 result.getHeader());
         assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
@@ -378,7 +378,7 @@ public abstract class SPFExecutorBaseTest {
         SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
         SPFResult result = spf.checkSPF(ip, "a_user@" + hostname, hostname);
         assertEquals(String.format(
-                        "Received-SPF: %3$s (spfCheck: Error in processing SPF Record) client-ip=%1$s; envelope-from=a_user@%2$s; helo=%2$s;",
+                        "Received-SPF: %3$s (spfCheck: Error in processing SPF Record) client-ip=%1$s; envelope-from=\"a_user@%2$s\"; helo=%2$s;",
                         ip, hostname, SPFErrorConstants.PERM_ERROR_CONV),
                 result.getHeader());
         assertEquals(SPFErrorConstants.PERM_ERROR_CONV, result.getResult());
@@ -397,7 +397,7 @@ public abstract class SPFExecutorBaseTest {
         SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
         SPFResult result = spf.checkSPF(ip, "a_user@" + hostname, hostname);
         assertEquals(String.format(
-                        "Received-SPF: %3$s (spfCheck: domain of %2$s designates %1$s as permitted sender) client-ip=%1$s; envelope-from=a_user@%2$s; helo=%2$s;",
+                        "Received-SPF: %3$s (spfCheck: domain of %2$s designates %1$s as permitted sender) client-ip=%1$s; envelope-from=\"a_user@%2$s\"; helo=%2$s;",
                         ip, hostname, SPFErrorConstants.PASS_CONV),
                 result.getHeader());
         assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
@@ -417,7 +417,7 @@ public abstract class SPFExecutorBaseTest {
         SPFResult result = spf.checkSPF(ip, "a_user@" + hostname, hostname);
         assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
         assertEquals(String.format(
-                        "Received-SPF: %3$s (spfCheck: domain of x\\)client-ip=203.0.113.9;\\(.%2$s does not designate %1$s as permitted sender) client-ip=%1$s; envelope-from=a_user@%2$s; helo=%2$s;",
+                        "Received-SPF: %3$s (spfCheck: domain of x\\)client-ip=203.0.113.9;\\(.%2$s does not designate %1$s as permitted sender) client-ip=%1$s; envelope-from=\"a_user@%2$s\"; helo=%2$s;",
                         ip, hostname, SPFErrorConstants.FAIL_CONV),
                 result.getHeader());
     }
@@ -885,6 +885,79 @@ public abstract class SPFExecutorBaseTest {
         SPFResult result = spf.checkSPF("192.0.2.10", "a_user@" + hostname, hostname);
 
         assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void headerShouldNotHoldTheControlCharactersOfTheHelo() throws IOException {
+        String hostname = "heloControl.spfexecutor.fake";
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, "v=spf1 +all"));
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+
+        SPFResult result = spf.checkSPF("192.0.2.10", "a_user@" + hostname, hostname + "\u0000");
+
+        // RFC 7208 9.1: a value is a dot-atom or a quoted-string, of no control character (RFC 5322 3.2.4)
+        assertEquals("Received-SPF: pass (spfCheck: domain of " + hostname + " designates 192.0.2.10 as permitted sender)"
+            + " client-ip=192.0.2.10; envelope-from=\"a_user@" + hostname + "\"; helo=\"" + hostname + "\";", result.getHeader());
+    }
+
+    @Test(timeout = 10000)
+    public void headerShouldKeepTheNonAsciiCharactersOfAMailFrom() throws IOException {
+        String hostname = "mailFromUtf8.spfexecutor.fake";
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, "v=spf1 +all"));
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+
+        // a UTF-8 local part, of SMTPUTF8
+        SPFResult result = spf.checkSPF("192.0.2.10", "pel\u00e9@" + hostname, hostname);
+
+        // RFC 6532 3.2: UTF-8 in a header value
+        assertEquals("Received-SPF: pass (spfCheck: domain of " + hostname + " designates 192.0.2.10 as permitted sender)"
+            + " client-ip=192.0.2.10; envelope-from=\"pel\u00e9@" + hostname + "\"; helo=" + hostname + ";", result.getHeader());
+    }
+
+    @Test(timeout = 10000)
+    public void headerShouldQuoteAMailFromThatWouldEndItsValue() throws IOException {
+        String hostname = "mailFromQuote.spfexecutor.fake";
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, "v=spf1 +all"));
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+
+        SPFResult result = spf.checkSPF("192.0.2.10", "\"a b;\"@" + hostname, hostname);
+
+        assertEquals("Received-SPF: pass (spfCheck: domain of " + hostname + " designates 192.0.2.10 as permitted sender)"
+            + " client-ip=192.0.2.10; envelope-from=\"\\\"a b;\\\"@" + hostname + "\"; helo=" + hostname + ";",
+            result.getHeader());
+    }
+
+    @Test(timeout = 10000)
+    public void headerShouldQuoteTheAddressOfAnIpv6Client() throws IOException {
+        String hostname = "clientIpv6.spfexecutor.fake";
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, "v=spf1 +all"));
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+
+        SPFResult result = spf.checkSPF("2001:db8::10", "a_user@" + hostname, hostname);
+
+        // RFC 7208 9.1: ":" is no atext (RFC 5322 3.2.3), so the address is no dot-atom
+        assertEquals("Received-SPF: pass (spfCheck: domain of " + hostname + " designates 2001:db8::10 as permitted sender)"
+            + " client-ip=\"2001:db8::10\"; envelope-from=\"a_user@" + hostname + "\"; helo=" + hostname + ";",
+            result.getHeader());
+    }
+
+    @Test(timeout = 10000)
+    public void headerShouldQuoteAHeloEndingWithADot() throws IOException {
+        String hostname = "heloDot.spfexecutor.fake";
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, "v=spf1 +all"));
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+
+        SPFResult result = spf.checkSPF("192.0.2.10", "a_user@" + hostname, hostname + ".");
+
+        // RFC 7208 9.1: a dot-atom ends with atext (RFC 5322 3.2.3)
+        assertEquals("Received-SPF: pass (spfCheck: domain of " + hostname + " designates 192.0.2.10 as permitted sender)"
+            + " client-ip=192.0.2.10; envelope-from=\"a_user@" + hostname + "\"; helo=\"" + hostname + ".\";",
+            result.getHeader());
     }
 
     @Test(timeout = 10000)
