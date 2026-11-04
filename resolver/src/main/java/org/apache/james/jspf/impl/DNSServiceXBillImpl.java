@@ -200,6 +200,21 @@ public class DNSServiceXBillImpl implements DNSService {
     }
 
     /**
+     * @param query the lookup of the given request
+     * @return the answer of the lookup
+     * @throws TimeoutException on a DNS error, as dnsjava's ClassCastException on some malformed
+     *         answers: DNSService declares no other exception (RFC 7208 4.4)
+     */
+    private static Record[] run(Lookup query, Name name, int type) throws TimeoutException {
+        try {
+            return query.run();
+        } catch (RuntimeException e) {
+            LOGGER.warn("Unexpected error of the DNS lookup of {} (type {})", name, Type.string(type), e);
+            throw new TimeoutException(e.toString());
+        }
+    }
+
+    /**
      * @return the records of the given type: an answer can hold others
      */
     private static Record[] ofType(Record[] rr, int type) {
@@ -306,10 +321,11 @@ public class DNSServiceXBillImpl implements DNSService {
             LOGGER.debug("Start {}-Record lookup for : {}", recordTypeDescription, request.getHostname());
 
             // RFC 7208 4.3: a fully qualified name, not looked up under the search path of the host
-            Lookup query = new Lookup(Name.fromString(request.getHostname(), Name.root), dnsJavaType);
+            Name name = Name.fromString(request.getHostname(), Name.root);
+            Lookup query = new Lookup(name, dnsJavaType);
             query.setResolver(resolver);
 
-            Record[] rr = query.run();
+            Record[] rr = run(query, name, dnsJavaType);
             int queryResult = query.getResult();
             
 
