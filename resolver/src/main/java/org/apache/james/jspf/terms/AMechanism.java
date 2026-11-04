@@ -77,34 +77,12 @@ public class AMechanism extends GenericMechanism implements SPFCheckerDNSRespons
             try {
                 boolean validIPV4Address = Inet6Util.isValidIPV4Address(spfData.getIpAddress());
                 spfData.setAttribute(ATTRIBUTE_AMECHANISM_IPV4CHECK, Boolean.valueOf(validIPV4Address));
-                if (validIPV4Address) {
-
-                    List<String> aRecords = getARecords(host);
-                    if (aRecords == null) {
-                        try {
-                            DNSRequest request = new DNSRequest(host, DNSRequest.A);
-                            return new DNSLookupContinuation(request, AMechanism.this);
-                        } catch (NoneException e) {
-                            return onDNSResponse(new DNSResponse(aRecords), spfData);
-                        }
-                    } else {
-                        return onDNSResponse(new DNSResponse(aRecords), spfData);
-                    }
-         
-                } else {
-                    
-                    List<String> aaaaRecords = getAAAARecords(host);
-                    if (aaaaRecords == null) {
-                        try {
-                            DNSRequest request = new DNSRequest(host, DNSRequest.AAAA);
-                            return new DNSLookupContinuation(request, AMechanism.this);
-                        } catch (NoneException e) {
-                            return onDNSResponse(new DNSResponse(aaaaRecords), spfData);
-                        }
-                    } else {
-                        return onDNSResponse(new DNSResponse(aaaaRecords), spfData);
-                    }
-
+                // RFC 7208 5.3: the target is a domain name, looked up even when it reads as an address
+                try {
+                    DNSRequest request = new DNSRequest(host, validIPV4Address ? DNSRequest.A : DNSRequest.AAAA);
+                    return new DNSLookupContinuation(request, AMechanism.this);
+                } catch (NoneException e) {
+                    return onDNSResponse(new DNSResponse((List<String>) null), spfData);
                 }
             // PermError / TempError
             // TODO: Should we replace this with the "right" Exceptions ?
@@ -230,7 +208,11 @@ public class AMechanism extends GenericMechanism implements SPFCheckerDNSRespons
     
     /**
      * Retrieve a list of AAAA records
+     *
+     * @deprecated no longer used: the target of the a mechanism is a domain name, always looked up
+     *             (RFC 7208 5.3)
      */
+    @Deprecated
     public List<String> getAAAARecords(String strServer) {
         List<String> listAAAAData = null;
         if (IPAddr.isIPV6(strServer)) {
@@ -248,7 +230,10 @@ public class AMechanism extends GenericMechanism implements SPFCheckerDNSRespons
      * @param strServer
      *            The hostname or ipAddress whe should get the A-Records for
      * @return The ipAddresses
+     * @deprecated no longer used: the target of the a mechanism is a domain name, always looked up
+     *             (RFC 7208 5.3)
      */
+    @Deprecated
     public List<String> getARecords(String strServer) {
         List<String> listAData = null;
         if (IPAddr.isIPAddr(strServer)) {
