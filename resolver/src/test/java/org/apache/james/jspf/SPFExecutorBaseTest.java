@@ -661,7 +661,8 @@ public abstract class SPFExecutorBaseTest {
 
         SPFResult result = spf.checkSPF("192.0.2.10", "a_user@" + hostname, hostname);
 
-        assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+        // not the pass of the override: the sender domain, holding a backslash, is malformed (RFC 7208 4.3)
+        assertEquals(SPFErrorConstants.NONE_CONV, result.getResult());
     }
 
     @Test(timeout = 10000)
@@ -767,6 +768,44 @@ public abstract class SPFExecutorBaseTest {
 
         // RFC 7208 5.3: the target is the HELO name, not the address it reads as
         assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void shouldReturnNoneForASenderDomainWithACharacterNoHostNameHolds() throws IOException {
+        String hostname = "escaped.spfexecutor.fake";
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, "v=spf1 +all"));
+
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+        // read as a DNS name, escape\d is escaped
+        SPFResult result = spf.checkSPF("192.0.2.10", "a_user@escape\\d.spfexecutor.fake", "mail.spfexecutor.fake");
+
+        // RFC 7208 4.3: a malformed domain gives none
+        assertEquals(SPFErrorConstants.NONE_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void anOverrideShouldNotApplyToAMalformedSenderDomain() throws IOException {
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(new FakeResolver(AnsweringResolver.withRcode(Rcode.NXDOMAIN))));
+        spf.getOverridePolicy().addEntry("escaped.spfexecutor.fake", "v=spf1 +all");
+
+        // read as a DNS name, escape\d is escaped: the domain of the override entry
+        SPFResult result = spf.checkSPF("192.0.2.10", "a_user@escape\\d.spfexecutor.fake", "mail.spfexecutor.fake");
+
+        // RFC 7208 4.3: a malformed domain gives none
+        assertEquals(SPFErrorConstants.NONE_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void shouldCheckASenderDomainWithAnUnderscore() throws IOException {
+        String hostname = "_underscore.spfexecutor.fake";
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, "v=spf1 +all"));
+
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+        SPFResult result = spf.checkSPF("192.0.2.10", "a_user@" + hostname, hostname);
+
+        assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
     }
 
     @Test(timeout = 10000)

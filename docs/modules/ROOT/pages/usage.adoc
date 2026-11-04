@@ -48,6 +48,10 @@ System.out.println(result.getResult());
 <2> The envelope sender, as provided in `MAIL FROM`.
 <3> The host name provided in `HELO` / `EHLO`.
 
+Give the domains as host names: an internationalized domain in A-labels (`xn--`), as RFC 7208
+4.3 requires. A sender domain holding another character (a U-label, a space, a backslash) is
+malformed, and the result is `none`.
+
 `SPF` instances are meant to be created once and reused for many checks.
 
 == Interpreting the result
