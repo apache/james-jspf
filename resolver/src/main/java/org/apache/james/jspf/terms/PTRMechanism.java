@@ -187,7 +187,12 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled,
             
             }
         } catch (TimeoutException e) {
-            throw new TempErrorException("Timeout querying the dns server");
+            // RFC 7208 5.5: "If a DNS error occurs while doing the PTR RR lookup, then this mechanism
+            // fails to match", and of an address lookup, "that domain name is skipped"
+            if (domainList == null) {
+                spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
+                return null;
+            }
         }
         
 
