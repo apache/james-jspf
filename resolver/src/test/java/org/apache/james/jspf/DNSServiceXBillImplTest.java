@@ -39,16 +39,21 @@ import org.xbill.DNS.Name;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.SPFRecord;
 import org.xbill.DNS.Section;
+import org.xbill.DNS.SimpleResolver;
 import org.xbill.DNS.TXTRecord;
 import org.xbill.DNS.Type;
 import org.xbill.DNS.lookup.LookupFailedException;
 import org.xbill.DNS.lookup.LookupSession;
 
+import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
@@ -120,6 +125,52 @@ public class DNSServiceXBillImplTest {
             fail("the lookup should fail");
         } catch (TimeoutException e) {
             // DNSService declares only TimeoutException: a DNS error (RFC 7208 4.4)
+        }
+    }
+
+    @Test(timeout = 10000)
+    public void getRecordsAsyncShouldReportADnsErrorForAnAnswerDnsjavaCannotProcess() throws Exception {
+        // opcode UPDATE, and the answer "example.com CNAME" of RDLENGTH 0: dnsjava's LookupSession fails with
+        // ClassCastException
+        byte[] message = Base64.getDecoder().decode("AAErAAABAAEAAAAAB2V4YW1wbGUDY29tAAAQAAHADAAFAAAAAA5RAABj");
+        DNSServiceXBillImpl dns = new DNSServiceXBillImpl(new AnsweringResolver(message));
+
+        CompletableFuture<List<String>> records = dns.getRecordsAsync(new DNSRequest("example.com", DNSRequest.TXT))
+            .toCompletableFuture();
+
+        try {
+            records.get(5, TimeUnit.SECONDS);
+            fail("the lookup should fail");
+        } catch (ExecutionException e) {
+            // a failed lookup of that name and type, not one of no data: a DNS error (RFC 7208 4.4)
+            assertEquals(e.getCause().toString(), LookupFailedException.class, e.getCause().getClass());
+            assertEquals(Name.fromString("example.com."), ((LookupFailedException) e.getCause()).getName());
+            assertEquals(Type.TXT, ((LookupFailedException) e.getCause()).getType());
+        }
+    }
+
+    @Test(timeout = 10000)
+    public void getRecordsAsyncShouldReportADnsErrorWhenTheResolverThrows() throws Exception {
+        // a resolver whose executor is shut down: it throws before it returns the stage of the query
+        SimpleResolver resolver = new SimpleResolver(InetAddress.getLoopbackAddress()) {
+            @Override
+            public CompletionStage<Message> sendAsync(Message query, Executor executor) {
+                throw new RejectedExecutionException("executor shut down");
+            }
+        };
+        DNSServiceXBillImpl dns = new DNSServiceXBillImpl(resolver);
+
+        CompletableFuture<List<String>> records = dns.getRecordsAsync(new DNSRequest("example.com", DNSRequest.TXT))
+            .toCompletableFuture();
+
+        try {
+            records.get(5, TimeUnit.SECONDS);
+            fail("the lookup should fail");
+        } catch (ExecutionException e) {
+            // a failed lookup of that name and type, as for an exception of the resolver once the lookup started
+            assertEquals(e.getCause().toString(), LookupFailedException.class, e.getCause().getClass());
+            assertEquals(Name.fromString("example.com."), ((LookupFailedException) e.getCause()).getName());
+            assertEquals(Type.TXT, ((LookupFailedException) e.getCause()).getType());
         }
     }
 
