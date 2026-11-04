@@ -25,6 +25,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import org.apache.james.jspf.core.DNSRequest;
+import org.apache.james.jspf.core.exceptions.TimeoutException;
 import org.apache.james.jspf.helpers.AnsweringResolver;
 import org.apache.james.jspf.impl.DNSServiceXBillImpl;
 import org.junit.Test;
@@ -32,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.xbill.DNS.CNAMERecord;
 import org.xbill.DNS.DClass;
 import org.xbill.DNS.Flags;
+import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.Record;
@@ -104,6 +106,21 @@ public class DNSServiceXBillImplTest {
 
         assertEquals(Type.TXT, answer[0].getType());
         assertNull(DNSServiceXBillImpl.convertRecordsToList(answer));
+    }
+
+    @Test(timeout = 10000)
+    public void getRecordsShouldReportADnsErrorForAnAnswerDnsjavaCannotProcess() throws Exception {
+        // opcode UPDATE, and the answer "example.com CNAME" of RDLENGTH 0: dnsjava's Lookup throws ClassCastException
+        byte[] message = Base64.getDecoder().decode("AAErAAABAAEAAAAAB2V4YW1wbGUDY29tAAAQAAHADAAFAAAAAA5RAABj");
+        DNSServiceXBillImpl dns = new DNSServiceXBillImpl(new AnsweringResolver(message));
+        Lookup.getDefaultCache(DClass.IN).clearCache();
+
+        try {
+            dns.getRecords(new DNSRequest("example.com", DNSRequest.TXT));
+            fail("the lookup should fail");
+        } catch (TimeoutException e) {
+            // DNSService declares only TimeoutException: a DNS error (RFC 7208 4.4)
+        }
     }
 
     @Test(timeout = 10000)
