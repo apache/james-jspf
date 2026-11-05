@@ -38,17 +38,21 @@ import org.xbill.DNS.Message;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.Rcode;
 import org.xbill.DNS.Record;
+import org.xbill.DNS.SIGRecord;
 import org.xbill.DNS.SPFRecord;
 import org.xbill.DNS.Section;
 import org.xbill.DNS.SimpleResolver;
 import org.xbill.DNS.TXTRecord;
+import org.xbill.DNS.TextParseException;
 import org.xbill.DNS.Type;
 import org.xbill.DNS.lookup.LookupFailedException;
 import org.xbill.DNS.lookup.LookupSession;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.time.Instant;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -67,6 +71,52 @@ import static org.junit.Assert.fail;
 public class DNSServiceXBillImplTest {
     // rcode YXRRSET, and the answer ". CNAME .": a CNAME of the root, not of the name queried
     private static final String CNAME_OF_THE_ROOT = "AAGBJwABAAEAAAAAAAABAAHADAAFAAEAAA4QAAEA";
+
+    /**
+     * @return an answer holding two CNAME records of example.com, and the TXT record of each target
+     */
+    private static Message twoCnamesOfTheName() throws TextParseException {
+        Message message = new Message();
+        message.getHeader().setFlag(Flags.QR);
+        Name name = Name.fromString("example.com.");
+        message.addRecord(new CNAMERecord(name, DClass.IN, 3600L, Name.fromString("first.example.com.")), Section.ANSWER);
+        message.addRecord(new CNAMERecord(name, DClass.IN, 3600L, Name.fromString("second.example.com.")), Section.ANSWER);
+        message.addRecord(new TXTRecord(Name.fromString("first.example.com."), DClass.IN, 3600L, "first"), Section.ANSWER);
+        message.addRecord(new TXTRecord(Name.fromString("second.example.com."), DClass.IN, 3600L, "second"), Section.ANSWER);
+        return message;
+    }
+
+    /**
+     * @return an answer holding a legacy SIG record (RFC 2535) of the CNAME of example.com before it, which
+     *         dnsjava puts in the RRset of the CNAME, the CNAME, and the TXT record of its target
+     */
+    private static Message sigBeforeTheCname() throws TextParseException {
+        Message message = new Message();
+        message.getHeader().setFlag(Flags.QR);
+        Name name = Name.fromString("example.com.");
+        // algorithm 8, RSA/SHA-256: the signature is not checked
+        message.addRecord(new SIGRecord(name, DClass.IN, 3600L, Type.CNAME, 8, 3600L, Instant.ofEpochSecond(3600L),
+            Instant.ofEpochSecond(0L), 1, name, new byte[] {1}), Section.ANSWER);
+        message.addRecord(new CNAMERecord(name, DClass.IN, 3600L, Name.fromString("target.example.com.")), Section.ANSWER);
+        message.addRecord(new TXTRecord(Name.fromString("target.example.com."), DClass.IN, 3600L, "target"), Section.ANSWER);
+        return message;
+    }
+
+    /**
+     * @return an answer holding the CNAME of example.com, a legacy SIG record of it after it (RFC 2535), and the
+     *         TXT record of its target
+     */
+    private static Message sigAfterTheCname() throws TextParseException {
+        Message message = new Message();
+        message.getHeader().setFlag(Flags.QR);
+        Name name = Name.fromString("example.com.");
+        message.addRecord(new CNAMERecord(name, DClass.IN, 3600L, Name.fromString("target.example.com.")), Section.ANSWER);
+        // algorithm 8, RSA/SHA-256: the signature is not checked
+        message.addRecord(new SIGRecord(name, DClass.IN, 3600L, Type.CNAME, 8, 3600L, Instant.ofEpochSecond(3600L),
+            Instant.ofEpochSecond(0L), 1, name, new byte[] {1}), Section.ANSWER);
+        message.addRecord(new TXTRecord(Name.fromString("target.example.com."), DClass.IN, 3600L, "target"), Section.ANSWER);
+        return message;
+    }
 
     @Test
     public void testGetLocalDomainNames() throws UnknownHostException {
@@ -186,6 +236,87 @@ public class DNSServiceXBillImplTest {
             assertEquals(Name.fromString("example.com."), ((LookupFailedException) e.getCause()).getName());
             assertEquals(Type.TXT, ((LookupFailedException) e.getCause()).getType());
         }
+    }
+
+    @Test(timeout = 10000)
+    public void getRecordsShouldFollowTheFirstOfSeveralCnames() throws Exception {
+        DNSServiceXBillImpl dns = new DNSServiceXBillImpl(new AnsweringResolver(twoCnamesOfTheName().toWire()));
+        Lookup.getDefaultCache(DClass.IN).clearCache();
+
+        List<String> records = dns.getRecords(new DNSRequest("example.com", DNSRequest.TXT));
+
+        // RFC 2181 10.1: a name has one CNAME at most; the first is followed, as Message.normalize means to
+        assertEquals(Collections.singletonList("first"), records);
+    }
+
+    @Test(timeout = 10000)
+    public void getRecordsAsyncShouldFollowTheFirstOfSeveralCnames() throws Exception {
+        DNSServiceXBillImpl dns = new DNSServiceXBillImpl(new AnsweringResolver(twoCnamesOfTheName().toWire()));
+
+        List<String> records = dns.getRecordsAsync(new DNSRequest("example.com", DNSRequest.TXT))
+            .toCompletableFuture().get(5, TimeUnit.SECONDS);
+
+        assertEquals(Collections.singletonList("first"), records);
+    }
+
+    @Test(timeout = 10000)
+    public void getRecordsShouldNotCacheTheCnameFollowedPastTheLowestTtlOfItsRRset() throws Exception {
+        // the first CNAME for an hour, the other one for no time: the RRset for no time (RFC 2181 5.2)
+        Message message = new Message();
+        message.getHeader().setFlag(Flags.QR);
+        Name name = Name.fromString("ttl.example.com.");
+        message.addRecord(new CNAMERecord(name, DClass.IN, 3600L, Name.fromString("first.example.com.")), Section.ANSWER);
+        message.addRecord(new CNAMERecord(name, DClass.IN, 0L, Name.fromString("second.example.com.")), Section.ANSWER);
+        message.addRecord(new TXTRecord(Name.fromString("first.example.com."), DClass.IN, 3600L, "first"), Section.ANSWER);
+        AnsweringResolver resolver = new AnsweringResolver(message.toWire());
+        DNSServiceXBillImpl dns = new DNSServiceXBillImpl(resolver);
+        Lookup.getDefaultCache(DClass.IN).clearCache();
+
+        dns.getRecords(new DNSRequest("ttl.example.com", DNSRequest.TXT));
+        dns.getRecords(new DNSRequest("ttl.example.com", DNSRequest.TXT));
+
+        // the second lookup asks again: the CNAME followed is not cached
+        assertEquals(2, resolver.getQueries());
+    }
+
+    @Test(timeout = 10000)
+    public void getRecordsShouldFollowACnameAfterASigRecordOfIt() throws Exception {
+        DNSServiceXBillImpl dns = new DNSServiceXBillImpl(new AnsweringResolver(sigBeforeTheCname().toWire()));
+        Lookup.getDefaultCache(DClass.IN).clearCache();
+
+        List<String> records = dns.getRecords(new DNSRequest("example.com", DNSRequest.TXT));
+
+        assertEquals(Collections.singletonList("target"), records);
+    }
+
+    @Test(timeout = 10000)
+    public void getRecordsShouldFollowACnameBeforeASigRecordOfIt() throws Exception {
+        DNSServiceXBillImpl dns = new DNSServiceXBillImpl(new AnsweringResolver(sigAfterTheCname().toWire()));
+        Lookup.getDefaultCache(DClass.IN).clearCache();
+
+        List<String> records = dns.getRecords(new DNSRequest("example.com", DNSRequest.TXT));
+
+        assertEquals(Collections.singletonList("target"), records);
+    }
+
+    @Test(timeout = 10000)
+    public void getRecordsAsyncShouldFollowACnameBeforeASigRecordOfIt() throws Exception {
+        DNSServiceXBillImpl dns = new DNSServiceXBillImpl(new AnsweringResolver(sigAfterTheCname().toWire()));
+
+        List<String> records = dns.getRecordsAsync(new DNSRequest("example.com", DNSRequest.TXT))
+            .toCompletableFuture().get(5, TimeUnit.SECONDS);
+
+        assertEquals(Collections.singletonList("target"), records);
+    }
+
+    @Test(timeout = 10000)
+    public void getRecordsAsyncShouldFollowACnameAfterASigRecordOfIt() throws Exception {
+        DNSServiceXBillImpl dns = new DNSServiceXBillImpl(new AnsweringResolver(sigBeforeTheCname().toWire()));
+
+        List<String> records = dns.getRecordsAsync(new DNSRequest("example.com", DNSRequest.TXT))
+            .toCompletableFuture().get(5, TimeUnit.SECONDS);
+
+        assertEquals(Collections.singletonList("target"), records);
     }
 
     @Test(timeout = 10000)

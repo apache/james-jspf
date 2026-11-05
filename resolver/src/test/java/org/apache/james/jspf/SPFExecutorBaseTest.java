@@ -762,6 +762,26 @@ public abstract class SPFExecutorBaseTest {
     }
 
     @Test(timeout = 10000)
+    public void shouldFollowTheFirstOfSeveralCnamesOfTheDomain() throws IOException {
+        String hostname = "cnames.spfexecutor.fake";
+        // three CNAME records of the domain, where RFC 2181 10.1 allows one, each to its own record
+        Message answer = new Message();
+        answer.getHeader().setFlag(Flags.QR);
+        String[] records = {"v=spf1 -all", "v=spf1 +all", "v=spf1 ?all"};
+        for (int i = 0; i < records.length; i++) {
+            Name target = Name.fromString("target" + i + "." + hostname + ".");
+            answer.addRecord(new CNAMERecord(Name.fromString(hostname + "."), DClass.IN, 30L, target), Section.ANSWER);
+            answer.addRecord(new TXTRecord(target, DClass.IN, 30L, records[i]), Section.ANSWER);
+        }
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(new AnsweringResolver(answer.toWire())));
+
+        SPFResult result = spf.checkSPF("192.0.2.10", "a_user@" + hostname, hostname);
+
+        // the record of the first CNAME, whatever the executor
+        assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
     public void shouldReturnNoneWhenTheLookupGetsACnameOfAnotherClass() throws IOException {
         String hostname = "cnameOfAnotherClass.spfexecutor.fake";
         // NOERROR, and a CNAME of the name queried in class CH: no record of class IN

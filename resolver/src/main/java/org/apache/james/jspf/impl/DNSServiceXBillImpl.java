@@ -32,6 +32,7 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSService;
@@ -47,10 +48,12 @@ import org.xbill.DNS.MXRecord;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.PTRRecord;
+import org.xbill.DNS.RRset;
 import org.xbill.DNS.Rcode;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.Resolver;
 import org.xbill.DNS.SPFRecord;
+import org.xbill.DNS.Section;
 import org.xbill.DNS.TSIG;
 import org.xbill.DNS.TXTRecord;
 import org.xbill.DNS.TextParseException;
@@ -82,6 +85,7 @@ public class DNSServiceXBillImpl implements DNSService {
      * extended bits, RFC 6891 6.1.3), or for another question: LookupSession would read an NXRRSET
      * answer as no record. Its {@link #send(Message)}, of the synchronous Lookup, is not bounded but
      * checks the answers the same way: Lookup reads only the 4 bits of the rcode in the header.
+     * Both keep the first of several CNAME records of a name, which Message.normalize means to do.
      */
     private static final class BoundedResolver implements Resolver {
         /**
@@ -109,6 +113,42 @@ public class DNSServiceXBillImpl implements DNSService {
         }
 
         /**
+         * @return the records kept of an RRset of the answer: of a CNAME RRset of several records, its first
+         *         CNAME record only, without the other CNAME records nor a legacy SIG record covering them,
+         *         which dnsjava puts in the RRset too, and Message.normalize would take for the CNAME
+         */
+        private static List<Record> keptRecords(RRset rrset) {
+            if (rrset.getType() != Type.CNAME || rrset.size() < 2) {
+                return rrset.rrs(false);
+            }
+            List<Record> cname = rrset.rrs(false).stream()
+                .filter(record -> record.getType() == Type.CNAME)
+                .limit(1)
+                .collect(Collectors.toList());
+            return cname.isEmpty() ? rrset.rrs(false) : cname;
+        }
+
+        /**
+         * @return the answer with only the first of several CNAME records of a name (RFC 2181 10.1 allows
+         *         one), as Message.normalize means to keep: dnsjava 3.6 removes another one, the first of
+         *         two, and LookupSession fails an answer of three where Lookup follows one. Such an answer
+         *         is rebuilt from its RRsets, whose records have the lowest TTL of their RRset (RFC 2181 5.2)
+         */
+        private static Message withFirstCnames(Message answer) {
+            List<RRset> rrsets = answer.getSectionRRsets(Section.ANSWER);
+            if (rrsets.stream().noneMatch(rrset -> rrset.getType() == Type.CNAME && rrset.size() > 1)) {
+                return answer;
+            }
+            Message kept = answer.clone();
+            kept.removeAllRecords(Section.ANSWER);
+            rrsets.forEach(rrset -> {
+                keptRecords(rrset).forEach(record -> kept.addRecord(record, Section.ANSWER));
+                rrset.sigs().forEach(sig -> kept.addRecord(sig, Section.ANSWER));
+            });
+            return kept;
+        }
+
+        /**
          * @return the answer, or a failed lookup when it is a DNS error (RFC 7208 4.4)
          */
         private static CompletionStage<Message> checked(Message query, Message answer) {
@@ -116,7 +156,7 @@ public class DNSServiceXBillImpl implements DNSService {
             if (error != null) {
                 return CompletableFuture.failedFuture(new LookupFailedException(error));
             }
-            return CompletableFuture.completedFuture(answer);
+            return CompletableFuture.completedFuture(withFirstCnames(answer));
         }
 
         private final Resolver resolver;
@@ -185,7 +225,7 @@ public class DNSServiceXBillImpl implements DNSService {
             if (error != null) {
                 throw new IOException(error);
             }
-            return answer;
+            return withFirstCnames(answer);
         }
 
         /**
