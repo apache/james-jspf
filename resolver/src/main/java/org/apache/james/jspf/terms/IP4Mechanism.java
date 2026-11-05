@@ -20,6 +20,8 @@
 
 package org.apache.james.jspf.terms;
 
+import java.util.Arrays;
+
 import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.IPAddr;
 import org.apache.james.jspf.core.Inet6Util;
@@ -92,10 +94,12 @@ public class IP4Mechanism extends GenericMechanism {
     }
 
     /**
+     * @return true for an ip4-network of RFC 7208 12: four qnum, decimal numbers from 0 to 255 without a leading zero
      * @see org.apache.james.jspf.core.Inet6Util#isValidIPV4Address(String)
      */
     protected boolean isValidAddress(String ipString) {
-        return Inet6Util.isValidIPV4Address(ipString);
+        return Inet6Util.isValidIPV4Address(ipString)
+            && Arrays.stream(ipString.split("\\.")).noneMatch(qnum -> qnum.length() > 1 && qnum.charAt(0) == '0');
     }
 
     /**
