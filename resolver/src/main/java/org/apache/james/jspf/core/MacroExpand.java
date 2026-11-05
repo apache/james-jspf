@@ -227,11 +227,35 @@ public class MacroExpand {
 
     private static final String ATTRIBUTE_MACRO_EXPAND_CHECKED_RECORD = "MacroExpand.checkedRecord";
 
+    /**
+     * Expand the input, or look up first the PTR names of the client address that %{p} needs. That lookup counts
+     * against the limit of DNS-querying terms, except for an explanation.
+     *
+     * @see #checkExpand(String, SPFSession, boolean, boolean)
+     */
     public DNSLookupContinuation checkExpand(String input, SPFSession session, boolean isExplanation) throws PermErrorException, NoneException {
+        return checkExpand(input, session, isExplanation, !isExplanation);
+    }
+
+    /**
+     * Expand the input, or look up first the PTR names of the client address that %{p} needs.
+     *
+     * @param input the domain-spec or explanation to expand
+     * @param session the session
+     * @param isExplanation true for an explanation
+     * @param countsLookup true when the PTR lookup counts against the limit of 10 DNS-querying terms (RFC 7208
+     *        4.6.4): for the terms that query DNS, not for exp=, looked up after the check
+     * @return the PTR lookup, or null when the input is expanded
+     * @throws PermErrorException also when that PTR lookup goes past the limit
+     */
+    public DNSLookupContinuation checkExpand(String input, SPFSession session, boolean isExplanation, boolean countsLookup) throws PermErrorException, NoneException {
         if (input != null) {
             String host = this.expand(input, session, isExplanation);
             if (host == null) {
-
+                if (countsLookup) {
+                    // RFC 7208 4.6.4: "the number of "PTR" resource records queried is included in the overall limit"
+                    session.increaseCurrentDepth();
+                }
                 return new DNSLookupContinuation(new DNSRequest(IPAddr
                         .getAddress(session.getIpAddress()).getReverseIP(),
                         DNSRequest.PTR), new PTRResponseListener(dnsProbe != null ? dnsProbe.getRecordLimit() : 0));

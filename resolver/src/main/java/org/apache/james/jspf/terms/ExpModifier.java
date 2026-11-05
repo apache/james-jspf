@@ -132,7 +132,8 @@ public class ExpModifier extends GenericModifier implements MacroExpandEnabled, 
             return null;
 
         spfData.pushChecker(expandedChecker);
-        return macroExpand.checkExpand(host, spfData, MacroExpand.DOMAIN);
+        // RFC 7208 4.6.4: exp= is "not subject to this limit"
+        return macroExpand.checkExpand(host, spfData, MacroExpand.DOMAIN, false);
     }
 
     /**
