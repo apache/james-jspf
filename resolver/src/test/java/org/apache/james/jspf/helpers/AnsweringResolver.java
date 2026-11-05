@@ -30,6 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.xbill.DNS.EDNSOption;
 import org.xbill.DNS.Flags;
 import org.xbill.DNS.Message;
+import org.xbill.DNS.OPTRecord;
 import org.xbill.DNS.Resolver;
 import org.xbill.DNS.Section;
 import org.xbill.DNS.TSIG;
@@ -40,13 +41,16 @@ import org.xbill.DNS.TSIG;
  */
 public final class AnsweringResolver implements Resolver {
     /**
-     * @param rcode an rcode
+     * @param rcode an rcode, of the header, or with extended bits, of an OPT record (RFC 6891 6.1.3)
      * @return a resolver answering every query with that rcode and no record
      */
     public static AnsweringResolver withRcode(int rcode) {
         Message answer = new Message();
         answer.getHeader().setFlag(Flags.QR);
-        answer.getHeader().setRcode(rcode);
+        answer.getHeader().setRcode(rcode & 0xF);
+        if (rcode > 0xF) {
+            answer.addRecord(new OPTRecord(1232, rcode >> 4, 0), Section.ADDITIONAL);
+        }
         return new AnsweringResolver(answer.toWire());
     }
 

@@ -80,7 +80,8 @@ public class DNSServiceXBillImpl implements DNSService {
      * an error rcode, as YXRRSET), or of another class.
      * It also fails, as Lookup does, an answer with an rcode other than NOERROR and NXDOMAIN (with its
      * extended bits, RFC 6891 6.1.3), or for another question: LookupSession would read an NXRRSET
-     * answer as no record.
+     * answer as no record. Its {@link #send(Message)}, of the synchronous Lookup, is not bounded but
+     * checks the answers the same way: Lookup reads only the 4 bits of the rcode in the header.
      */
     private static final class BoundedResolver implements Resolver {
         /**
@@ -94,17 +95,26 @@ public class DNSServiceXBillImpl implements DNSService {
         }
 
         /**
+         * @return why the answer is a DNS error (RFC 7208 4.4), or null when it is none
+         */
+        private static String errorOf(Message query, Message answer) {
+            int rcode = answer.getRcode();
+            if (rcode != Rcode.NOERROR && rcode != Rcode.NXDOMAIN) {
+                return "Answer " + Rcode.string(rcode) + " for " + query.getQuestion();
+            }
+            if (!query.getQuestion().equals(answer.getQuestion())) {
+                return "Answer for another question than " + query.getQuestion();
+            }
+            return null;
+        }
+
+        /**
          * @return the answer, or a failed lookup when it is a DNS error (RFC 7208 4.4)
          */
         private static CompletionStage<Message> checked(Message query, Message answer) {
-            int rcode = answer.getRcode();
-            if (rcode != Rcode.NOERROR && rcode != Rcode.NXDOMAIN) {
-                return CompletableFuture.failedFuture(new LookupFailedException(
-                    "Answer " + Rcode.string(rcode) + " for " + query.getQuestion()));
-            }
-            if (!query.getQuestion().equals(answer.getQuestion())) {
-                return CompletableFuture.failedFuture(new LookupFailedException(
-                    "Answer for another question than " + query.getQuestion()));
+            String error = errorOf(query, answer);
+            if (error != null) {
+                return CompletableFuture.failedFuture(new LookupFailedException(error));
             }
             return CompletableFuture.completedFuture(answer);
         }
@@ -167,9 +177,15 @@ public class DNSServiceXBillImpl implements DNSService {
 
         /**
          * @see org.xbill.DNS.Resolver#send(Message)
+         * @throws IOException also when the answer is a DNS error: Lookup then reports TRY_AGAIN
          */
         public Message send(Message query) throws IOException {
-            return resolver.send(query);
+            Message answer = resolver.send(query);
+            String error = errorOf(query, answer);
+            if (error != null) {
+                throw new IOException(error);
+            }
+            return answer;
         }
 
         /**
@@ -351,7 +367,7 @@ public class DNSServiceXBillImpl implements DNSService {
             // RFC 7208 4.3: a fully qualified name, not looked up under the search path of the host
             Name name = Name.fromString(request.getHostname(), Name.root);
             Lookup query = new Lookup(name, dnsJavaType);
-            query.setResolver(resolver);
+            query.setResolver(new BoundedResolver(resolver));
 
             Record[] rr = run(query, name, dnsJavaType);
             int queryResult = query.getResult();
