@@ -1327,6 +1327,36 @@ public abstract class SPFExecutorBaseTest {
     }
 
     @Test(timeout = 10000)
+    public void shouldReturnPermErrorOnAIp4CidrWithALeadingZero() throws IOException {
+        SPFResult result = checkRecord("aIp4CidrZero.spfexecutor.fake", "v=spf1 a/024 -all", "1.2.3.4");
+
+        // RFC 7208 5.6: ip4-cidr-length = "/" ("0" / %x31-39 0*1DIGIT)
+        assertEquals(SPFErrorConstants.PERM_ERROR_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void shouldReturnPermErrorOnMxIp6CidrWithALeadingZero() throws IOException {
+        SPFResult result = checkRecord("mxIp6CidrZero.spfexecutor.fake", "v=spf1 mx//064 -all", "1.2.3.4");
+
+        // RFC 7208 5.6: ip6-cidr-length = "/" ("0" / %x31-39 0*2DIGIT)
+        assertEquals(SPFErrorConstants.PERM_ERROR_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void shouldAcceptACidrLengthOfZero() throws IOException {
+        String hostname = "aCidrZero.spfexecutor.fake";
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, "v=spf1 a/0//0 -all"));
+        fakeResolver.addRecord(new ARecord(Name.fromString(hostname + "."), DClass.IN, 30L, InetAddress.getByName("192.0.2.1")));
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+
+        SPFResult result = spf.checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
+
+        // "0" alone is a CIDR length: a/0 matches every IPv4 client of a domain having an IPv4 address
+        assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
     public void shouldReturnPermErrorOnMxIp6CidrOverflowingAnInt() throws IOException {
         SPFResult result = checkRecord("mxIp6CidrOverflow.spfexecutor.fake", "v=spf1 mx//99999999999 -all", "1.2.3.4");
 
