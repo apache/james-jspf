@@ -742,6 +742,17 @@ public abstract class SPFExecutorBaseTest {
     }
 
     @Test(timeout = 10000)
+    public void shouldReturnTempErrorWhenTheLookupGetsAnExtendedErrorRcode() {
+        // BADVERS (16): 0 in the header, the upper bits in the OPT record (RFC 6891 6.1.3)
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(AnsweringResolver.withRcode(Rcode.BADVERS)));
+
+        SPFResult result = spf.checkSPF("192.0.2.10", "a_user@badvers.spfexecutor.fake", "badvers.spfexecutor.fake");
+
+        // RFC 7208 4.4: "some other error (RCODE other than 0 or 3)"
+        assertEquals(SPFErrorConstants.TEMP_ERROR_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
     public void shouldReturnTempErrorWhenTheLookupGetsANetworkError() {
         SPF spf = createCustomSPF(new DNSServiceXBillImpl(AnsweringResolver.unreachable()));
 

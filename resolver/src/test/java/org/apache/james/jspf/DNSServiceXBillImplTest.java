@@ -36,6 +36,7 @@ import org.xbill.DNS.Flags;
 import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.Name;
+import org.xbill.DNS.Rcode;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.SPFRecord;
 import org.xbill.DNS.Section;
@@ -125,6 +126,19 @@ public class DNSServiceXBillImplTest {
             fail("the lookup should fail");
         } catch (TimeoutException e) {
             // DNSService declares only TimeoutException: a DNS error (RFC 7208 4.4)
+        }
+    }
+
+    @Test(timeout = 10000)
+    public void getRecordsShouldReportADnsErrorForAnExtendedErrorRcode() throws Exception {
+        // BADVERS, of which dnsjava's Lookup reads only the header bits: NOERROR
+        DNSServiceXBillImpl dns = new DNSServiceXBillImpl(AnsweringResolver.withRcode(Rcode.BADVERS));
+
+        try {
+            dns.getRecords(new DNSRequest("badvers.example.com", DNSRequest.TXT));
+            fail("the lookup should fail");
+        } catch (TimeoutException e) {
+            // an error rcode: a DNS error (RFC 7208 4.4)
         }
     }
 
