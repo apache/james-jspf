@@ -644,6 +644,22 @@ public abstract class SPFExecutorBaseTest {
     }
 
     @Test(timeout = 10000)
+    public void shouldReturnPermErrorOnAnIp4NetworkWithALeadingZero() throws IOException {
+        SPFResult result = checkRecord("ip4Zero.spfexecutor.fake", "v=spf1 ip4:01.2.3.4 -all", "1.2.3.4");
+
+        // RFC 7208 12: qnum = DIGIT / %x31-39 DIGIT / "1" 2DIGIT / "2" %x30-34 DIGIT / "25" %x30-35
+        assertEquals(SPFErrorConstants.PERM_ERROR_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void shouldMatchAnIp4NetworkOfZeroOctets() throws IOException {
+        SPFResult result = checkRecord("ip4ZeroOctet.spfexecutor.fake", "v=spf1 ip4:10.0.0.0/8 -all", "10.0.2.4");
+
+        // a qnum of 0 alone stays valid
+        assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
     public void shouldReturnPermErrorOnIp6CidrOverflowingAnInt() throws IOException {
         SPFResult result = checkRecord("ip6CidrOverflow.spfexecutor.fake", "v=spf1 ip6:2001:db8::/99999999999 -all", "1.2.3.4");
 
