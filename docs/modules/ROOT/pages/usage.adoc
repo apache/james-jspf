@@ -144,7 +144,8 @@ spf.setSPFMustEqualsTXT(true);                          // <4>
 <3> When no SPF record is found, evaluate `v=spf1 a/24 mx/24 ptr ?all` instead of
 returning `none`. Only `pass` or `neutral` can result from a best guess. Defaults to false.
 <4> Return a `permerror` when a domain publishes both an SPF-type and a TXT-type record
-and the two disagree. Defaults to false.
+and the two disagree. Defaults to false: the TXT record is then read (RFC 7208 4.4), and a
+record of the obsolete SPF type only when no TXT record is an SPF record.
 
 Two policy objects let you supply records jSPF would not otherwise see:
 

@@ -23,6 +23,7 @@ import org.xbill.DNS.Message;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.PTRRecord;
 import org.xbill.DNS.Rcode;
+import org.xbill.DNS.Record;
 import org.xbill.DNS.Resolver;
 import org.xbill.DNS.SPFRecord;
 import org.xbill.DNS.Section;
@@ -82,14 +83,14 @@ public abstract class SPFExecutorBaseTest {
         return fakeResolver;
     }
 
-    // hostname publishes "v=spf1 -all" as TXT, on a server failing the lookups of the obsolete SPF type
-    private static DNSService dnsFailingTheSpfType(String hostname) throws IOException {
+    // a server publishing the record, failing the lookups of the given DNSRequest type
+    private static DNSService dnsFailing(int failedType, Record record) throws IOException {
         FakeResolver fakeResolver = new FakeResolver();
-        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, "v=spf1 -all"));
+        fakeResolver.addRecord(record);
         return new DNSServiceXBillImpl(fakeResolver) {
             @Override
             public List<String> getRecords(DNSRequest request) throws TimeoutException {
-                if (request.getRecordType() == DNSRequest.SPF) {
+                if (request.getRecordType() == failedType) {
                     throw new TimeoutException("SERVFAIL");
                 }
                 return super.getRecords(request);
@@ -97,12 +98,17 @@ public abstract class SPFExecutorBaseTest {
 
             @Override
             public CompletionStage<List<String>> getRecordsAsync(DNSRequest request) {
-                if (request.getRecordType() == DNSRequest.SPF) {
+                if (request.getRecordType() == failedType) {
                     return CompletableFuture.failedFuture(new TimeoutException("SERVFAIL"));
                 }
                 return super.getRecordsAsync(request);
             }
         };
+    }
+
+    // hostname publishes "v=spf1 -all" as TXT, on a server failing the lookups of the obsolete SPF type
+    private static DNSService dnsFailingTheSpfType(String hostname) throws IOException {
+        return dnsFailing(DNSRequest.SPF, new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, "v=spf1 -all"));
     }
 
     protected abstract SPF createSPF();
@@ -895,6 +901,47 @@ public abstract class SPFExecutorBaseTest {
 
         // RFC 7208 5.5: "If a DNS error occurs while doing an A RR lookup, then that domain name is skipped"
         assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void shouldPreferTheTxtRecordToARecordOfTheSpfType() throws IOException {
+        String hostname = "txtAndSpfType.spfexecutor.fake";
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, "v=spf1 +all"));
+        // a stale record of the obsolete SPF type
+        fakeResolver.addRecord(new SPFRecord(Name.fromString(hostname + "."), DClass.IN, 30L, "v=spf1 -all"));
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+
+        SPFResult result = spf.checkSPF("192.0.2.10", "a_user@" + hostname, hostname);
+
+        // RFC 7208 4.4: the record is looked up as "type TXT only"
+        assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void shouldReadTheSpfTypeWhenNoTxtRecordIsAnSpfRecord() throws IOException {
+        String hostname = "spfTypeOnly.spfexecutor.fake";
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, "site-verification=abc"));
+        fakeResolver.addRecord(new SPFRecord(Name.fromString(hostname + "."), DClass.IN, 30L, "v=spf1 -all"));
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+
+        SPFResult result = spf.checkSPF("192.0.2.10", "a_user@" + hostname, hostname);
+
+        // as before RFC 7208, for a domain publishing its record as the obsolete SPF type only
+        assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void shouldReturnTempErrorWhenTheTxtLookupFailsAlthoughTheSpfTypeHasARecord() throws IOException {
+        String hostname = "txtservfail.spfexecutor.fake";
+        DNSService dns = dnsFailing(DNSRequest.TXT,
+            new SPFRecord(Name.fromString(hostname + "."), DClass.IN, 30L, "v=spf1 -all"));
+
+        SPFResult result = createCustomSPF(dns).checkSPF("192.0.2.10", "a_user@" + hostname, hostname);
+
+        // RFC 7208 4.4: the record is looked up as "type TXT only", a DNS error of which is a temperror
+        assertEquals(SPFErrorConstants.TEMP_ERROR_CONV, result.getResult());
     }
 
     @Test(timeout = 10000)

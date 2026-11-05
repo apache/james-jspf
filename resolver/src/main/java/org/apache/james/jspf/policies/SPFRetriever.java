@@ -42,6 +42,10 @@ import java.util.List;
  */
 public class SPFRetriever implements SPFChecker {
     
+    /**
+     * The TXT records of the domain, where RFC 7208 4.4 looks the record up ("type TXT only"): when
+     * none is an SPF record, the records of the obsolete SPF type are read, as RFC 4408 4.4 allowed
+     */
     private static final class SPFRecordHandlerDNSResponseListener implements SPFCheckerDNSResponseListener {
 
         /**
@@ -59,6 +63,9 @@ public class SPFRetriever implements SPFChecker {
                 String record = extractSPFRecord(spfR);
                 if (record != null) {
                     session.setAttribute(SPF1Utils.ATTRIBUTE_SPF1_RECORD, new SPF1Record(record));
+                } else if (!CHECK_ONLY_TXT_RECORDS) {
+                    String currentDomain = session.getCurrentDomain();
+                    return new DNSLookupContinuation(new DNSRequest(currentDomain, DNSRequest.SPF), new SPFRetrieverDNSResponseListener());
                 }
             } catch (TimeoutException e) {
                 throw new TempErrorException("Timeout querying dns");
@@ -69,6 +76,9 @@ public class SPFRetriever implements SPFChecker {
         
     }
 
+    /**
+     * The records of the obsolete SPF type, of a domain whose TXT records hold no SPF record
+     */
     private static final class SPFRetrieverDNSResponseListener implements SPFCheckerDNSResponseListener {
 
         /**
@@ -79,36 +89,22 @@ public class SPFRetriever implements SPFChecker {
                 throws PermErrorException, NoneException,
                 TempErrorException, NeutralException {
             try {
-                List<String> spfR = response.getResponse();
-                
-                if (spfR == null || spfR.isEmpty()) {
-                    
-                    String currentDomain = session.getCurrentDomain();
-                    return new DNSLookupContinuation(new DNSRequest(currentDomain, DNSRequest.TXT), new SPFRecordHandlerDNSResponseListener());
-
-                } else {
-                    
-                    String record = extractSPFRecord(spfR);
-                    if (record != null) {
-                        session.setAttribute(SPF1Utils.ATTRIBUTE_SPF1_RECORD, new SPF1Record(record));
-                    }
-                    
+                String record = extractSPFRecord(response.getResponse());
+                if (record != null) {
+                    session.setAttribute(SPF1Utils.ATTRIBUTE_SPF1_RECORD, new SPF1Record(record));
                 }
-                
-                return null;
-                
             } catch (TimeoutException e) {
                 // RFC 7208 4.4: the record is looked up as "type TXT only": a DNS error of the obsolete SPF type is not one
-                String currentDomain = session.getCurrentDomain();
-                return new DNSLookupContinuation(new DNSRequest(currentDomain, DNSRequest.TXT), new SPFRecordHandlerDNSResponseListener());
             }
+            return null;
         }
         
     }
 
 	/**
-	 * This is used for testing purpose. Setting this to true will skip the initial
-	 * lookups for SPF records and instead will simply check the TXT records.
+	 * This is used for testing purpose. Setting this to true will skip the lookup of
+	 * the obsolete SPF type, when no TXT record is an SPF record, and will simply check
+	 * the TXT records.
 	 */
 	private static final boolean CHECK_ONLY_TXT_RECORDS = false;
     
@@ -154,12 +150,7 @@ public class SPFRetriever implements SPFChecker {
         SPF1Record res = (SPF1Record) spfData.getAttribute(SPF1Utils.ATTRIBUTE_SPF1_RECORD);
         if (res == null) {
             String currentDomain = spfData.getCurrentDomain();
-            if (CHECK_ONLY_TXT_RECORDS) {
-                return new DNSLookupContinuation(new DNSRequest(currentDomain, DNSRequest.TXT), new SPFRecordHandlerDNSResponseListener());
-            } else {
-                return new DNSLookupContinuation(new DNSRequest(currentDomain, DNSRequest.SPF), new SPFRetrieverDNSResponseListener());
-            }
-            
+            return new DNSLookupContinuation(new DNSRequest(currentDomain, DNSRequest.TXT), new SPFRecordHandlerDNSResponseListener());
         }
         return null;
     }
