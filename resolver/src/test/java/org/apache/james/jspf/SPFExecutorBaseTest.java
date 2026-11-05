@@ -38,6 +38,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -49,6 +50,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public abstract class SPFExecutorBaseTest {
     protected final String zonesDir = "src/test/resources/dnszones";
@@ -80,6 +82,24 @@ public abstract class SPFExecutorBaseTest {
             Name.fromString(ptrName)));
         fakeResolver.addRecord(new ARecord(Name.fromString(ptrName), DClass.IN, 30L,
             InetAddress.getByName("1.2.3.4")));
+        return fakeResolver;
+    }
+
+    // hostname has "v=spf1 exists:%{p}._p.<hostname> -all", where only <expected>._p.<hostname> exists, and 1.2.3.4 the
+    // PTR names, of which the validated ones have the address 1.2.3.4
+    private static FakeResolver pMacroOfTheClient(FakeResolver fakeResolver, String hostname, List<String> ptrNames,
+            List<String> validated, String expected) throws IOException {
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L,
+            "v=spf1 exists:%{p}._p." + hostname + " -all"));
+        for (String ptrName : ptrNames) {
+            fakeResolver.addRecord(new PTRRecord(Name.fromString("4.3.2.1.in-addr.arpa."), DClass.IN, 30L,
+                Name.fromString(ptrName + ".")));
+        }
+        for (String name : validated) {
+            fakeResolver.addRecord(new ARecord(Name.fromString(name + "."), DClass.IN, 30L, InetAddress.getByName("1.2.3.4")));
+        }
+        fakeResolver.addRecord(new ARecord(Name.fromString(expected + "._p." + hostname + "."), DClass.IN, 30L,
+            InetAddress.getByName("127.0.0.2")));
         return fakeResolver;
     }
 
@@ -748,6 +768,112 @@ public abstract class SPFExecutorBaseTest {
 
         SPFResult result = spf.checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
 
+        assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void pMacroShouldBeAValidatedNameAfterOneThatDoesNotValidate() throws IOException {
+        String hostname = "pmacro.spfexecutor.fake";
+        FakeResolver fakeResolver = pMacroOfTheClient(new FakeResolver(), hostname,
+            Arrays.asList("bad." + hostname, "good." + hostname), Collections.singletonList("good." + hostname),
+            "good." + hostname);
+
+        SPFResult result = createCustomSPF(new DNSServiceXBillImpl(fakeResolver)).checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
+
+        // RFC 7208 7.3 and 5.5: each PTR name is validated
+        assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void pMacroShouldPreferAValidatedNameUnderTheDomain() throws IOException {
+        String hostname = "pmacrosub.spfexecutor.fake";
+        FakeResolver fakeResolver = pMacroOfTheClient(new FakeResolver(), hostname,
+            Arrays.asList("mail.other.fake", "mail." + hostname), Arrays.asList("mail.other.fake", "mail." + hostname),
+            "mail." + hostname);
+
+        SPFResult result = createCustomSPF(new DNSServiceXBillImpl(fakeResolver)).checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
+
+        // RFC 7208 7.3: "if a subdomain of the <domain> is present, it SHOULD be used"
+        assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void pMacroShouldPreferTheDomainToASubdomain() throws IOException {
+        String hostname = "pmacrodomain.spfexecutor.fake";
+        FakeResolver fakeResolver = pMacroOfTheClient(new FakeResolver(), hostname,
+            Arrays.asList("mail." + hostname, hostname), Arrays.asList("mail." + hostname, hostname), hostname);
+
+        SPFResult result = createCustomSPF(new DNSServiceXBillImpl(fakeResolver)).checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
+
+        // RFC 7208 7.3: "If the <domain> is present in the list of validated domains, it SHOULD be used"
+        assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void pMacroShouldSkipANameWhoseAddressLookupFails() throws IOException {
+        String hostname = "pmacroerror.spfexecutor.fake";
+        // the names outside the zones of fakeResolver, as broken.servfail.fake, get a server failure
+        AnsweringResolver servfail = AnsweringResolver.withRcode(Rcode.SERVFAIL);
+        FakeResolver fakeResolver = pMacroOfTheClient(new FakeResolver(servfail), hostname,
+            Arrays.asList("broken.servfail.fake", "good." + hostname), Collections.singletonList("good." + hostname),
+            "good." + hostname);
+
+        SPFResult result = createCustomSPF(new DNSServiceXBillImpl(fakeResolver)).checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
+
+        // RFC 7208 5.5: "that domain name is skipped and the search continues"
+        assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
+        assertTrue(servfail.getQueries() + " queries", servfail.getQueries() > 0);
+    }
+
+    @Test(timeout = 10000)
+    public void pMacroShouldValidateTheTenthName() throws IOException {
+        String hostname = "pmacrotenth.spfexecutor.fake";
+        List<String> names = IntStream.rangeClosed(1, 11).mapToObj(i -> "name" + i + "." + hostname)
+            .collect(Collectors.toList());
+        FakeResolver fakeResolver = pMacroOfTheClient(new FakeResolver(), hostname, names,
+            Collections.singletonList(names.get(9)), names.get(9));
+
+        SPFResult result = createCustomSPF(new DNSServiceXBillImpl(fakeResolver)).checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
+
+        // RFC 7208 4.6.4: the first 10 PTR names are validated
+        assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void pMacroShouldBeChosenForTheDomainOfAnInclude() throws IOException {
+        String hostname = "pmacroinclude.spfexecutor.fake";
+        String child = "child." + hostname;
+        FakeResolver fakeResolver = new FakeResolver();
+        // the include chooses %{p} = child first, then hostname chooses its own validated name
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L,
+            "v=spf1 include:" + child + " exists:%{p}._allow." + hostname + " -all"));
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(child + "."), DClass.IN, 30L,
+            "v=spf1 exists:%{p}._miss." + child + " -all"));
+        for (String name : Arrays.asList(hostname, child)) {
+            fakeResolver.addRecord(new PTRRecord(Name.fromString("4.3.2.1.in-addr.arpa."), DClass.IN, 30L,
+                Name.fromString(name + ".")));
+            fakeResolver.addRecord(new ARecord(Name.fromString(name + "."), DClass.IN, 30L, InetAddress.getByName("1.2.3.4")));
+        }
+        fakeResolver.addRecord(new ARecord(Name.fromString(hostname + "._allow." + hostname + "."), DClass.IN, 30L,
+            InetAddress.getByName("127.0.0.2")));
+
+        SPFResult result = createCustomSPF(new DNSServiceXBillImpl(fakeResolver)).checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
+
+        // RFC 7208 7.3: %{p} prefers the <domain>, which the include changed and the end of the include restored
+        assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void pMacroShouldIgnoreTheNamesAfterTheTenth() throws IOException {
+        String hostname = "pmacrolimit.spfexecutor.fake";
+        List<String> names = IntStream.rangeClosed(1, 11).mapToObj(i -> "name" + i + "." + hostname)
+            .collect(Collectors.toList());
+        FakeResolver fakeResolver = pMacroOfTheClient(new FakeResolver(), hostname, names,
+            Collections.singletonList(names.get(10)), names.get(10));
+
+        SPFResult result = createCustomSPF(new DNSServiceXBillImpl(fakeResolver)).checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
+
+        // RFC 7208 4.6.4: "all records other than the first 10 MUST be ignored", so %{p} is "unknown"
         assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
     }
 

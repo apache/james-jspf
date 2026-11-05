@@ -21,9 +21,13 @@
 package org.apache.james.jspf.core;
 
 import org.apache.james.jspf.core.exceptions.PermErrorException;
+import org.xbill.DNS.Name;
+import org.xbill.DNS.TextParseException;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Stack;
 import java.util.function.Predicate;
 
@@ -53,6 +57,34 @@ public class SPFSession implements MacroData {
         return s.substring(start, end);
     }
 
+    /**
+     * @return the name as a domain name, whatever the case and a trailing dot, or null when it is none
+     */
+    private static Name domainName(String name) {
+        try {
+            return name == null ? null : Name.fromString(name, Name.root);
+        } catch (TextParseException e) {
+            return null;
+        }
+    }
+
+    /**
+     * @param validatedNames the validated names of the client address, in the order of its PTR records
+     * @param domain the current domain
+     * @return %{p}, of RFC 7208 7.3: the domain when it is validated, else the first validated subdomain of it,
+     *         else the first validated name, else "unknown"
+     */
+    private static String clientDomainOf(List<String> validatedNames, String domain) {
+        Name target = domainName(domain);
+        Optional<String> exact = validatedNames.stream()
+            .filter(name -> target != null && target.equals(domainName(name)))
+            .findFirst();
+        Optional<String> subdomain = validatedNames.stream()
+            .filter(name -> target != null && domainName(name) != null && domainName(name).subdomain(target))
+            .findFirst();
+        return exact.orElse(subdomain.orElse(validatedNames.stream().findFirst().orElse("unknown")));
+    }
+
     private String ipAddress = ""; // also used for (i)<sending-host>
 
     private String mailFrom = ""; // (s)<responsible-sender>
@@ -66,6 +98,8 @@ public class SPFSession implements MacroData {
     private String inAddress = "invalid"; // (v)
 
     private String clientDomain = null; // (p)
+
+    private List<String> validatedClientNames = null; // the validated names of (p), once looked up
 
     private String senderDomain = ""; // (o)
 
@@ -185,7 +219,19 @@ public class SPFSession implements MacroData {
      * @see org.apache.james.jspf.core.MacroData#getClientDomain()
      */
     public String getClientDomain() {
-        return clientDomain;
+        if (clientDomain != null || validatedClientNames == null) {
+            return clientDomain;
+        }
+        // chosen for the current domain, which an include or a redirect changes
+        return clientDomainOf(validatedClientNames, getCurrentDomain());
+    }
+
+    /**
+     * Sets the validated names of the client address, %{p} then being chosen among them for the current domain
+     * @param validatedClientNames the validated names, in the order of the PTR records, empty for "unknown"
+     */
+    void setValidatedClientNames(List<String> validatedClientNames) {
+        this.validatedClientNames = validatedClientNames;
     }
     
     /**
