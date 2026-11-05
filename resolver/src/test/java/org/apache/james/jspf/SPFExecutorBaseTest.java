@@ -103,6 +103,26 @@ public abstract class SPFExecutorBaseTest {
         return fakeResolver;
     }
 
+    // hostname has the record, and 1.2.3.4 the validated PTR name good.<hostname>: good.<hostname>._p.<hostname> exists,
+    // and good.<hostname>._exp.<hostname> holds the explanation "explained"
+    private static FakeResolver pMacroRecord(String hostname, String record) throws IOException {
+        String good = "good." + hostname;
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(longTxtRecord(hostname, record));
+        fakeResolver.addRecord(new PTRRecord(Name.fromString("4.3.2.1.in-addr.arpa."), DClass.IN, 30L,
+            Name.fromString(good + ".")));
+        fakeResolver.addRecord(new ARecord(Name.fromString(good + "."), DClass.IN, 30L, InetAddress.getByName("1.2.3.4")));
+        fakeResolver.addRecord(new ARecord(Name.fromString(good + "._p." + hostname + "."), DClass.IN, 30L,
+            InetAddress.getByName("127.0.0.2")));
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(good + "._exp." + hostname + "."), DClass.IN, 30L, "explained"));
+        return fakeResolver;
+    }
+
+    // the "a" terms of n names under hostname without address
+    private static String aTermsWithoutAddress(String hostname, int n) {
+        return IntStream.rangeClosed(1, n).mapToObj(i -> "a:x" + i + "." + hostname).collect(Collectors.joining(" "));
+    }
+
     // hostname has "v=spf1 ptr -all", and 1.2.3.4 the 11 PTR names name<i>.<hostname>, of which only name<validated> has
     // the address 1.2.3.4
     private static FakeResolver elevenPtrNamesOfTheClient(String hostname, int validated) throws IOException {
@@ -837,6 +857,59 @@ public abstract class SPFExecutorBaseTest {
 
         // RFC 7208 4.6.4: the first 10 PTR names are validated
         assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void pMacroShouldCountItsPtrLookupInTheLookupLimit() throws IOException {
+        String hostname = "pmacrocount.spfexecutor.fake";
+        // 9 a terms and exists: 10 terms that query DNS, then the PTR lookup of %{p}
+        FakeResolver fakeResolver = pMacroRecord(hostname,
+            "v=spf1 " + aTermsWithoutAddress(hostname, 9) + " exists:%{p}._p." + hostname + " -all");
+
+        SPFResult result = createCustomSPF(new DNSServiceXBillImpl(fakeResolver)).checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
+
+        // RFC 7208 4.6.4: "the number of "PTR" resource records queried is included in the overall limit of 10"
+        assertEquals(SPFErrorConstants.PERM_ERROR_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void pMacroShouldPassWithinTheLookupLimit() throws IOException {
+        String hostname = "pmacrowithin.spfexecutor.fake";
+        // 8 a terms, exists and the PTR lookup of %{p}: 10
+        FakeResolver fakeResolver = pMacroRecord(hostname,
+            "v=spf1 " + aTermsWithoutAddress(hostname, 8) + " exists:%{p}._p." + hostname + " -all");
+
+        SPFResult result = createCustomSPF(new DNSServiceXBillImpl(fakeResolver)).checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
+
+        assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void pMacroOfAnExpShouldNotCountInTheLookupLimit() throws IOException {
+        String hostname = "pmacroexp.spfexecutor.fake";
+        // 10 a terms, then exp=, whose PTR lookup of %{p} comes after the check
+        FakeResolver fakeResolver = pMacroRecord(hostname,
+            "v=spf1 " + aTermsWithoutAddress(hostname, 10) + " -all exp=%{p}._exp." + hostname);
+
+        SPFResult result = createCustomSPF(new DNSServiceXBillImpl(fakeResolver)).checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
+
+        // RFC 7208 4.6.4: exp= is "not subject to this limit"
+        assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+        assertEquals("explained", result.getExplanation());
+    }
+
+    @Test(timeout = 10000)
+    public void pMacroOfAnExplanationTextShouldNotCountInTheLookupLimit() throws IOException {
+        String hostname = "pmacroexptext.spfexecutor.fake";
+        // 10 a terms, then the explanation "from %{p}", expanded after the check
+        FakeResolver fakeResolver = pMacroRecord(hostname,
+            "v=spf1 " + aTermsWithoutAddress(hostname, 10) + " -all exp=e." + hostname);
+        fakeResolver.addRecord(new TXTRecord(Name.fromString("e." + hostname + "."), DClass.IN, 30L, "from %{p}"));
+
+        SPFResult result = createCustomSPF(new DNSServiceXBillImpl(fakeResolver)).checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
+
+        assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+        assertEquals("from good." + hostname, result.getExplanation());
     }
 
     @Test(timeout = 10000)
