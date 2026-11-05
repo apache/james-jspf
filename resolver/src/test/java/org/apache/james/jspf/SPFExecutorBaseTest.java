@@ -83,6 +83,20 @@ public abstract class SPFExecutorBaseTest {
         return fakeResolver;
     }
 
+    // hostname has "v=spf1 ptr -all", and 1.2.3.4 the 11 PTR names name<i>.<hostname>, of which only name<validated> has
+    // the address 1.2.3.4
+    private static FakeResolver elevenPtrNamesOfTheClient(String hostname, int validated) throws IOException {
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, "v=spf1 ptr -all"));
+        for (int i = 1; i <= 11; i++) {
+            fakeResolver.addRecord(new PTRRecord(Name.fromString("4.3.2.1.in-addr.arpa."), DClass.IN, 30L,
+                Name.fromString("name" + i + "." + hostname + ".")));
+        }
+        fakeResolver.addRecord(new ARecord(Name.fromString("name" + validated + "." + hostname + "."), DClass.IN, 30L,
+            InetAddress.getByName("1.2.3.4")));
+        return fakeResolver;
+    }
+
     // a server publishing the record, failing the lookups of the given DNSRequest type
     private static DNSService dnsFailing(int failedType, Record record) throws IOException {
         FakeResolver fakeResolver = new FakeResolver();
@@ -714,6 +728,27 @@ public abstract class SPFExecutorBaseTest {
         SPFResult result = spf.checkSPF("1.2.3.4", "a_user@" + hostname + ".", hostname);
 
         assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void ptrShouldCheckTheTenthOfMoreThanTenNames() throws IOException {
+        String hostname = "ptrlimit.spfexecutor.fake";
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(elevenPtrNamesOfTheClient(hostname, 10)));
+
+        SPFResult result = spf.checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
+
+        // RFC 7208 4.6.4: "all records other than the first 10 MUST be ignored"
+        assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void ptrShouldIgnoreTheEleventhOfMoreThanTenNames() throws IOException {
+        String hostname = "ptrlimit11.spfexecutor.fake";
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(elevenPtrNamesOfTheClient(hostname, 11)));
+
+        SPFResult result = spf.checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
+
+        assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
     }
 
     @Test(timeout = 10000)

@@ -156,9 +156,9 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled,
         
                 // check if the maximum lookup count is reached
                 if (dnsService.getRecordLimit() > 0 && domainList.size() > dnsService.getRecordLimit()) {
-                    // Truncate the PTR list to getRecordLimit.
-                    // See #ptr-limit rfc4408 test
-                    domainList = domainList.subList(0, dnsService.getRecordLimit()-1);
+                    // Truncate the PTR list to getRecordLimit: RFC 7208 4.6.4, "all records other than the
+                    // first 10 MUST be ignored". See #ptr-limit rfc4408 test
+                    domainList = domainList.subList(0, dnsService.getRecordLimit());
                     // throw new PermErrorException("Maximum PTR lookup count reached");
                 }
                 
