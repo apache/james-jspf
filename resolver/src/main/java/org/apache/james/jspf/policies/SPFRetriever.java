@@ -126,8 +126,8 @@ public class SPFRetriever implements SPFChecker {
             // DO NOT trim the result!
             String compare = all.next();
 
-            // We trim the compare value only for the comparison
-            if (compare.toLowerCase().trim().startsWith(SPF1Constants.SPF_VERSION1 + " ") || compare.trim().equalsIgnoreCase(SPF1Constants.SPF_VERSION1)) {
+            // RFC 7208 4.5: a record begins with exactly "v=spf1", ended by a space or by the end of the record
+            if (compare.toLowerCase().startsWith(SPF1Constants.SPF_VERSION1 + " ") || compare.equalsIgnoreCase(SPF1Constants.SPF_VERSION1)) {
                 if (returnValue == null) {
                     returnValue = compare;
                 } else {

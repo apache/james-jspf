@@ -945,6 +945,33 @@ public abstract class SPFExecutorBaseTest {
     }
 
     @Test(timeout = 10000)
+    public void shouldDiscardARecordThatDoesNotBeginWithTheVersion() throws IOException {
+        String hostname = "leadingSpace.spfexecutor.fake";
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, "v=spf1 -all"));
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, " v=spf1 +all"));
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+
+        SPFResult result = spf.checkSPF("192.0.2.10", "a_user@" + hostname, hostname);
+
+        // RFC 7208 4.5: "discard records that do not begin with a version section of exactly "v=spf1""
+        assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void shouldReadTheSpfTypeWhenNoTxtRecordBeginsWithTheVersion() throws IOException {
+        String hostname = "leadingSpaceOnly.spfexecutor.fake";
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, " v=spf1 +all"));
+        fakeResolver.addRecord(new SPFRecord(Name.fromString(hostname + "."), DClass.IN, 30L, "v=spf1 -all"));
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+
+        SPFResult result = spf.checkSPF("192.0.2.10", "a_user@" + hostname, hostname);
+
+        assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
     public void shouldCheckTheTxtRecordWhenTheLookupOfTheSpfTypeFails() throws IOException {
         String hostname = "spftypeservfail.spfexecutor.fake";
 
