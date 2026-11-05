@@ -29,7 +29,6 @@ package org.apache.james.jspf.core;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -81,6 +80,64 @@ public class MacroExpand {
     }
 
     /**
+     * The PTR names of the client address left to validate, for %{p}
+     */
+    private static final String ATTRIBUTE_MACRO_EXPAND_PTR_NAMES = "MacroExpand.ptrNames";
+
+    /**
+     * The PTR names of the client address validated so far, for %{p}
+     */
+    private static final String ATTRIBUTE_MACRO_EXPAND_VALIDATED = "MacroExpand.validated";
+
+    /**
+     * @return the PTR names of the client address validated so far
+     */
+    @SuppressWarnings("unchecked")
+    private static List<String> validatedNames(SPFSession session) {
+        return (List<String>) session.getAttribute(ATTRIBUTE_MACRO_EXPAND_VALIDATED);
+    }
+
+    /**
+     * @return true when one of the addresses is the client address
+     * @throws PermErrorException when the client address does not parse
+     */
+    private static boolean hasClientAddress(List<String> addresses, SPFSession session) throws PermErrorException {
+        String client = IPAddr.getAddress(session.getIpAddress()).toString();
+        for (String address : addresses) {
+            try {
+                if (client.equals(IPAddr.getAddress(address).toString())) {
+                    return true;
+                }
+            } catch (PermErrorException e) {
+                // no address: not the client one
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @return the lookup of the addresses of the next PTR name to validate, or null when none is left: the
+     *         session then holds the validated names
+     */
+    @SuppressWarnings("unchecked")
+    private static DNSLookupContinuation validateNextPtrName(SPFSession session) {
+        List<String> names = (List<String>) session.getAttribute(ATTRIBUTE_MACRO_EXPAND_PTR_NAMES);
+        int type = IPAddr.isIPV6(session.getIpAddress()) ? DNSRequest.AAAA : DNSRequest.A;
+        while (!names.isEmpty()) {
+            String name = names.remove(0);
+            try {
+                DNSRequest request = new DNSRequest(name, type);
+                session.setAttribute(ATTRIBUTE_MACRO_EXPAND_CHECKED_RECORD, name);
+                return new DNSLookupContinuation(request, new AResponseListener());
+            } catch (NoneException e) {
+                // no domain name: not validated
+            }
+        }
+        session.setValidatedClientNames(validatedNames(session));
+        return null;
+    }
+
+    /**
      * Construct MacroExpand
      * 
      * @param dnsProbe the dns service to use
@@ -96,6 +153,10 @@ public class MacroExpand {
     }
     
 
+    /**
+     * The addresses of a PTR name of the client address: the name is validated when one is the client address
+     * (RFC 7208 5.5). A DNS error of the lookup skips the name.
+     */
     private static final class AResponseListener implements
             SPFCheckerDNSResponseListener {
         
@@ -105,36 +166,38 @@ public class MacroExpand {
         public DNSLookupContinuation onDNSResponse(DNSResponse response, SPFSession session)
                 throws PermErrorException, NoneException, TempErrorException,
                 NeutralException {
-            // just return the default "unknown" if we cannot find anything
-            // later
-            session.setClientDomain("unknown");
             try {
-                List<String> records = response.getResponse();
-                if (records != null && records.size() > 0) {
-                    Iterator<String> i = records.iterator();
-                    while (i.hasNext()) {
-                        String next = i.next();
-                        if (IPAddr.getAddress(session.getIpAddress())
-                                .toString().equals(
-                                        IPAddr.getAddress(next).toString())) {
-                            session
-                                    .setClientDomain((String) session
-                                            .getAttribute(ATTRIBUTE_MACRO_EXPAND_CHECKED_RECORD));
-                            break;
-                        }
-                    }
+                List<String> addresses = response.getResponse();
+                if (addresses != null && hasClientAddress(addresses, session)) {
+                    validatedNames(session).add((String) session.getAttribute(ATTRIBUTE_MACRO_EXPAND_CHECKED_RECORD));
                 }
             } catch (TimeoutException e) {
-                // just return the default "unknown".
+                // RFC 7208 5.5: "that domain name is skipped and the search continues"
             } catch (PermErrorException e) {
-                // just return the default "unknown".
+                // a client address that does not parse: no validated name, "unknown"
+                session.setValidatedClientNames(new ArrayList<>());
+                return null;
             }
-            return null;
+            return validateNextPtrName(session);
         }
     }
 
+    /**
+     * The PTR names of the client address: the first ones, up to the record limit of the DNS service (RFC 7208
+     * 4.6.4), are validated in turn, once for the session, which chooses %{p} among the validated ones for each
+     * domain (RFC 7208 7.3). A DNS error of the lookup makes %{p} "unknown".
+     */
     private static final class PTRResponseListener implements
             SPFCheckerDNSResponseListener {
+
+        private final int recordLimit;
+
+        /**
+         * @param recordLimit the number of names validated at most, 0 for all of them
+         */
+        private PTRResponseListener(int recordLimit) {
+            this.recordLimit = recordLimit;
+        }
 
         /**
          * @see org.apache.james.jspf.core.SPFCheckerDNSResponseListener#onDNSResponse(org.apache.james.jspf.core.DNSResponse, org.apache.james.jspf.core.SPFSession)
@@ -144,24 +207,19 @@ public class MacroExpand {
                 NeutralException {
 
             try {
-                boolean ip6 = IPAddr.isIPV6(session.getIpAddress());
-                List<String> records = response.getResponse();
+                List<String> names = response.getResponse();
 
-                if (records != null && records.size() > 0) {
-                    String record = records.get(0);
-                    session.setAttribute(ATTRIBUTE_MACRO_EXPAND_CHECKED_RECORD,
-                            record);
-
-                    return new DNSLookupContinuation(new DNSRequest(record,
-                            ip6 ? DNSRequest.AAAA : DNSRequest.A), 
-                            new AResponseListener());
-
+                if (names != null && names.size() > 0) {
+                    int validated = recordLimit > 0 ? Math.min(recordLimit, names.size()) : names.size();
+                    session.setAttribute(ATTRIBUTE_MACRO_EXPAND_PTR_NAMES, new ArrayList<>(names.subList(0, validated)));
+                    session.setAttribute(ATTRIBUTE_MACRO_EXPAND_VALIDATED, new ArrayList<String>());
+                    return validateNextPtrName(session);
                 }
             } catch (TimeoutException e) {
                 // just return the default "unknown".
             }
                     
-            session.setClientDomain("unknown");        
+            session.setValidatedClientNames(new ArrayList<>());
             return null;
 
         }
@@ -176,7 +234,7 @@ public class MacroExpand {
 
                 return new DNSLookupContinuation(new DNSRequest(IPAddr
                         .getAddress(session.getIpAddress()).getReverseIP(),
-                        DNSRequest.PTR), new PTRResponseListener());
+                        DNSRequest.PTR), new PTRResponseListener(dnsProbe != null ? dnsProbe.getRecordLimit() : 0));
             }
         }
         return null;
