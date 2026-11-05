@@ -128,6 +128,13 @@ public class DNSTestingServer implements ResponseGenerator {
         zone = null;
     }
 
+    /**
+     * A server that only generates replies, without listening on the network: for tests
+     */
+    DNSTestingServer() {
+        zone = null;
+    }
+
     @SuppressWarnings("unchecked")
     public synchronized void setData(Map<String, List<?>> map) {
         try {
@@ -462,7 +469,8 @@ public class DNSTestingServer implements ResponseGenerator {
 
         if (queryOPT != null) {
             int optflags = (flags == FLAG_DNSSECOK) ? ExtendedFlags.DO : 0;
-            OPTRecord opt = new OPTRecord((short) 4096, rcode, (byte) 0,
+            // the rcode, NOERROR or NXDOMAIN, is in the header: no extended bits (RFC 6891 6.1.3)
+            OPTRecord opt = new OPTRecord((short) 4096, 0, (byte) 0,
                     optflags);
             response.addRecord(opt, Section.ADDITIONAL);
         }
