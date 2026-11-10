@@ -43,7 +43,7 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(StagedMultipleSPFExecutor.class);
     private static final String ATTRIBUTE_STAGED_EXECUTOR_CONTINUATION = "StagedMultipleSPFExecutor.continuation";
 
-    private static class ResponseQueueImpl extends LinkedList<IResponse> implements IResponseQueue {
+    static class ResponseQueueImpl extends LinkedList<IResponse> implements IResponseQueue {
 
         private static final long serialVersionUID = 5714025260393791651L;
         
@@ -63,8 +63,14 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
         public synchronized IResponse removeResponse() {
             if ( (size() - waitingThreads <= 0) ) {
                 try { waitingThreads++; wait();}
-                catch (InterruptedException e)  {Thread.interrupted();}
-                waitingThreads--;
+                catch (InterruptedException e)  {
+                    // keep the interrupt for the caller, which stops on a null response
+                    Thread.currentThread().interrupt();
+                }
+                finally { waitingThreads--; }
+            }
+            if (isEmpty()) {
+                return null;
             }
             return (IResponse)removeFirst();        }
 
@@ -163,6 +169,9 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
             try {
                 this.wait(100);
             } catch (InterruptedException e) {
+                // stop throttling and keep the interrupt for the caller
+                Thread.currentThread().interrupt();
+                break;
             }
         }
         int nextId = nextId();
@@ -182,7 +191,11 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
         while (true) {
             
             IResponse resp = responseQueue.removeResponse();
-            
+            if (resp == null) {
+                // interrupted: stop the worker
+                return;
+            }
+
             Integer respId = (Integer)resp.getId();
             SPFSession session = sessions.remove(respId);
             FutureSPFResult result = results.remove(respId);

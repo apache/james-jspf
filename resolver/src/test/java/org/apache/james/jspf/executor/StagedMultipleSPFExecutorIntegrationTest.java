@@ -20,6 +20,8 @@
 package org.apache.james.jspf.executor;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -133,6 +135,14 @@ public class StagedMultipleSPFExecutorIntegrationTest {
         assertEquals(SPFErrorConstants.TEMP_ERROR_CONV, spf.checkSPF("1.2.3.4", "foo@broken.example.com", "broken.example.com").getResult());
         // the second answer of the failed lookup does not end the executor
         assertEquals(SPFErrorConstants.PASS_CONV, spf.checkSPF("1.2.3.4", "foo@example.com", "example.com").getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void anInterruptedWaitForAResponseShouldKeepTheInterrupt() {
+        Thread.currentThread().interrupt();
+
+        assertNull(new StagedMultipleSPFExecutor.ResponseQueueImpl().removeResponse());
+        assertTrue(Thread.interrupted());
     }
 
     private void checkUnexpectedLookupError(boolean multiThread, String domain) {
