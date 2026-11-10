@@ -65,11 +65,35 @@ public class SPF1Utils {
      * @return false or true
      */
     public static boolean checkFQDN(String host) {
-        String regex = "(([a-zA-Z0-9\\-])+\\.)+([a-zA-Z]+)$";
-        if (host.matches(regex)) {
-            return true;
-        } else {
+        // the language of (([a-zA-Z0-9\\-])+\\.)+([a-zA-Z]+), checked without a regex: a repeated group
+        // recurses once per label and overflows the stack on a long name
+        int lastDot = host.lastIndexOf('.');
+        if (lastDot < 0 || lastDot == host.length() - 1) {
             return false;
         }
+        for (int i = lastDot + 1; i < host.length(); i++) {
+            if (!isAsciiLetter(host.charAt(i))) {
+                return false;
+            }
+        }
+        int labelLength = 0;
+        for (int i = 0; i <= lastDot; i++) {
+            char c = host.charAt(i);
+            if (c == '.') {
+                if (labelLength == 0) {
+                    return false;
+                }
+                labelLength = 0;
+            } else if (isAsciiLetter(c) || (c >= '0' && c <= '9') || c == '-') {
+                labelLength++;
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean isAsciiLetter(char c) {
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
     }
 }
