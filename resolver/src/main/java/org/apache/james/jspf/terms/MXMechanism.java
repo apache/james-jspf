@@ -59,8 +59,14 @@ public class MXMechanism extends AMechanism implements DNSServiceEnabled, SPFChe
 
             // Get the right host.
             String host = expandHost(spfData);
-            
-            return new DNSLookupContinuation(new DNSRequest(host, DNSRequest.MX), MXMechanism.this);
+
+            try {
+                return new DNSLookupContinuation(new DNSRequest(host, DNSRequest.MX), MXMechanism.this);
+            } catch (NoneException e) {
+                // the expanded target is not a valid domain name: no match, as the a mechanism
+                spfData.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
+                return null;
+            }
         }
     }
 
@@ -147,8 +153,13 @@ public class MXMechanism extends AMechanism implements DNSServiceEnabled, SPFChe
             while (records.size() > 0 && (mx = records.remove(0)) != null && mx.length() > 0) {
                 LOGGER.debug("Add MX-Record {} to list", mx);
 
-                return new DNSLookupContinuation(new DNSRequest(mx, isIPv6 ? DNSRequest.AAAA : DNSRequest.A), MXMechanism.this);
-                
+                try {
+                    return new DNSLookupContinuation(new DNSRequest(mx, isIPv6 ? DNSRequest.AAAA : DNSRequest.A), MXMechanism.this);
+                } catch (NoneException e) {
+                    // an MX name that is not a valid domain name has no address: skip it
+                    LOGGER.debug("Skip invalid MX name {}", mx);
+                }
+
             }
                 
             // no mx record found

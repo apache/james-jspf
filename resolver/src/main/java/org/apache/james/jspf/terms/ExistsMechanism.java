@@ -50,7 +50,13 @@ public class ExistsMechanism extends GenericMechanism implements SPFCheckerDNSRe
     	public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException,
                 TempErrorException, NeutralException, NoneException {
             String host = expandHost(spfData);
-            return new DNSLookupContinuation(new DNSRequest(host,DNSRequest.A), ExistsMechanism.this);
+            try {
+                return new DNSLookupContinuation(new DNSRequest(host, DNSRequest.A), ExistsMechanism.this);
+            } catch (NoneException e) {
+                // the expanded target is not a valid domain name: no match, as the a mechanism
+                spfData.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
+                return null;
+            }
         }
     }
 
