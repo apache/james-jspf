@@ -22,8 +22,10 @@ package org.apache.james.jspf.executor;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.james.jspf.core.SPFSession;
+import org.apache.james.jspf.core.exceptions.SPFErrorConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,6 +95,43 @@ public class FutureSPFResult extends SPFResult {
                 waiters--;
             }
         }
+    }
+
+    /**
+     * Waits until the SPFResult is set, at most the given time
+     *
+     * @return true if the SPFResult is set
+     */
+    private synchronized boolean checkReady(long timeout, TimeUnit unit) {
+        long deadline = System.nanoTime() + unit.toNanos(timeout);
+        while (!isReady) {
+            long remaining = deadline - System.nanoTime();
+            if (remaining <= 0) {
+                return false;
+            }
+            try {
+                waiters++;
+                TimeUnit.NANOSECONDS.timedWait(this, remaining);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return isReady;
+            } finally {
+                waiters--;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Waits for the result at most the given time
+     *
+     * @return the result, or temperror if it is not set in time (RFC 7208 4.6.4)
+     */
+    public String getResult(long timeout, TimeUnit unit) {
+        if (!checkReady(timeout, unit)) {
+            return SPFErrorConstants.TEMP_ERROR_CONV;
+        }
+        return super.getResult();
     }
 
     /**

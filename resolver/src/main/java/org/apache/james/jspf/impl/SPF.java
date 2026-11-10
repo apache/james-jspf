@@ -233,6 +233,15 @@ public class SPF implements SPFChecker {
     private SPFExecutor executor;
 
     /**
+     * RFC 7208 4.6.4: "at least 20 seconds"
+     */
+    public static final long DEFAULT_TIME_BUDGET_MILLIS = 20000;
+
+    private long timeBudgetMillis = DEFAULT_TIME_BUDGET_MILLIS;
+
+    private int maxVoidLookups = SPFSession.DEFAULT_MAX_VOID_LOOKUPS;
+
+    /**
      * Creates an instance with the provided dnsService and executor.
      *
      * @param dnsService    the dns provider
@@ -349,6 +358,10 @@ public class SPF implements SPFChecker {
 
         // Setup the data
         spfData = new SPFSession(mailFrom, hostName, ipAddress);
+        synchronized (this) {
+            spfData.setMaxVoidLookups(maxVoidLookups);
+            spfData.setTimeBudget(timeBudgetMillis);
+        }
       
 
         SPFChecker resultHandler = new DefaultSPFChecker();
@@ -444,6 +457,26 @@ public class SPF implements SPFChecker {
         dnsProbe.setTimeOut(timeOut);
     }
     
+    /**
+     * Set the time a whole check may take, in milliseconds: once it is spent, the check gives temperror before its
+     * next DNS lookup (RFC 7208 4.6.4). The default is 20 seconds, 0 or less for no limit.
+     *
+     * @param timeBudgetMillis the time in milliseconds
+     */
+    public synchronized void setTimeBudget(long timeBudgetMillis) {
+        this.timeBudgetMillis = timeBudgetMillis;
+    }
+
+    /**
+     * Set the number of void lookups, of a name that does not exist or has no record, allowed to the terms of a
+     * check: beyond it the check gives permerror (RFC 7208 4.6.4). The default is 2, a negative limit for none.
+     *
+     * @param maxVoidLookups the number of void lookups allowed
+     */
+    public synchronized void setMaxVoidLookups(int maxVoidLookups) {
+        this.maxVoidLookups = maxVoidLookups;
+    }
+
     /**
      * Set the default explanation which will be used if no explanation is found in the SPF Record
      *  

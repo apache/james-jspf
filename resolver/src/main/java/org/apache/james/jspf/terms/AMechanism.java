@@ -82,7 +82,9 @@ public class AMechanism extends GenericMechanism implements SPFCheckerDNSRespons
                     DNSRequest request = new DNSRequest(host, validIPV4Address ? DNSRequest.A : DNSRequest.AAAA);
                     return new DNSLookupContinuation(request, AMechanism.this);
                 } catch (NoneException e) {
-                    return onDNSResponse(new DNSResponse((List<String>) null), spfData);
+                    // the expanded target is not a valid domain name: no match, without a lookup
+                    spfData.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
+                    return null;
                 }
             // PermError / TempError
             // TODO: Should we replace this with the "right" Exceptions ?
@@ -255,6 +257,7 @@ public class AMechanism extends GenericMechanism implements SPFCheckerDNSRespons
         } catch (TimeoutException e) {
             throw new TempErrorException("Timeout querying dns server");
         }
+        spfSession.countVoidLookup(listAData);
         // no a records just return null
         if (listAData == null) {
             spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);

@@ -54,6 +54,8 @@ public class SynchronousSPFExecutor implements SPFExecutor {
                 DNSLookupContinuation cont = checker.checkSPF(session);
                 // if the checker returns a continuation we return it
                 while (cont != null) {
+                    // RFC 7208 4.6.4: a check whose time budget is spent is a temperror
+                    session.checkTimeBudget();
                     DNSResponse response;
                     try {
                         response = new DNSResponse(dnsProbe.getRecords(cont

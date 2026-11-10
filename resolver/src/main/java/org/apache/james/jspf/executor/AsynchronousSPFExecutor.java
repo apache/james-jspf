@@ -35,6 +35,7 @@ import org.apache.james.jspf.core.SPFCheckerExceptionCatcher;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.core.exceptions.SPFErrorConstants;
 import org.apache.james.jspf.core.exceptions.SPFResultException;
+import org.apache.james.jspf.core.exceptions.TempErrorException;
 import org.apache.james.jspf.core.exceptions.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,6 +94,13 @@ public class AsynchronousSPFExecutor implements SPFExecutor {
 
     private void handleCont(SPFSession session, FutureSPFResult result, DNSLookupContinuation cont, SPFChecker checker) {
         if (cont != null) {
+            try {
+                // RFC 7208 4.6.4: a check whose time budget is spent is a temperror
+                session.checkTimeBudget();
+            } catch (TempErrorException e) {
+                handleErrorAndComplete(session, result, e);
+                return;
+            }
             // if the checker returns a continuation we return it
             lookUp(cont.getRequest())
                 .thenAccept(results -> onResponse(session, result, cont, new DNSResponse(results), checker))

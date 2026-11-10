@@ -147,6 +147,8 @@ public class PTRMechanism extends GenericMechanism implements DNSServiceEnabled,
             if (domainList == null) {
             
                 domainList = response.getResponse();
+                // the PTR lookup of the term, not the address lookups of its names
+                spfSession.countVoidLookup(domainList);
                 
                 // No PTR records found
                 if (domainList == null) {
