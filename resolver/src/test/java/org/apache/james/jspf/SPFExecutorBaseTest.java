@@ -193,6 +193,13 @@ public abstract class SPFExecutorBaseTest {
         return createCustomSPF(new DNSServiceXBillImpl(fakeResolver)).checkSPF("192.0.2.10", "a_user@" + hostname, hostname);
     }
 
+    // hostname has the record, checked for the sender localPart@<hostname> and the HELO helo
+    private SPFResult checkSender(String hostname, String record, String localPart, String helo) throws IOException {
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, record));
+        return createCustomSPF(new DNSServiceXBillImpl(fakeResolver)).checkSPF("1.2.3.4", localPart + "@" + hostname, helo);
+    }
+
     // the lookups of broken.<hostname> fail with an unchecked exception, as dnsjava may do on an answer it cannot handle
     private SPFResult checkRecordWithBrokenHost(String hostname, String record) throws IOException {
         FakeResolver fakeResolver = new FakeResolver();
@@ -1606,5 +1613,55 @@ public abstract class SPFExecutorBaseTest {
 
         // RFC 7208 7.3: 253 characters "in this format", without the trailing dot of a fully qualified name
         assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void existsShouldNotMatchATargetWithAnEmptyLabelFromTheLocalPart() throws IOException {
+        // RFC 7208 7.4 example: %{l1r+-} of "-x" is "", so the target 4.3.2.1.._spf.<hostname> has an empty label
+        SPFResult result = checkSender("existsEmptyLabel.spfexecutor.fake",
+            "v=spf1 exists:%{ir}.%{l1r+-}._spf.%{d} -all", "-x", "helo.spfexecutor.fake");
+
+        // an invalid target is no match: the record goes on to -all, as for the a mechanism
+        assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void existsShouldNotMatchATargetWithALabelOf64Octets() throws IOException {
+        SPFResult result = checkSender("existsLongLabel.spfexecutor.fake",
+            "v=spf1 exists:%{l}._spf.%{d} -all", "x".repeat(64), "helo.spfexecutor.fake");
+
+        assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void existsShouldNotMatchATargetWithAnEmptyLabelFromTheHelo() throws IOException {
+        SPFResult result = checkSender("existsInvalidHelo.spfexecutor.fake",
+            "v=spf1 exists:%{h}._spf.%{d} -all", "a_user", "a..b");
+
+        assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void mxShouldNotMatchATargetWithAnEmptyLabelFromTheHelo() throws IOException {
+        SPFResult result = checkSender("mxInvalidHelo.spfexecutor.fake",
+            "v=spf1 mx:%{h} -all", "a_user", "a..b");
+
+        assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void mxShouldNotMatchATargetWithALabelOf64Octets() throws IOException {
+        SPFResult result = checkSender("mxLongLabel.spfexecutor.fake",
+            "v=spf1 mx:%{l}.%{d} -all", "x".repeat(64), "helo.spfexecutor.fake");
+
+        assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void mxShouldNotMatchATargetWithAnEmptyLabelFromTheLocalPart() throws IOException {
+        SPFResult result = checkSender("mxEmptyLabel.spfexecutor.fake",
+            "v=spf1 mx:%{l1r+-}.%{d} -all", "-x", "helo.spfexecutor.fake");
+
+        assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
     }
 }
