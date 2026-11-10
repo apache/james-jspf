@@ -31,6 +31,7 @@ import org.apache.james.jspf.core.SPFCheckerExceptionCatcher;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.core.exceptions.SPFErrorConstants;
 import org.apache.james.jspf.core.exceptions.SPFResultException;
+import org.apache.james.jspf.core.exceptions.TempErrorException;
 import org.apache.james.jspf.core.exceptions.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -179,6 +180,13 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
         results.put(new Integer(nextId), result);
         session.setAttribute(ATTRIBUTE_STAGED_EXECUTOR_CONTINUATION, cont);
         try {
+            // RFC 7208 4.6.4: a check whose time budget is spent is a temperror
+            session.checkTimeBudget();
+        } catch (TempErrorException e) {
+            responseQueue.insertResponse(new IResponseImpl(new Integer(nextId), e));
+            return;
+        }
+        try {
             dnsProbe.getRecordsAsynch(cont.getRequest(), nextId, responseQueue);
         } catch (RuntimeException e) {
             // the lookup service failed instead of answering: the error is its answer
@@ -221,7 +229,10 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
         DNSLookupContinuation cont = (DNSLookupContinuation) session.getAttribute(ATTRIBUTE_STAGED_EXECUTOR_CONTINUATION);
         try {
             DNSResponse response;
-            if (resp.getException() instanceof TimeoutException) {
+            if (resp.getException() instanceof TempErrorException) {
+                // the time budget of the check is spent
+                throw (TempErrorException) resp.getException();
+            } else if (resp.getException() instanceof TimeoutException) {
                 response = new DNSResponse((TimeoutException) resp.getException());
             } else if (resp.getException() != null) {
                 // a lookup error, as dnsjava's on an answer it cannot handle: temperror (RFC 7208 4.4)

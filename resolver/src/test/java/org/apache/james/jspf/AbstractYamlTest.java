@@ -47,6 +47,7 @@ import org.apache.james.jspf.executor.SynchronousSPFExecutor;
 import org.apache.james.jspf.impl.DNSServiceAsynchSimulator;
 import org.apache.james.jspf.impl.DNSServiceXBillImpl;
 import org.apache.james.jspf.impl.DefaultTermsFactory;
+import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.impl.SPF;
 import org.apache.james.jspf.parser.RFC4408SPF1Parser;
 import org.apache.james.jspf.tester.DNSTestingServer;
@@ -164,6 +165,7 @@ public abstract class AbstractYamlTest extends TestCase {
             throw new UnsupportedOperationException("Unknown executor type");
         }
         spf = new SPF(dns, parser, macroExpand, executor);
+        spf.setMaxVoidLookups(getMaxVoidLookups());
 
         if (test != null) {
             String next = test;
@@ -269,6 +271,13 @@ public abstract class AbstractYamlTest extends TestCase {
             default: 
                 throw new UnsupportedOperationException("Unsupported mock style");
         }
+    }
+
+    /**
+     * @return the limit of void lookups of the checks, RFC 7208 4.6.4
+     */
+    protected int getMaxVoidLookups() {
+        return SPFSession.DEFAULT_MAX_VOID_LOOKUPS;
     }
 
     protected int getDnsServiceMockStyle() {

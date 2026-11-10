@@ -117,6 +117,8 @@ public class MXMechanism extends AMechanism implements DNSServiceEnabled, SPFChe
             if (records == null) {
             
                 records = response.getResponse();
+                // the MX lookup of the term, not the address lookups of its names
+                spfSession.countVoidLookup(records);
 
                 if (records == null) {
                     // no mx record found

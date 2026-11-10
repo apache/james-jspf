@@ -21,6 +21,7 @@
 package org.apache.james.jspf.core;
 
 import org.apache.james.jspf.core.exceptions.PermErrorException;
+import org.apache.james.jspf.core.exceptions.TempErrorException;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.TextParseException;
 
@@ -29,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Stack;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 /**
@@ -113,6 +115,20 @@ public class SPFSession implements MacroData {
      * The maximum mechanismn which are allowed to use
      */
     public static final int MAX_DEPTH = 10;
+
+    /**
+     * The default limit of void lookups, RFC 7208 4.6.4
+     */
+    public static final int DEFAULT_MAX_VOID_LOOKUPS = 2;
+
+    private int voidLookups = 0;
+
+    private int maxVoidLookups = DEFAULT_MAX_VOID_LOOKUPS;
+
+    // the System.nanoTime() after which no lookup is made, when hasDeadline
+    private long deadline;
+
+    private boolean hasDeadline = false;
 
     private String explanation = null;
 
@@ -319,6 +335,53 @@ public class SPFSession implements MacroData {
             throw new PermErrorException(
                     "Maximum mechanism/modifiers calls done: "
                         + currentDepth);
+    }
+
+    /**
+     * Set the limit of void lookups, a negative limit for none
+     *
+     * @param maxVoidLookups the number of void lookups allowed
+     */
+    public void setMaxVoidLookups(int maxVoidLookups) {
+        this.maxVoidLookups = maxVoidLookups;
+    }
+
+    /**
+     * Count the answer of the lookup a term makes: a void lookup, NXDOMAIN or no answer, beyond the limit is a
+     * PermErrorException. See RFC 7208 4.6.4
+     *
+     * @param records the answer of the lookup, null when the name does not exist
+     */
+    public void countVoidLookup(List<String> records) throws PermErrorException {
+        if (records != null && !records.isEmpty()) {
+            return;
+        }
+        voidLookups++;
+        if (maxVoidLookups >= 0 && voidLookups > maxVoidLookups) {
+            throw new PermErrorException("Maximum void lookups done: " + voidLookups);
+        }
+    }
+
+    /**
+     * Set the time the check may take from now: once it is spent, the next DNS lookup is a TempErrorException.
+     * See RFC 7208 4.6.4
+     *
+     * @param timeBudgetMillis the time in milliseconds, 0 or less for no limit
+     */
+    public void setTimeBudget(long timeBudgetMillis) {
+        this.hasDeadline = timeBudgetMillis > 0;
+        this.deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeBudgetMillis);
+    }
+
+    /**
+     * Called by the executors before each DNS lookup
+     *
+     * @throws TempErrorException once the time budget of the check is spent
+     */
+    public void checkTimeBudget() throws TempErrorException {
+        if (hasDeadline && System.nanoTime() - deadline >= 0) {
+            throw new TempErrorException("Time budget of the SPF check spent");
+        }
     }
 
     /**

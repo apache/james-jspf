@@ -104,7 +104,8 @@ public abstract class SPFExecutorBaseTest {
     }
 
     // hostname has the record, and 1.2.3.4 the validated PTR name good.<hostname>: good.<hostname>._p.<hostname> exists,
-    // and good.<hostname>._exp.<hostname> holds the explanation "explained"
+    // and good.<hostname>._exp.<hostname> holds the explanation "explained". The names x<i>.<hostname> of
+    // aTermsOfAnotherAddress have the address 192.0.2.1
     private static FakeResolver pMacroRecord(String hostname, String record) throws IOException {
         String good = "good." + hostname;
         FakeResolver fakeResolver = new FakeResolver();
@@ -115,11 +116,15 @@ public abstract class SPFExecutorBaseTest {
         fakeResolver.addRecord(new ARecord(Name.fromString(good + "._p." + hostname + "."), DClass.IN, 30L,
             InetAddress.getByName("127.0.0.2")));
         fakeResolver.addRecord(new TXTRecord(Name.fromString(good + "._exp." + hostname + "."), DClass.IN, 30L, "explained"));
+        for (int i = 1; i <= 10; i++) {
+            fakeResolver.addRecord(new ARecord(Name.fromString("x" + i + "." + hostname + "."), DClass.IN, 30L,
+                InetAddress.getByName("192.0.2.1")));
+        }
         return fakeResolver;
     }
 
-    // the "a" terms of n names under hostname without address
-    private static String aTermsWithoutAddress(String hostname, int n) {
+    // the "a" terms of n names x<i>.<hostname>, which pMacroRecord gives another address than 1.2.3.4: not void lookups
+    private static String aTermsOfAnotherAddress(String hostname, int n) {
         return IntStream.rangeClosed(1, n).mapToObj(i -> "a:x" + i + "." + hostname).collect(Collectors.joining(" "));
     }
 
@@ -887,7 +892,7 @@ public abstract class SPFExecutorBaseTest {
         String hostname = "pmacrocount.spfexecutor.fake";
         // 9 a terms and exists: 10 terms that query DNS, then the PTR lookup of %{p}
         FakeResolver fakeResolver = pMacroRecord(hostname,
-            "v=spf1 " + aTermsWithoutAddress(hostname, 9) + " exists:%{p}._p." + hostname + " -all");
+            "v=spf1 " + aTermsOfAnotherAddress(hostname, 9) + " exists:%{p}._p." + hostname + " -all");
 
         SPFResult result = createCustomSPF(new DNSServiceXBillImpl(fakeResolver)).checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
 
@@ -900,7 +905,7 @@ public abstract class SPFExecutorBaseTest {
         String hostname = "pmacrowithin.spfexecutor.fake";
         // 8 a terms, exists and the PTR lookup of %{p}: 10
         FakeResolver fakeResolver = pMacroRecord(hostname,
-            "v=spf1 " + aTermsWithoutAddress(hostname, 8) + " exists:%{p}._p." + hostname + " -all");
+            "v=spf1 " + aTermsOfAnotherAddress(hostname, 8) + " exists:%{p}._p." + hostname + " -all");
 
         SPFResult result = createCustomSPF(new DNSServiceXBillImpl(fakeResolver)).checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
 
@@ -912,7 +917,7 @@ public abstract class SPFExecutorBaseTest {
         String hostname = "pmacroexp.spfexecutor.fake";
         // 10 a terms, then exp=, whose PTR lookup of %{p} comes after the check
         FakeResolver fakeResolver = pMacroRecord(hostname,
-            "v=spf1 " + aTermsWithoutAddress(hostname, 10) + " -all exp=%{p}._exp." + hostname);
+            "v=spf1 " + aTermsOfAnotherAddress(hostname, 10) + " -all exp=%{p}._exp." + hostname);
 
         SPFResult result = createCustomSPF(new DNSServiceXBillImpl(fakeResolver)).checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
 
@@ -926,7 +931,7 @@ public abstract class SPFExecutorBaseTest {
         String hostname = "pmacroexptext.spfexecutor.fake";
         // 10 a terms, then the explanation "from %{p}", expanded after the check
         FakeResolver fakeResolver = pMacroRecord(hostname,
-            "v=spf1 " + aTermsWithoutAddress(hostname, 10) + " -all exp=e." + hostname);
+            "v=spf1 " + aTermsOfAnotherAddress(hostname, 10) + " -all exp=e." + hostname);
         fakeResolver.addRecord(new TXTRecord(Name.fromString("e." + hostname + "."), DClass.IN, 30L, "from %{p}"));
 
         SPFResult result = createCustomSPF(new DNSServiceXBillImpl(fakeResolver)).checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
@@ -1674,6 +1679,98 @@ public abstract class SPFExecutorBaseTest {
         SPFResult result = createCustomSPF(dns).checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
 
         // RFC 7208 5: a DNS error of a mechanism lookup is a temperror, the deny list does not fail open
+        assertEquals(SPFErrorConstants.TEMP_ERROR_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void shouldReturnPermErrorBeyondTwoVoidLookups() throws IOException {
+        String hostname = "voidOverLimit.spfexecutor.fake";
+        SPFResult result = checkRecord(hostname,
+            "v=spf1 a:n1." + hostname + " mx:n2." + hostname + " exists:n3." + hostname + " ip4:1.2.3.4 -all", "1.2.3.4");
+
+        // RFC 7208 4.6.4: "SHOULD limit "void lookups" to two"
+        assertEquals(SPFErrorConstants.PERM_ERROR_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void shouldAllowTwoVoidLookups() throws IOException {
+        String hostname = "voidAtLimit.spfexecutor.fake";
+        SPFResult result = checkRecord(hostname,
+            "v=spf1 a:n1." + hostname + " exists:n2." + hostname + " ip4:1.2.3.4 -all", "1.2.3.4");
+
+        assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void shouldAllowVoidLookupsWhenTheLimitIsDisabled() throws IOException {
+        String hostname = "voidDisabled.spfexecutor.fake";
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L,
+            "v=spf1 a:n1." + hostname + " mx:n2." + hostname + " exists:n3." + hostname + " ip4:1.2.3.4 -all"));
+        SPF spf = createCustomSPF(new DNSServiceXBillImpl(fakeResolver));
+        spf.setMaxVoidLookups(-1);
+
+        SPFResult result = spf.checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
+
+        assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void shouldNotCountTheAddressLookupsOfTheMxNamesAsVoidLookups() throws IOException {
+        String hostname = "voidMxNames.spfexecutor.fake";
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L,
+            "v=spf1 mx ip4:1.2.3.4 -all"));
+        // 3 MX names without address, as MX hosts without AAAA for an IPv6 client
+        for (int i = 1; i <= 3; i++) {
+            fakeResolver.addRecord(new MXRecord(Name.fromString(hostname + "."), DClass.IN, 30L, i,
+                Name.fromString("mx" + i + "." + hostname + ".")));
+        }
+
+        SPFResult result = createCustomSPF(new DNSServiceXBillImpl(fakeResolver)).checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
+
+        // the mx term makes one lookup that is not void
+        assertEquals(SPFErrorConstants.PASS_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void shouldReturnTempErrorOnceTheTimeBudgetIsSpent() throws IOException {
+        String hostname = "timeBudget.spfexecutor.fake";
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(longTxtRecord(hostname,
+            "v=spf1 " + IntStream.rangeClosed(1, 9).mapToObj(i -> "a:h" + i + "." + hostname).collect(Collectors.joining(" "))
+                + " -all"));
+        for (int i = 1; i <= 9; i++) {
+            fakeResolver.addRecord(new ARecord(Name.fromString("h" + i + "." + hostname + "."), DClass.IN, 30L,
+                InetAddress.getByName("192.0.2.1")));
+        }
+        // each lookup answers after 100 ms, as an authoritative server delaying its answers
+        DNSService slowDns = new DNSServiceXBillImpl(fakeResolver) {
+            @Override
+            public List<String> getRecords(DNSRequest request) throws TimeoutException {
+                pause();
+                return super.getRecords(request);
+            }
+
+            @Override
+            public CompletionStage<List<String>> getRecordsAsync(DNSRequest request) {
+                return CompletableFuture.runAsync(this::pause).thenCompose(v -> super.getRecordsAsync(request));
+            }
+
+            private void pause() {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        };
+        SPF spf = createCustomSPF(slowDns);
+        spf.setTimeBudget(300);
+
+        SPFResult result = spf.checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
+
+        // RFC 7208 4.6.4: once the time limit is exceeded, "the result of authorization SHOULD be "temperror""
         assertEquals(SPFErrorConstants.TEMP_ERROR_CONV, result.getResult());
     }
 }

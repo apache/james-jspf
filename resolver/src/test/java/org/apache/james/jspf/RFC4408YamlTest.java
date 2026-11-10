@@ -53,6 +53,14 @@ public class RFC4408YamlTest extends AbstractYamlTest {
         return YAMLFILE2;
     }
 
+    /**
+     * RFC 4408 has no limit of void lookups: its suites check the limit of 10 terms with names without records, as
+     * mech-at-limit and include-at-limit
+     */
+    protected int getMaxVoidLookups() {
+        return -1;
+    }
+
     public static Test suite() throws IOException {
         return new RFC4408Suite();
     }
