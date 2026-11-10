@@ -1664,4 +1664,16 @@ public abstract class SPFExecutorBaseTest {
 
         assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
     }
+
+    @Test(timeout = 10000)
+    public void existsShouldReturnTempErrorWhenTheLookupOfTheTargetFails() throws IOException {
+        String hostname = "existsFailing.spfexecutor.fake";
+        DNSService dns = dnsFailing(DNSRequest.A, new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L,
+            "v=spf1 -exists:%{ir}.bl." + hostname + " +all"));
+
+        SPFResult result = createCustomSPF(dns).checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
+
+        // RFC 7208 5: a DNS error of a mechanism lookup is a temperror, the deny list does not fail open
+        assertEquals(SPFErrorConstants.TEMP_ERROR_CONV, result.getResult());
+    }
 }
