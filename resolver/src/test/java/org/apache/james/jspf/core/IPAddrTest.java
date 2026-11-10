@@ -152,4 +152,13 @@ public class IPAddrTest extends TestCase {
         }
     }
 
+    public void testEmptyWordsAreInvalid() {
+        assertFalse(Inet6Util.isValidIPV4Address(""));
+        assertFalse(Inet6Util.isValidIPV4Address("1..2.3"));
+        assertFalse(Inet6Util.isValidIPV4Address("1.2.3."));
+        assertFalse(Inet6Util.isValidIPV4Address(".1.2.3"));
+        assertFalse(Inet6Util.isValidIP6Address("1:2:3:4:5:6:7:"));
+        assertTrue(Inet6Util.isValidIPV4Address("1.2.3.4"));
+    }
+
 }
