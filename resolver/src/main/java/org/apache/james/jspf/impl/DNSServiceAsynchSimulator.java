@@ -96,9 +96,12 @@ public class DNSServiceAsynchSimulator implements Runnable, DNSAsynchLookupServi
                     try {
                         waitingThreads++; queue.wait();
                     } catch (InterruptedException e) {
-                        Thread.interrupted();
+                        // interrupted: stop the worker
+                        Thread.currentThread().interrupt();
+                        return;
+                    } finally {
+                        waitingThreads--;
                     }
-                    waitingThreads--;
                 }
                 req = (Request) queue.removeFirst();
             }
