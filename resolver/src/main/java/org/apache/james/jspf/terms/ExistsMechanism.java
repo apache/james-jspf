@@ -89,8 +89,8 @@ public class ExistsMechanism extends GenericMechanism implements SPFCheckerDNSRe
         try {
             aRecords = response.getResponse();
         } catch (TimeoutException e) {
-            spfSession.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.FALSE);
-            return null;
+            // RFC 7208 5: a failed lookup of the target is a temperror, not a missing name
+            throw new TempErrorException("Timeout querying dns server");
         }
         
         if (aRecords != null && aRecords.size() > 0) {
