@@ -357,7 +357,7 @@ public class Inet6Util {
             // a : or a .
             // If we did not end in :: then this is invalid
             if (numberOfPercent == 0) {
-                if (word == "" && ipAddress.charAt(length - 1 - offset) == ':'
+                if (word.isEmpty() && ipAddress.charAt(length - 1 - offset) == ':'
                         && ipAddress.charAt(length - 2 - offset) != ':') {
                     return false;
                 }
@@ -429,7 +429,7 @@ public class Inet6Util {
                 periods++;
                 if (periods > 3)
                     return false;
-                if (word == "")
+                if (word.isEmpty())
                     return false;
                 if (Integer.parseInt(word) > 255)
                     return false;
@@ -443,7 +443,7 @@ public class Inet6Util {
             }
         }
 
-        if (word == "" || Integer.parseInt(word) > 255)
+        if (word.isEmpty() || Integer.parseInt(word) > 255)
             return false;
         if (periods != 3)
             return false;
