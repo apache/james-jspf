@@ -165,9 +165,12 @@ public class AsynchronousSPFExecutor implements SPFExecutor {
             LOGGER.error("Unexpected error during the asynchronous SPF check", ex);
             session.setCurrentResult(SPFErrorConstants.TEMP_ERROR_CONV);
             session.setCurrentResultExpanded(SPFErrorConstants.TEMP_ERROR_CONV);
-        } finally {
             result.setSPFResult(session);
+            return;
         }
+        // Go on with the checkers below the catcher, as the other executors: one may handle the error and let the
+        // check go on, as the catcher of the exp lookups
+        execute(session, result);
     }
 
     private void handleError(SPFSession session, Throwable e) {

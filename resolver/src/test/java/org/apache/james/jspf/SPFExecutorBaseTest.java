@@ -50,6 +50,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 public abstract class SPFExecutorBaseTest {
@@ -168,6 +169,33 @@ public abstract class SPFExecutorBaseTest {
     // hostname publishes "v=spf1 -all" as TXT, on a server failing the lookups of the obsolete SPF type
     private static DNSService dnsFailingTheSpfType(String hostname) throws IOException {
         return dnsFailing(DNSRequest.SPF, new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L, "v=spf1 -all"));
+    }
+
+    // the lookups of slowHost answer after delayMillis, as from an authoritative server delaying its answers
+    private static DNSService slowFor(FakeResolver fakeResolver, String slowHost, long delayMillis) {
+        return new DNSServiceXBillImpl(fakeResolver) {
+            @Override
+            public List<String> getRecords(DNSRequest request) throws TimeoutException {
+                pauseFor(request);
+                return super.getRecords(request);
+            }
+
+            @Override
+            public CompletionStage<List<String>> getRecordsAsync(DNSRequest request) {
+                return CompletableFuture.runAsync(() -> pauseFor(request)).thenCompose(v -> super.getRecordsAsync(request));
+            }
+
+            private void pauseFor(DNSRequest request) {
+                if (!request.getHostname().equals(slowHost)) {
+                    return;
+                }
+                try {
+                    Thread.sleep(delayMillis);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        };
     }
 
     protected abstract SPF createSPF();
@@ -1772,5 +1800,40 @@ public abstract class SPFExecutorBaseTest {
 
         // RFC 7208 4.6.4: once the time limit is exceeded, "the result of authorization SHOULD be "temperror""
         assertEquals(SPFErrorConstants.TEMP_ERROR_CONV, result.getResult());
+    }
+
+    @Test(timeout = 10000)
+    public void shouldKeepTheFailWhenTheTimeBudgetIsSpentBeforeTheExpLookup() throws IOException {
+        String hostname = "expTimeBudget.spfexecutor.fake";
+        String slowHost = "slow." + hostname;
+        FakeResolver fakeResolver = new FakeResolver();
+        fakeResolver.addRecord(new TXTRecord(Name.fromString(hostname + "."), DClass.IN, 30L,
+            "v=spf1 a:" + slowHost + " -all exp=e." + hostname));
+        fakeResolver.addRecord(new ARecord(Name.fromString(slowHost + "."), DClass.IN, 30L, InetAddress.getByName("192.0.2.1")));
+        fakeResolver.addRecord(new TXTRecord(Name.fromString("e." + hostname + "."), DClass.IN, 30L, "explained"));
+        SPF spf = createCustomSPF(slowFor(fakeResolver, slowHost, 300));
+        spf.setTimeBudget(150);
+
+        SPFResult result = spf.checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
+
+        // -all matched within the budget. RFC 7208 6.2: on a DNS error of the exp lookup, "proceed as if no exp
+        // modifier was given"
+        assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+        assertNotEquals("explained", result.getExplanation());
+    }
+
+    @Test(timeout = 10000)
+    public void shouldKeepTheFailWhenTheTimeBudgetIsSpentBeforeThePMacroLookupOfExp() throws IOException {
+        String hostname = "expPTimeBudget.spfexecutor.fake";
+        String slowHost = "slow." + hostname;
+        FakeResolver fakeResolver = pMacroRecord(hostname, "v=spf1 a:" + slowHost + " -all exp=%{p}._exp." + hostname);
+        fakeResolver.addRecord(new ARecord(Name.fromString(slowHost + "."), DClass.IN, 30L, InetAddress.getByName("192.0.2.1")));
+        SPF spf = createCustomSPF(slowFor(fakeResolver, slowHost, 300));
+        spf.setTimeBudget(150);
+
+        SPFResult result = spf.checkSPF("1.2.3.4", "a_user@" + hostname, hostname);
+
+        assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+        assertNotEquals("explained", result.getExplanation());
     }
 }
