@@ -30,6 +30,7 @@ import org.apache.james.jspf.core.MacroExpandEnabled;
 import org.apache.james.jspf.core.SPF1Constants;
 import org.apache.james.jspf.core.SPFChecker;
 import org.apache.james.jspf.core.SPFCheckerDNSResponseListener;
+import org.apache.james.jspf.core.SPFCheckerExceptionCatcher;
 import org.apache.james.jspf.core.SPFSession;
 import org.apache.james.jspf.core.SPFTermsRegexps;
 import org.apache.james.jspf.core.exceptions.NeutralException;
@@ -68,6 +69,47 @@ public class ExpModifier extends GenericModifier implements MacroExpandEnabled, 
     }
 
 
+    /**
+     * Below the lookups of the explanation: a TempErrorException of one, as when the time budget of the check is spent,
+     * drops the explanation and the check goes on with its result. RFC 7208 6.2: "if there are any DNS processing
+     * errors [...] proceed as if no exp modifier was given"
+     */
+    private static final class ExplanationErrorCatcher implements SPFChecker, SPFCheckerExceptionCatcher {
+
+        /**
+         * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
+         */
+        public DNSLookupContinuation checkSPF(SPFSession spfData) {
+            // the lookups of the explanation are over
+            return null;
+        }
+
+        /**
+         * @see org.apache.james.jspf.core.SPFCheckerExceptionCatcher#onException(java.lang.Throwable, org.apache.james.jspf.core.SPFSession)
+         */
+        public void onException(Throwable exception, SPFSession session)
+                throws PermErrorException, NoneException, TempErrorException, NeutralException {
+            if (exception instanceof TempErrorException) {
+                LOGGER.debug("No explanation: {}", exception.getMessage());
+                session.setExplanation(null);
+            } else if (exception instanceof PermErrorException) {
+                throw (PermErrorException) exception;
+            } else if (exception instanceof NoneException) {
+                throw (NoneException) exception;
+            } else if (exception instanceof NeutralException) {
+                throw (NeutralException) exception;
+            } else if (exception instanceof RuntimeException) {
+                throw (RuntimeException) exception;
+            } else {
+                throw new IllegalStateException(exception.getMessage(), exception);
+            }
+        }
+
+        public String toString() {
+            return "ExpModifier.ExplanationErrorCatcher";
+        }
+    }
+
     private final class ExpandedChecker implements SPFChecker {
         
         /**
@@ -103,6 +145,8 @@ public class ExpModifier extends GenericModifier implements MacroExpandEnabled, 
 
     private ExpandedExplanationChecker expandedExplanationChecker = new ExpandedExplanationChecker();
 
+    private static final ExplanationErrorCatcher EXPLANATION_ERROR_CATCHER = new ExplanationErrorCatcher();
+
     /**
      * Generate the explanation and set it in SPF1Data so it can be accessed
      * easy later if needed
@@ -131,6 +175,7 @@ public class ExpModifier extends GenericModifier implements MacroExpandEnabled, 
         if (spfData.getCurrentResult()== null || !spfData.getCurrentResult().equals(SPF1Constants.FAIL))
             return null;
 
+        spfData.pushChecker(EXPLANATION_ERROR_CATCHER);
         spfData.pushChecker(expandedChecker);
         // RFC 7208 4.6.4: exp= is "not subject to this limit"
         return macroExpand.checkExpand(host, spfData, MacroExpand.DOMAIN, false);
