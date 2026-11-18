@@ -52,7 +52,11 @@ public class MacroExpand {
 
     private Pattern macroLettersExpPattern;
 
-    private Pattern cellPattern;
+    private static final Pattern DIGITS_PATTERN = Pattern.compile("\\d+");
+
+    private static final Pattern REVERSE_PATTERN = Pattern.compile("r");
+
+    private static final Pattern DELIMITERS_PATTERN = Pattern.compile("[\\.\\-\\+\\,\\/\\_\\=]+");
 
     private DNSService dnsProbe;
 
@@ -440,8 +444,7 @@ public class MacroExpand {
         }
 
         // Find number of domains to use
-        cellPattern = Pattern.compile("\\d+");
-        cellMatcher = cellPattern.matcher(replaceValue);
+        cellMatcher = DIGITS_PATTERN.matcher(replaceValue);
         while (cellMatcher.find()) {
             domainNumber = cellMatcher.group();
             if (parseDigitTransformer(domainNumber) == 0) {
@@ -450,15 +453,13 @@ public class MacroExpand {
             }
         }
         // find if reversed
-        cellPattern = Pattern.compile("r");
-        cellMatcher = cellPattern.matcher(replaceValue);
+        cellMatcher = REVERSE_PATTERN.matcher(replaceValue);
         while (cellMatcher.find()) {
             isReversed = true;
         }
 
         // find delimeters
-        cellPattern = Pattern.compile("[\\.\\-\\+\\,\\/\\_\\=]+");
-        cellMatcher = cellPattern.matcher(replaceValue);
+        cellMatcher = DELIMITERS_PATTERN.matcher(replaceValue);
         while (cellMatcher.find()) {
             delimeters = cellMatcher.group();
         }
