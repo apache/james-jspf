@@ -98,8 +98,6 @@ public class RFC4408SPF1Parser implements SPFRecordParser {
             + SPF1Constants.PASS + "\\" + SPF1Constants.FAIL + "\\"
             + SPF1Constants.NEUTRAL + "\\" + SPF1Constants.SOFTFAIL + "]";
 
-    private Pattern termsSeparatorPattern = null;
-
     private Pattern termPattern = null;
 
     private int TERM_STEP_REGEX_QUALIFIER_POS;
@@ -142,12 +140,6 @@ public class RFC4408SPF1Parser implements SPFRecordParser {
         String TERM_REGEX = "(?:" + MODIFIER_REGEX + "|" + DIRECTIVE_REGEX
                 + ")";
 
-        /**
-         * ABNF: 1*SP
-         */
-        String TERMS_SEPARATOR_REGEX = "[ ]+";
-
-        termsSeparatorPattern = Pattern.compile(TERMS_SEPARATOR_REGEX);
         termPattern = Pattern.compile(TERM_REGEX);
 
         initializePositions();
@@ -263,60 +255,84 @@ public class RFC4408SPF1Parser implements SPFRecordParser {
             throw new NoneException("No valid SPF Record: " + spfRecord);
         }
 
-        // extract terms
-        String[] terms = termsSeparatorPattern.split(spfRecord.replaceFirst(
-                SPF1Constants.SPF_VERSION1, ""));
-
         // cycle terms
-        for (int i = 0; i < terms.length; i++) {
-            if (terms[i].length() > 0) {
-                Matcher termMatcher = termPattern.matcher(terms[i]);
-                if (!termMatcher.matches()) {
-                    throw new PermErrorException("Term [" + terms[i]
-                            + "] is not syntactically valid: "
-                            + termPattern.pattern());
-                }
+        for (String term : splitTerms(spfRecord)) {
+            Matcher termMatcher = termPattern.matcher(term);
+            if (!termMatcher.matches()) {
+                throw new PermErrorException("Term [" + term
+                        + "] is not syntactically valid: "
+                        + termPattern.pattern());
+            }
 
-                // true if we matched a modifier, false if we matched a
-                // directive
-                String modifierString = termMatcher
-                        .group(TERM_STEP_REGEX_MODIFIER_POS);
+            // true if we matched a modifier, false if we matched a
+            // directive
+            String modifierString = termMatcher
+                    .group(TERM_STEP_REGEX_MODIFIER_POS);
 
-                if (modifierString != null) {
-                    // MODIFIER
-                    Modifier mod = (Modifier) lookupAndCreateTerm(termMatcher,
-                            TERM_STEP_REGEX_MODIFIER_POS);
+            if (modifierString != null) {
+                // MODIFIER
+                Modifier mod = (Modifier) lookupAndCreateTerm(termMatcher,
+                        TERM_STEP_REGEX_MODIFIER_POS);
 
-                    if (mod.enforceSingleInstance()) {
-                        Iterator<Modifier> it = result.getModifiers().iterator();
-                        while (it.hasNext()) {
-                            if (it.next().getClass().equals(mod.getClass())) {
-                                throw new PermErrorException("More than one "
-                                        + modifierString
-                                        + " found in SPF-Record");
-                            }
+                if (mod.enforceSingleInstance()) {
+                    Iterator<Modifier> it = result.getModifiers().iterator();
+                    while (it.hasNext()) {
+                        if (it.next().getClass().equals(mod.getClass())) {
+                            throw new PermErrorException("More than one "
+                                    + modifierString
+                                    + " found in SPF-Record");
                         }
                     }
-
-                    result.getModifiers().add(mod);
-
-                } else {
-                    // DIRECTIVE
-                    String qualifier = termMatcher
-                            .group(TERM_STEP_REGEX_QUALIFIER_POS);
-
-                    Object mech = lookupAndCreateTerm(termMatcher,
-                            TERM_STEP_REGEX_MECHANISM_POS);
-
-                    result.getDirectives().add(
-                            new Directive(qualifier, (Mechanism) mech));
-
                 }
+
+                result.getModifiers().add(mod);
+
+            } else {
+                // DIRECTIVE
+                String qualifier = termMatcher
+                        .group(TERM_STEP_REGEX_QUALIFIER_POS);
+
+                Object mech = lookupAndCreateTerm(termMatcher,
+                        TERM_STEP_REGEX_MECHANISM_POS);
+
+                result.getDirectives().add(
+                        new Directive(qualifier, (Mechanism) mech));
 
             }
         }
 
         return result;
+    }
+
+    /**
+     * The terms of a record, without its first "v=spf1" (case-sensitive) and without the empty terms
+     * that several spaces in a row leave (ABNF: terms = *( 1*SP ( directive / modifier ) )).
+     *
+     * Neither a regex split nor String.replaceFirst: they cost a regex step per character of a
+     * record the sender chooses, and a Pattern compiled per call.
+     *
+     * @param spfRecord the record
+     * @return its terms
+     */
+    static List<String> splitTerms(String spfRecord) {
+        String rest = spfRecord;
+        int version = rest.indexOf(SPF1Constants.SPF_VERSION1);
+        if (version >= 0) {
+            rest = rest.substring(0, version) + rest.substring(version + SPF1Constants.SPF_VERSION1.length());
+        }
+        List<String> terms = new ArrayList<String>();
+        int start = 0;
+        while (start < rest.length()) {
+            int end = rest.indexOf(' ', start);
+            if (end < 0) {
+                end = rest.length();
+            }
+            if (end > start) {
+                terms.add(rest.substring(start, end));
+            }
+            start = end + 1;
+        }
+        return terms;
     }
 
     /**
