@@ -29,6 +29,7 @@ package org.apache.james.jspf.core;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -471,7 +472,7 @@ public class MacroExpand {
         // Reverse domains as necessary
         ArrayList<String> data = split(variable, delimeters);
         if (isReversed) {
-            data = reverse(data);
+            Collections.reverse(data);
         }
 
         // Truncate domain name to number of sub sections
@@ -565,39 +566,19 @@ public class MacroExpand {
      *            The delimeter we want to use to split the String
      * @return ArrayList which contains the String parts
      */
-    private ArrayList<String> split(String data, String delimeters) {
+    static ArrayList<String> split(String data, String delimeters) {
 
-        String currentChar;
-        StringBuffer element = new StringBuffer();
         ArrayList<String> splitParts = new ArrayList<String>();
-
+        int start = 0;
         for (int i = 0; i < data.length(); i++) {
-            currentChar = data.substring(i, i + 1);
-            if (delimeters.indexOf(currentChar) > -1) {
-                splitParts.add(element.toString());
-                element.setLength(0);
-            } else {
-                element.append(currentChar);
+            if (delimeters.indexOf(data.charAt(i)) >= 0) {
+                // the empty parts between two delimiters, or at an end, are kept (RFC 7208 7.3)
+                splitParts.add(data.substring(start, i));
+                start = i + 1;
             }
         }
-        splitParts.add(element.toString());
+        splitParts.add(data.substring(start));
         return splitParts;
-    }
-
-    /**
-     * Reverse an ArrayList
-     * 
-     * @param data
-     *            The ArrayList we want to get reversed
-     * @return reversed The reversed given ArrayList
-     */
-    private ArrayList<String> reverse(ArrayList<String> data) {
-
-        ArrayList<String> reversed = new ArrayList<String>();
-        for (int i = 0; i < data.size(); i++) {
-            reversed.add(0, data.get(i));
-        }
-        return reversed;
     }
 
     /**
@@ -616,7 +597,7 @@ public class MacroExpand {
      */
     private String subset(ArrayList<String> data, int length) {
 
-        StringBuffer buildString = new StringBuffer();
+        StringBuilder buildString = new StringBuilder();
         if (data.size() < length) {
             length = data.size();
         }

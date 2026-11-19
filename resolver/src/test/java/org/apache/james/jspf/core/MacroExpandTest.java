@@ -246,4 +246,20 @@ public class MacroExpandTest extends TestCase {
                         }, MacroExpand.DOMAIN));
     }
 
+    public void testSplitKeepsTheEmptyParts() {
+        assertEquals(java.util.Arrays.asList("", "a", "", "b", ""), MacroExpand.split(".a..b.", "."));
+        assertEquals(java.util.Arrays.asList(""), MacroExpand.split("", "."));
+    }
+
+    public void testSplitOnEachDelimiter() {
+        assertEquals(java.util.Arrays.asList("a", "b", "c", "d"), MacroExpand.split("a-b+c.d", ".-+"));
+    }
+
+    public void testEmptyPartsAreKeptInTheExpansion() throws PermErrorException {
+        assertEquals("bad..strong", defIp4me.expand("%{lr-}", new rfcIP4MacroData() {
+            public String getCurrentSenderPart() {
+                return "strong--bad";
+            }
+        }, MacroExpand.DOMAIN));
+    }
 }
