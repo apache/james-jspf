@@ -161,4 +161,33 @@ public class IPAddrTest extends TestCase {
         assertTrue(Inet6Util.isValidIPV4Address("1.2.3.4"));
     }
 
+    public void testIPV4AddressIsParsedInOnePass() {
+        assertTrue(java.util.Arrays.equals(new byte[] {1, 2, (byte) 254, (byte) 255},
+            Inet6Util.parseIPV4Address("1.2.254.255")));
+        assertNull(Inet6Util.parseIPV4Address("1.2.3.256"));
+        assertNull(Inet6Util.parseIPV4Address("1.2.3.4.5"));
+        assertNull(Inet6Util.parseIPV4Address("1.2.3"));
+        assertNull(Inet6Util.parseIPV4Address("1.2.3.0001"));
+        assertNull(Inet6Util.parseIPV4Address("1.2.3.a"));
+        assertNull(Inet6Util.parseIPV4Address("::1"));
+    }
+
+    public void testIPv4AndIPv6AddressesAreConverted() throws PermErrorException {
+        assertEquals("192.0.2.3", IPAddr.getAddress("192.0.2.3").getIPAddress());
+        assertEquals("2001:0DB8:0000:0000:0000:0000:0000:CB01", IPAddr.getAddress("2001:db8::cb01").getIPAddress());
+        assertEquals("192.0.2.3", IPAddr.getAddress("::ffff:192.0.2.3").getIPAddress());
+    }
+
+    public void testInvalidAddressesAreRejected() {
+        String[] invalid = {null, "", "[", "1.2.3", "1.2.3.256", "1:2:3:4:5:6:7:8:9", "2", "a.b.c.d"};
+        for (String address : invalid) {
+            try {
+                IPAddr.getAddress(address);
+                fail(address + " is not an address");
+            } catch (PermErrorException e) {
+                // expected
+            }
+        }
+    }
+
 }

@@ -205,15 +205,22 @@ public class IPAddr {
      *             on error
      */
     private void stringToInternal(String netAddress) throws PermErrorException {
-        // createByteArrayFromIPAddressString expects a valid address: it fails on "" or "[", ignores
-        // a group without ":" or "." ("2" read as ::), and writes past its array on too many groups
-        if (!isValidIP(netAddress)) {
+        if (netAddress == null) {
             throw new PermErrorException("Not a valid address: " + netAddress);
         }
-
         try {
-            byte[] bytes = Inet6Util.createByteArrayFromIPAddressString(netAddress);
-    
+            // an IPv4 address is validated and converted in one pass
+            byte[] bytes = Inet6Util.parseIPV4Address(netAddress);
+            if (bytes == null) {
+                // createByteArrayFromIP6AddressString expects a valid address: it fails on "" or "[",
+                // ignores a group without ":" or "." ("2" read as ::), and writes past its array on
+                // too many groups
+                if (!Inet6Util.isValidIP6Address(netAddress)) {
+                    throw new PermErrorException("Not a valid address: " + netAddress);
+                }
+                bytes = Inet6Util.createByteArrayFromIP6AddressString(netAddress);
+            }
+
             if (bytes.length == 4) {
                 for (int i = 0; i < bytes.length; i++) {
                     address[i] = bytes[i];

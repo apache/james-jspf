@@ -42,21 +42,18 @@ public class Inet6Util {
     public static byte[] createByteArrayFromIPAddressString(
             String ipAddressString) {
 
-        if (isValidIPV4Address(ipAddressString)) {
-            StringTokenizer tokenizer = new StringTokenizer(ipAddressString,
-                    ".");
-            String token = "";
-            int tempInt = 0;
-            byte[] byteAddress = new byte[4];
-            for (int i = 0; i < 4; i++) {
-                token = tokenizer.nextToken();
-                tempInt = Integer.parseInt(token);
-                byteAddress[i] = (byte) tempInt;
-            }
-
-            return byteAddress;
+        byte[] ipv4Address = parseIPV4Address(ipAddressString);
+        if (ipv4Address != null) {
+            return ipv4Address;
         }
+        return createByteArrayFromIP6AddressString(ipAddressString);
+    }
 
+    /**
+     * Creates an byte[] based on the String of an IPv6 address, which must be valid (see
+     * {@link #isValidIP6Address(String)}): 4 bytes for an IPv4-mapped address (::ffff:a.b.c.d).
+     */
+    static byte[] createByteArrayFromIP6AddressString(String ipAddressString) {
         if (ipAddressString.charAt(0) == '[') {
             ipAddressString = ipAddressString.substring(1, ipAddressString
                     .length() - 1);
@@ -240,7 +237,8 @@ public class Inet6Util {
         int numberOfColons = 0;
         int numberOfPeriods = 0;
         int numberOfPercent = 0;
-        String word = "";
+        // the characters since the last ":" or ".", reused: a String per character was the main cost
+        StringBuilder word = new StringBuilder(4);
         char c = 0;
         char prevChar = 0;
         int offset = 0; // offset for [] ip addresses
@@ -286,7 +284,7 @@ public class Inet6Util {
                 if (numberOfColons == 7 && ipAddress.charAt(0 + offset) != ':'
                         && ipAddress.charAt(1 + offset) != ':')
                     return false;
-                word = "";
+                word.setLength(0);
                 break;
 
             case ':':
@@ -308,7 +306,7 @@ public class Inet6Util {
                         return false;
                     doubleColon = true;
                 }
-                word = "";
+                word.setLength(0);
                 break;
             case '%':
                 if (numberOfColons == 0)
@@ -338,7 +336,7 @@ public class Inet6Util {
                     if (!isValidHexChar(c))
                         return false;
                 }
-                word += c;
+                word.append(c);
             }
         }
 
@@ -357,7 +355,7 @@ public class Inet6Util {
             // a : or a .
             // If we did not end in :: then this is invalid
             if (numberOfPercent == 0) {
-                if (word.isEmpty() && ipAddress.charAt(length - 1 - offset) == ':'
+                if (word.length() == 0 && ipAddress.charAt(length - 1 - offset) == ':'
                         && ipAddress.charAt(length - 2 - offset) != ':') {
                     return false;
                 }
@@ -377,28 +375,38 @@ public class Inet6Util {
      */
     private static boolean hasValidGroupCount(String address, boolean doubleColon) {
         int groups = 0;
-        for (String group : address.split(":")) {
-            if (group.indexOf('.') >= 0) {
+        int start = 0;
+        while (start <= address.length()) {
+            int end = address.indexOf(':', start);
+            if (end < 0) {
+                end = address.length();
+            }
+            if (address.lastIndexOf('.', end - 1) >= start) {
                 groups += 2;
-            } else if (!group.isEmpty()) {
+            } else if (end > start) {
                 groups++;
             }
+            start = end + 1;
         }
         return doubleColon ? groups <= 7 : groups == 8;
     }
 
     public static boolean isValidIP4Word(String word) {
+        return isValidIP4Word((CharSequence) word);
+    }
+
+    private static boolean isValidIP4Word(CharSequence word) {
         char c;
         if (word.length() < 1 || word.length() > 3)
             return false;
+        int value = 0;
         for (int i = 0; i < word.length(); i++) {
             c = word.charAt(i);
             if (!(c >= '0' && c <= '9'))
                 return false;
+            value = value * 10 + (c - '0');
         }
-        if (Integer.parseInt(word) > 255)
-            return false;
-        return true;
+        return value <= 255;
     }
 
     static boolean isValidHexChar(char c) {
@@ -414,40 +422,44 @@ public class Inet6Util {
      *         notation, false otherwise
      */
     public static boolean isValidIPV4Address(String value) {
+        return parseIPV4Address(value) != null;
+    }
 
-        int periods = 0;
-        int i = 0;
+    /**
+     * Parses an IPV4 address in dotted notation in one pass: four decimal numbers of 1 to 3 digits,
+     * each at most 255. The digits are the ones of Character.isDigit, as Integer.parseInt reads
+     * them.
+     *
+     * @return its 4 bytes, or null when the string is not an IPV4 address in dotted notation
+     */
+    static byte[] parseIPV4Address(String value) {
         int length = value.length();
-
         if (length > 15)
-            return false;
-        char c = 0;
-        String word = "";
-        for (i = 0; i < length; i++) {
-            c = value.charAt(i);
+            return null;
+        byte[] bytes = new byte[4];
+        int periods = 0;
+        int digits = 0;
+        int word = 0;
+        for (int i = 0; i < length; i++) {
+            char c = value.charAt(i);
             if (c == '.') {
-                periods++;
-                if (periods > 3)
-                    return false;
-                if (word.isEmpty())
-                    return false;
-                if (Integer.parseInt(word) > 255)
-                    return false;
-                word = "";
-            } else if (!(Character.isDigit(c)))
-                return false;
-            else {
-                if (word.length() > 2)
-                    return false;
-                word += c;
+                if (periods == 3 || digits == 0 || word > 255)
+                    return null;
+                bytes[periods++] = (byte) word;
+                digits = 0;
+                word = 0;
+            } else {
+                int digit = Character.digit(c, 10);
+                if (digit < 0 || digits == 3)
+                    return null;
+                word = word * 10 + digit;
+                digits++;
             }
         }
-
-        if (word.isEmpty() || Integer.parseInt(word) > 255)
-            return false;
-        if (periods != 3)
-            return false;
-        return true;
+        if (periods != 3 || digits == 0 || word > 255)
+            return null;
+        bytes[3] = (byte) word;
+        return bytes;
     }
 
 }
