@@ -160,8 +160,7 @@ public class AMechanism extends GenericMechanism implements SPFCheckerDNSRespons
                 // set the mask in the address.
                 // TODO should we use cidr from the parameters or the input checkAddress cidr?
                 IPAddr ipAddr = IPAddr.getAddress(ip, checkAddress.getMaskLength());
-                if (checkAddress.getMaskedIPAddress().equals(
-                        ipAddr.getMaskedIPAddress())) {
+                if (checkAddress.matchesMasked(ipAddr)) {
                     return true;
                 }
             }

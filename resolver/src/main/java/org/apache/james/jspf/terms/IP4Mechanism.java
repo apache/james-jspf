@@ -45,12 +45,10 @@ public class IP4Mechanism extends GenericMechanism {
      * @see org.apache.james.jspf.core.SPFChecker#checkSPF(org.apache.james.jspf.core.SPFSession)
      */
     public DNSLookupContinuation checkSPF(SPFSession spfData) throws PermErrorException {
-        IPAddr originalIP;
+        // the client address under the mask of the network, compared as numbers
+        boolean matches = getIp().matchesMasked(spfData.getParsedIpAddress());
 
-        originalIP = IPAddr.getAddress(spfData.getIpAddress(), getIp()
-                .getMaskLength());
-
-        spfData.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.valueOf(getIp().getMaskedIPAddress().equals(originalIP.getMaskedIPAddress())));
+        spfData.setAttribute(Directive.ATTRIBUTE_MECHANISM_RESULT, Boolean.valueOf(matches));
         
         return null;
     }

@@ -89,6 +89,8 @@ public class SPFSession implements MacroData {
 
     private String ipAddress = ""; // also used for (i)<sending-host>
 
+    private IPAddr parsedIpAddress;
+
     private String mailFrom = ""; // (s)<responsible-sender>
 
     private String hostName = ""; // (h)<sender-domain>
@@ -272,6 +274,19 @@ public class SPFSession implements MacroData {
      */
     public String getIpAddress() {
         return ipAddress;
+    }
+
+    /**
+     * The client address, parsed once for the check: callers must not change its mask.
+     *
+     * @return the ipAddress, parsed
+     * @throws PermErrorException when it is not a valid address
+     */
+    public IPAddr getParsedIpAddress() throws PermErrorException {
+        if (parsedIpAddress == null) {
+            parsedIpAddress = IPAddr.getAddress(ipAddress);
+        }
+        return parsedIpAddress;
     }
     
     /**

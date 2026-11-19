@@ -300,6 +300,35 @@ public class IPAddr {
     }
 
     /**
+     * Compares the addresses as numbers, under the mask of this address: the same result as
+     * comparing the getMaskedIPAddress Strings when both have the mask of this one, without
+     * formatting them.
+     *
+     * @param other
+     *            the address to compare
+     * @return true when other is of the same family (IPv4 or IPv6) and its masked address is the
+     *         masked address of this one
+     */
+    public boolean matchesMasked(IPAddr other) {
+        if (ipLength != other.ipLength) {
+            return false;
+        }
+        for (int i = 0; i < ipRun; i++) {
+            int thisPart = address[i] & mask[i];
+            int otherPart = other.address[i] & mask[i];
+            if (ipLength == 4) {
+                // the octets of an IPv4 address are kept as signed bytes, as get8BitAddress reads them
+                thisPart &= MASK8;
+                otherPart &= MASK8;
+            }
+            if (thisPart != otherPart) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Return the NibbleFormat of the IPAddr
      * 
      * @return ipAddress The ipAddress in nibbleFormat 
