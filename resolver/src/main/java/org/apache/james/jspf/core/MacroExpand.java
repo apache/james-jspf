@@ -47,8 +47,6 @@ public class MacroExpand {
 
     private Pattern domainSpecPattern;
 
-    private Pattern macroStringPattern;
-
     private Pattern macroLettersPattern;
 
     private Pattern macroLettersExpPattern;
@@ -153,8 +151,6 @@ public class MacroExpand {
      */
     public MacroExpand(DNSService dnsProbe) {
         domainSpecPattern = Pattern.compile(SPFTermsRegexps.DOMAIN_SPEC_REGEX);
-        // The real pattern replacer
-        macroStringPattern = Pattern.compile(SPFTermsRegexps.MACRO_STRING_REGEX_TOKEN);
         // The macro letters pattern
         macroLettersExpPattern = Pattern.compile(SPFTermsRegexps.MACRO_LETTER_PATTERN_EXP);
         macroLettersPattern = Pattern.compile(SPFTermsRegexps.MACRO_LETTER_PATTERN);
@@ -360,51 +356,115 @@ public class MacroExpand {
      */
     private String expandMacroString(String input, MacroData macroData, boolean isExplanation) throws PermErrorException, RequireClientDomainException {
 
-        StringBuffer decodedValue = new StringBuffer();
-        Matcher inputMatcher = macroStringPattern.matcher(input);
-        String macroCell;
+        // ABNF: macro-string = *( macro-expand / macro-literal ), walked by hand: a regex find per
+        // macro-literal cost a Matcher.find and a String per character of every target
+        StringBuilder decodedValue = null;
         int pos = 0;
-
-        while (inputMatcher.find()) {
-            String match2 = inputMatcher.group();
-            if (pos != inputMatcher.start()) {
-                throw new PermErrorException("Middle part does not match: "+input.substring(0,pos)+">>"+input.substring(pos, inputMatcher.start())+"<<"+input.substring(inputMatcher.start())+" ["+input+"]");
-            }
-            if (match2.length() > 0) {
-                if (match2.startsWith("%{")) {
-                    macroCell = input.substring(inputMatcher.start() + 2, inputMatcher
-                            .end() - 1);
-                    inputMatcher
-                            .appendReplacement(decodedValue, escapeForMatcher(replaceCell(macroCell, macroData, isExplanation)));
-                } else if (match2.length() == 2 && match2.startsWith("%")) {
-                    // handle the % escaping
-                    /*
-                     * From RFC4408:
-                     * 
-                     * A literal "%" is expressed by "%%".
-                     *   "%_" expands to a single " " space.
-                     *   "%-" expands to a URL-encoded space, viz., "%20".
-                     */
-                    if ("%_".equals(match2)) {
-                        inputMatcher.appendReplacement(decodedValue, " ");
-                    } else if ("%-".equals(match2)) {
-                        inputMatcher.appendReplacement(decodedValue, "%20");
-                    } else {
-                        inputMatcher.appendReplacement(decodedValue, escapeForMatcher(match2.substring(1)));
-                    }
+        while (pos < input.length()) {
+            int macro = input.indexOf('%', pos);
+            int literalsEnd = macro < 0 ? input.length() : macro;
+            checkMacroLiterals(input, pos, literalsEnd);
+            if (macro < 0) {
+                if (decodedValue == null) {
+                    // no macro-expand: the input is its own expansion
+                    return input;
                 }
+                decodedValue.append(input, pos, literalsEnd);
+                break;
             }
-            
-            pos = inputMatcher.end();
+            if (decodedValue == null) {
+                decodedValue = new StringBuilder(input.length() + 32);
+            }
+            decodedValue.append(input, pos, literalsEnd);
+            pos = expandMacro(input, macro, decodedValue, macroData, isExplanation);
         }
-        
-        if (input.length() != pos) {
-            throw new PermErrorException("End part does not match: "+input.substring(pos));
-        }
-        
-        inputMatcher.appendTail(decodedValue);
 
-        return decodedValue.toString();
+        return decodedValue == null ? input : decodedValue.toString();
+    }
+
+    /**
+     * ABNF: macro-literal = %x21-24 / %x26-7E
+     *
+     * @throws PermErrorException when a character of input, from start to end, is not a macro-literal
+     */
+    private static void checkMacroLiterals(String input, int start, int end) throws PermErrorException {
+        for (int i = start; i < end; i++) {
+            char c = input.charAt(i);
+            if (c < 0x21 || c > 0x7e || c == '%') {
+                throw new PermErrorException("Invalid macro-literal at " + i + ": " + input);
+            }
+        }
+    }
+
+    /**
+     * ABNF: macro-expand = ( "%{" macro-letter transformers *delimiter "}" ) / "%%" / "%_" / "%-"
+     *
+     * The macro-letters of an explanation are accepted here for a domain too: replaceCell rejects
+     * the ones a domain may not use.
+     *
+     * @param input the macro-string
+     * @param start the position of the "%" of the macro-expand
+     * @param out where the expansion is appended
+     * @return the position after the macro-expand
+     * @throws PermErrorException when there is no valid macro-expand at start
+     */
+    private int expandMacro(String input, int start, StringBuilder out, MacroData macroData, boolean isExplanation) throws PermErrorException, RequireClientDomainException {
+        if (start + 1 >= input.length()) {
+            throw new PermErrorException("Invalid macro-expand at " + start + ": " + input);
+        }
+        switch (input.charAt(start + 1)) {
+            /*
+             * From RFC4408:
+             *
+             * A literal "%" is expressed by "%%".
+             *   "%_" expands to a single " " space.
+             *   "%-" expands to a URL-encoded space, viz., "%20".
+             */
+            case '%':
+                out.append('%');
+                return start + 2;
+            case '_':
+                out.append(' ');
+                return start + 2;
+            case '-':
+                out.append("%20");
+                return start + 2;
+            case '{':
+                int end = macroCellEnd(input, start + 2);
+                if (end < 0) {
+                    throw new PermErrorException("Invalid macro-expand at " + start + ": " + input);
+                }
+                out.append(replaceCell(input.substring(start + 2, end), macroData, isExplanation));
+                return end + 1;
+            default:
+                throw new PermErrorException("Invalid macro-expand at " + start + ": " + input);
+        }
+    }
+
+    /**
+     * ABNF: macro-letter transformers *delimiter "}", with transformers = *DIGIT [ "r" ]
+     *
+     * @return the position of the closing "}", or -1 when there is no such macro cell at start
+     */
+    private static int macroCellEnd(String input, int start) {
+        int i = start;
+        if (i >= input.length() || "rctlsodipvhRCTLSODIPVH".indexOf(input.charAt(i)) < 0) {
+            return -1;
+        }
+        i++;
+        while (i < input.length() && input.charAt(i) >= '0' && input.charAt(i) <= '9') {
+            i++;
+        }
+        if (i < input.length() && input.charAt(i) == 'r') {
+            i++;
+        }
+        while (i < input.length() && ".-+,/_=".indexOf(input.charAt(i)) >= 0) {
+            i++;
+        }
+        if (i < input.length() && input.charAt(i) == '}') {
+            return i;
+        }
+        return -1;
     }
 
     /**
@@ -635,28 +695,6 @@ public class MacroExpand {
         // workaround for the above descripted problem
         return data.replaceAll("\\+", "%20");
 
-    }
-    
-    /**
-     * Because Dollar signs may be treated as references to captured subsequences in method Matcher.appendReplacement
-     * its necessary to escape Dollar signs because its allowed in the local-part of an emailaddress.
-     * 
-     * See JSPF-71 for the bugreport
-     * 
-     * @param raw
-     * @return escaped string
-     */
-    private String escapeForMatcher(String raw) {
-        StringBuffer sb = new StringBuffer();
-
-        for (int i = 0; i < raw.length(); i++) {
-            char c = raw.charAt(i);
-            if (c == '$' || c == '\\') {
-                sb.append('\\');
-            }
-            sb.append(c);
-        }
-        return sb.toString();
     }
 
 }
