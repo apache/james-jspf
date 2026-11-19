@@ -76,7 +76,11 @@ public class MacroExpand {
      *         them (RFC 7208 7.1)
      */
     private static int parseDigitTransformer(String digits) {
-        String value = digits.replaceFirst("^0+", "");
+        int zeros = 0;
+        while (zeros < digits.length() && digits.charAt(zeros) == '0') {
+            zeros++;
+        }
+        String value = digits.substring(zeros);
         if (value.length() > 9) {
             return Integer.MAX_VALUE;
         }
