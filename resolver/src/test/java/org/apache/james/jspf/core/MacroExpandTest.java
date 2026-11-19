@@ -262,4 +262,84 @@ public class MacroExpandTest extends TestCase {
             }
         }, MacroExpand.DOMAIN));
     }
+    public void testPlainTargetIsReturnedAsIs() throws PermErrorException {
+        assertEquals("_spf.mail.example.net", defIp4me.expand("_spf.mail.example.net", new rfcIP4MacroData(), MacroExpand.DOMAIN));
+    }
+
+    public void testInvalidMacroExpandsAreErrors() {
+        String[] invalid = {"a%", "%{", "%{d", "%{dR}", "%{x}", "%{}", "%a", "a\tb%{d}", "\u00e9%{d}", "%{d1.2}"};
+        for (String input : invalid) {
+            try {
+                defIp4me.expand(input, new rfcIP4MacroData(), MacroExpand.EXPLANATION);
+                fail(input + " should be a permerror");
+            } catch (PermErrorException e) {
+                // expected
+            }
+        }
+    }
+
+    public void testMacroValueWithReplacementCharactersIsCopied() throws PermErrorException {
+        assertEquals("a$1\\b.x", defIp4me.expand("%{l}.x", new rfcIP4MacroData() {
+            public String getCurrentSenderPart() {
+                return "a$1\\b";
+            }
+        }, MacroExpand.EXPLANATION));
+    }
+
+    /**
+     * The former tokenizer: a regex find per macro-expand or macro-literal, each cell expanded alone.
+     */
+    private String referenceExpansion(String input, MacroData data) throws PermErrorException {
+        java.util.regex.Matcher matcher = java.util.regex.Pattern.compile(SPFTermsRegexps.MACRO_STRING_REGEX_TOKEN).matcher(input);
+        StringBuilder out = new StringBuilder();
+        int pos = 0;
+        while (matcher.find()) {
+            if (pos != matcher.start()) {
+                throw new PermErrorException("Middle part does not match");
+            }
+            String token = matcher.group();
+            if (token.startsWith("%{")) {
+                out.append(defIp4me.expand(token, data, MacroExpand.EXPLANATION));
+            } else if ("%_".equals(token)) {
+                out.append(' ');
+            } else if ("%-".equals(token)) {
+                out.append("%20");
+            } else if ("%%".equals(token)) {
+                out.append('%');
+            } else {
+                out.append(token);
+            }
+            pos = matcher.end();
+        }
+        if (pos != input.length()) {
+            throw new PermErrorException("End part does not match");
+        }
+        return out.toString();
+    }
+
+    public void testExpansionIsTheOneOfTheFormerTokenizer() {
+        String[] pieces = {"%", "{", "}", "%{", "%%", "%_", "%-", "d", "l", "i", "r", "c", "k", "R", "1", "2", "0",
+            ".", "-", "+", "=", "/", ",", "_", "$", "\\", "a", "\u00e9", "\t", "~", "!"};
+        java.util.Random random = new java.util.Random(42);
+        for (int n = 0; n < 20000; n++) {
+            StringBuilder input = new StringBuilder();
+            int length = random.nextInt(8);
+            for (int k = 0; k < length; k++) {
+                input.append(pieces[random.nextInt(pieces.length)]);
+            }
+            String expected;
+            try {
+                expected = referenceExpansion(input.toString(), new rfcIP4MacroData());
+            } catch (PermErrorException e) {
+                expected = "permerror";
+            }
+            String actual;
+            try {
+                actual = defIp4me.expand(input.toString(), new rfcIP4MacroData(), MacroExpand.EXPLANATION);
+            } catch (PermErrorException e) {
+                actual = "permerror";
+            }
+            assertEquals(input.toString(), expected, actual);
+        }
+    }
 }
