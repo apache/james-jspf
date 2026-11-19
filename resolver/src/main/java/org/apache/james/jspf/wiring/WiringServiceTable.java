@@ -34,6 +34,22 @@ public class WiringServiceTable extends Hashtable<Class<?>,Object> implements Wi
     private static final long serialVersionUID = -9151935136150279119L;
 
     /**
+     * The setter of each enabling interface, its only declared method, or null when it has
+     * none or several. An interface never changes: no need to follow put and remove.
+     * getDeclaredMethods copies the Method array and each Method on every call.
+     */
+    private static final ClassValue<Method> SETTERS = new ClassValue<Method>() {
+        @Override
+        protected Method computeValue(Class<?> enablingClass) {
+            Method[] m = enablingClass.getDeclaredMethods();
+            if (m != null && m.length == 1 && m[0] != null) {
+                return m[0];
+            }
+            return null;
+        }
+    };
+
+    /**
      * @see org.apache.james.jspf.wiring.WiringService#wire(java.lang.Object)
      */
     public void wire(Object component) throws WiringServiceException {
@@ -41,10 +57,10 @@ public class WiringServiceTable extends Hashtable<Class<?>,Object> implements Wi
         while (i.hasNext()) {
             Class<?> enablingClass = i.next();
             if (enablingClass.isInstance(component)) {
-                Method[] m = enablingClass.getDeclaredMethods();
-                if (m!=null && m.length == 1 && m[0] != null) {
+                Method setter = SETTERS.get(enablingClass);
+                if (setter != null) {
                     try {
-                        m[0].invoke(component, new Object[] {get(enablingClass)});
+                        setter.invoke(component, get(enablingClass));
                     } catch (IllegalArgumentException e) {
                         throw new WiringServiceException("Illegal argument invoking enabled service: "+enablingClass.toString(), e);
                     } catch (InvocationTargetException e) {
