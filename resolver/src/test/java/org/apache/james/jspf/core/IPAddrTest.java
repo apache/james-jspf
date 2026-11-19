@@ -190,4 +190,34 @@ public class IPAddrTest extends TestCase {
         }
     }
 
+    private static String randomAddress(java.util.Random random) {
+        switch (random.nextInt(3)) {
+            case 0:
+                // few values, so that the addresses often share a prefix
+                return random.nextInt(3) + "." + random.nextInt(3) + "." + (random.nextInt(2) * 255) + "." + random.nextInt(256);
+            case 1:
+                return "2001:db8:" + Integer.toHexString(random.nextInt(3)) + "::" + Integer.toHexString(random.nextInt(65536));
+            default:
+                return "::ffff:" + random.nextInt(2) + ".2.3." + random.nextInt(256);
+        }
+    }
+
+    public void testMatchesMaskedIsTheComparisonOfTheMaskedAddresses() throws PermErrorException {
+        java.util.Random random = new java.util.Random(42);
+        int matches = 0;
+        for (int n = 0; n < 50000; n++) {
+            int maskLength = random.nextInt(130);
+            IPAddr first = random.nextBoolean() ? IPAddr.getAddress(randomAddress(random), maskLength)
+                : IPAddr.getIP6Address(randomAddress(random), maskLength);
+            IPAddr second = IPAddr.getAddress(randomAddress(random), maskLength);
+
+            boolean expected = first.getMaskedIPAddress().equals(second.getMaskedIPAddress());
+            assertEquals(first + " " + second + "/" + maskLength, expected, first.matchesMasked(second));
+            if (expected) {
+                matches++;
+            }
+        }
+        assertTrue(matches > 1000);
+    }
+
 }
