@@ -46,6 +46,7 @@ import org.apache.james.jspf.executor.FutureSPFResult;
 import org.apache.james.jspf.executor.SPFExecutor;
 import org.apache.james.jspf.executor.SPFResult;
 import org.apache.james.jspf.executor.SynchronousSPFExecutor;
+import org.apache.james.jspf.parser.CachingSPFRecordParser;
 import org.apache.james.jspf.parser.RFC4408SPF1Parser;
 import org.apache.james.jspf.policies.InitialChecksPolicy;
 import org.apache.james.jspf.policies.NeutralIfNotMatchPolicy;
@@ -258,7 +259,8 @@ public class SPF implements SPFChecker {
         wiringService.put(DNSServiceEnabled.class, this.dnsProbe);
         this.macroExpand = new MacroExpand(this.dnsProbe);
         wiringService.put(MacroExpandEnabled.class, this.macroExpand);
-        this.parser = new RFC4408SPF1Parser(new DefaultTermsFactory(wiringService));
+        // the terms of jSPF can be shared by concurrent checks: the parsed records are kept
+        this.parser = new CachingSPFRecordParser(new RFC4408SPF1Parser(new DefaultTermsFactory(wiringService)));
         // We add this after the parser creation because services cannot be null
         wiringService.put(SPFCheckEnabled.class, this);
     }
