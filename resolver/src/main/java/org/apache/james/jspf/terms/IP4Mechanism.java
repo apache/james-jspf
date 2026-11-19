@@ -20,7 +20,6 @@
 
 package org.apache.james.jspf.terms;
 
-import java.util.Arrays;
 
 import org.apache.james.jspf.core.DNSLookupContinuation;
 import org.apache.james.jspf.core.IPAddr;
@@ -98,8 +97,17 @@ public class IP4Mechanism extends GenericMechanism {
      * @see org.apache.james.jspf.core.Inet6Util#isValidIPV4Address(String)
      */
     protected boolean isValidAddress(String ipString) {
-        return Inet6Util.isValidIPV4Address(ipString)
-            && Arrays.stream(ipString.split("\\.")).noneMatch(qnum -> qnum.length() > 1 && qnum.charAt(0) == '0');
+        if (!Inet6Util.isValidIPV4Address(ipString)) {
+            return false;
+        }
+        // RFC 7208 12: no leading zero
+        for (int i = 0; i < ipString.length() - 1; i++) {
+            boolean qnumStart = i == 0 || ipString.charAt(i - 1) == '.';
+            if (qnumStart && ipString.charAt(i) == '0' && ipString.charAt(i + 1) != '.') {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
