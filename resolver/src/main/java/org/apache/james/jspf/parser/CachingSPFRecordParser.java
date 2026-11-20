@@ -38,7 +38,9 @@ import org.apache.james.jspf.core.exceptions.PermErrorException;
  * holding these terms, as the policies add modifiers to the record they get.
  *
  * The records are the sender's: the cache keeps at most a given number of them, the least
- * recently used ones being dropped, and not the longer ones nor the invalid ones.
+ * recently used ones being dropped, and not the longer ones, the ones with more terms than a
+ * legitimate record has nor the invalid ones: a short text can hold many terms, each one kept as
+ * several objects.
  */
 public class CachingSPFRecordParser implements SPFRecordParser {
 
@@ -53,9 +55,17 @@ public class CachingSPFRecordParser implements SPFRecordParser {
      */
     public static final int DEFAULT_MAX_RECORD_LENGTH = 2048;
 
+    /**
+     * The number of terms, directives and modifiers, of the largest record kept by default: more
+     * than the legitimate records have, the evaluation of a record being limited to 10 lookups
+     */
+    public static final int DEFAULT_MAX_RECORD_TERMS = 64;
+
     private final SPFRecordParser parser;
 
     private final int maxRecordLength;
+
+    private final int maxRecordTerms;
 
     private final Map<String, SPF1Record> records;
 
@@ -72,8 +82,19 @@ public class CachingSPFRecordParser implements SPFRecordParser {
      * @param maxRecordLength the length of the longest record kept
      */
     public CachingSPFRecordParser(SPFRecordParser parser, final int maxRecords, int maxRecordLength) {
+        this(parser, maxRecords, maxRecordLength, DEFAULT_MAX_RECORD_TERMS);
+    }
+
+    /**
+     * @param parser the parser of the records not cached
+     * @param maxRecords the number of records kept at most
+     * @param maxRecordLength the length of the longest record kept
+     * @param maxRecordTerms the number of terms of the largest record kept
+     */
+    public CachingSPFRecordParser(SPFRecordParser parser, final int maxRecords, int maxRecordLength, int maxRecordTerms) {
         this.parser = parser;
         this.maxRecordLength = maxRecordLength;
+        this.maxRecordTerms = maxRecordTerms;
         this.records = new LinkedHashMap<String, SPF1Record>(16, 0.75f, true) {
             private static final long serialVersionUID = 1L;
 
@@ -98,6 +119,10 @@ public class CachingSPFRecordParser implements SPFRecordParser {
         if (parsed == null) {
             // an invalid record throws: it is not kept
             parsed = parser.parse(spfRecord);
+            if (parsed.getDirectives().size() + parsed.getModifiers().size() > maxRecordTerms) {
+                // a record with that many terms is not a legitimate one: it is not kept
+                return parsed;
+            }
             synchronized (records) {
                 records.put(spfRecord, parsed);
             }

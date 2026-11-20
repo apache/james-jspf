@@ -131,6 +131,31 @@ public class CachingSPFRecordParserTest {
     }
 
     @Test
+    public void shouldNotKeepARecordWithManyTerms() throws Exception {
+        CachingSPFRecordParser parser = new CachingSPFRecordParser(counting);
+        StringBuilder record = new StringBuilder("v=spf1");
+        for (int i = 0; i < 200; i++) {
+            record.append(" a");
+        }
+
+        assertEquals(200, parser.parse(record.toString()).getDirectives().size());
+        parser.parse(record.toString());
+
+        assertEquals(2, counting.parsed.get());
+        assertEquals(0, parser.size());
+    }
+
+    @Test
+    public void shouldKeepARecordWithFewTerms() throws Exception {
+        CachingSPFRecordParser parser = new CachingSPFRecordParser(counting);
+
+        parser.parse("v=spf1 a mx ip4:192.0.2.0/24 ip4:198.51.100.0/24 include:a.example.com include:b.example.com"
+            + " a:c.example.com mx:d.example.com exists:e.example.com -all");
+
+        assertEquals(1, parser.size());
+    }
+
+    @Test
     public void shouldKeepAtMostTheGivenNumberOfRecords() throws Exception {
         CachingSPFRecordParser parser = new CachingSPFRecordParser(counting, 2, 2048);
 
