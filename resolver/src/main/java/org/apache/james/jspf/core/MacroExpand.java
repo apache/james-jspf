@@ -62,6 +62,13 @@ public class MacroExpand {
     public static final boolean EXPLANATION = true;
     
     public static final boolean DOMAIN = false;
+
+    /**
+     * The longest expanded explanation: an SMTP reply line is at most 512 octets (RFC 5321 4.5.3.1.5). A longer
+     * one is a permerror, so that the check goes on as without explanation (RFC 7208 6.2), and its expansion
+     * stops there instead of growing each macro of a DNS answer of up to 64 KB into megabytes.
+     */
+    public static final int MAX_EXPLANATION_LENGTH = 1000;
     
     public static class RequireClientDomainException extends Exception {
 
@@ -296,10 +303,11 @@ public class MacroExpand {
         LOGGER.debug("Start do expand explanation: {}", input);
 
         String[] parts = input.split(" ");
-        StringBuffer res = new StringBuffer();
+        StringBuilder res = new StringBuilder();
         for (int i = 0; i < parts.length; i++) {
             if (i > 0) res.append(" ");
             res.append(expandMacroString(parts[i], macroData, true));
+            checkExplanationLength(res.length());
         }
         LOGGER.debug("Done expand explanation: {}", res);
         
@@ -377,9 +385,18 @@ public class MacroExpand {
             }
             decodedValue.append(input, pos, literalsEnd);
             pos = expandMacro(input, macro, decodedValue, macroData, isExplanation);
+            if (isExplanation) {
+                checkExplanationLength(decodedValue.length());
+            }
         }
 
         return decodedValue == null ? input : decodedValue.toString();
+    }
+
+    private static void checkExplanationLength(int length) throws PermErrorException {
+        if (length > MAX_EXPLANATION_LENGTH) {
+            throw new PermErrorException("Expanded explanation longer than " + MAX_EXPLANATION_LENGTH + " characters");
+        }
     }
 
     /**
