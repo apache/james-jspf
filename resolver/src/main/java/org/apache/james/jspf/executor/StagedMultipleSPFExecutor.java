@@ -77,17 +77,14 @@ public class StagedMultipleSPFExecutor implements SPFExecutor, Runnable {
 
     }
 
-    // Use short as id because the id header is limited to 16 bit
-    // From RFC1035 4.1.1. Header section format :
-    // 
-    // ID              A 16 bit identifier assigned by the program that
-    //                 generates any kind of query.  This identifier is copied
-    //                 the corresponding reply and can be used by the requester
-    //                 to match up replies to outstanding queries.
-    //
-    private static short id;
-    
+    // The key of a pending lookup in sessions and results. It is not a DNS message id: the lookup
+    // service keeps its own. An int wraps only after 2^32 lookups, and nextId() skips a key still in use.
+    private int id;
+
     private synchronized int nextId() {
+        while (sessions.containsKey(id)) {
+            id++;
+        }
         return id++;
     }
 

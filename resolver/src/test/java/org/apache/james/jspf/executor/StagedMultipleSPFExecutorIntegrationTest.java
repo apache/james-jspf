@@ -28,6 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSService;
@@ -40,6 +43,7 @@ public class StagedMultipleSPFExecutorIntegrationTest {
 
     private static final Map<String, String> RECORDS = Map.of(
         "example.com", "v=spf1 +all",
+        "held.example.com", "v=spf1 -all",
         "include.example.com", "v=spf1 include:broken.example.com -all",
         "redirect.example.com", "v=spf1 redirect=broken.example.com");
 
@@ -135,6 +139,33 @@ public class StagedMultipleSPFExecutorIntegrationTest {
         assertEquals(SPFErrorConstants.TEMP_ERROR_CONV, spf.checkSPF("1.2.3.4", "foo@broken.example.com", "broken.example.com").getResult());
         // the second answer of the failed lookup does not end the executor
         assertEquals(SPFErrorConstants.PASS_CONV, spf.checkSPF("1.2.3.4", "foo@example.com", "example.com").getResult());
+    }
+
+    @Test(timeout = 60000)
+    public void aPendingLookupShouldGetItsOwnAnswerAfterManyOtherLookups() {
+        AtomicReference<Runnable> heldAnswer = new AtomicReference<>();
+        AtomicInteger lookups = new AtomicInteger();
+        // answers at once, except the lookup of held.example.com, answered on demand
+        DNSAsynchLookupService holding = (request, id, responseQueue) -> {
+            lookups.incrementAndGet();
+            Runnable answer = () -> responseQueue.insertResponse(new IResponseImpl(id, RECORDS.get(request.getHostname()) == null
+                ? null : new ArrayList<>(List.of(RECORDS.get(request.getHostname())))));
+            if (request.getHostname().equals("held.example.com")) {
+                heldAnswer.set(answer);
+            } else {
+                answer.run();
+            }
+        };
+        SPF spf = new SPF(DNS, new StagedMultipleSPFExecutor(holding));
+
+        FutureSPFResult held = (FutureSPFResult) spf.checkSPF("1.2.3.4", "foo@held.example.com", "held.example.com");
+        // more lookups than a 16 bit id can tell apart while the lookup of held.example.com is pending
+        while (lookups.get() < 70000) {
+            assertEquals(SPFErrorConstants.PASS_CONV, spf.checkSPF("1.2.3.4", "foo@example.com", "example.com").getResult());
+        }
+        heldAnswer.get().run();
+
+        assertEquals(SPFErrorConstants.FAIL_CONV, held.getResult(10, TimeUnit.SECONDS));
     }
 
     @Test(timeout = 10000)
