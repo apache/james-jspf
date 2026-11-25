@@ -262,6 +262,24 @@ public class MacroExpandTest extends TestCase {
             }
         }, MacroExpand.DOMAIN));
     }
+    public void testAnExplanationUnderTheLimitIsExpanded() throws PermErrorException {
+        String explanation = defIp4me.expand("%{d} ".repeat(50), new rfcIP4MacroData(), MacroExpand.EXPLANATION);
+
+        assertEquals("email.example.com ".repeat(50).trim(), explanation);
+    }
+
+    public void testAnExplanationExpandedPastTheLimitIsAPermError() {
+        // a few KB of macros, each growing into the whole sender domain
+        String[] inputs = {"%{d}".repeat(2000), "%{d} ".repeat(2000), "a".repeat(MacroExpand.MAX_EXPLANATION_LENGTH + 1)};
+        for (String input : inputs) {
+            try {
+                defIp4me.expand(input, new rfcIP4MacroData(), MacroExpand.EXPLANATION);
+                fail("an explanation longer than " + MacroExpand.MAX_EXPLANATION_LENGTH + " characters should be a permerror");
+            } catch (PermErrorException e) {
+            }
+        }
+    }
+
     public void testPlainTargetIsReturnedAsIs() throws PermErrorException {
         assertEquals("_spf.mail.example.net", defIp4me.expand("_spf.mail.example.net", new rfcIP4MacroData(), MacroExpand.DOMAIN));
     }
