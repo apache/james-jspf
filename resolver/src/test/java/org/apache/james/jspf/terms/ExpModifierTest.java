@@ -32,6 +32,7 @@ import org.apache.james.jspf.core.DNSRequest;
 import org.apache.james.jspf.core.DNSService;
 import org.apache.james.jspf.core.MacroExpand;
 import org.apache.james.jspf.core.exceptions.SPFErrorConstants;
+import org.apache.james.jspf.executor.AsynchronousSPFExecutor;
 import org.apache.james.jspf.executor.SPFResult;
 import org.apache.james.jspf.impl.SPF;
 import org.junit.Test;
@@ -92,5 +93,56 @@ public class ExpModifierTest {
         assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
         assertTrue(result.getExplanation(), result.getExplanation().length() <= MacroExpand.MAX_EXPLANATION_LENGTH);
         assertTrue(result.getExplanation(), result.getExplanation().startsWith("http://www.openspf.org/why.html?sender="));
+    }
+
+    private static final String LONG_SENDER = "!".repeat(400) + "@example.com";
+
+    private static void assertFailWithBoundedExplanation(SPFResult result) {
+        // RFC 7208 6.2: the fail is kept, without an explanation
+        assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+        assertEquals("", result.getExplanation());
+    }
+
+    @Test
+    public void aDefaultExplanationExpandedPastTheLimitShouldKeepTheFail() {
+        SPF spf = new SPF(dns(Map.of("example.com", "v=spf1 -all")));
+
+        assertFailWithBoundedExplanation(spf.checkSPF("1.2.3.4", LONG_SENDER, HELO));
+    }
+
+    @Test
+    public void aConfiguredDefaultExplanationExpandedPastTheLimitShouldKeepTheFail() {
+        SPF spf = new SPF(dns(Map.of("example.com", "v=spf1 -all")));
+        spf.setDefaultExplanation("%{S} is not allowed");
+
+        assertFailWithBoundedExplanation(spf.checkSPF("1.2.3.4", LONG_SENDER, HELO));
+    }
+
+    @Test
+    public void aDefaultExplanationExpandedPastTheLimitShouldKeepTheFailWithTheAsynchronousExecutor() {
+        DNSService dns = dns(Map.of("example.com", "v=spf1 -all"));
+        SPF spf = new SPF(dns, new AsynchronousSPFExecutor(dns));
+
+        assertFailWithBoundedExplanation(spf.checkSPF("1.2.3.4", LONG_SENDER, HELO));
+    }
+
+    @Test
+    public void aDefaultExplanationExpandedPastTheLimitAfterThePTRLookupShouldKeepTheFail() {
+        // %{p} first needs the PTR lookup: the limit is only reached on the expansion that follows it
+        SPF spf = new SPF(dns(Map.of("example.com", "v=spf1 -all")));
+        spf.setDefaultExplanation("%{p} %{S}");
+
+        assertFailWithBoundedExplanation(spf.checkSPF("1.2.3.4", LONG_SENDER, HELO));
+    }
+
+    @Test
+    public void aDefaultExplanationShouldBeExpandedAfterThePTRLookup() {
+        SPF spf = new SPF(dns(Map.of("example.com", "v=spf1 -all")));
+        spf.setDefaultExplanation("%{p} %{s}");
+
+        SPFResult result = spf.checkSPF("1.2.3.4", "foo@example.com", HELO);
+
+        assertEquals(SPFErrorConstants.FAIL_CONV, result.getResult());
+        assertEquals("unknown foo@example.com", result.getExplanation());
     }
 }
