@@ -57,8 +57,9 @@ public final class DefaultExplanationPolicy implements PolicyPostFilter {
                 
                 spfData.setExplanation(explanation);
             } catch (PermErrorException e) {
-                // Should never happen !
-                LOGGER.debug("Invalid defaulfExplanation: {}", attExplanation);
+                // an invalid default explanation, or one expanded past MacroExpand.MAX_EXPLANATION_LENGTH once the
+                // PTR names of %{p} are known: RFC 7208 6.2, the explanation never changes the result
+                LOGGER.warn("Default explanation not expanded: {}", e.getMessage());
             }
             return null;
         }
@@ -87,8 +88,15 @@ public final class DefaultExplanationPolicy implements PolicyPostFilter {
                         explanation = defExplanation;
                     }
                     spfData.setAttribute(ATTRIBUTE_DEFAULT_EXPLANATION_POLICY_EXPLANATION, explanation);
-                    spfData.pushChecker(explanationCheckr);
-                    return macroExpand.checkExpand(explanation, spfData, MacroExpand.EXPLANATION);
+                    try {
+                        DNSLookupContinuation cont = macroExpand.checkExpand(explanation, spfData, MacroExpand.EXPLANATION);
+                        spfData.pushChecker(explanationCheckr);
+                        return cont;
+                    } catch (PermErrorException e) {
+                        // RFC 7208 6.2: the explanation never changes the result, keep the fail without one
+                        LOGGER.warn("Default explanation not expanded: {}", e.getMessage());
+                        return null;
+                    }
                 }
             }
             
