@@ -87,8 +87,14 @@ public final class DefaultExplanationPolicy implements PolicyPostFilter {
                     } else {
                         explanation = defExplanation;
                     }
-                    spfData.setAttribute(ATTRIBUTE_DEFAULT_EXPLANATION_POLICY_EXPLANATION, explanation);
                     try {
+                        String expanded = macroExpand.expand(explanation, spfData, MacroExpand.EXPLANATION);
+                        if (expanded != null) {
+                            spfData.setExplanation(expanded);
+                            return null;
+                        }
+                        // %{p} needs the PTR names of the client address first: expand again once they are known
+                        spfData.setAttribute(ATTRIBUTE_DEFAULT_EXPLANATION_POLICY_EXPLANATION, explanation);
                         DNSLookupContinuation cont = macroExpand.checkExpand(explanation, spfData, MacroExpand.EXPLANATION);
                         spfData.pushChecker(explanationCheckr);
                         return cont;
